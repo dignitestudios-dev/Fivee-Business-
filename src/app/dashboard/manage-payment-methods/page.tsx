@@ -2,13 +2,17 @@
 import DeletePref from "@/components/icons/DeletePref";
 import Popup from "@/components/ui/Popup";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { AiFillEdit } from "react-icons/ai";
 import { FaCcMastercard } from "react-icons/fa";
+import { GoPlus } from "react-icons/go";
+import { IoArrowBackOutline } from "react-icons/io5";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { SiVisa } from "react-icons/si";
 
 const ManagePaymentMethods = () => {
+  const router = useRouter();
   const [deletePaymentMethod, setDeletePaymentMethod] = useState<string | null>(
     null
   );
@@ -66,7 +70,26 @@ const ManagePaymentMethods = () => {
 
   return (
     <>
-      <div>
+      <div className="border-b border-[#E3E3E3] flex items-center gap-5 h-14">
+        <Link
+          href={"/dashboard"}
+          className="px-3 h-full cursor-pointer bg-[var(--primary)]/10 text-[var(--primary)] font-semibold flex items-center gap-2"
+        >
+          <IoArrowBackOutline size={18} />
+          Back
+        </Link>
+        <div className="flex-1">
+          <p className="font-bold text-base">Payment Methods</p>
+        </div>
+        <Link
+          href={"/dashboard/manage-payment-methods/add"}
+          className="px-3 h-full font-semibold flex items-center gap-2"
+        >
+          <GoPlus size={24} className="text-black" />
+          Add New
+        </Link>
+      </div>
+      <div className="px-10 pb-18 h-full overflow-y-auto">
         {cards.map((card, index) => (
           <div
             key={index}
@@ -81,19 +104,14 @@ const ManagePaymentMethods = () => {
               <p className="text-base font-semibold">Siweh Harris</p>
               <p className="font-medium">Card ending with {card.last4}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href={`/dashboard/manage-payment-methods/edit/${card.last4}`}>
-                <AiFillEdit size={20} />
-              </Link>
 
-              <RiDeleteBin6Fill
-                size={20}
-                className="text-red-600 cursor-pointer"
-                onClick={() => {
-                  setDeletePaymentMethod("123");
-                }}
-              />
-            </div>
+            <RiDeleteBin6Fill
+              size={20}
+              className="text-red-600 cursor-pointer"
+              onClick={() => {
+                setDeletePaymentMethod("123");
+              }}
+            />
           </div>
         ))}
       </div>
