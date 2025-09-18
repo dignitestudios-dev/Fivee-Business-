@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "PlusJakartaSans";
+  src: url("/fonts/PlusJakartaSans.ttf") format("truetype");
+}
+
+body {
+  font-family: PlusJakartaSans;
+  font-size: 14px;
+  background-color: #f9fafa;
+}
+
+/* theme tokens */
+@theme {
+  /* custom colors */
+  --primary: #22b573;
+  --desc: #838383;
+}
+
+/* custom utilities */
+@layer utilities {
+  .text-desc {
+    @apply text-[var(--desc)];
+  }
+  .move-x {
+    @apply group-hover:translate-x-2 transition-all;
+  }
+  .shadow-brand {
+    @apply shadow-[0px_4px_19.4px_0px_#22B5731A];
+  }
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.hidden-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
