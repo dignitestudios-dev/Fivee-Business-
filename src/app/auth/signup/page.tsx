@@ -1,7 +1,7 @@
 import SignupForm from "@/components/auth/SignupForm";
 import Apple from "@/components/icons/Apple";
 import Google from "@/components/icons/Google";
-import Button from "@/components/ui/Button";
+import FButton from "@/components/ui/FButton";
 import { constants } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
@@ -29,13 +29,13 @@ const SignUp = () => {
         <div className="h-[.5px] w-full bg-[#E3E3E3]" />
       </div>
 
-      <Button variant="outline" size="lg" icon={<Google />} className="w-full">
+      <FButton variant="outline" size="lg" icon={<Google />} className="w-full">
         Continue with Google
-      </Button>
+      </FButton>
 
-      <Button variant="outline" size="lg" icon={<Apple />} className="w-full">
+      <FButton variant="outline" size="lg" icon={<Apple />} className="w-full">
         Continue with Apple
-      </Button>
+      </FButton>
 
       <p className=" mt-5">
         By Creating your account you agree to our <b>Terms & Conditions</b> and{" "}

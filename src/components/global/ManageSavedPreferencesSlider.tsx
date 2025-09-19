@@ -7,7 +7,7 @@ import { AiFillEdit } from "react-icons/ai";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import Popup from "../ui/Popup";
 import EditPref from "../icons/EditPref";
-import Input from "../ui/Input";
+import FInput from "../ui/FInput";
 import DeletePref from "../icons/DeletePref";
 
 interface ManageSavedPreferencesSliderProps {
@@ -150,7 +150,7 @@ const ManageSavedPreferencesSlider: React.FC<
         onCancel={() => setEditPref(null)}
       >
         <div className="w-full">
-          <Input
+          <FInput
             autoFocus
             value={editingPrefName}
             onChange={(e) => setEditingPrefName(e.target.value)}

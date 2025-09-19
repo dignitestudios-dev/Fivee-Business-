@@ -1,97 +1,59 @@
-import { forwardRef, ButtonHTMLAttributes, ReactNode } from "react";
+import * as React from 'react'
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
 
-type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "ghost"
-  | "danger"
-  | "success"
-  | "warning"
-  | "outline";
+import { cn } from "@/utils/helper"
 
-type ButtonSize = "sm" | "md" | "lg" | "xl";
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  {
+    variants: {
+      variant: {
+        default:
+          'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+        destructive:
+          'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+        outline:
+          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+        secondary:
+          'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+        ghost:
+          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+        link: 'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
+        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+        icon: 'size-9',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+)
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children?: ReactNode;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  icon?: ReactNode;
-  iconPosition?: "left" | "right"; // NEW
-  disabled?: boolean;
-  loading?: boolean;
-  className?: string;
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }) {
+  const Comp = asChild ? Slot : 'button'
+
+  return (
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      children,
-      variant = "primary",
-      size = "md",
-      icon,
-      iconPosition = "left", // default left
-      disabled = false,
-      loading = false,
-      className = "",
-      onClick,
-      ...props
-    },
-    ref
-  ) => {
-    const baseClasses =
-      "inline-flex items-center justify-center cursor-pointer font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
-
-    const variants: Record<ButtonVariant, string> = {
-      primary:
-        "bg-[var(--primary)]/90 hover:bg-[var(--primary)] text-white focus:ring-[var(--primary)]",
-      secondary:
-        "bg-gray-200 hover:bg-gray-300 text-gray-900 focus:ring-gray-500",
-      ghost:
-        "text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-500",
-      danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
-      success:
-        "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500",
-      warning:
-        "bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-500",
-      outline:
-        "border-2 border-[var(--primary)] text-black bg-[var(--primary)]/10 hover:bg-[var(--primary)]/15 focus:ring-[var(--primary)]",
-    };
-
-    const sizes: Record<ButtonSize, string> = {
-      sm: "px-3 py-1.5 ",
-      md: "px-4 py-2 ",
-      lg: "px-6 py-3 text-base",
-      xl: "px-8 py-4 text-lg",
-    };
-
-    const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
-
-    return (
-      <button
-        ref={ref}
-        className={classes}
-        disabled={disabled || loading}
-        onClick={onClick}
-        {...props}
-      >
-        {loading && <div className="w-4 h-4 mr-2 spinner" />}
-
-        {/* Icon Left */}
-        {icon && !loading && iconPosition === "left" && (
-          <span className={children ? "mr-2" : ""}>{icon}</span>
-        )}
-
-        {children}
-
-        {/* Icon Right */}
-        {icon && !loading && iconPosition === "right" && (
-          <span className={children ? "ml-2" : ""}>{icon}</span>
-        )}
-      </button>
-    );
-  }
-);
-
-Button.displayName = "Button";
-
-export default Button;
+export { Button, buttonVariants }

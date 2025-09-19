@@ -5,7 +5,7 @@ import BusinessTaxIcon from "@/components/icons/BusinessTaxIcon";
 import Doc from "@/components/icons/Doc";
 import Edit from "@/components/icons/Edit";
 import IndividualTaxIcon from "@/components/icons/IndividualTaxIcon";
-import Button from "@/components/ui/Button";
+import FButton from "@/components/ui/FButton";
 import DropdownPopup from "@/components/ui/DropdownPopup";
 import { formatDate, formatDateWithName } from "@/utils/helper";
 import { useRouter } from "next/navigation";
@@ -88,9 +88,9 @@ const Dashboard = () => {
 
                 <DropdownPopup
                   trigger={
-                    <Button className="bg-black text-white" size="md">
+                    <FButton className="bg-black text-white" size="md">
                       File New Tax
-                    </Button>
+                    </FButton>
                   }
                   title="File Tax"
                   options={IndividualTaxOptions}
@@ -108,9 +108,9 @@ const Dashboard = () => {
 
                 <DropdownPopup
                   trigger={
-                    <Button className="bg-black text-white" size="md">
+                    <FButton className="bg-black text-white" size="md">
                       File New Tax
-                    </Button>
+                    </FButton>
                   }
                   title="File Tax"
                   options={businessTaxOptions}

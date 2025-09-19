@@ -77,12 +77,14 @@ const Header = () => {
     <>
       <header className="flex justify-between items-center px-5 gap-5 bg-[var(--primary)]">
         <div className="flex items-center gap-5">
-          <Image
-            src={constants.APP_CONFIG.logo}
-            alt={constants.APP_CONFIG.name}
-            height={30}
-            width={30}
-          />
+          <Link href="/dashboard">
+            <Image
+              src={constants.APP_CONFIG.logo}
+              alt={constants.APP_CONFIG.name}
+              height={30}
+              width={30}
+            />
+          </Link>
 
           <nav className="flex items-center gap-5 text-white ms-10">
             {navLinks.map((navLink, index) => (

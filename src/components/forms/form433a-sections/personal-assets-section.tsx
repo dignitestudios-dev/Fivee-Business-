@@ -1,18 +1,158 @@
-import type { FormData } from "@/app/page"
-import { FormNavigation } from "@/components/form-navigation"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { FormNavigation } from "./form-navigation";
+import { FormInput, FormField } from "@/components/ui/form-field";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { Button } from "@/components/ui/Button";
+import { Plus, Trash2 } from "lucide-react";
+import { toTitleCase } from "@/utils/helper";
 
 interface PersonalAssetsSectionProps {
-  formData: FormData
-  updateFormData: (updates: Partial<FormData>) => void
+  onNext: () => void;
+  onPrevious: () => void;
+  onSubmit: () => void;
+  currentStep: number;
+  totalSteps: number;
+  validateStep: () => Promise<boolean>;
 }
 
-export function PersonalAssetsSection({ formData, updateFormData }: PersonalAssetsSectionProps) {
+export function PersonalAssetsSection({
+  onNext,
+  onPrevious,
+  onSubmit,
+  currentStep,
+  totalSteps,
+  validateStep,
+}: PersonalAssetsSectionProps) {
+  const {
+    register,
+    watch,
+    control,
+    formState: { errors },
+    setValue,
+  } = useFormContext<FormData433A>();
+
+  // --- BANK ACCOUNTS ---
+  const {
+    fields: bankAccounts,
+    append: addBankAccount,
+    remove: removeBankAccount,
+  } = useFieldArray({
+    control,
+    name: "bankAccounts",
+  });
+
+  // --- INVESTMENTS ---
+  const {
+    fields: investments,
+    append: addInvestment,
+    remove: removeInvestment,
+  } = useFieldArray({
+    control,
+    name: "investments",
+  });
+
+  // --- DIGITAL ASSETS ---
+  const {
+    fields: digitalAssets,
+    append: addDigitalAsset,
+    remove: removeDigitalAsset,
+  } = useFieldArray({
+    control,
+    name: "digitalAssets",
+  });
+
+  // Retirement Accounts
+  const {
+    fields: retirementAccounts,
+    append: addRetirementAccount,
+    remove: removeRetirementAccount,
+  } = useFieldArray({
+    control,
+    name: "retirementAccounts",
+  });
+
+  // Life Insurance
+  const {
+    fields: lifeInsurance,
+    append: addLifeInsurance,
+    remove: removeLifeInsurance,
+  } = useFieldArray({
+    control,
+    name: "lifeInsurance",
+  });
+
+  const {
+    fields: property,
+    append: addProperty,
+    remove: removeProperty,
+  } = useFieldArray({ control, name: "property" });
+
+  const {
+    fields: vehicles,
+    append: addVehicle,
+    remove: removeVehicle,
+  } = useFieldArray({ control, name: "vehicles" });
+
+  const {
+    fields: valuables,
+    append: addValuable,
+    remove: removeValuable,
+  } = useFieldArray({ control, name: "valuables" });
+
+  const {
+    fields: furniture,
+    append: addFurniture,
+    remove: removeFurniture,
+  } = useFieldArray({ control, name: "furniture" });
+
+  // Watch values for calculations and conditional rendering
+  const investmentMarketValue = watch("investmentMarketValue");
+  const investmentLoanBalance = watch("investmentLoanBalance");
+  const retirementMarketValue = watch("retirementMarketValue");
+  const retirementLoanBalance = watch("retirementLoanBalance");
+  const cashValue = watch("cashValue");
+  const insuranceLoanBalance = watch("insuranceLoanBalance");
+  const propertyMarketValue = watch("propertyMarketValue");
+  const propertyLoanBalance = watch("propertyLoanBalance");
+  const vehicleMarketValue = watch("vehicleMarketValue");
+  const vehicleLoanBalance = watch("vehicleLoanBalance");
+  const valuableMarketValue = watch("valuableMarketValue");
+  const valuableLoanBalance = watch("valuableLoanBalance");
+  const furnitureMarketValue = watch("furnitureMarketValue");
+  const furnitureLoanBalance = watch("furnitureLoanBalance");
+  const propertySaleStatus = watch("propertySaleStatus");
+
+  // Calculate net values
+  const investmentNetValue =
+    (investmentMarketValue || 0) - (investmentLoanBalance || 0);
+  const retirementNetValue =
+    (retirementMarketValue || 0) * 0.8 - (retirementLoanBalance || 0);
+  const insuranceNetValue = (cashValue || 0) - (insuranceLoanBalance || 0);
+  const propertyNetValue =
+    (propertyMarketValue || 0) * 0.8 - (propertyLoanBalance || 0);
+  const vehicleNetValue =
+    (vehicleMarketValue || 0) * 0.8 - (vehicleLoanBalance || 0);
+  const valuableNetValue =
+    (valuableMarketValue || 0) * 0.8 - (valuableLoanBalance || 0);
+  const furnitureNetValue =
+    (furnitureMarketValue || 0) * 0.8 - (furnitureLoanBalance || 0);
+
+  // Calculate total available equity
+  const totalEquity = Math.max(
+    0,
+    investmentNetValue +
+      retirementNetValue +
+      insuranceNetValue +
+      propertyNetValue +
+      vehicleNetValue +
+      valuableNetValue +
+      furnitureNetValue
+  );
+
   return (
     <div className="space-y-8">
       <div>
@@ -20,425 +160,431 @@ export function PersonalAssetsSection({ formData, updateFormData }: PersonalAsse
           Section 3: Personal Asset Information (Domestic and Foreign)
         </h2>
         <p className="text-gray-600">
-          Use the most current statement for each type of account. Asset value is subject to adjustment by IRS based on
-          individual circumstances.
+          Use the most current statement for each type of account. Asset value
+          is subject to adjustment by IRS based on individual circumstances.
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          Round to the nearest dollar. Do not enter a negative number. If any line item is a negative number, enter "0".
+          Round to the nearest dollar. Do not enter a negative number. If any
+          line item is a negative number, enter "0".
         </p>
       </div>
 
-      {/* Cash and Investments */}
+      {/* Cash / Bank Accounts */}
       <Card>
         <CardHeader>
-          <CardTitle>Cash and Investments (Domestic and Foreign)</CardTitle>
+          <CardTitle>Cash / Bank Accounts</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Bank Account 1 */}
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Bank Account 1</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Account Type</Label>
-                <div className="flex flex-wrap gap-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Cash</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Checking</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Savings</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Money Market Account/CD</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Online Account</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Stored Value Card</Label>
-                  </div>
-                </div>
+          {bankAccounts.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Bank Account {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeBankAccount(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="bankAmount1">Amount ($)</Label>
-                <Input
-                  id="bankAmount1"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="bankName1">Bank Name and Country Location</Label>
-                <Input id="bankName1" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="accountNumber1">Account Number</Label>
-                <Input id="accountNumber1" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-            </div>
-          </div>
 
-          {/* Investment Accounts */}
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Investment Account</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Investment Type</Label>
-                <div className="flex flex-wrap gap-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Stocks</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Bonds</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Other</Label>
-                  </div>
-                </div>
+              {/* Account Type Checkboxes */}
+              <div className="flex flex-wrap gap-4">
+                {[
+                  "Cash",
+                  "Checking",
+                  "Savings",
+                  "Money Market/CD",
+                  "Online Account",
+                  "Stored Value Card",
+                ].map((type) => (
+                  <label key={type} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      value={type}
+                      {...register(`bankAccounts.${index}.accountTypes`)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <span className="text-sm text-gray-700">{type}</span>
+                  </label>
+                ))}
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="investmentInstitution">Name of Financial Institution and Country Location</Label>
-                <Input id="investmentInstitution" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="investmentAccount">Account Number</Label>
-                <Input id="investmentAccount" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="currentMarketValue">Current Market Value ($)</Label>
-                <Input
-                  id="currentMarketValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="loanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="loanBalance"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="netValue">Net Value ($)</Label>
-                <Input
-                  id="netValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Digital Assets */}
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Digital Assets</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="digitalAssetDescription">Description of Digital Asset</Label>
-                <Input
-                  id="digitalAssetDescription"
-                  placeholder="e.g., Bitcoin, Ethereum, NFT"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
+              {/* Account Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Bank Name & Country"
+                  id={`bankAccounts.${index}.bankName`}
+                  {...register(`bankAccounts.${index}.bankName`)}
+                  error={errors.bankAccounts?.[index]?.bankName?.message}
                 />
-              </div>
-              <div>
-                <Label htmlFor="digitalAssetUnits">Number of Units</Label>
-                <Input
-                  id="digitalAssetUnits"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="digitalAssetLocation">Location of Digital Asset</Label>
-                <Input
-                  id="digitalAssetLocation"
-                  placeholder="Exchange account, self-hosted wallet"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="digitalAssetValue">US Dollar Equivalent ($)</Label>
-                <Input
-                  id="digitalAssetValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="digitalAssetAddress">Digital Asset Address (for self-hosted digital assets)</Label>
-              <Input id="digitalAssetAddress" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-            </div>
-          </div>
 
-          {/* Retirement Accounts */}
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Retirement Account</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Account Type</Label>
-                <div className="flex flex-wrap gap-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">401K</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">IRA</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]" />
-                    <Label className="text-sm">Other</Label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="retirementInstitution">Name of Financial Institution and Country Location</Label>
-                <Input id="retirementInstitution" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="retirementAccount">Account Number</Label>
-                <Input id="retirementAccount" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="retirementMarketValue">Current Market Value ($)</Label>
-                <Input
-                  id="retirementMarketValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
+                <FormInput
+                  label="Account Number"
+                  id={`bankAccounts.${index}.accountNumber`}
+                  {...register(`bankAccounts.${index}.accountNumber`)}
+                  error={errors.bankAccounts?.[index]?.accountNumber?.message}
                 />
-              </div>
-              <div>
-                <Label htmlFor="retirementMultiplier">× 0.8 =</Label>
-                <Input
-                  id="retirementMultiplier"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="retirementLoanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="retirementLoanBalance"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="retirementNetValue">Net Value ($)</Label>
-                <Input
-                  id="retirementNetValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500">
-              Note: Your reduction from current market value may be greater than 20% due to potential tax
-              consequences/withdrawal penalties.
-            </p>
-          </div>
 
-          {/* Life Insurance */}
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Cash Value of Life Insurance Policies</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="insuranceCompany">Name of Insurance Company</Label>
-                <Input id="insuranceCompany" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="policyNumber">Policy Number</Label>
-                <Input id="policyNumber" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="cashValue">Current Cash Value ($)</Label>
-                <Input
-                  id="cashValue"
+                <FormInput
+                  label="Balance ($)"
+                  id={`bankAccounts.${index}.balance`}
                   type="number"
                   placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="insuranceLoanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="insuranceLoanBalance"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="insuranceNetValue">Net Value ($)</Label>
-                <Input
-                  id="insuranceNetValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
+                  {...register(`bankAccounts.${index}.balance`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.bankAccounts?.[index]?.balance?.message}
                 />
               </div>
             </div>
-          </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addBankAccount({
+                accountTypes: [],
+                bankName: "",
+                accountNumber: "",
+                balance: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Bank Account
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Real Property */}
+      {/* Investments */}
       <Card>
         <CardHeader>
-          <CardTitle>Real Property</CardTitle>
-          <p className="text-sm text-gray-600">
-            Enter information about any house, condo, co-op, time share, etc. that you own.
-          </p>
+          <CardTitle>Investments (Domestic and Foreign)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label>
-              Is your real property currently for sale or do you anticipate selling your real property to fund the offer
-              amount?
-            </Label>
-            <RadioGroup className="flex gap-6 mt-2">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="property-sale-yes" className="text-[#22b573]" />
-                <Label htmlFor="property-sale-yes">Yes</Label>
+        <CardContent className="space-y-4">
+          {investments.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Investment {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeInvestment(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="property-sale-no" className="text-[#22b573]" />
-                <Label htmlFor="property-sale-no">No</Label>
-              </div>
-            </RadioGroup>
-          </div>
 
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Property 1</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="propertyDescription">Property Description</Label>
-                <Input
-                  id="propertyDescription"
-                  placeholder="Personal residence, rental property, vacant, etc."
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Type of Investment"
+                  id={`investments.${index}.type`}
+                  {...register(`investments.${index}.type`)}
+                  error={errors.investments?.[index]?.type?.message}
                 />
-              </div>
-              <div>
-                <Label htmlFor="purchaseDate">Purchase Date (mm/dd/yyyy)</Label>
-                <Input id="purchaseDate" type="date" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="mortgagePayment">Amount of Mortgage Payment ($)</Label>
-                <Input
-                  id="mortgagePayment"
+                <FormInput
+                  label="Market Value ($)"
+                  id={`investments.${index}.marketValue`}
                   type="number"
                   placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="finalPaymentDate">Date of Final Payment</Label>
-                <Input id="finalPaymentDate" type="date" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="titleHeld">How Title is Held</Label>
-                <Input
-                  id="titleHeld"
-                  placeholder="Joint tenancy, etc."
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
+                  {...register(`investments.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.investments?.[index]?.marketValue?.message}
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="propertyLocation">Location (street, city, state, ZIP code, county, and country)</Label>
-              <Textarea id="propertyLocation" className="focus:ring-[#22b573] focus:border-[#22b573]" />
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addInvestment({
+                type: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Investment
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Digital Assets */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Digital Assets</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {digitalAssets.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Digital Asset {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeDigitalAsset(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Type of Digital Asset"
+                  id={`digitalAssets.${index}.type`}
+                  {...register(`digitalAssets.${index}.type`)}
+                  error={errors.digitalAssets?.[index]?.type?.message}
+                />
+                <FormInput
+                  label="Market Value ($)"
+                  id={`digitalAssets.${index}.marketValue`}
+                  type="number"
+                  placeholder="0"
+                  {...register(`digitalAssets.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.digitalAssets?.[index]?.marketValue?.message}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="lenderInfo">Lender/Contract Holder Name, Address and Phone</Label>
-              <Textarea id="lenderInfo" className="focus:ring-[#22b573] focus:border-[#22b573]" />
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addDigitalAsset({
+                type: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Digital Asset
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Retirement Accounts */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Retirement Accounts</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {retirementAccounts.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Retirement Account {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeRetirementAccount(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Type of Retirement Account"
+                  id={`retirementAccounts.${index}.type`}
+                  {...register(`retirementAccounts.${index}.type`)}
+                  error={errors.retirementAccounts?.[index]?.type?.message}
+                />
+                <FormInput
+                  label="Market Value ($)"
+                  id={`retirementAccounts.${index}.marketValue`}
+                  type="number"
+                  placeholder="0"
+                  {...register(`retirementAccounts.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={
+                    errors.retirementAccounts?.[index]?.marketValue?.message
+                  }
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="propertyMarketValue">Current Market Value ($)</Label>
-                <Input
-                  id="propertyMarketValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addRetirementAccount({
+                type: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Retirement Account
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Life Insurance */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Life Insurance</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {lifeInsurance.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Life Insurance {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeLifeInsurance(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="propertyMultiplier">× 0.8 =</Label>
-                <Input
-                  id="propertyMultiplier"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Insurance Company"
+                  id={`lifeInsurance.${index}.company`}
+                  {...register(`lifeInsurance.${index}.company`)}
+                  error={errors.lifeInsurance?.[index]?.company?.message}
                 />
-              </div>
-              <div>
-                <Label htmlFor="propertyLoanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="propertyLoanBalance"
+                <FormInput
+                  label="Cash Value ($)"
+                  id={`lifeInsurance.${index}.cashValue`}
                   type="number"
                   placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="propertyNetValue">Total Value ($)</Label>
-                <Input
-                  id="propertyNetValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
+                  {...register(`lifeInsurance.${index}.cashValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.lifeInsurance?.[index]?.cashValue?.message}
                 />
               </div>
             </div>
-          </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addLifeInsurance({
+                company: "",
+                cashValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Life Insurance
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Property */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Real Estate / Property</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {property.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Property {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeProperty(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Description"
+                  id={`property.${index}.description`}
+                  {...register(`property.${index}.description`)}
+                  error={errors.property?.[index]?.description?.message}
+                />
+                <FormInput
+                  label="Market Value ($)"
+                  id={`property.${index}.marketValue`}
+                  type="number"
+                  placeholder="0"
+                  {...register(`property.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.property?.[index]?.marketValue?.message}
+                />
+              </div>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addProperty({
+                description: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Property
+          </Button>
         </CardContent>
       </Card>
 
@@ -446,231 +592,200 @@ export function PersonalAssetsSection({ formData, updateFormData }: PersonalAsse
       <Card>
         <CardHeader>
           <CardTitle>Vehicles</CardTitle>
-          <p className="text-sm text-gray-600">
-            Enter information about any cars, boats, motorcycles, etc. that you own or lease.
-          </p>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Vehicle 1</h4>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="vehicleMake">Vehicle Make & Model</Label>
-                <Input id="vehicleMake" className="focus:ring-[#22b573] focus:border-[#22b573]" />
+        <CardContent className="space-y-4">
+          {vehicles.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Vehicle {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeVehicle(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="vehicleYear">Year</Label>
-                <Input id="vehicleYear" type="number" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="datePurchased">Date Purchased</Label>
-                <Input id="datePurchased" type="date" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="mileage">Mileage</Label>
-                <Input id="mileage" type="number" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="licenseTag">License/Tag Number</Label>
-                <Input id="licenseTag" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label>Ownership</Label>
-                <RadioGroup className="flex gap-6 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="lease" id="vehicle-lease" className="text-[#22b573]" />
-                    <Label htmlFor="vehicle-lease">Lease</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="own" id="vehicle-own" className="text-[#22b573]" />
-                    <Label htmlFor="vehicle-own">Own</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="creditorName">Name of Creditor</Label>
-                <Input id="creditorName" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="vehicleFinalPayment">Date of Final Payment</Label>
-                <Input id="vehicleFinalPayment" type="date" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-              </div>
-              <div>
-                <Label htmlFor="monthlyPayment">Monthly Lease/Loan Amount ($)</Label>
-                <Input
-                  id="monthlyPayment"
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Make/Model"
+                  id={`vehicles.${index}.make`}
+                  {...register(`vehicles.${index}.make`)}
+                  error={errors.vehicles?.[index]?.make?.message}
+                />
+                <FormInput
+                  label="Market Value ($)"
+                  id={`vehicles.${index}.marketValue`}
                   type="number"
                   placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
+                  {...register(`vehicles.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.vehicles?.[index]?.marketValue?.message}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="vehicleMarketValue">Current Market Value ($)</Label>
-                <Input
-                  id="vehicleMarketValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="vehicleMultiplier">× 0.8 =</Label>
-                <Input
-                  id="vehicleMultiplier"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="vehicleLoanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="vehicleLoanBalance"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="vehicleNetValue">Total Value ($)</Label>
-                <Input
-                  id="vehicleNetValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-          </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addVehicle({
+                make: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Vehicle
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Other Valuable Items */}
+      {/* Valuables */}
       <Card>
         <CardHeader>
-          <CardTitle>Other Valuable Items</CardTitle>
-          <p className="text-sm text-gray-600">
-            Artwork, collections, jewelry, items of value in safe deposit boxes, interest in a company or business that
-            is not publicly traded, etc.
-          </p>
+          <CardTitle>Valuables</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <div>
-              <Label htmlFor="valuableDescription">Description of Asset(s)</Label>
-              <Textarea id="valuableDescription" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="valuableMarketValue">Current Market Value ($)</Label>
-                <Input
-                  id="valuableMarketValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
+        <CardContent className="space-y-4">
+          {valuables.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Valuable {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeValuable(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="valuableMultiplier">× 0.8 =</Label>
-                <Input
-                  id="valuableMultiplier"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="valuableLoanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="valuableLoanBalance"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="valuableNetValue">Net Value ($)</Label>
-                <Input
-                  id="valuableNetValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h4 className="font-medium text-gray-900">Value of Remaining Furniture and Personal Effects</h4>
-            <div>
-              <Label htmlFor="furnitureDescription">Description of Asset</Label>
-              <Textarea id="furnitureDescription" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="furnitureMarketValue">Current Market Value ($)</Label>
-                <Input
-                  id="furnitureMarketValue"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Description"
+                  id={`valuables.${index}.description`}
+                  {...register(`valuables.${index}.description`)}
+                  error={errors.valuables?.[index]?.description?.message}
                 />
-              </div>
-              <div>
-                <Label htmlFor="furnitureMultiplier">× 0.8 =</Label>
-                <Input
-                  id="furnitureMultiplier"
+                <FormInput
+                  label="Market Value ($)"
+                  id={`valuables.${index}.marketValue`}
                   type="number"
                   placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="furnitureLoanBalance">Minus Loan Balance ($)</Label>
-                <Input
-                  id="furnitureLoanBalance"
-                  type="number"
-                  placeholder="0"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="furnitureNetValue">Net Value ($)</Label>
-                <Input
-                  id="furnitureNetValue"
-                  type="number"
-                  placeholder="0"
-                  readOnly
-                  className="bg-gray-50 focus:ring-[#22b573] focus:border-[#22b573]"
+                  {...register(`valuables.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.valuables?.[index]?.marketValue?.message}
                 />
               </div>
             </div>
-          </div>
+          ))}
 
-          <div className="bg-[#22b573]/5 p-4 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-900">Available Individual Equity in Assets (Box A)</span>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-[#22b573]">$0</span>
-                <p className="text-xs text-gray-500">Calculated automatically</p>
-              </div>
-            </div>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addValuable({
+                description: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Valuable
+          </Button>
         </CardContent>
       </Card>
 
-      <FormNavigation currentStep={3} totalSteps={10} onPrevious={() => {}} onNext={() => {}} />
+      {/* Furniture */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Furniture</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {furniture.map((field, index) => (
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-900">
+                  Furniture {index + 1}
+                </h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeFurniture(index)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Description"
+                  id={`furniture.${index}.description`}
+                  {...register(`furniture.${index}.description`)}
+                  error={errors.furniture?.[index]?.description?.message}
+                />
+                <FormInput
+                  label="Market Value ($)"
+                  id={`furniture.${index}.marketValue`}
+                  type="number"
+                  placeholder="0"
+                  {...register(`furniture.${index}.marketValue`, {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.furniture?.[index]?.marketValue?.message}
+                />
+              </div>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              addFurniture({
+                description: "",
+                marketValue: 0,
+              })
+            }
+            className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Furniture
+          </Button>
+        </CardContent>
+      </Card>
+
+      <FormNavigation
+        currentStep={3}
+        totalSteps={10}
+        onPrevious={onPrevious}
+        onNext={onNext}
+      />
     </div>
-  )
+  );
 }

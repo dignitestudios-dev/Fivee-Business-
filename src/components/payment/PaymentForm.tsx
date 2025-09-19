@@ -8,7 +8,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import Button from "../ui/Button";
+import FButton from "../ui/FButton";
 import { MdLock } from "react-icons/md";
 import { useRouter } from "next/navigation";
 // import { api } from "@/lib/services";
@@ -205,7 +205,7 @@ const PaymentForm = ({
       <p className="text-red-600">{error}</p>
 
       <div className="w-full flex justify-end">
-        <Button
+        <FButton
           type="submit"
           disabled={
             !stripe ||
@@ -226,7 +226,7 @@ const PaymentForm = ({
           ) : (
             "Save"
           )}
-        </Button>
+        </FButton>
       </div>
     </form>
   );

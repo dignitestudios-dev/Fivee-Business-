@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import Button from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
+import FButton from "../../components/ui/FButton";
+import FInput from "../../components/ui/FInput";
 import { useForm } from "react-hook-form";
 import { SECURITY_CONFIG } from "@/lib/constants";
 import { BiCheckCircle } from "react-icons/bi";
@@ -79,12 +79,12 @@ const ResetPasswordForm = () => {
             </div>
 
             <div className="mt-8">
-              <Button
+              <FButton
                 onClick={() => router.push("/auth/login")}
                 className="w-full"
               >
                 Continue to login
-              </Button>
+              </FButton>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ const ResetPasswordForm = () => {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-      <Input
+      <FInput
         label="Password"
         type={showPassword ? "text" : "password"}
         autoComplete="new-password"
@@ -122,7 +122,7 @@ const ResetPasswordForm = () => {
         }
       />
 
-      <Input
+      <FInput
         label="Confirm Password"
         type={showConfirmPassword ? "text" : "password"}
         autoComplete="new-password"
@@ -220,9 +220,9 @@ const ResetPasswordForm = () => {
         </div>
       )}
 
-      <Button type="submit" className="w-full" loading={false} disabled={false}>
+      <FButton type="submit" className="w-full" loading={false} disabled={false}>
         {false ? "Reseting..." : "Reset"}
-      </Button>
+      </FButton>
     </form>
   );
 };

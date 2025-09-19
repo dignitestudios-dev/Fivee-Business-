@@ -1,7 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useState } from "react"
 
 interface FormNavigationProps {
   currentStep: number
@@ -9,7 +10,7 @@ interface FormNavigationProps {
   onPrevious: () => void
   onNext: () => void
   onSubmit?: () => void
-  isLastStep?: boolean
+  validateStep?: () => Promise<boolean>
 }
 
 export function FormNavigation({
@@ -18,8 +19,27 @@ export function FormNavigation({
   onPrevious,
   onNext,
   onSubmit,
-  isLastStep = false,
+  validateStep,
 }: FormNavigationProps) {
+  const [isValidating, setIsValidating] = useState(false)
+
+  const handleNext = async () => {
+    if (validateStep) {
+      setIsValidating(true)
+      const isValid = await validateStep()
+      setIsValidating(false)
+
+      if (isValid) {
+        onNext()
+      } else {
+        // Validation errors will be shown by the form components
+        console.log("[v0] Form validation failed")
+      }
+    } else {
+      onNext()
+    }
+  }
+
   return (
     <div className="flex justify-between items-center pt-6 border-t border-gray-200">
       <Button
@@ -48,11 +68,12 @@ export function FormNavigation({
       ) : (
         <Button
           type="button"
-          onClick={onNext}
-          className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2"
+          onClick={handleNext}
+          disabled={isValidating}
+          className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
         >
-          Next
-          <ChevronRight className="w-4 h-4" />
+          {isValidating ? "Validating..." : "Next"}
+          {!isValidating && <ChevronRight className="w-4 h-4" />}
         </Button>
       )}
     </div>

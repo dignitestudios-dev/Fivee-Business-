@@ -5,9 +5,9 @@ import { FiEyeOff } from "react-icons/fi";
 import { FaEye } from "react-icons/fa";
 import { GoCheckCircleFill } from "react-icons/go";
 
-import Input from "@/components/ui/Input";
+import FInput from "@/components/ui/FInput";
 import { DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
-import Button from "../ui/Button";
+import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/lib/features/userSlice";
 import { useAppDispatch } from "@/lib/hooks";
@@ -70,7 +70,7 @@ const SignupForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-5 items-center mt-5 w-full"
     >
-      <Input
+      <FInput
         label="Email"
         placeholder="email@example.com"
         autoComplete="email"
@@ -81,7 +81,7 @@ const SignupForm = () => {
       />
 
       <div className="w-full grid grid-cols-2 gap-5">
-        <Input
+        <FInput
           label="First Name"
           placeholder="Siweh"
           type="text"
@@ -89,7 +89,7 @@ const SignupForm = () => {
           {...register("firstName", { required: "First name is required" })}
           error={errors.firstName?.message}
         />
-        <Input
+        <FInput
           label="Last Name"
           placeholder="Harris"
           type="text"
@@ -100,7 +100,7 @@ const SignupForm = () => {
       </div>
 
       {/* New Password */}
-      <Input
+      <FInput
         label="Password"
         placeholder="Enter Password"
         type={showPassword ? "text" : "password"}
@@ -196,9 +196,9 @@ const SignupForm = () => {
         </div>
       )}
 
-      <Button variant="primary" size="lg" className="w-full">
+      <FButton variant="primary" size="lg" className="w-full">
         Sign Up
-      </Button>
+      </FButton>
     </form>
   );
 };

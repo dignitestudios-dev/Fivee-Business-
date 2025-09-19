@@ -1,3 +1,5 @@
+import { completeFormSchema } from "@/lib/validation-schemas";
+
 export {}; // makes this a module
 
 declare global {
@@ -43,4 +45,6 @@ declare global {
     sender: "user" | "support";
     timestamp: Date;
   }
+
+  type FormData433A = z.infer<typeof completeFormSchema>;
 }

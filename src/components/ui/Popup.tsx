@@ -1,6 +1,6 @@
 import { useState, ReactNode } from "react";
 import Modal from "./Modal";
-import Button from "./Button";
+import FButton from "./FButton";
 import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 type PopupType = "success" | "error" | "info" | "confirm";
@@ -151,7 +151,7 @@ export default function Popup({
       </div>
       {isConfirm && (
         <div className="flex justify-center gap-4 mt-6">
-          <Button
+          <FButton
             type="button"
             className="min-w-[96px] w-full"
             variant={cancelVariant}
@@ -159,8 +159,8 @@ export default function Popup({
             disabled={loading}
           >
             {cancelText}
-          </Button>
-          <Button
+          </FButton>
+          <FButton
             type="button"
             className="min-w-[96px] w-full"
             loading={loading}
@@ -169,7 +169,7 @@ export default function Popup({
             variant={confirmVariant}
           >
             {loading ? "Please wait..." : confirmText}
-          </Button>
+          </FButton>
         </div>
       )}
     </Modal>

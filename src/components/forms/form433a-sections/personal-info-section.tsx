@@ -1,55 +1,52 @@
 "use client"
 
-import type { FormData } from "@/app/page"
-import { FormNavigation } from "@/components/form-navigation"
-import { Input } from "@/components/ui/input"
+import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation"
+import { FormInput, FormField } from "@/components/ui/form-field"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
 import { Plus, Trash2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useFormContext, useFieldArray } from "react-hook-form"
+import { Button } from "@/components/ui/Button"
 
 interface PersonalInfoSectionProps {
-  formData: FormData
-  updateFormData: (updates: Partial<FormData>) => void
   onNext: () => void
   onPrevious: () => void
   currentStep: number
   totalSteps: number
+  validateStep: () => Promise<boolean>
 }
 
 export function PersonalInfoSection({
-  formData,
-  updateFormData,
   onNext,
   onPrevious,
   currentStep,
   totalSteps,
+  validateStep,
 }: PersonalInfoSectionProps) {
+  const {
+    register,
+    watch,
+    formState: { errors },
+    setValue,
+  } = useFormContext<FormData433A>()
+
+  const { fields, append, remove } = useFieldArray({
+    name: "householdMembers",
+  })
+
+  const maritalStatus = watch("maritalStatus")
+  const homeOwnership = watch("homeOwnership")
+
   const addHouseholdMember = () => {
-    const newMember = {
+    append({
       name: "",
       age: "",
       relationship: "",
       claimedAsDependent: false,
       contributesToIncome: false,
-    }
-    updateFormData({
-      householdMembers: [...formData.householdMembers, newMember],
     })
-  }
-
-  const removeHouseholdMember = (index: number) => {
-    const updatedMembers = formData.householdMembers.filter((_, i) => i !== index)
-    updateFormData({ householdMembers: updatedMembers })
-  }
-
-  const updateHouseholdMember = (index: number, field: string, value: any) => {
-    const updatedMembers = formData.householdMembers.map((member, i) =>
-      i === index ? { ...member, [field]: value } : member,
-    )
-    updateFormData({ householdMembers: updatedMembers })
   }
 
   return (
@@ -66,54 +63,45 @@ export function PersonalInfoSection({
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => updateFormData({ firstName: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => updateFormData({ lastName: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="First Name"
+              id="firstName"
+              required
+              {...register("firstName")}
+              error={errors.firstName?.message}
+            />
+            <FormInput
+              label="Last Name"
+              id="lastName"
+              required
+              {...register("lastName")}
+              error={errors.lastName?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="dateOfBirth">Date of Birth (mm/dd/yyyy)</Label>
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => updateFormData({ dateOfBirth: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="ssn">Social Security Number or ITIN</Label>
-              <Input
-                id="ssn"
-                value={formData.ssn}
-                onChange={(e) => updateFormData({ ssn: e.target.value })}
-                placeholder="XXX-XX-XXXX"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="Date of Birth (mm/dd/yyyy)"
+              id="dateOfBirth"
+              type="date"
+              required
+              {...register("dateOfBirth")}
+              error={errors.dateOfBirth?.message}
+            />
+            <FormInput
+              label="Social Security Number or ITIN"
+              id="ssn"
+              placeholder="XXX-XX-XXXX"
+              required
+              {...register("ssn")}
+              error={errors.ssn?.message}
+            />
           </div>
 
-          <div>
-            <Label>Marital Status</Label>
+          <FormField label="Marital Status" id="maritalStatus" required error={errors.maritalStatus?.message}>
             <RadioGroup
-              value={formData.maritalStatus}
-              onValueChange={(value: "unmarried" | "married") => updateFormData({ maritalStatus: value })}
+              value={maritalStatus}
+              onValueChange={(value: "unmarried" | "married") => setValue("maritalStatus", value)}
               className="flex gap-6 mt-2"
             >
               <div className="flex items-center space-x-2">
@@ -125,36 +113,32 @@ export function PersonalInfoSection({
                 <Label htmlFor="married">Married</Label>
               </div>
             </RadioGroup>
-          </div>
+          </FormField>
 
-          {formData.maritalStatus === "married" && (
-            <div>
-              <Label htmlFor="marriageDate">Date of Marriage (mm/dd/yyyy)</Label>
-              <Input
-                id="marriageDate"
-                type="date"
-                value={formData.marriageDate}
-                onChange={(e) => updateFormData({ marriageDate: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573] max-w-md"
-              />
-            </div>
+          {maritalStatus === "married" && (
+            <FormInput
+              label="Date of Marriage (mm/dd/yyyy)"
+              id="marriageDate"
+              type="date"
+              required
+              {...register("marriageDate")}
+              error={errors.marriageDate?.message}
+              className="max-w-md"
+            />
           )}
 
-          <div>
-            <Label htmlFor="homeAddress">Home Physical Address (street, city, state, ZIP code)</Label>
-            <Input
-              id="homeAddress"
-              value={formData.homeAddress}
-              onChange={(e) => updateFormData({ homeAddress: e.target.value })}
-              className="focus:ring-[#22b573] focus:border-[#22b573]"
-            />
-          </div>
+          <FormInput
+            label="Home Physical Address (street, city, state, ZIP code)"
+            id="homeAddress"
+            required
+            {...register("homeAddress")}
+            error={errors.homeAddress?.message}
+          />
 
-          <div>
-            <Label>Do you</Label>
+          <FormField label="Do you" id="homeOwnership" required error={errors.homeOwnership?.message}>
             <RadioGroup
-              value={formData.homeOwnership}
-              onValueChange={(value: "own" | "rent" | "other") => updateFormData({ homeOwnership: value })}
+              value={homeOwnership}
+              onValueChange={(value: "own" | "rent" | "other") => setValue("homeOwnership", value)}
               className="flex flex-wrap gap-6 mt-2"
             >
               <div className="flex items-center space-x-2">
@@ -171,23 +155,25 @@ export function PersonalInfoSection({
               </div>
             </RadioGroup>
 
-            {formData.homeOwnership === "other" && (
+            {homeOwnership === "other" && (
               <div className="mt-3">
-                <Input
+                <FormInput
+                  label=""
+                  id="homeOwnershipOther"
                   placeholder="Specify (e.g., share rent, live with relative, etc.)"
-                  value={formData.homeOwnershipOther}
-                  onChange={(e) => updateFormData({ homeOwnershipOther: e.target.value })}
-                  className="focus:ring-[#22b573] focus:border-[#22b573] max-w-md"
+                  required
+                  {...register("homeOwnershipOther")}
+                  error={errors.homeOwnershipOther?.message}
+                  className="max-w-md"
                 />
               </div>
             )}
-          </div>
+          </FormField>
 
           <div className="flex items-center space-x-2">
             <Checkbox
               id="communityProperty"
-              checked={formData.communityPropertyState}
-              onCheckedChange={(checked) => updateFormData({ communityPropertyState: !!checked })}
+              {...register("communityPropertyState")}
               className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
             />
             <Label htmlFor="communityProperty" className="text-sm">
@@ -196,109 +182,89 @@ export function PersonalInfoSection({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <Label htmlFor="county">County of Residence</Label>
-              <Input
-                id="county"
-                value={formData.county}
-                onChange={(e) => updateFormData({ county: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="primaryPhone">Primary Phone</Label>
-              <Input
-                id="primaryPhone"
-                value={formData.primaryPhone}
-                onChange={(e) => updateFormData({ primaryPhone: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="secondaryPhone">Secondary Phone</Label>
-              <Input
-                id="secondaryPhone"
-                value={formData.secondaryPhone}
-                onChange={(e) => updateFormData({ secondaryPhone: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="County of Residence"
+              id="county"
+              required
+              {...register("county")}
+              error={errors.county?.message}
+            />
+            <FormInput
+              label="Primary Phone"
+              id="primaryPhone"
+              placeholder="(123) 456-7890"
+              required
+              {...register("primaryPhone")}
+              error={errors.primaryPhone?.message}
+            />
+            <FormInput
+              label="Secondary Phone"
+              id="secondaryPhone"
+              placeholder="(123) 456-7890"
+              {...register("secondaryPhone")}
+              error={errors.secondaryPhone?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="faxNumber">FAX Number</Label>
-              <Input
-                id="faxNumber"
-                value={formData.faxNumber}
-                onChange={(e) => updateFormData({ faxNumber: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="mailingAddress">
-                Home Mailing Address (if different from above or post office box number)
-              </Label>
-              <Input
-                id="mailingAddress"
-                value={formData.mailingAddress}
-                onChange={(e) => updateFormData({ mailingAddress: e.target.value })}
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="FAX Number"
+              id="faxNumber"
+              placeholder="(123) 456-7890"
+              {...register("faxNumber")}
+              error={errors.faxNumber?.message}
+            />
+            <FormInput
+              label="Home Mailing Address (if different from above or post office box number)"
+              id="mailingAddress"
+              {...register("mailingAddress")}
+              error={errors.mailingAddress?.message}
+            />
           </div>
         </CardContent>
       </Card>
 
       {/* Spouse Information */}
-      {formData.maritalStatus === "married" && (
+      {maritalStatus === "married" && (
         <Card>
           <CardHeader>
             <CardTitle>Spouse Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="spouseFirstName">Spouse's First Name</Label>
-                <Input
-                  id="spouseFirstName"
-                  value={formData.spouseFirstName}
-                  onChange={(e) => updateFormData({ spouseFirstName: e.target.value })}
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="spouseLastName">Spouse's Last Name</Label>
-                <Input
-                  id="spouseLastName"
-                  value={formData.spouseLastName}
-                  onChange={(e) => updateFormData({ spouseLastName: e.target.value })}
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
+              <FormInput
+                label="Spouse's First Name"
+                id="spouseFirstName"
+                required
+                {...register("spouseFirstName")}
+                error={errors.spouseFirstName?.message}
+              />
+              <FormInput
+                label="Spouse's Last Name"
+                id="spouseLastName"
+                required
+                {...register("spouseLastName")}
+                error={errors.spouseLastName?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="spouseDateOfBirth">Date of Birth (mm/dd/yyyy)</Label>
-                <Input
-                  id="spouseDateOfBirth"
-                  type="date"
-                  value={formData.spouseDateOfBirth}
-                  onChange={(e) => updateFormData({ spouseDateOfBirth: e.target.value })}
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
-              <div>
-                <Label htmlFor="spouseSSN">Social Security Number</Label>
-                <Input
-                  id="spouseSSN"
-                  value={formData.spouseSSN}
-                  onChange={(e) => updateFormData({ spouseSSN: e.target.value })}
-                  placeholder="XXX-XX-XXXX"
-                  className="focus:ring-[#22b573] focus:border-[#22b573]"
-                />
-              </div>
+              <FormInput
+                label="Date of Birth (mm/dd/yyyy)"
+                id="spouseDateOfBirth"
+                type="date"
+                required
+                {...register("spouseDateOfBirth")}
+                error={errors.spouseDateOfBirth?.message}
+              />
+              <FormInput
+                label="Social Security Number"
+                id="spouseSSN"
+                placeholder="XXX-XX-XXXX"
+                required
+                {...register("spouseSSN")}
+                error={errors.spouseSSN?.message}
+              />
             </div>
           </CardContent>
         </Card>
@@ -313,15 +279,15 @@ export function PersonalInfoSection({
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {formData.householdMembers.map((member, index) => (
-            <div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4">
+          {fields.map((field, index) => (
+            <div key={field.id} className="p-4 border border-gray-200 rounded-lg space-y-4">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium text-gray-900">Household Member {index + 1}</h4>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeHouseholdMember(index)}
+                  onClick={() => remove(index)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -329,41 +295,34 @@ export function PersonalInfoSection({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor={`member-name-${index}`}>Name</Label>
-                  <Input
-                    id={`member-name-${index}`}
-                    value={member.name}
-                    onChange={(e) => updateHouseholdMember(index, "name", e.target.value)}
-                    className="focus:ring-[#22b573] focus:border-[#22b573]"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`member-age-${index}`}>Age</Label>
-                  <Input
-                    id={`member-age-${index}`}
-                    value={member.age}
-                    onChange={(e) => updateHouseholdMember(index, "age", e.target.value)}
-                    className="focus:ring-[#22b573] focus:border-[#22b573]"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`member-relationship-${index}`}>Relationship</Label>
-                  <Input
-                    id={`member-relationship-${index}`}
-                    value={member.relationship}
-                    onChange={(e) => updateHouseholdMember(index, "relationship", e.target.value)}
-                    className="focus:ring-[#22b573] focus:border-[#22b573]"
-                  />
-                </div>
+                <FormInput
+                  label="Name"
+                  id={`householdMembers.${index}.name`}
+                  required
+                  {...register(`householdMembers.${index}.name`)}
+                  error={errors.householdMembers?.[index]?.name?.message}
+                />
+                <FormInput
+                  label="Age"
+                  id={`householdMembers.${index}.age`}
+                  required
+                  {...register(`householdMembers.${index}.age`)}
+                  error={errors.householdMembers?.[index]?.age?.message}
+                />
+                <FormInput
+                  label="Relationship"
+                  id={`householdMembers.${index}.relationship`}
+                  required
+                  {...register(`householdMembers.${index}.relationship`)}
+                  error={errors.householdMembers?.[index]?.relationship?.message}
+                />
               </div>
 
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id={`member-dependent-${index}`}
-                    checked={member.claimedAsDependent}
-                    onCheckedChange={(checked) => updateHouseholdMember(index, "claimedAsDependent", !!checked)}
+                    {...register(`householdMembers.${index}.claimedAsDependent`)}
                     className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                   />
                   <Label htmlFor={`member-dependent-${index}`} className="text-sm">
@@ -373,8 +332,7 @@ export function PersonalInfoSection({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id={`member-income-${index}`}
-                    checked={member.contributesToIncome}
-                    onCheckedChange={(checked) => updateHouseholdMember(index, "contributesToIncome", !!checked)}
+                    {...register(`householdMembers.${index}.contributesToIncome`)}
                     className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                   />
                   <Label htmlFor={`member-income-${index}`} className="text-sm">
@@ -397,7 +355,13 @@ export function PersonalInfoSection({
         </CardContent>
       </Card>
 
-      <FormNavigation currentStep={currentStep} totalSteps={totalSteps} onPrevious={onPrevious} onNext={onNext} />
+      <FormNavigation
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        onPrevious={onPrevious}
+        onNext={onNext}
+        validateStep={validateStep}
+      />
     </div>
   )
 }

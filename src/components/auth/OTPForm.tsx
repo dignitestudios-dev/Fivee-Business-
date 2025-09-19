@@ -1,5 +1,5 @@
 "use client";
-import Button from "../ui/Button";
+import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import OtpInput from "./OtpInput";
@@ -37,9 +37,9 @@ const OTPForm = () => {
         label=""
       />
 
-      <Button variant="primary" size="lg" className="w-full">
+      <FButton variant="primary" size="lg" className="w-full">
         Confirm
-      </Button>
+      </FButton>
     </form>
   );
 };

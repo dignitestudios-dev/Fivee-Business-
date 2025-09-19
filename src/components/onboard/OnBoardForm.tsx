@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Button from "../ui/Button";
+import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/hooks";
 import { loginUser } from "@/lib/features/userSlice";
@@ -68,14 +68,14 @@ const OnBoardForm = () => {
         </div>
       </div>
 
-      <Button
+      <FButton
         variant="primary"
         size="lg"
         className="w-full"
         onClick={handleSubmit}
       >
         Continue
-      </Button>
+      </FButton>
     </div>
   );
 };

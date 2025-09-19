@@ -4,10 +4,10 @@ import { useForm } from "react-hook-form";
 import { FiEyeOff } from "react-icons/fi";
 import { FaEye } from "react-icons/fa";
 
-import Input from "@/components/ui/Input";
+import FInput from "@/components/ui/FInput";
 import { DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
 import Link from "next/link";
-import Button from "../ui/Button";
+import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/hooks";
 import { loginUser } from "@/lib/features/userSlice";
@@ -68,7 +68,7 @@ const LoginForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-5 items-center mt-5 w-full"
     >
-      <Input
+      <FInput
         label="Email"
         placeholder="email@example.com"
         autoComplete="email"
@@ -79,7 +79,7 @@ const LoginForm = () => {
       />
 
       {/* New Password */}
-      <Input
+      <FInput
         label="Password"
         placeholder="Enter Password"
         type={showPassword ? "text" : "password"}
@@ -111,9 +111,9 @@ const LoginForm = () => {
         Forgot Password?
       </Link>
 
-      <Button variant="primary" size="lg" className="w-full">
+      <FButton variant="primary" size="lg" className="w-full">
         Login
-      </Button>
+      </FButton>
     </form>
   );
 };

@@ -1,5 +1,4 @@
-import type { FormData } from "@/app/page"
-import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation"
+import { FormNavigation } from "./form-navigation"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -8,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 
 interface BusinessAssetsSectionProps {
-  formData: FormData
-  updateFormData: (updates: Partial<FormData>) => void
+  formData: FormData433A
+  updateFormData: (updates: Partial<FormData433A>) => void
 }
 
 export function BusinessAssetsSection({ formData, updateFormData }: BusinessAssetsSectionProps) {
