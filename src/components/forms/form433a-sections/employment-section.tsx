@@ -165,23 +165,25 @@ export function EmploymentSection({
                 <div className="flex-1">
                   <FormInput
                     label=""
-                    name="employmentYears"
                     placeholder="Years"
                     type="number"
                     min="0"
                     required
+                    {...register("employmentYears")}
+                    error={errors.employmentYears?.message}
                   />
                   <Label className="text-xs text-gray-500 mt-1">Years</Label>
                 </div>
                 <div className="flex-1">
                   <FormInput
                     label=""
-                    name="employmentMonths"
                     placeholder="Months"
                     type="number"
                     min="0"
                     max="11"
                     required
+                    {...register("employmentMonths")}
+                    error={errors.employmentMonths?.message}
                   />
                   <Label className="text-xs text-gray-500 mt-1">Months</Label>
                 </div>
@@ -200,10 +202,11 @@ export function EmploymentSection({
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                name="spouseEmployerName"
                 label="Spouse's Employer's Name"
                 placeholder="Enter spouse's employer name"
                 required
+                {...register("spouseEmployerName")}
+                error={errors.spouseEmployerName?.message}
               />
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700">
@@ -253,10 +256,11 @@ export function EmploymentSection({
             </div>
 
             <FormInput
-              name="spouseEmployerAddress"
               label="Employer's Address (street, city, state, ZIP code)"
               placeholder="Enter spouse's employer address"
               required
+              {...register("spouseEmployerAddress")}
+              error={errors.spouseEmployerAddress?.message}
             />
 
             <div className="space-y-3">
@@ -293,10 +297,11 @@ export function EmploymentSection({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                name="spouseOccupation"
                 label="Spouse's Occupation"
                 placeholder="Enter spouse's occupation"
                 required
+                {...register("spouseOccupation")}
+                error={errors.spouseOccupation?.message}
               />
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700">
@@ -306,23 +311,31 @@ export function EmploymentSection({
                   <div className="flex-1">
                     <FormInput
                       label=""
-                      name="spouseEmploymentYears"
                       placeholder="Years"
                       type="number"
                       min="0"
                       required
+                      {...register("spouseEmploymentYears")}
+                      error={errors.spouseEmploymentYears?.message}
                     />
                     <Label className="text-xs text-gray-500 mt-1">Years</Label>
                   </div>
                   <div className="flex-1">
                     <FormInput
                       label=""
-                      name="spouseEmploymentMonths"
                       placeholder="Months"
                       type="number"
                       min="0"
                       max="11"
                       required
+                      {...register("spouseEmploymentMonths", {
+                        required: "Spouse's employment months is required",
+                        max: {
+                          value: 11,
+                          message: "Months must be 11 or less",
+                        },
+                      })}
+                      error={errors.spouseEmploymentMonths?.message}
                     />
                     <Label className="text-xs text-gray-500 mt-1">Months</Label>
                   </div>

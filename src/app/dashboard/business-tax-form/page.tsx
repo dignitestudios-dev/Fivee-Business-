@@ -1,7 +1,7 @@
 import Form433AOIC from "@/components/forms/Form433AOIC";
 import React from "react";
 
-const TaxForm = () => {
+const IndividualTaxForm = () => {
   return (
     <>
       <Form433AOIC />
@@ -9,4 +9,4 @@ const TaxForm = () => {
   );
 };
 
-export default TaxForm;
+export default IndividualTaxForm;

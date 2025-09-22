@@ -164,29 +164,91 @@ export const personalAssetsSchema = z.object({
 // Self-Employed Schema
 export const selfEmployedSchema = z
   .object({
-    isSelfEmployed: z.boolean(),
-    businessName: z.string().optional(),
+    isSoleProprietorship: z.boolean({
+      error: (issue) => {
+        if (issue.input === undefined) {
+          return "Please select if your business is a sole proprietorship";
+        }
+        return "Must be a boolean value";
+      },
+    }),
+    businessName: z.string().min(1, "Business name is required"),
     businessAddress: z.string().optional(),
-    businessPhone: z.string().optional(),
-    ein: z.string().optional(),
-    businessWebsite: z.string().optional(),
+    businessTelephone: z
+      .string()
+      .optional()
+      .refine(
+        (val) =>
+          !val ||
+          /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/.test(
+            val
+          ),
+        "Please enter a valid US phone number"
+      ),
+    ein: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^\d{2}-?\d{7}$/.test(val),
+        "Please enter a valid EIN (XX-XXXXXXX)"
+      ),
+    businessWebsite: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^https?:\/\/[^\s$.?#].[^\s]*$/.test(val),
+        "Please enter a valid URL"
+      ),
     tradeName: z.string().optional(),
-    businessDescription: z.string().optional(),
-    totalEmployees: z.string().optional(),
-    depositFrequency: z.string().optional(),
-    avgMonthlyPayroll: z.string().optional(),
+    businessDescription: z
+      .string()
+      .min(1, "Description of business is required"),
+    totalEmployees: z.coerce
+      .number()
+      .min(0, "Total employees must be 0 or greater")
+      .optional(),
+    taxDepositFrequency: z.string().optional(),
+    avgGrossMonthlyPayroll: z.coerce
+      .number()
+      .min(0, "Average payroll must be 0 or greater")
+      .optional(),
+    hasOtherBusinessInterests: z.boolean(),
+    otherBusinesses: z
+      .array(
+        z.object({
+          percentageOwnership: z.coerce
+            .number()
+            .min(0, "Percentage must be at least 0")
+            .max(100, "Percentage must be at most 100"),
+          title: z.string().min(1, "Title is required"),
+          businessAddress: z.string().min(1, "Business address is required"),
+          businessName: z.string().min(1, "Business name is required"),
+          businessTelephone: z
+            .string()
+            .regex(
+              /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
+              "Please enter a valid US phone number"
+            ),
+          ein: z
+            .string()
+            .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)"),
+          businessType: z.enum(["partnership", "llc", "corporation", "other"], {
+            message: "Type of business is required",
+          }),
+        })
+      )
+      .optional(),
   })
   .refine(
     (data) => {
-      // If self-employed, business fields are required
-      if (data.isSelfEmployed) {
-        return data.businessName && data.businessDescription;
+      if (data.hasOtherBusinessInterests) {
+        return data.otherBusinesses && data.otherBusinesses.length > 0;
       }
       return true;
     },
     {
-      message: "Business information is required for self-employed individuals",
-      path: ["businessName"],
+      message: "Please add at least one other business interest if applicable",
+      path: ["otherBusinesses"],
     }
   );
 

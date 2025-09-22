@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation"
-import { FormInput, FormField } from "@/components/ui/form-field"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useFormContext, useFieldArray } from "react-hook-form"
-import { Button } from "@/components/ui/Button"
+import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
+import { FormInput, FormField } from "@/components/ui/form-field";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { Button } from "@/components/ui/Button";
 
 interface PersonalInfoSectionProps {
-  onNext: () => void
-  onPrevious: () => void
-  currentStep: number
-  totalSteps: number
-  validateStep: () => Promise<boolean>
+  onNext: () => void;
+  onPrevious: () => void;
+  currentStep: number;
+  totalSteps: number;
+  validateStep: () => Promise<boolean>;
 }
 
 export function PersonalInfoSection({
@@ -30,14 +30,14 @@ export function PersonalInfoSection({
     watch,
     formState: { errors },
     setValue,
-  } = useFormContext<FormData433A>()
+  } = useFormContext<FormData433A>();
 
   const { fields, append, remove } = useFieldArray({
     name: "householdMembers",
-  })
+  });
 
-  const maritalStatus = watch("maritalStatus")
-  const homeOwnership = watch("homeOwnership")
+  const maritalStatus = watch("maritalStatus");
+  const homeOwnership = watch("homeOwnership");
 
   const addHouseholdMember = () => {
     append({
@@ -46,14 +46,19 @@ export function PersonalInfoSection({
       relationship: "",
       claimedAsDependent: false,
       contributesToIncome: false,
-    })
-  }
+    });
+  };
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Section 1: Personal and Household Information</h2>
-        <p className="text-gray-600">Provide your basic personal information and details about your household.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Section 1: Personal and Household Information
+        </h2>
+        <p className="text-gray-600">
+          Provide your basic personal information and details about your
+          household.
+        </p>
       </div>
 
       {/* Personal Information */}
@@ -64,18 +69,18 @@ export function PersonalInfoSection({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormInput
-              label="First Name"
-              id="firstName"
-              required
-              {...register("firstName")}
-              error={errors.firstName?.message}
-            />
-            <FormInput
               label="Last Name"
               id="lastName"
               required
               {...register("lastName")}
               error={errors.lastName?.message}
+            />
+            <FormInput
+              label="First Name"
+              id="firstName"
+              required
+              {...register("firstName")}
+              error={errors.firstName?.message}
             />
           </div>
 
@@ -98,18 +103,33 @@ export function PersonalInfoSection({
             />
           </div>
 
-          <FormField label="Marital Status" id="maritalStatus" required error={errors.maritalStatus?.message}>
+          <FormField
+            label="Marital Status"
+            id="maritalStatus"
+            required
+            error={errors.maritalStatus?.message}
+          >
             <RadioGroup
               value={maritalStatus}
-              onValueChange={(value: "unmarried" | "married") => setValue("maritalStatus", value)}
+              onValueChange={(value: "unmarried" | "married") =>
+                setValue("maritalStatus", value)
+              }
               className="flex gap-6 mt-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="unmarried" id="unmarried" className="text-[#22b573]" />
+                <RadioGroupItem
+                  value="unmarried"
+                  id="unmarried"
+                  className="text-[#22b573]"
+                />
                 <Label htmlFor="unmarried">Unmarried</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="married" id="married" className="text-[#22b573]" />
+                <RadioGroupItem
+                  value="married"
+                  id="married"
+                  className="text-[#22b573]"
+                />
                 <Label htmlFor="married">Married</Label>
               </div>
             </RadioGroup>
@@ -135,22 +155,41 @@ export function PersonalInfoSection({
             error={errors.homeAddress?.message}
           />
 
-          <FormField label="Do you" id="homeOwnership" required error={errors.homeOwnership?.message}>
+          <FormField
+            label="Do you"
+            id="homeOwnership"
+            required
+            error={errors.homeOwnership?.message}
+          >
             <RadioGroup
               value={homeOwnership}
-              onValueChange={(value: "own" | "rent" | "other") => setValue("homeOwnership", value)}
+              onValueChange={(value: "own" | "rent" | "other") =>
+                setValue("homeOwnership", value)
+              }
               className="flex flex-wrap gap-6 mt-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="own" id="own" className="text-[#22b573]" />
+                <RadioGroupItem
+                  value="own"
+                  id="own"
+                  className="text-[#22b573]"
+                />
                 <Label htmlFor="own">Own your home</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="rent" id="rent" className="text-[#22b573]" />
+                <RadioGroupItem
+                  value="rent"
+                  id="rent"
+                  className="text-[#22b573]"
+                />
                 <Label htmlFor="rent">Rent</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="other" id="other" className="text-[#22b573]" />
+                <RadioGroupItem
+                  value="other"
+                  id="other"
+                  className="text-[#22b573]"
+                />
                 <Label htmlFor="other">Other</Label>
               </div>
             </RadioGroup>
@@ -177,7 +216,8 @@ export function PersonalInfoSection({
               className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
             />
             <Label htmlFor="communityProperty" className="text-sm">
-              If you were married and lived in AZ, CA, ID, LA, NM, NV, TX, WA or WI within the last ten years check here
+              If you were married and lived in AZ, CA, ID, LA, NM, NV, TX, WA or
+              WI within the last ten years check here
             </Label>
           </div>
 
@@ -228,23 +268,23 @@ export function PersonalInfoSection({
       {maritalStatus === "married" && (
         <Card>
           <CardHeader>
-            <CardTitle>Spouse Information</CardTitle>
+            <CardTitle>Provide information about your spouse.</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormInput
-                label="Spouse's First Name"
-                id="spouseFirstName"
-                required
-                {...register("spouseFirstName")}
-                error={errors.spouseFirstName?.message}
-              />
               <FormInput
                 label="Spouse's Last Name"
                 id="spouseLastName"
                 required
                 {...register("spouseLastName")}
                 error={errors.spouseLastName?.message}
+              />
+              <FormInput
+                label="Spouse's First Name"
+                id="spouseFirstName"
+                required
+                {...register("spouseFirstName")}
+                error={errors.spouseFirstName?.message}
               />
             </div>
 
@@ -275,14 +315,20 @@ export function PersonalInfoSection({
         <CardHeader>
           <CardTitle>Household Members and Dependents</CardTitle>
           <p className="text-sm text-gray-600">
-            Provide information for all other persons in the household or claimed as a dependent.
+            Provide information for all other persons in the household or
+            claimed as a dependent.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {fields.map((field, index) => (
-            <div key={field.id} className="p-4 border border-gray-200 rounded-lg space-y-4">
+            <div
+              key={field.id}
+              className="p-4 border border-gray-200 rounded-lg space-y-4"
+            >
               <div className="flex justify-between items-center">
-                <h4 className="font-medium text-gray-900">Household Member {index + 1}</h4>
+                <h4 className="font-medium text-gray-900">
+                  Household Member {index + 1}
+                </h4>
                 <Button
                   type="button"
                   variant="outline"
@@ -314,7 +360,9 @@ export function PersonalInfoSection({
                   id={`householdMembers.${index}.relationship`}
                   required
                   {...register(`householdMembers.${index}.relationship`)}
-                  error={errors.householdMembers?.[index]?.relationship?.message}
+                  error={
+                    errors.householdMembers?.[index]?.relationship?.message
+                  }
                 />
               </div>
 
@@ -322,17 +370,24 @@ export function PersonalInfoSection({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id={`member-dependent-${index}`}
-                    {...register(`householdMembers.${index}.claimedAsDependent`)}
+                    {...register(
+                      `householdMembers.${index}.claimedAsDependent`
+                    )}
                     className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                   />
-                  <Label htmlFor={`member-dependent-${index}`} className="text-sm">
+                  <Label
+                    htmlFor={`member-dependent-${index}`}
+                    className="text-sm"
+                  >
                     Claimed as a dependent on your Form 1040
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id={`member-income-${index}`}
-                    {...register(`householdMembers.${index}.contributesToIncome`)}
+                    {...register(
+                      `householdMembers.${index}.contributesToIncome`
+                    )}
                     className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                   />
                   <Label htmlFor={`member-income-${index}`} className="text-sm">
@@ -363,5 +418,5 @@ export function PersonalInfoSection({
         validateStep={validateStep}
       />
     </div>
-  )
+  );
 }

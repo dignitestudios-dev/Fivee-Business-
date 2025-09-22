@@ -43,7 +43,11 @@ const Dashboard = () => {
 
   const handleFileTax = (type: "individual" | "business") => {
     console.log(type);
-    router.push("/dashboard/tax-form");
+    router.push(
+      type === "individual"
+        ? "/dashboard/individual-tax-form"
+        : "/dashboard/business-tax-form"
+    );
   };
 
   const IndividualTaxOptions = [
