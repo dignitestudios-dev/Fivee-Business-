@@ -72,7 +72,7 @@ const steps = [
 ];
 
 export default function Form433AOIC() {
-  const [currentStep, setCurrentStep] = useState<number>(4);
+  const [currentStep, setCurrentStep] = useState<number>(5);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
   const methods = useForm<FormData433A>({
@@ -125,6 +125,7 @@ export default function Form433AOIC() {
   } = methods;
 
   const validateCurrentStep = async (): Promise<boolean> => {
+    console.log("current step validation runs:");
     // Clear previous errors
     clearErrors();
 
@@ -409,33 +410,9 @@ export default function Form433AOIC() {
         break;
 
       case 3: // Personal Assets
-        // Validate property sale status
-        const propertySaleStatus = getValues("propertySaleStatus");
-        if (!propertySaleStatus) {
-          setError("propertySaleStatus", {
-            type: "required",
-            message: "Property sale status is required",
-          });
-          isValid = false;
-        }
-
-        if (propertySaleStatus === "yes") {
-          const propertyListingPrice = getValues("propertyListingPrice");
-          if (
-            propertyListingPrice == null ||
-            isNaN(propertyListingPrice) ||
-            propertyListingPrice < 0
-          ) {
-            setError("propertyListingPrice", {
-              type: "required",
-              message: "Listing price is required and cannot be negative",
-            });
-            isValid = false;
-          }
-        }
-
         // Validate bank accounts
         const bankAccounts = getValues("bankAccounts") || [];
+        console.log("bankAccounts: ", bankAccounts);
         if (bankAccounts.length > 0) {
           bankAccounts.forEach((account: any, index: number) => {
             if (!account.accountType || account.accountType.trim() === "") {
@@ -693,6 +670,29 @@ export default function Form433AOIC() {
         const realProperty = getValues("realProperty") || [];
         if (realProperty.length > 0) {
           realProperty.forEach((prop: any, index: number) => {
+            // // Validate property sale status
+            // if (!prop.propertySaleStatus) {
+            //   setError(`realProperty.${index}.propertySaleStatus`, {
+            //     type: "required",
+            //     message: "Property sale status is required",
+            //   });
+            //   isValid = false;
+            // }
+
+            // if (prop.propertySaleStatus === "yes") {
+            //   if (
+            //     prop.propertyListingPrice == null ||
+            //     isNaN(prop.propertyListingPrice) ||
+            //     prop.propertyListingPrice < 0
+            //   ) {
+            //     setError(`realProperty.${index}.propertySaleStatus`, {
+            //       type: "required",
+            //       message: "Listing price is required and cannot be negative",
+            //     });
+            //     isValid = false;
+            //   }
+            // }
+
             if (!prop.description || prop.description.trim() === "") {
               setError(`realProperty.${index}.description`, {
                 type: "required",
@@ -1047,176 +1047,243 @@ export default function Form433AOIC() {
           const assetValidation = await trigger(assetFieldsToValidate);
           isValid = isValid && assetValidation;
         }
-
-        if (propertySaleStatus === "yes") {
-          const listingPriceValidation = await trigger([
-            "propertyListingPrice",
-          ]);
-          isValid = isValid && listingPriceValidation;
-        }
         break;
 
-      case 4: // Self-Employed Info
-        fieldsToValidate = [
-          "isSoleProprietorship",
-          "businessName",
-          "businessDescription",
-        ];
+      case 4: // Self-Employed Information
+        // First validate basic required fields
+        fieldsToValidate = ["isSelfEmployed"];
 
+        // Validate basic fields first
         const basicValidation4 = await trigger(fieldsToValidate);
         isValid = basicValidation4;
 
-        // Validate optional fields if they have values
-        const optionalFields = [
-          "businessAddress",
-          "businessTelephone",
-          "ein",
-          "businessWebsite",
-          "tradeName",
-          "totalEmployees",
-          "taxDepositFrequency",
-          "avgGrossMonthlyPayroll",
-        ];
-        const optionalToValidate: (keyof FormData433A)[] =
-          optionalFields.filter((field) => getValues(field));
-
-        if (optionalToValidate.length > 0) {
-          const optionalValidation = await trigger(optionalToValidate);
-          isValid = isValid && optionalValidation;
-        }
-
-        const hasOtherBusinessInterests = getValues(
-          "hasOtherBusinessInterests"
-        );
+        const selfEmployed = getValues("isSelfEmployed");
         const otherBusinesses = getValues("otherBusinesses") || [];
 
-        // If has other interests, validate them
-        if (hasOtherBusinessInterests) {
-          if (otherBusinesses.length === 0) {
-            setError("otherBusinesses", {
-              type: "required",
-              message: "Please add at least one other business interest",
-            });
-            isValid = false;
+        if (selfEmployed) {
+          // Add required fields for self-employed (including businessTelephone as per user request)
+          const selfEmployedFields = [
+            "isSoleProprietorship",
+            "businessName",
+            "businessTelephone",
+            "businessDescription",
+            "totalEmployees",
+            "taxDepositFrequency",
+            "avgGrossMonthlyPayroll",
+            "hasOtherBusinessInterests",
+          ];
+          fieldsToValidate = [...fieldsToValidate, ...selfEmployedFields];
+
+          // First trigger validation for formats/patterns on all required fields
+          const selfValidation = await trigger(selfEmployedFields);
+          isValid = isValid && selfValidation;
+
+          // Then manually check for required (empty) and set errors if needed
+          selfEmployedFields.forEach((field) => {
+            let value = getValues(field);
+            let isEmpty = false;
+
+            if (value === undefined) {
+              isEmpty = true;
+            } else if (typeof value === "string") {
+              isEmpty = value.trim() === "";
+            } else if (typeof value === "number") {
+              isEmpty = isNaN(value);
+            } else if (typeof value === "boolean") {
+              // Booleans are required to be set, but since radio sets true/false, undefined means not selected
+              isEmpty = false; // Typically not empty, but if undefined, treat as empty
+            }
+
+            if (isEmpty) {
+              setError(field, {
+                type: "required",
+                message: `${field
+                  .replace(/([A-Z])/g, " $1")
+                  .replace(/^./, (str) => str.toUpperCase())} is required`,
+              });
+              isValid = false;
+            }
+          });
+
+          // Conditional for EIN if not sole proprietorship
+          const soleProp = getValues("isSoleProprietorship");
+          if (soleProp === false) {
+            const ein = getValues("ein");
+            let einIsEmpty =
+              ein === undefined ||
+              (typeof ein === "string" && ein.trim() === "");
+            if (einIsEmpty) {
+              setError("ein", {
+                type: "required",
+                message:
+                  "EIN is required for non-sole proprietorship businesses",
+              });
+              isValid = false;
+            } else {
+              // Validate format if value exists
+              const einValidation = await trigger(["ein"]);
+              isValid = isValid && einValidation;
+            }
+          } else if (soleProp === true || soleProp !== false) {
+            // Validate if provided
+            const ein = getValues("ein");
+            if (ein && typeof ein === "string" && ein.trim() !== "") {
+              const einValidation = await trigger(["ein"]);
+              isValid = isValid && einValidation;
+            }
           }
 
-          otherBusinesses.forEach((biz: any, index: number) => {
-            // Required fields check
-            if (
-              !biz.percentageOwnership ||
-              biz.percentageOwnership.trim() === ""
-            ) {
-              setError(`otherBusinesses.${index}.percentageOwnership`, {
-                type: "required",
-                message: "Percentage of ownership is required",
-              });
-              isValid = false;
-            } else if (
-              isNaN(Number(biz.percentageOwnership)) ||
-              Number(biz.percentageOwnership) < 0 ||
-              Number(biz.percentageOwnership) > 100
-            ) {
-              setError(`otherBusinesses.${index}.percentageOwnership`, {
-                type: "pattern",
-                message: "Percentage must be a number between 0 and 100",
-              });
-              isValid = false;
-            }
-
-            if (!biz.title || biz.title.trim() === "") {
-              setError(`otherBusinesses.${index}.title`, {
-                type: "required",
-                message: "Title is required",
-              });
-              isValid = false;
-            }
-
-            if (!biz.businessAddress || biz.businessAddress.trim() === "") {
-              setError(`otherBusinesses.${index}.businessAddress`, {
-                type: "required",
-                message: "Business address is required",
-              });
-              isValid = false;
-            }
-
-            if (!biz.businessName || biz.businessName.trim() === "") {
-              setError(`otherBusinesses.${index}.businessName`, {
-                type: "required",
-                message: "Business name is required",
-              });
-              isValid = false;
-            }
-
-            if (!biz.businessTelephone || biz.businessTelephone.trim() === "") {
-              setError(`otherBusinesses.${index}.businessTelephone`, {
-                type: "required",
-                message: "Business telephone is required",
-              });
-              isValid = false;
-            } else if (
-              !/^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/.test(
-                biz.businessTelephone
-              )
-            ) {
-              setError(`otherBusinesses.${index}.businessTelephone`, {
-                type: "pattern",
-                message: "Please enter a valid US phone number",
-              });
-              isValid = false;
-            }
-
-            if (!biz.ein || biz.ein.trim() === "") {
-              setError(`otherBusinesses.${index}.ein`, {
-                type: "required",
-                message: "EIN is required",
-              });
-              isValid = false;
-            } else if (!/^\d{2}-?\d{7}$/.test(biz.ein)) {
-              setError(`otherBusinesses.${index}.ein`, {
-                type: "pattern",
-                message: "Please enter a valid EIN (XX-XXXXXXX)",
-              });
-              isValid = false;
-            }
-
-            if (!biz.businessType || biz.businessType.trim() === "") {
-              setError(`otherBusinesses.${index}.businessType`, {
-                type: "required",
-                message: "Type of business is required",
-              });
-              isValid = false;
+          // Optional fields: validate format if provided
+          const optionalFields = [
+            "businessAddress",
+            "businessWebsite",
+            "tradeName",
+          ];
+          const optionalToValidate: any = [];
+          optionalFields.forEach((field) => {
+            const value = getValues(field);
+            if (value && typeof value === "string" && value.trim() !== "") {
+              optionalToValidate.push(field);
             }
           });
+          if (optionalToValidate.length > 0) {
+            const optionalValidation = await trigger(optionalToValidate);
+            isValid = isValid && optionalValidation;
+          }
 
-          // Trigger validation for other business fields that have values (for format, etc.)
-          const otherFieldsToValidate: (keyof FormData433A)[] = [];
-          otherBusinesses.forEach((_: any, index: number) => {
-            otherFieldsToValidate.push(
-              `otherBusinesses.${index}.percentageOwnership` as keyof FormData433A,
-              `otherBusinesses.${index}.title` as keyof FormData433A,
-              `otherBusinesses.${index}.businessAddress` as keyof FormData433A,
-              `otherBusinesses.${index}.businessName` as keyof FormData433A,
-              `otherBusinesses.${index}.businessTelephone` as keyof FormData433A,
-              `otherBusinesses.${index}.ein` as keyof FormData433A,
-              `otherBusinesses.${index}.businessType` as keyof FormData433A
-            );
-          });
-          if (otherFieldsToValidate.length > 0) {
-            const otherValidation = await trigger(otherFieldsToValidate);
-            isValid = isValid && otherValidation;
+          // Validate other business interests if yes
+          const hasOther = getValues("hasOtherBusinessInterests");
+          if (hasOther) {
+            if (otherBusinesses.length === 0) {
+              setError("hasOtherBusinessInterests", {
+                type: "required",
+                message:
+                  "Please add at least one other business interest or select No",
+              });
+              isValid = false;
+            } else {
+              // Validate each other business
+              otherBusinesses.forEach((business: any, index: number) => {
+                // Check required subfields
+                const subFields = [
+                  "percentageOwnership",
+                  "title",
+                  "businessAddress",
+                  "businessName",
+                  "businessTelephone",
+                  "ein",
+                  "businessType",
+                ];
+                subFields.forEach((subField) => {
+                  let value = business[subField];
+                  let isSubEmpty = false;
+
+                  if (value === undefined) {
+                    isSubEmpty = true;
+                  } else if (typeof value === "string") {
+                    isSubEmpty = value.trim() === "";
+                  } else if (typeof value === "number") {
+                    isSubEmpty = isNaN(value);
+                  }
+
+                  if (isSubEmpty) {
+                    setError(`otherBusinesses.${index}.${subField}`, {
+                      type: "required",
+                      message: `${subField
+                        .replace(/([A-Z])/g, " $1")
+                        .replace(/^./, (str) =>
+                          str.toUpperCase()
+                        )} is required`,
+                    });
+                    isValid = false;
+                  }
+                });
+              });
+
+              // Trigger validation for subfields that have values (for formats/patterns)
+              const subFieldsToValidate: any = [];
+              otherBusinesses.forEach((business: any, index: number) => {
+                const subFields = [
+                  "percentageOwnership",
+                  "title",
+                  "businessAddress",
+                  "businessName",
+                  "businessTelephone",
+                  "ein",
+                  "businessType",
+                ];
+                subFields.forEach((subField) => {
+                  let value = business[subField];
+                  if (
+                    value !== undefined &&
+                    (typeof value === "string" ? value.trim() !== "" : true)
+                  ) {
+                    subFieldsToValidate.push(
+                      `otherBusinesses.${index}.${subField}`
+                    );
+                  }
+                });
+              });
+              if (subFieldsToValidate.length > 0) {
+                const subValidation = await trigger(subFieldsToValidate);
+                isValid = isValid && subValidation;
+              }
+            }
           }
         }
+
+        console.log("fieldsToValidate: ", fieldsToValidate);
         break;
 
-      case 5: // Business Assets
-        fieldsToValidate = [
+case 5: // Business Assets Information
+        const selfEmployed5 = getValues("isSelfEmployed");
+        if (!selfEmployed5) {
+          isValid = true;
+          break;
+        }
+
+        const sectionFields = [
           "businessBankAccounts",
-          "businessVehicles",
-          "businessRealEstate",
-          "businessInventory",
-          "businessEquipment",
-        ];
-        break;
+          "businessDigitalAssets",
+          "totalBusinessBankAttachment",
+          "businessOtherAssets",
+          "totalBusinessAssetsAttachment",
+          "businessIrsDeduction",
+          "hasBusinessNotesReceivable",
+          "businessNotesListing",
+          "hasBusinessAccountsReceivable",
+          "businessAccountsListing",
+        ] as (keyof FormData433A)[];
+
+        sectionFields.forEach((field) => clearErrors(field));
+
+        const sectionData = {
+          isSelfEmployed: selfEmployed5,
+          businessBankAccounts: getValues("businessBankAccounts"),
+          businessDigitalAssets: getValues("businessDigitalAssets"),
+          totalBusinessBankAttachment: getValues("totalBusinessBankAttachment"),
+          businessOtherAssets: getValues("businessOtherAssets"),
+          totalBusinessAssetsAttachment: getValues("totalBusinessAssetsAttachment"),
+          businessIrsDeduction: getValues("businessIrsDeduction"),
+          hasBusinessNotesReceivable: getValues("hasBusinessNotesReceivable"),
+          businessNotesListing: getValues("businessNotesListing"),
+          hasBusinessAccountsReceivable: getValues("hasBusinessAccountsReceivable"),
+          businessAccountsListing: getValues("businessAccountsListing"),
+        };
+
+        try {
+          businessAssetsSchema.parse(sectionData);
+          return true;
+        } catch (e) {
+          if (e instanceof z.ZodError) {
+            e.errors.forEach((err) => {
+              const path = err.path.join(".") as keyof FormData433A;
+              setError(path, { type: "manual", message: err.message });
+            });
+            return false;
+          }
+          throw e;
+        }
 
       case 6: // Business Income
         fieldsToValidate = ["grossReceipts", "businessExpenses", "netIncome"];
@@ -1267,7 +1334,7 @@ export default function Form433AOIC() {
             isValid = false;
           }
 
-          // Validate spouse signature fields that have values for format/pattern
+          // Validate spouse fields that have values for format/pattern
           const spouseSignatureFieldsToValidate: (keyof FormData433A)[] = [];
           if (spouseSignature && spouseSignature.trim() !== "")
             spouseSignatureFieldsToValidate.push("spouseSignature");
@@ -1299,6 +1366,7 @@ export default function Form433AOIC() {
   const handleNext = async () => {
     console.log("Next runs");
     const isValid = await validateCurrentStep();
+    console.log("is valid: ", isValid);
     if (isValid && currentStep < 10) {
       // Mark current step as completed
       setCompletedSteps((prev) => new Set([...prev, currentStep]));
