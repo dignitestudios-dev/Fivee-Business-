@@ -1,14 +1,107 @@
-import { FormNavigation } from "./form-navigation"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client";
+
+import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
+import { FormInput } from "@/components/ui/form-field";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFormContext } from "react-hook-form";
+import { useEffect } from "react";
 
 interface BusinessIncomeSectionProps {
-  formData: FormData433A
-  updateFormData: (updates: Partial<FormData433A>) => void
+  onNext: () => void;
+  onPrevious: () => void;
+  currentStep: number;
+  totalSteps: number;
+  validateStep: () => Promise<boolean>;
 }
 
-export function BusinessIncomeSection({ formData, updateFormData }: BusinessIncomeSectionProps) {
+export function BusinessIncomeSection({
+  onNext,
+  onPrevious,
+  currentStep,
+  totalSteps,
+  validateStep,
+}: BusinessIncomeSectionProps) {
+  const {
+    register,
+    watch,
+    formState: { errors },
+    clearErrors,
+    trigger,
+    setValue,
+  } = useFormContext<FormData433A>();
+
+  const isSelfEmployed = watch("isSelfEmployed");
+
+  // Calculate totals for display
+  const grossReceipts = parseFloat(watch("grossReceipts")) || 0;
+  const grossRentalIncome = parseFloat(watch("grossRentalIncome")) || 0;
+  const interestIncome = parseFloat(watch("interestIncome")) || 0;
+  const dividends = parseFloat(watch("dividends")) || 0;
+  const otherBusinessIncome = parseFloat(watch("otherBusinessIncome")) || 0;
+  const totalBusinessIncome =
+    grossReceipts +
+    grossRentalIncome +
+    interestIncome +
+    dividends +
+    otherBusinessIncome;
+
+  const materialsPurchased = parseFloat(watch("materialsPurchased")) || 0;
+  const inventoryPurchased = parseFloat(watch("inventoryPurchased")) || 0;
+  const grossWages = parseFloat(watch("grossWages")) || 0;
+  const businessRent = parseFloat(watch("businessRent")) || 0;
+  const businessSupplies = parseFloat(watch("businessSupplies")) || 0;
+  const utilitiesTelephones = parseFloat(watch("utilitiesTelephones")) || 0;
+  const vehicleCosts = parseFloat(watch("vehicleCosts")) || 0;
+  const businessInsurance = parseFloat(watch("businessInsurance")) || 0;
+  const currentBusinessTaxes = parseFloat(watch("currentBusinessTaxes")) || 0;
+  const securedDebts = parseFloat(watch("securedDebts")) || 0;
+  const otherBusinessExpenses = parseFloat(watch("otherBusinessExpenses")) || 0;
+
+  const totalBusinessExpenses =
+    materialsPurchased +
+    inventoryPurchased +
+    grossWages +
+    businessRent +
+    businessSupplies +
+    utilitiesTelephones +
+    vehicleCosts +
+    businessInsurance +
+    currentBusinessTaxes +
+    securedDebts +
+    otherBusinessExpenses;
+
+  const netBusinessIncome = Math.max(
+    0,
+    totalBusinessIncome - totalBusinessExpenses
+  );
+
+  useEffect(() => {
+    setValue("boxC", netBusinessIncome);
+  }, [netBusinessIncome, setValue]);
+
+  if (!isSelfEmployed) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Section 6: Business Income and Expense Information (for
+            Self-Employed)
+          </h2>
+          <p className="text-gray-600">
+            This section is not applicable as you are not self-employed.
+          </p>
+        </div>
+        <FormNavigation
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onPrevious={onPrevious}
+          onNext={onNext}
+          validateStep={validateStep}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -16,15 +109,18 @@ export function BusinessIncomeSection({ formData, updateFormData }: BusinessInco
           Section 6: Business Income and Expense Information (for Self-Employed)
         </h2>
         <p className="text-gray-600">
-          If you provide a current profit and loss (P&L) statement for the information below, enter the total gross
-          monthly income on line 17 and your monthly expenses on line 29 below.
+          If you provide a current profit and loss (P&L) statement for the
+          information below, enter the total gross monthly income on line 17 and
+          your monthly expenses on line 29 below.
         </p>
-        <p className="text-sm text-gray-500 mt-2">
-          Round to the nearest whole dollar. Do not enter a negative number. If any line item is a negative number,
-          enter "0".
+        <p className="text-gray-800 font-semibold">
+          Round to the nearest whole dollar. Do not enter a negative number. If
+          any line item is a negative number, enter "0".
+        </p>
+        <p className="text-sm text-red-600 font-medium">
+          * All fields are required
         </p>
       </div>
-
       {/* Period Information */}
       <Card>
         <CardHeader>
@@ -32,226 +128,447 @@ export function BusinessIncomeSection({ formData, updateFormData }: BusinessInco
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="periodBeginning">Period Provided Beginning</Label>
-              <Input id="periodBeginning" type="date" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-            </div>
-            <div>
-              <Label htmlFor="periodThrough">Through</Label>
-              <Input id="periodThrough" type="date" className="focus:ring-[#22b573] focus:border-[#22b573]" />
-            </div>
+            <FormInput
+              label="Period Provided Beginning *"
+              id="periodBeginning"
+              type="date"
+              required={true}
+              {...register("periodBeginning", {
+                required: "Period beginning date is required",
+                onChange: (e) => {
+                  if (e.target.value.trim() !== "") {
+                    clearErrors("periodBeginning");
+                    trigger("periodBeginning");
+                  }
+                },
+              })}
+              error={errors.periodBeginning?.message}
+            />
+            <FormInput
+              label="Through *"
+              id="periodThrough"
+              type="date"
+              required={true}
+              {...register("periodThrough", {
+                required: "Period through date is required",
+                validate: (value) => {
+                  const beginDate = watch("periodBeginning");
+                  if (
+                    beginDate &&
+                    value &&
+                    new Date(value) <= new Date(beginDate)
+                  ) {
+                    return "Through date must be after beginning date";
+                  }
+                  return true;
+                },
+                onChange: (e) => {
+                  if (e.target.value.trim() !== "") {
+                    clearErrors("periodThrough");
+                    trigger("periodThrough");
+                  }
+                },
+              })}
+              error={errors.periodThrough?.message}
+            />
           </div>
         </CardContent>
       </Card>
-
       {/* Business Income */}
       <Card>
         <CardHeader>
           <CardTitle>Business Income</CardTitle>
           <p className="text-sm text-gray-600">
-            You may average 6-12 months income/receipts to determine your gross monthly income/receipts
+            You may average 6-12 months income/receipts to determine your gross
+            monthly income/receipts
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="grossReceipts">Gross Receipts ($)</Label>
-              <Input
-                id="grossReceipts"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="grossRentalIncome">Gross Rental Income ($)</Label>
-              <Input
-                id="grossRentalIncome"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="Gross Receipts ($) *"
+              id="grossReceipts"
+              type="number"
+              required={true}
+              {...register("grossReceipts", {
+                required: "Gross receipts is required",
+                validate: (value) => {
+                  if (!value || value.trim() === "")
+                    return "Gross receipts is required";
+                  const num = Number(value);
+                  if (isNaN(num)) return "Must be a number";
+                  if (num < 0) return "Must be 0 or greater";
+                  return true;
+                },
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("grossReceipts");
+                    trigger("grossReceipts");
+                  }
+                },
+              })}
+              error={errors.grossReceipts?.message}
+            />
+            <FormInput
+              label="Gross Rental Income ($) *"
+              id="grossRentalIncome"
+              type="number"
+              required={true}
+              {...register("grossRentalIncome", {
+                required: "Gross rental income is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("grossRentalIncome");
+                    trigger("grossRentalIncome");
+                  }
+                },
+              })}
+              error={errors.grossRentalIncome?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="interestIncome">Interest Income ($)</Label>
-              <Input
-                id="interestIncome"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="dividends">Dividends ($)</Label>
-              <Input
-                id="dividends"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="Interest Income ($) *"
+              id="interestIncome"
+              type="number"
+              required={true}
+              {...register("interestIncome", {
+                required: "Interest income is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("interestIncome");
+                    trigger("interestIncome");
+                  }
+                },
+              })}
+              error={errors.interestIncome?.message}
+            />
+            <FormInput
+              label="Dividends ($) *"
+              id="dividends"
+              type="number"
+              required={true}
+              {...register("dividends", {
+                required: "Dividends is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("dividends");
+                    trigger("dividends");
+                  }
+                },
+              })}
+              error={errors.dividends?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="otherBusinessIncome">Other Income ($)</Label>
-              <Input
-                id="otherBusinessIncome"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="Other Income ($) *"
+              id="otherBusinessIncome"
+              type="number"
+              required={true}
+              {...register("otherBusinessIncome", {
+                required: "Other business income is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("otherBusinessIncome");
+                    trigger("otherBusinessIncome");
+                  }
+                },
+              })}
+              error={errors.otherBusinessIncome?.message}
+            />
             <div className="bg-[#22b573]/5 p-4 rounded-lg">
-              <Label className="font-medium">Total Business Income ($)</Label>
-              <div className="text-2xl font-bold text-[#22b573] mt-1">$0</div>
+              <div className="font-medium">Total Business Income ($)</div>
+              <div className="text-2xl font-bold text-[#22b573] mt-1">
+                ${totalBusinessIncome.toFixed(0)}
+              </div>
               <p className="text-xs text-gray-500">Calculated automatically</p>
             </div>
           </div>
         </CardContent>
       </Card>
-
       {/* Business Expenses */}
       <Card>
         <CardHeader>
           <CardTitle>Business Expenses</CardTitle>
           <p className="text-sm text-gray-600">
-            You may average 6-12 months expenses to determine your average expenses
+            You may average 6-12 months expenses to determine your average
+            expenses
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="materialsPurchased">Materials Purchased ($)</Label>
-              <Input
+            <div className="space-y-2">
+              <FormInput
+                label="Materials Purchased ($) *"
                 id="materialsPurchased"
                 type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
+                required={true}
+                {...register("materialsPurchased", {
+                  required: "Materials purchased is required",
+                  min: { value: 0, message: "Must be 0 or greater" },
+
+                  onChange: (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      clearErrors("materialsPurchased");
+                      trigger("materialsPurchased");
+                    }
+                  },
+                })}
+                error={errors.materialsPurchased?.message}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500">
                 Items directly related to the production of a product or service
               </p>
             </div>
-            <div>
-              <Label htmlFor="inventoryPurchased">Inventory Purchased ($)</Label>
-              <Input
+            <div className="space-y-2">
+              <FormInput
+                label="Inventory Purchased ($) *"
                 id="inventoryPurchased"
                 type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
+                required={true}
+                {...register("inventoryPurchased", {
+                  required: "Inventory purchased is required",
+                  min: { value: 0, message: "Must be 0 or greater" },
+
+                  onChange: (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      clearErrors("inventoryPurchased");
+                      trigger("inventoryPurchased");
+                    }
+                  },
+                })}
+                error={errors.inventoryPurchased?.message}
               />
-              <p className="text-xs text-gray-500 mt-1">Goods bought for resale</p>
+              <p className="text-xs text-gray-500">Goods bought for resale</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="grossWages">Gross Wages and Salaries ($)</Label>
-              <Input
-                id="grossWages"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="businessRent">Rent ($)</Label>
-              <Input
-                id="businessRent"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="Gross Wages and Salaries ($) *"
+              id="grossWages"
+              type="number"
+              required={true}
+              {...register("grossWages", {
+                required: "Gross wages is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("grossWages");
+                    trigger("grossWages");
+                  }
+                },
+              })}
+              error={errors.grossWages?.message}
+            />
+            <FormInput
+              label="Rent ($) *"
+              id="businessRent"
+              type="number"
+              required={true}
+              {...register("businessRent", {
+                required: "Business rent is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("businessRent");
+                    trigger("businessRent");
+                  }
+                },
+              })}
+              error={errors.businessRent?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="businessSupplies">Supplies ($)</Label>
-              <Input
+            <div className="space-y-2">
+              <FormInput
+                label="Supplies ($) *"
                 id="businessSupplies"
                 type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-              <p className="text-xs text-gray-500 mt-1">Items used to conduct business and used up within one year</p>
-            </div>
-            <div>
-              <Label htmlFor="utilitiesTelephones">Utilities/Telephones ($)</Label>
-              <Input
-                id="utilitiesTelephones"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-          </div>
+                required={true}
+                {...register("businessSupplies", {
+                  required: "Business supplies is required",
+                  min: { value: 0, message: "Must be 0 or greater" },
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="vehicleCosts">Vehicle Costs ($)</Label>
-              <Input
-                id="vehicleCosts"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
+                  onChange: (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      clearErrors("businessSupplies");
+                      trigger("businessSupplies");
+                    }
+                  },
+                })}
+                error={errors.businessSupplies?.message}
               />
-              <p className="text-xs text-gray-500 mt-1">Gas, oil, repairs, maintenance</p>
-            </div>
-            <div>
-              <Label htmlFor="businessInsurance">Business Insurance ($)</Label>
-              <Input
-                id="businessInsurance"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="currentBusinessTaxes">Current Business Taxes ($)</Label>
-              <Input
-                id="currentBusinessTaxes"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Real estate, excise, franchise, occupational, personal property, sales and employer's portion of
-                employment taxes
+              <p className="text-xs text-gray-500">
+                Items used to conduct business and used up within one year
               </p>
             </div>
-            <div>
-              <Label htmlFor="securedDebts">Secured Debts (not credit cards) ($)</Label>
-              <Input
-                id="securedDebts"
-                type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
-              />
-            </div>
+            <FormInput
+              label="Utilities/Telephones ($) *"
+              id="utilitiesTelephones"
+              type="number"
+              required={true}
+              {...register("utilitiesTelephones", {
+                required: "Utilities/telephones is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("utilitiesTelephones");
+                    trigger("utilitiesTelephones");
+                  }
+                },
+              })}
+              error={errors.utilitiesTelephones?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="otherBusinessExpenses">Other Business Expenses ($)</Label>
-              <Input
+            <div className="space-y-2">
+              <FormInput
+                label="Vehicle Costs ($) *"
+                id="vehicleCosts"
+                type="number"
+                required={true}
+                {...register("vehicleCosts", {
+                  required: "Vehicle costs is required",
+                  min: { value: 0, message: "Must be 0 or greater" },
+
+                  onChange: (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      clearErrors("vehicleCosts");
+                      trigger("vehicleCosts");
+                    }
+                  },
+                })}
+                error={errors.vehicleCosts?.message}
+              />
+              <p className="text-xs text-gray-500">
+                Gas, oil, repairs, maintenance
+              </p>
+            </div>
+            <FormInput
+              label="Business Insurance ($) *"
+              id="businessInsurance"
+              type="number"
+              required={true}
+              {...register("businessInsurance", {
+                required: "Business insurance is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("businessInsurance");
+                    trigger("businessInsurance");
+                  }
+                },
+              })}
+              error={errors.businessInsurance?.message}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <FormInput
+                label="Current Business Taxes ($) *"
+                id="currentBusinessTaxes"
+                type="number"
+                required={true}
+                {...register("currentBusinessTaxes", {
+                  required: "Current business taxes is required",
+                  min: { value: 0, message: "Must be 0 or greater" },
+
+                  onChange: (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      clearErrors("currentBusinessTaxes");
+                      trigger("currentBusinessTaxes");
+                    }
+                  },
+                })}
+                error={errors.currentBusinessTaxes?.message}
+              />
+              <p className="text-xs text-gray-500">
+                Real estate, excise, franchise, occupational, personal property,
+                sales and employer's portion of employment taxes
+              </p>
+            </div>
+            <FormInput
+              label="Secured Debts (not credit cards) ($) *"
+              id="securedDebts"
+              type="number"
+              required={true}
+              {...register("securedDebts", {
+                required: "Secured debts is required",
+                min: { value: 0, message: "Must be 0 or greater" },
+
+                onChange: (e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0) {
+                    clearErrors("securedDebts");
+                    trigger("securedDebts");
+                  }
+                },
+              })}
+              error={errors.securedDebts?.message}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <FormInput
+                label="Other Business Expenses ($) *"
                 id="otherBusinessExpenses"
                 type="number"
-                placeholder="0"
-                className="focus:ring-[#22b573] focus:border-[#22b573]"
+                required={true}
+                {...register("otherBusinessExpenses", {
+                  required: "Other business expenses is required",
+                  min: { value: 0, message: "Must be 0 or greater" },
+
+                  onChange: (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val >= 0) {
+                      clearErrors("otherBusinessExpenses");
+                      trigger("otherBusinessExpenses");
+                    }
+                  },
+                })}
+                error={errors.otherBusinessExpenses?.message}
               />
-              <p className="text-xs text-gray-500 mt-1">Include a list</p>
+              <p className="text-xs text-gray-500">Include a list</p>
             </div>
             <div className="bg-[#22b573]/5 p-4 rounded-lg">
-              <Label className="font-medium">Total Business Expenses ($)</Label>
-              <div className="text-2xl font-bold text-[#22b573] mt-1">$0</div>
+              <div className="font-medium">Total Business Expenses ($)</div>
+              <div className="text-2xl font-bold text-[#22b573] mt-1">
+                ${totalBusinessExpenses.toFixed(0)}
+              </div>
               <p className="text-xs text-gray-500">Calculated automatically</p>
             </div>
           </div>
@@ -264,19 +581,33 @@ export function BusinessIncomeSection({ formData, updateFormData }: BusinessInco
           <CardTitle>Net Business Income Calculation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-[#22b573]/5 p-6 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-900">Net Business Income (Box C)</span>
-              <div className="text-right">
-                <span className="text-3xl font-bold text-[#22b573]">$0</span>
-                <p className="text-xs text-gray-500">Total Income minus Total Expenses</p>
-              </div>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Round to the nearest whole dollar
+              </p>
+              <p className="text-sm text-gray-600 mb-2">
+                Total Income minus Total Expenses
+              </p>
+              <p className="font-bold text-lg">
+                Net Business Income (Box C) = $
+                {netBusinessIncome.toLocaleString()}
+              </p>
+              <p className="text-sm font-medium mt-1">
+                Box C - Net Business Income
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <FormNavigation currentStep={6} totalSteps={10} onPrevious={() => {}} onNext={() => {}} />
+      <FormNavigation
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        onPrevious={onPrevious}
+        onNext={onNext}
+        validateStep={validateStep}
+      />
     </div>
-  )
+  );
 }

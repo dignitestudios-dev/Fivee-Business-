@@ -5,10 +5,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Plus, Trash2 } from "lucide-react";
 import { toTitleCase } from "@/utils/helper";
+import { useEffect } from "react";
 
 interface PersonalAssetsSectionProps {
   onNext: () => void;
@@ -113,8 +114,98 @@ export function PersonalAssetsSection({
     remove: removeFurniture,
   } = useFieldArray({ control, name: "furniture" });
 
-  // Watch property sale status
+  // Watch property sale status (unused, but kept as is)
   const propertySaleStatus = watch("propertySaleStatus");
+
+  // Compute all subtotals outside of UI
+  const bankAccountsValue = watch("bankAccounts") || [];
+  const bankTotal = Math.max(
+    0,
+    bankAccountsValue.reduce((sum: any, acc: any) => sum + (acc.balance || 0), 0) - 1000
+  );
+
+  const investmentsValue = watch("investments") || [];
+  const investmentTotal = investmentsValue.reduce(
+    (sum: any, inv: any) =>
+      sum + Math.max(0, (inv.marketValue || 0) - (inv.loanBalance || 0)),
+    0
+  );
+
+  const digitalAssetsValue = watch("digitalAssets") || [];
+  const digitalTotal = digitalAssetsValue.reduce(
+    (sum: any, asset: any) => sum + (asset.dollarValue || 0),
+    0
+  );
+
+  const retirementAccountsValue = watch("retirementAccounts") || [];
+  const retirementTotal = retirementAccountsValue.reduce(
+    (sum: any, ret: any) =>
+      sum + Math.max(0, (ret.marketValue || 0) * 0.8 - (ret.loanBalance || 0)),
+    0
+  );
+
+  const lifeInsuranceValue = watch("lifeInsurance") || [];
+  const insuranceTotal = lifeInsuranceValue.reduce(
+    (sum: any, ins: any) =>
+      sum + Math.max(0, (ins.cashValue || 0) - (ins.loanBalance || 0)),
+    0
+  );
+
+  const realPropertyValue = watch("realProperty") || [];
+  const propertyTotal = realPropertyValue.reduce(
+    (sum: any, prop: any) =>
+      sum +
+      Math.max(0, (prop.marketValue || 0) * 0.8 - (prop.loanBalance || 0)),
+    0
+  );
+
+  const vehiclesValue = watch("vehicles") || [];
+  let vehicleTotal = 0;
+  vehiclesValue.forEach((vehicle: any, index: any) => {
+    if (vehicle.status !== "lease") {
+      const vehicleValue = Math.max(
+        0,
+        (vehicle.marketValue || 0) * 0.8 - (vehicle.loanBalance || 0)
+      );
+      if (index === 0) {
+        vehicleTotal += Math.max(0, vehicleValue - 3450);
+      } else {
+        vehicleTotal += vehicleValue;
+      }
+    }
+  });
+
+  const valuablesValue = watch("valuables") || [];
+  const valuablesTotal = valuablesValue.reduce(
+    (sum: any, item: any) =>
+      sum +
+      Math.max(0, (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)),
+    0
+  );
+
+  const furnitureValue = watch("furniture") || [];
+  const furnitureTotal = furnitureValue.reduce(
+    (sum: any, item: any) =>
+      sum +
+      Math.max(0, (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)),
+    0
+  );
+  const otherTotal = Math.max(0, valuablesTotal + furnitureTotal - 11710);
+
+  const totalEquity =
+    bankTotal +
+    investmentTotal +
+    digitalTotal +
+    retirementTotal +
+    insuranceTotal +
+    propertyTotal +
+    vehicleTotal +
+    otherTotal;
+
+  // Save boxA in form state
+  useEffect(() => {
+    setValue("boxA", totalEquity);
+  }, [totalEquity, setValue]);
 
   return (
     <div className="space-y-8">
@@ -166,40 +257,45 @@ export function PersonalAssetsSection({
                 required
                 error={errors.bankAccounts?.[index]?.accountType?.message}
               >
-                <RadioGroup
-                  value={watch(`bankAccounts.${index}.accountType`)}
-                  onValueChange={(value) =>
-                    setValue(`bankAccounts.${index}.accountType`, value)
-                  }
-                  className="flex flex-wrap gap-4 mt-2"
-                >
-                  {[
-                    "Cash",
-                    "Checking",
-                    "Savings",
-                    "Money Market Account/CD",
-                    "Online Account",
-                    "Stored Value Card",
-                  ].map((type) => (
-                    <div key={type} className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value={type}
-                        id={`bank-${index}-${type
-                          .replace(/\s+/g, "-")
-                          .toLowerCase()}`}
-                        className="text-[#22b573]"
-                      />
-                      <Label
-                        htmlFor={`bank-${index}-${type
-                          .replace(/\s+/g, "-")
-                          .toLowerCase()}`}
-                        className="text-sm"
-                      >
-                        {type}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                <Controller
+                  name={`bankAccounts.${index}.accountType`}
+                  control={control}
+                  rules={{ required: "Account type is required" }}
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="flex flex-wrap gap-4 mt-2"
+                    >
+                      {[
+                        "Cash",
+                        "Checking",
+                        "Savings",
+                        "Money Market Account/CD",
+                        "Online Account",
+                        "Stored Value Card",
+                      ].map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={type}
+                            id={`bank-${index}-${type
+                              .replace(/\s+/g, "-")
+                              .toLowerCase()}`}
+                            className="text-[#22b573]"
+                          />
+                          <Label
+                            htmlFor={`bank-${index}-${type
+                              .replace(/\s+/g, "-")
+                              .toLowerCase()}`}
+                            className="text-sm"
+                          >
+                            {type}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )}
+                />
               </FormField>
 
               {/* Account Info */}
@@ -289,35 +385,43 @@ export function PersonalAssetsSection({
                 required
                 error={errors.investments?.[index]?.type?.message}
               >
-                <RadioGroup
-                  value={watch(`investments.${index}.type`)}
-                  onValueChange={(value) =>
-                    setValue(`investments.${index}.type`, value)
-                  }
-                  className="flex flex-wrap gap-4 mt-2"
-                >
-                  {["Investment Account", "Stocks", "Bonds", "Other"].map(
-                    (type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value={type}
-                          id={`investment-${index}-${type
-                            .replace(/\s+/g, "-")
-                            .toLowerCase()}`}
-                          className="text-[#22b573]"
-                        />
-                        <Label
-                          htmlFor={`investment-${index}-${type
-                            .replace(/\s+/g, "-")
-                            .toLowerCase()}`}
-                          className="text-sm"
-                        >
-                          {type}
-                        </Label>
-                      </div>
-                    )
+                <Controller
+                  name={`investments.${index}.type`}
+                  control={control}
+                  rules={{ required: "Investment type is required" }}
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="flex flex-wrap gap-4 mt-2"
+                    >
+                      {["Investment Account", "Stocks", "Bonds", "Other"].map(
+                        (type) => (
+                          <div
+                            key={type}
+                            className="flex items-center space-x-2"
+                          >
+                            <RadioGroupItem
+                              value={type}
+                              id={`investment-${index}-${type
+                                .replace(/\s+/g, "-")
+                                .toLowerCase()}`}
+                              className="text-[#22b573]"
+                            />
+                            <Label
+                              htmlFor={`investment-${index}-${type
+                                .replace(/\s+/g, "-")
+                                .toLowerCase()}`}
+                              className="text-sm"
+                            >
+                              {type}
+                            </Label>
+                          </div>
+                        )
+                      )}
+                    </RadioGroup>
                   )}
-                </RadioGroup>
+                />
               </FormField>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -541,33 +645,38 @@ export function PersonalAssetsSection({
                 required
                 error={errors.retirementAccounts?.[index]?.type?.message}
               >
-                <RadioGroup
-                  value={watch(`retirementAccounts.${index}.type`)}
-                  onValueChange={(value) =>
-                    setValue(`retirementAccounts.${index}.type`, value)
-                  }
-                  className="flex flex-wrap gap-4 mt-2"
-                >
-                  {["401K", "IRA", "Other"].map((type) => (
-                    <div key={type} className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value={type}
-                        id={`retirement-${index}-${type
-                          .replace(/\s+/g, "-")
-                          .toLowerCase()}`}
-                        className="text-[#22b573]"
-                      />
-                      <Label
-                        htmlFor={`retirement-${index}-${type
-                          .replace(/\s+/g, "-")
-                          .toLowerCase()}`}
-                        className="text-sm"
-                      >
-                        {type}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                <Controller
+                  name={`retirementAccounts.${index}.type`}
+                  control={control}
+                  rules={{ required: "Retirement account type is required" }}
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="flex flex-wrap gap-4 mt-2"
+                    >
+                      {["401K", "IRA", "Other"].map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={type}
+                            id={`retirement-${index}-${type
+                              .replace(/\s+/g, "-")
+                              .toLowerCase()}`}
+                            className="text-[#22b573]"
+                          />
+                          <Label
+                            htmlFor={`retirement-${index}-${type
+                              .replace(/\s+/g, "-")
+                              .toLowerCase()}`}
+                            className="text-sm"
+                          >
+                            {type}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )}
+                />
               </FormField>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -825,30 +934,45 @@ export function PersonalAssetsSection({
                 id={`realProperty.${index}.saleStatus`}
                 error={errors.realProperty?.[index]?.saleStatus?.message}
               >
-                <RadioGroup
-                  value={watch(`realProperty.${index}.saleStatus`)}
-                  onValueChange={(value: "yes" | "no") =>
-                    setValue(`realProperty.${index}.saleStatus`, value)
-                  }
-                  className="flex gap-6 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="yes"
-                      id={`property-sale-yes-${index}`}
-                      className="text-[#22b573]"
-                    />
-                    <Label htmlFor={`property-sale-yes-${index}`}>Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="no"
-                      id={`property-sale-no-${index}`}
-                      className="text-[#22b573]"
-                    />
-                    <Label htmlFor={`property-sale-no-${index}`}>No</Label>
-                  </div>
-                </RadioGroup>
+                <Controller
+                  name={`realProperty.${index}.saleStatus`}
+                  control={control}
+                  rules={{ required: "Please select an option" }}
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={(value: "yes" | "no") => {
+                        field.onChange(value);
+                        if (value === "no") {
+                          setValue(
+                            `realProperty.${index}.listingPrice`,
+                            undefined
+                          );
+                        }
+                      }}
+                      className="flex gap-6 mt-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="yes"
+                          id={`property-sale-yes-${index}`}
+                          className="text-[#22b573]"
+                        />
+                        <Label htmlFor={`property-sale-yes-${index}`}>
+                          Yes
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="no"
+                          id={`property-sale-no-${index}`}
+                          className="text-[#22b573]"
+                        />
+                        <Label htmlFor={`property-sale-no-${index}`}>No</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
+                />
 
                 {watch(`realProperty.${index}.saleStatus`) === "yes" && (
                   <div className="mt-3">
@@ -860,6 +984,7 @@ export function PersonalAssetsSection({
                       placeholder="0"
                       required
                       {...register(`realProperty.${index}.listingPrice`, {
+                        required: "Listing price is required",
                         valueAsNumber: true,
                         min: {
                           value: 0,
@@ -1121,30 +1246,35 @@ export function PersonalAssetsSection({
                 required
                 error={errors.vehicles?.[index]?.status?.message}
               >
-                <RadioGroup
-                  value={watch(`vehicles.${index}.status`)}
-                  onValueChange={(value) =>
-                    setValue(`vehicles.${index}.status`, value)
-                  }
-                  className="flex gap-6 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="lease"
-                      id={`vehicle-${index}-lease`}
-                      className="text-[#22b573]"
-                    />
-                    <Label htmlFor={`vehicle-${index}-lease`}>Lease</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="own"
-                      id={`vehicle-${index}-own`}
-                      className="text-[#22b573]"
-                    />
-                    <Label htmlFor={`vehicle-${index}-own`}>Own</Label>
-                  </div>
-                </RadioGroup>
+                <Controller
+                  name={`vehicles.${index}.status`}
+                  control={control}
+                  rules={{ required: "Vehicle status is required" }}
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="flex gap-6 mt-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="lease"
+                          id={`vehicle-${index}-lease`}
+                          className="text-[#22b573]"
+                        />
+                        <Label htmlFor={`vehicle-${index}-lease`}>Lease</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="own"
+                          id={`vehicle-${index}-own`}
+                          className="text-[#22b573]"
+                        />
+                        <Label htmlFor={`vehicle-${index}-own`}>Own</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
+                />
               </FormField>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1514,56 +1644,10 @@ export function PersonalAssetsSection({
             <div className="space-y-2">
               <Label className="text-sm font-medium text-blue-900">
                 Total Valuable Items + Furniture Value: $
-                {(() => {
-                  const valuablesTotal = (watch("valuables") || []).reduce(
-                    (sum: number, item: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  const furnitureTotal = (watch("furniture") || []).reduce(
-                    (sum: number, item: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  return (valuablesTotal + furnitureTotal).toLocaleString();
-                })()}
+                {(valuablesTotal + furnitureTotal).toLocaleString()}
               </Label>
               <Label className="text-sm font-medium text-blue-900">
-                Minus IRS Deduction of $11,710: $
-                {Math.max(
-                  0,
-                  (() => {
-                    const valuablesTotal = (watch("valuables") || []).reduce(
-                      (sum: number, item: any) =>
-                        sum +
-                        Math.max(
-                          0,
-                          (item.marketValue || 0) * 0.8 -
-                            (item.loanBalance || 0)
-                        ),
-                      0
-                    );
-                    const furnitureTotal = (watch("furniture") || []).reduce(
-                      (sum: number, item: any) =>
-                        sum +
-                        Math.max(
-                          0,
-                          (item.marketValue || 0) * 0.8 -
-                            (item.loanBalance || 0)
-                        ),
-                      0
-                    );
-                    return valuablesTotal + furnitureTotal - 11710;
-                  })()
-                ).toLocaleString()}
+                Minus IRS Deduction of $11,710: ${otherTotal.toLocaleString()}
               </Label>
             </div>
           </div>
@@ -1576,248 +1660,61 @@ export function PersonalAssetsSection({
           <CardTitle>Available Individual Equity in Assets Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-green-50 p-4 rounded-lg">
+          <div className="bg-blue-50 p-4 rounded-lg">
             <div className="space-y-2">
               <div className="text-sm">
-                <span className="font-medium">
+                <span className="font-medium text-gray-600">
                   Bank Accounts (minus $1,000):{" "}
                 </span>
-                $
-                {Math.max(
-                  0,
-                  (watch("bankAccounts") || []).reduce(
-                    (sum: number, account: any) => sum + (account.balance || 0),
-                    0
-                  ) - 1000
-                ).toLocaleString()}
+                ${bankTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Investments: </span>$
-                {(watch("investments") || [])
-                  .reduce(
-                    (sum: number, inv: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (inv.marketValue || 0) - (inv.loanBalance || 0)
-                      ),
-                    0
-                  )
-                  .toLocaleString()}
+                <span className="font-medium text-gray-600">Investments: </span>
+                ${investmentTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Digital Assets: </span>$
-                {(watch("digitalAssets") || [])
-                  .reduce(
-                    (sum: number, asset: any) => sum + (asset.dollarValue || 0),
-                    0
-                  )
-                  .toLocaleString()}
+                <span className="font-medium text-gray-600">
+                  Digital Assets:{" "}
+                </span>
+                ${digitalTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Retirement Accounts: </span>$
-                {(watch("retirementAccounts") || [])
-                  .reduce(
-                    (sum: number, ret: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (ret.marketValue || 0) * 0.8 - (ret.loanBalance || 0)
-                      ),
-                    0
-                  )
-                  .toLocaleString()}
+                <span className="font-medium text-gray-600">
+                  Retirement Accounts:{" "}
+                </span>
+                ${retirementTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Life Insurance: </span>$
-                {(watch("lifeInsurance") || [])
-                  .reduce(
-                    (sum: number, ins: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (ins.cashValue || 0) - (ins.loanBalance || 0)
-                      ),
-                    0
-                  )
-                  .toLocaleString()}
+                <span className="font-medium text-gray-600">
+                  Life Insurance:{" "}
+                </span>
+                ${insuranceTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Real Property: </span>$
-                {(watch("realProperty") || [])
-                  .reduce(
-                    (sum: number, prop: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (prop.marketValue || 0) * 0.8 - (prop.loanBalance || 0)
-                      ),
-                    0
-                  )
-                  .toLocaleString()}
+                <span className="font-medium text-gray-600">
+                  Real Property:{" "}
+                </span>
+                ${propertyTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">Vehicles: </span>$
-                {(() => {
-                  const vehicles = watch("vehicles") || [];
-                  let total = 0;
-                  vehicles.forEach((vehicle: any, index: number) => {
-                    if (vehicle.status !== "lease") {
-                      const vehicleValue = Math.max(
-                        0,
-                        (vehicle.marketValue || 0) * 0.8 -
-                          (vehicle.loanBalance || 0)
-                      );
-                      if (index === 0) {
-                        total += Math.max(0, vehicleValue - 3450);
-                      } else {
-                        total += vehicleValue;
-                      }
-                    }
-                  });
-                  return total.toLocaleString();
-                })()}
+                <span className="font-medium text-gray-600">Vehicles: </span>$
+                {vehicleTotal.toLocaleString()}
               </div>
               <div className="text-sm">
-                <span className="font-medium">
+                <span className="font-medium text-gray-600">
                   Other Items (minus $11,710):{" "}
                 </span>
-                $
-                {Math.max(
-                  0,
-                  (() => {
-                    const valuablesTotal = (watch("valuables") || []).reduce(
-                      (sum: number, item: any) =>
-                        sum +
-                        Math.max(
-                          0,
-                          (item.marketValue || 0) * 0.8 -
-                            (item.loanBalance || 0)
-                        ),
-                      0
-                    );
-                    const furnitureTotal = (watch("furniture") || []).reduce(
-                      (sum: number, item: any) =>
-                        sum +
-                        Math.max(
-                          0,
-                          (item.marketValue || 0) * 0.8 -
-                            (item.loanBalance || 0)
-                        ),
-                      0
-                    );
-                    return valuablesTotal + furnitureTotal - 11710;
-                  })()
-                ).toLocaleString()}
+                ${otherTotal.toLocaleString()}
               </div>
               <hr className="my-3" />
-              <div className="text-lg font-bold text-green-800">
+              <div className="text-lg font-bold text-center">
                 <span>Total Available Individual Equity: </span>$
-                {(() => {
-                  const bankTotal = Math.max(
-                    0,
-                    (watch("bankAccounts") || []).reduce(
-                      (sum: number, account: any) =>
-                        sum + (account.balance || 0),
-                      0
-                    ) - 1000
-                  );
-                  const investmentTotal = (watch("investments") || []).reduce(
-                    (sum: number, inv: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (inv.marketValue || 0) - (inv.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  const digitalTotal = (watch("digitalAssets") || []).reduce(
-                    (sum: number, asset: any) => sum + (asset.dollarValue || 0),
-                    0
-                  );
-                  const retirementTotal = (
-                    watch("retirementAccounts") || []
-                  ).reduce(
-                    (sum: number, ret: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (ret.marketValue || 0) * 0.8 - (ret.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  const insuranceTotal = (watch("lifeInsurance") || []).reduce(
-                    (sum: number, ins: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (ins.cashValue || 0) - (ins.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  const propertyTotal = (watch("realProperty") || []).reduce(
-                    (sum: number, prop: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (prop.marketValue || 0) * 0.8 - (prop.loanBalance || 0)
-                      ),
-                    0
-                  );
-
-                  const vehicles = watch("vehicles") || [];
-                  let vehicleTotal = 0;
-                  vehicles.forEach((vehicle: any, index: number) => {
-                    if (vehicle.status !== "lease") {
-                      const vehicleValue = Math.max(
-                        0,
-                        (vehicle.marketValue || 0) * 0.8 -
-                          (vehicle.loanBalance || 0)
-                      );
-                      if (index === 0) {
-                        vehicleTotal += Math.max(0, vehicleValue - 3450);
-                      } else {
-                        vehicleTotal += vehicleValue;
-                      }
-                    }
-                  });
-
-                  const valuablesTotal = (watch("valuables") || []).reduce(
-                    (sum: number, item: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  const furnitureTotal = (watch("furniture") || []).reduce(
-                    (sum: number, item: any) =>
-                      sum +
-                      Math.max(
-                        0,
-                        (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)
-                      ),
-                    0
-                  );
-                  const otherTotal = Math.max(
-                    0,
-                    valuablesTotal + furnitureTotal - 11710
-                  );
-
-                  return Math.max(
-                    0,
-                    bankTotal +
-                      investmentTotal +
-                      digitalTotal +
-                      retirementTotal +
-                      insuranceTotal +
-                      propertyTotal +
-                      vehicleTotal +
-                      otherTotal
-                  ).toLocaleString();
-                })()}
+                {totalEquity.toLocaleString()}
               </div>
+
+              <p className="text-center text-sm font-medium mt-1">
+                Box A - Total Personal Assets
+              </p>
             </div>
           </div>
         </CardContent>

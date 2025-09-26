@@ -140,6 +140,10 @@ export function BusinessAssetsSection({
   const value11 = Math.max(0, total9 - deduction);
   const boxB = total8 + value11;
 
+  useEffect(() => {
+    setValue("boxB", boxB);
+  }, [boxB, setValue]);
+
   if (!isSelfEmployed) {
     return (
       <div className="space-y-8">
@@ -890,17 +894,17 @@ export function BusinessAssetsSection({
       </Card>
 
       {/* Box B */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Box B: Available Business Equity in Assets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-between font-medium">
-            <span>Add lines (8) and (11) and enter the amount in Box B</span>
-            <span>${boxB.toFixed(0)}</span>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-blue-50 p-4 rounded-lg">
+        <div className="text-center">
+          <p className="font-bold text-lg">
+            Add lines (8) and (11) and enter the amount in Box B = $
+            {boxB.toFixed(0)}
+          </p>
+          <p className="text-sm font-medium mt-1">
+            Box B: Available Business Equity in Assets{" "}
+          </p>
+        </div>
+      </div>
 
       <FormNavigation
         currentStep={currentStep}

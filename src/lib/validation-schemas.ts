@@ -471,27 +471,22 @@ export const businessAssetsSchema = z
         z.object({
           accountType: z
             .string({
-              required_error: "Account type is required",
-              invalid_type_error: "Account type must be a string",
+              message: "Account type is required",
             })
             .min(1, { message: "Account type is required" }),
           bankNameCountry: z
             .string({
-              required_error: "Bank name and country location is required",
-              invalid_type_error:
-                "Bank name and country location must be a string",
+              message: "Bank name and country location is required",
             })
             .min(1, { message: "Bank name and country location is required" }),
           accountNumber: z
             .string({
-              required_error: "Account number is required",
-              invalid_type_error: "Account number must be a string",
+              message: "Account number is required",
             })
             .min(1, { message: "Account number is required" }),
           amount: z.coerce
             .number({
-              required_error: "Amount is required",
-              invalid_type_error: "Amount must be a number",
+              message: "Amount must be a number",
             })
             .min(0, { message: "Amount must be 0 or greater" }),
         })
@@ -503,58 +498,48 @@ export const businessAssetsSchema = z
           z.object({
             description: z
               .string({
-                required_error: "Description of digital asset is required",
-                invalid_type_error:
-                  "Description of digital asset must be a string",
+                message: "Description of digital asset is required",
               })
               .min(1, { message: "Description of digital asset is required" }),
             units: z.coerce
               .number({
-                required_error: "Number of units is required",
-                invalid_type_error: "Number of units must be a number",
+                message: "Number of units must be a number",
               })
               .min(0, { message: "Number of units must be 0 or greater" }),
             location: z.literal("accountExchange"),
             custodianBroker: z
               .string({
-                required_error: "Custodian or broker is required",
-                invalid_type_error: "Custodian or broker must be a string",
+                message: "Custodian or broker is required",
               })
               .min(1, { message: "Custodian or broker is required" }),
             address: z.string().optional(),
             value: z.coerce
               .number({
-                required_error: "Value is required",
-                invalid_type_error: "Value must be a number",
+                message: "Value must be a number",
               })
               .min(0, { message: "Value must be 0 or greater" }),
           }),
           z.object({
             description: z
               .string({
-                required_error: "Description of digital asset is required",
-                invalid_type_error:
-                  "Description of digital asset must be a string",
+                message: "Description of digital asset is required",
               })
               .min(1, { message: "Description of digital asset is required" }),
             units: z.coerce
               .number({
-                required_error: "Number of units is required",
-                invalid_type_error: "Number of units must be a number",
+                message: "Number of units must be a number",
               })
               .min(0, { message: "Number of units must be 0 or greater" }),
             location: z.literal("selfHostedWallet"),
             address: z
               .string({
-                required_error: "Digital asset address is required",
-                invalid_type_error: "Digital asset address must be a string",
+                message: "Digital asset address is required",
               })
               .min(1, { message: "Digital asset address is required" }),
             custodianBroker: z.string().optional(),
             value: z.coerce
               .number({
-                required_error: "Value is required",
-                invalid_type_error: "Value must be a number",
+                message: "Value must be a number",
               })
               .min(0, { message: "Value must be 0 or greater" }),
           }),
@@ -582,7 +567,7 @@ export const businessAssetsSchema = z
       ),
     totalBusinessBankAttachment: z.coerce
       .number({
-        invalid_type_error: "Total must be a number",
+        message: "Total must be a number",
       })
       .min(0, { message: "Total must be 0 or greater" })
       .optional(),
@@ -591,32 +576,27 @@ export const businessAssetsSchema = z
         z.object({
           description: z
             .string({
-              required_error: "Description of asset is required",
-              invalid_type_error: "Description of asset must be a string",
+              message: "Description of asset is required",
             })
             .min(1, { message: "Description of asset is required" }),
           currentMarketValue: z.coerce
             .number({
-              required_error: "Current market value is required",
-              invalid_type_error: "Current market value must be a number",
+              message: "Current market value must be a number",
             })
             .min(0, { message: "Current market value must be 0 or greater" }),
           quickSaleValue: z.coerce
             .number({
-              required_error: "Quick sale value is required",
-              invalid_type_error: "Quick sale value must be a number",
+              message: "Quick sale value must be a number",
             })
             .min(0, { message: "Quick sale value must be 0 or greater" }),
           loanBalance: z.coerce
             .number({
-              required_error: "Loan balance is required",
-              invalid_type_error: "Loan balance must be a number",
+              message: "Loan balance must be a number",
             })
             .min(0, { message: "Loan balance must be 0 or greater" }),
           totalValue: z.coerce
             .number({
-              required_error: "Total value is required",
-              invalid_type_error: "Total value must be a number",
+              message: "Total value must be a number",
             })
             .min(0, { message: "Total value must be 0 or greater" }),
         })
@@ -624,13 +604,13 @@ export const businessAssetsSchema = z
       .default([]),
     totalBusinessAssetsAttachment: z.coerce
       .number({
-        invalid_type_error: "Total must be a number",
+        message: "Total must be a number",
       })
       .min(0, { message: "Total must be 0 or greater" })
       .optional(),
     businessIrsDeduction: z.coerce
       .number({
-        invalid_type_error: "Deduction must be a number",
+        message: "Deduction must be a number",
       })
       .min(0, { message: "Deduction must be 0 or greater" })
       .optional(),
@@ -687,23 +667,290 @@ export const businessAssetsSchema = z
   );
 
 // Business Income Schema
-export const businessIncomeSchema = z.object({
-  businessIncomeCompleted: z
-    .boolean()
-    .refine(
-      (val) => val === true,
-      "Please complete all business income information"
-    ),
-});
+export const businessIncomeSchema = z
+  .object({
+    isSelfEmployed: z.boolean(),
+    periodBeginning: z
+      .string({
+        message: "Period beginning date is required",
+      })
+      .min(1, { message: "Period beginning date is required" }),
+    periodThrough: z
+      .string({
+        message: "Period through date is required",
+      })
+      .min(1, { message: "Period through date is required" }),
+    grossReceipts: z
+      .string()
+      .min(1, { message: "Gross receipts is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Gross receipts must be a number 0 or greater",
+      }),
+    grossRentalIncome: z
+      .string()
+      .min(1, { message: "Gross rental income is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Gross rental income must be a number 0 or greater",
+      }),
+    interestIncome: z
+      .string()
+      .min(1, { message: "Interest income is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Interest income must be a number 0 or greater",
+      }),
+    dividends: z
+      .string()
+      .min(1, { message: "Dividends is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Dividends must be a number 0 or greater",
+      }),
+    otherBusinessIncome: z
+      .string()
+      .min(1, { message: "Other business income is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Other business income must be a number 0 or greater",
+      }),
+    materialsPurchased: z
+      .string()
+      .min(1, { message: "Materials purchased is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Materials purchased must be a number 0 or greater",
+      }),
+    inventoryPurchased: z
+      .string()
+      .min(1, { message: "Inventory purchased is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Inventory purchased must be a number 0 or greater",
+      }),
+    grossWages: z
+      .string()
+      .min(1, { message: "Gross wages is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Gross wages must be a number 0 or greater",
+      }),
+    businessRent: z
+      .string()
+      .min(1, { message: "Business rent is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Business rent must be a number 0 or greater",
+      }),
+    businessSupplies: z
+      .string()
+      .min(1, { message: "Business supplies is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Business supplies must be a number 0 or greater",
+      }),
+    utilitiesTelephones: z
+      .string()
+      .min(1, { message: "Utilities/telephones is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Utilities/telephones must be a number 0 or greater",
+      }),
+    vehicleCosts: z
+      .string()
+      .min(1, { message: "Vehicle costs is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Vehicle costs must be a number 0 or greater",
+      }),
+    businessInsurance: z
+      .string()
+      .min(1, { message: "Business insurance is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Business insurance must be a number 0 or greater",
+      }),
+    currentBusinessTaxes: z
+      .string()
+      .min(1, { message: "Current business taxes is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Current business taxes must be a number 0 or greater",
+      }),
+    securedDebts: z
+      .string()
+      .min(1, { message: "Secured debts is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Secured debts must be a number 0 or greater",
+      }),
+    otherBusinessExpenses: z
+      .string()
+      .min(1, { message: "Other business expenses is required" })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+        message: "Other business expenses must be a number 0 or greater",
+      }),
+  })
+  .refine(
+    (data) => {
+      // Cross-field validation: period through should be after period beginning
+      if (data.isSelfEmployed && data.periodBeginning && data.periodThrough) {
+        const beginDate = new Date(data.periodBeginning);
+        const throughDate = new Date(data.periodThrough);
+        return throughDate > beginDate;
+      }
+      return true;
+    },
+    {
+      message: "Period through date must be after the beginning date",
+      path: ["periodThrough"],
+    }
+  );
 
 // Household Income Schema
 export const householdIncomeSchema = z.object({
-  householdIncomeCompleted: z
-    .boolean()
-    .refine(
-      (val) => val === true,
-      "Please complete all household income information"
-    ),
+  // Primary taxpayer income fields (Box 30)
+  primaryGrossWages: z
+    .number()
+    .min(0, "Primary gross wages must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  primarySocialSecurity: z
+    .number()
+    .min(0, "Primary social security must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  primaryPensions: z
+    .number()
+    .min(0, "Primary pensions must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  primaryOtherIncome: z
+    .number()
+    .min(0, "Primary other income must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+
+  // Spouse income fields (Box 31) - conditional
+  spouseGrossWages: z
+    .number()
+    .min(0, "Spouse gross wages must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  spouseSocialSecurity: z
+    .number()
+    .min(0, "Spouse social security must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  spousePensions: z
+    .number()
+    .min(0, "Spouse pensions must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  spouseOtherIncome: z
+    .number()
+    .min(0, "Spouse other income must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+
+  // Additional income sources (Boxes 32-38)
+  additionalSources: z
+    .number()
+    .min(0, "Additional sources must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 32
+  interestDividendsRoyalties: z
+    .number()
+    .min(0, "Interest/dividends/royalties must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 33
+  distributions: z
+    .number()
+    .min(0, "Distributions must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 34
+  netRentalIncome: z
+    .number()
+    .min(0, "Net rental income must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 35
+  netBusinessIncomeFromBoxC: z
+    .number()
+    .min(0, "Net business income must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 36
+  childSupportReceived: z
+    .number()
+    .min(0, "Child support received must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 37
+  alimonyReceived: z
+    .number()
+    .min(0, "Alimony received must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 38
+
+  // Required expense fields (Boxes 39, 40, 49)
+  foodClothingMisc: z
+    .number()
+    .min(0, "Food, clothing, and miscellaneous must be 0 or greater"), // Box 39 - Required
+  housingUtilities: z
+    .number()
+    .min(0, "Housing and utilities must be 0 or greater"), // Box 40 - Required
+  currentMonthlyTaxes: z
+    .number()
+    .min(0, "Current monthly taxes must be 0 or greater"), // Box 49 - Required
+
+  // Optional expense fields (Boxes 41-48, 50-51)
+  vehicleLoanLease: z
+    .number()
+    .min(0, "Vehicle loan/lease must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 41
+  vehicleOperatingCosts: z
+    .number()
+    .min(0, "Vehicle operating costs must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 42
+  publicTransportation: z
+    .number()
+    .min(0, "Public transportation must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 43
+  healthInsurancePremiums: z
+    .number()
+    .min(0, "Health insurance premiums must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 44
+  outOfPocketHealthcare: z
+    .number()
+    .min(0, "Out-of-pocket healthcare must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 45
+  courtOrderedPayments: z
+    .number()
+    .min(0, "Court-ordered payments must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 46
+  childDependentCare: z
+    .number()
+    .min(0, "Child/dependent care must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 47
+  lifeInsurancePremiums: z
+    .number()
+    .min(0, "Life insurance premiums must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 48
+  lifeInsurancePolicyAmount: z
+    .number()
+    .min(0, "Life insurance policy amount must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
+  securedDebtsOther: z
+    .number()
+    .min(0, "Secured debts/other must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 50
+  monthlyDelinquentTaxPayments: z
+    .number()
+    .min(0, "Monthly delinquent tax payments must be 0 or greater")
+    .optional()
+    .or(z.literal("")), // Box 51
+
+  // Text fields
+  listDebtsExpenses: z.string().optional(),
+  totalTaxOwed: z
+    .number()
+    .min(0, "Total tax owed must be 0 or greater")
+    .optional()
+    .or(z.literal("")),
 });
 
 // Calculation Schema
@@ -723,25 +970,77 @@ export const otherInfoSchema = z.object({
 // Signature Schema
 export const signatureSchema = z
   .object({
-    taxpayerSignature: z.string().optional(),
-    taxpayerSignatureDate: z.string().optional(),
-    spouseSignature: z.string().optional(),
-    spouseSignatureDate: z.string().optional(),
     maritalStatus: z.enum(["unmarried", "married"]),
+    taxpayerSignatureImage: z
+      .string()
+      .min(1, { message: "Taxpayer signature image is required" }),
+    taxpayerSignatureDate: z
+      .string()
+      .min(1, { message: "Taxpayer signature date is required" })
+      .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Invalid date format" }),
+    spouseSignatureImage: z.string().optional(),
+    spouseSignatureDate: z.string().optional(),
+    attachment1: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment2: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment3: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment4: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment5: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment6: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment7: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment8: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment9: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment10: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment11: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment12: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment13: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
+    attachment14: z.literal(true, {
+      message: "This attachment must be confirmed",
+    }),
   })
-  .refine(
-    (data) => {
-      // If married, spouse signature is required
-      if (data.maritalStatus === "married") {
-        return data.spouseSignature && data.spouseSignatureDate;
+  .superRefine((data, ctx) => {
+    if (data.maritalStatus === "married") {
+      if (!data.spouseSignatureImage) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Spouse signature image is required if married",
+          path: ["spouseSignatureImage"],
+        });
       }
-      return true;
-    },
-    {
-      message: "Spouse signature is required when married",
-      path: ["spouseSignature"],
+      if (!data.spouseSignatureDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Spouse signature date is required if married",
+          path: ["spouseSignatureDate"],
+        });
+      }
     }
-  );
+  });
 
 // Combined schema for all sections
 export const formSchemas = {
