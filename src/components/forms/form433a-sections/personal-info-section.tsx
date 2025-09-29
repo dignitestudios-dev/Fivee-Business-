@@ -29,6 +29,7 @@ export function PersonalInfoSection({
     watch,
     formState: { errors },
     setValue,
+    trigger,
   } = useFormContext<FormData433A>();
 
   const { fields, append, remove } = useFieldArray({
@@ -36,7 +37,7 @@ export function PersonalInfoSection({
   });
 
   const maritalStatus = watch("maritalStatus");
-  const homeOwnership = watch("homeOwnership");
+  const housingStatus = watch("housingStatus");
 
   const addHouseholdMember = () => {
     append({
@@ -86,19 +87,19 @@ export function PersonalInfoSection({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormInput
               label="Date of Birth (mm/dd/yyyy)"
-              id="dateOfBirth"
+              id="dob"
               type="date"
               required
-              {...register("dateOfBirth")}
-              error={errors.dateOfBirth?.message}
+              {...register("dob")}
+              error={errors.dob?.message}
             />
             <FormInput
               label="Social Security Number or ITIN"
-              id="ssn"
+              id="ssnOrItin"
               placeholder="XXX-XX-XXXX"
               required
-              {...register("ssn")}
-              error={errors.ssn?.message}
+              {...register("ssnOrItin")}
+              error={errors.ssnOrItin?.message}
             />
           </div>
 
@@ -137,11 +138,11 @@ export function PersonalInfoSection({
           {maritalStatus === "married" && (
             <FormInput
               label="Date of Marriage (mm/dd/yyyy)"
-              id="marriageDate"
+              id="dateOfMarriage"
               type="date"
               required
-              {...register("marriageDate")}
-              error={errors.marriageDate?.message}
+              {...register("dateOfMarriage")}
+              error={errors.dateOfMarriage?.message}
               className="max-w-md"
             />
           )}
@@ -156,14 +157,14 @@ export function PersonalInfoSection({
 
           <FormField
             label="Do you"
-            id="homeOwnership"
+            id="housingStatus"
             required
-            error={errors.homeOwnership?.message}
+            error={errors.housingStatus?.message}
           >
             <RadioGroup
-              value={homeOwnership}
+              value={housingStatus}
               onValueChange={(value: "own" | "rent" | "other") =>
-                setValue("homeOwnership", value)
+                setValue("housingStatus", value)
               }
               className="flex flex-wrap gap-6 mt-2"
             >
@@ -193,15 +194,15 @@ export function PersonalInfoSection({
               </div>
             </RadioGroup>
 
-            {homeOwnership === "other" && (
+            {housingStatus === "other" && (
               <div className="mt-3">
                 <FormInput
                   label=""
-                  id="homeOwnershipOther"
+                  id="housingOtherDetails"
                   placeholder="Specify (e.g., share rent, live with relative, etc.)"
                   required
-                  {...register("homeOwnershipOther")}
-                  error={errors.homeOwnershipOther?.message}
+                  {...register("housingOtherDetails")}
+                  error={errors.housingOtherDetails?.message}
                   className="max-w-md"
                 />
               </div>
@@ -210,11 +211,11 @@ export function PersonalInfoSection({
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              id="communityProperty"
-              {...register("communityPropertyState")}
+              id="livedInCommunityPropertyStateInLast10Years"
+              {...register("livedInCommunityPropertyStateInLast10Years")}
               className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
             />
-            <Label htmlFor="communityProperty" className="text-sm">
+            <Label htmlFor="livedInCommunityPropertyStateInLast10Years" className="text-sm">
               If you were married and lived in AZ, CA, ID, LA, NM, NV, TX, WA or
               WI within the last ten years check here
             </Label>
@@ -223,10 +224,10 @@ export function PersonalInfoSection({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FormInput
               label="County of Residence"
-              id="county"
+              id="countyOfResidence"
               required
-              {...register("county")}
-              error={errors.county?.message}
+              {...register("countyOfResidence")}
+              error={errors.countyOfResidence?.message}
             />
             <FormInput
               label="Primary Phone"
@@ -290,11 +291,11 @@ export function PersonalInfoSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
                 label="Date of Birth (mm/dd/yyyy)"
-                id="spouseDateOfBirth"
+                id="spouseDOB"
                 type="date"
                 required
-                {...register("spouseDateOfBirth")}
-                error={errors.spouseDateOfBirth?.message}
+                {...register("spouseDOB")}
+                error={errors.spouseDOB?.message}
               />
               <FormInput
                 label="Social Security Number"
@@ -350,6 +351,7 @@ export function PersonalInfoSection({
                 <FormInput
                   label="Age"
                   id={`householdMembers.${index}.age`}
+                  type="number"
                   required
                   {...register(`householdMembers.${index}.age`)}
                   error={errors.householdMembers?.[index]?.age?.message}
@@ -368,14 +370,12 @@ export function PersonalInfoSection({
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id={`member-dependent-${index}`}
-                    {...register(
-                      `householdMembers.${index}.claimedAsDependent`
-                    )}
+                    id={`householdMembers.${index}.claimedAsDependent`}
+                    name={`householdMembers.${index}.claimedAsDependent`}
                     className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                   />
                   <Label
-                    htmlFor={`member-dependent-${index}`}
+                    htmlFor={`householdMembers.${index}.claimedAsDependent`}
                     className="text-sm"
                   >
                     Claimed as a dependent on your Form 1040
@@ -383,13 +383,14 @@ export function PersonalInfoSection({
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id={`member-income-${index}`}
-                    {...register(
-                      `householdMembers.${index}.contributesToIncome`
-                    )}
+                    id={`householdMembers.${index}.contributesToIncome`}
+                    name={`householdMembers.${index}.contributesToIncome`}
                     className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                   />
-                  <Label htmlFor={`member-income-${index}`} className="text-sm">
+                  <Label
+                    htmlFor={`householdMembers.${index}.contributesToIncome`}
+                    className="text-sm"
+                  >
                     Contributes to household income
                   </Label>
                 </div>

@@ -41,7 +41,10 @@ export function EmploymentSection({
         </h2>
         <p className="text-gray-600">
           Complete this section if you or your spouse are wage earners and
-          receive a Form W-2.
+          receive a Form W-2. If you or your spouse have self-employment income
+          (that is you file a Schedule C, E, F, etc.) instead of, or in addition
+          to wage income, you must also complete Business Information in
+          Sections 4, 5, and 6.
         </p>
       </div>
 
@@ -121,9 +124,9 @@ export function EmploymentSection({
               Do you have an ownership interest in this business? *
             </Label>
             <RadioGroup
-              value={watch("ownershipInterest") ? "yes" : "no"}
+              value={watch("hasOwnershipInterest") ? "yes" : "no"}
               onValueChange={(value) =>
-                setValue("ownershipInterest", value === "yes")
+                setValue("hasOwnershipInterest", value === "yes")
               }
               className="flex gap-6"
             >
@@ -150,12 +153,12 @@ export function EmploymentSection({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormInput
-              id="occupation"
+              id="jobTitle"
               label="Your Occupation"
-              placeholder="Enter your occupation"
+              placeholder="Enter your jobTitle"
               required
-              {...register("occupation")}
-              error={errors.occupation?.message}
+              {...register("jobTitle")}
+              error={errors.jobTitle?.message}
             />
             <div className="space-y-3">
               <Label className="text-sm font-medium text-gray-700">
@@ -169,8 +172,8 @@ export function EmploymentSection({
                     type="number"
                     min="0"
                     required
-                    {...register("employmentYears")}
-                    error={errors.employmentYears?.message}
+                    {...register("yearsWithEmployer")}
+                    error={errors.yearsWithEmployer?.message}
                   />
                   <Label className="text-xs text-gray-500 mt-1">Years</Label>
                 </div>
@@ -182,8 +185,8 @@ export function EmploymentSection({
                     min="0"
                     max="11"
                     required
-                    {...register("employmentMonths")}
-                    error={errors.employmentMonths?.message}
+                    {...register("monthsWithEmployer")}
+                    error={errors.monthsWithEmployer?.message}
                   />
                   <Label className="text-xs text-gray-500 mt-1">Months</Label>
                 </div>
@@ -268,9 +271,9 @@ export function EmploymentSection({
                 Does your spouse have an ownership interest in this business? *
               </Label>
               <RadioGroup
-                value={watch("spouseOwnershipInterest") ? "yes" : "no"}
+                value={watch("spouseHasOwnershipInterest") ? "yes" : "no"}
                 onValueChange={(value) =>
-                  setValue("spouseOwnershipInterest", value === "yes")
+                  setValue("spouseHasOwnershipInterest", value === "yes")
                 }
                 className="flex gap-6"
               >
@@ -298,10 +301,10 @@ export function EmploymentSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
                 label="Spouse's Occupation"
-                placeholder="Enter spouse's occupation"
+                placeholder="Enter spouse's jobTitle"
                 required
-                {...register("spouseOccupation")}
-                error={errors.spouseOccupation?.message}
+                {...register("spouseJobTitle")}
+                error={errors.spouseJobTitle?.message}
               />
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700">
@@ -315,8 +318,8 @@ export function EmploymentSection({
                       type="number"
                       min="0"
                       required
-                      {...register("spouseEmploymentYears")}
-                      error={errors.spouseEmploymentYears?.message}
+                      {...register("spouseYearsWithEmployer")}
+                      error={errors.spouseYearsWithEmployer?.message}
                     />
                     <Label className="text-xs text-gray-500 mt-1">Years</Label>
                   </div>
@@ -328,14 +331,14 @@ export function EmploymentSection({
                       min="0"
                       max="11"
                       required
-                      {...register("spouseEmploymentMonths", {
+                      {...register("spouseMonthsWithEmployer", {
                         required: "Spouse's employment months is required",
                         max: {
                           value: 11,
                           message: "Months must be 11 or less",
                         },
                       })}
-                      error={errors.spouseEmploymentMonths?.message}
+                      error={errors.spouseMonthsWithEmployer?.message}
                     />
                     <Label className="text-xs text-gray-500 mt-1">Months</Label>
                   </div>

@@ -21,15 +21,17 @@ export const personalInfoSchema = z
       .string()
       .min(1, "Last name is required")
       .max(50, "Last name must be less than 50 characters"),
-    dateOfBirth: dateSchema,
-    ssn: z.string().regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
+    dob: dateSchema,
+    ssnOrItin: z
+      .string()
+      .regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
     maritalStatus: z.enum(["unmarried", "married"]),
-    marriageDate: z.string().optional(),
+    dateOfMarriage: z.string().optional(),
     homeAddress: z.string().min(1, "Home address is required"),
-    homeOwnership: z.enum(["own", "rent", "other"]),
-    homeOwnershipOther: z.string().optional(),
-    communityPropertyState: z.boolean(),
-    county: z.string().min(1, "County is required"),
+    housingStatus: z.enum(["own", "rent", "other"]),
+    housingOtherDetails: z.string().optional(),
+    livedInCommunityPropertyStateInLast10Years: z.boolean(),
+    countyOfResidence: z.string().min(1, "County is required"),
     primaryPhone: z
       .string()
       .regex(
@@ -57,17 +59,19 @@ export const personalInfoSchema = z
     // Spouse fields (conditional)
     spouseFirstName: z.string().optional(),
     spouseLastName: z.string().optional(),
-    spouseDateOfBirth: z.string().optional(),
-    spouseSSN: z.string().optional(),
+    spouseDOB: z.string().optional(),
+    spouseSSN: z
+      .string()
+      .regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
     spouseEmployerName: z.string().optional(),
     spousePayPeriod: z
       .enum(["weekly", "bi-weekly", "monthly", "other"])
       .optional(),
     spouseEmployerAddress: z.string().optional(),
-    spouseOwnershipInterest: z.boolean().optional(),
-    spouseOccupation: z.string().optional(),
-    spouseEmploymentYears: z.string().optional(),
-    spouseEmploymentMonths: z.string().optional(),
+    spouseHasOwnershipInterest: z.boolean().optional(),
+    spouseJobTitle: z.string().optional(),
+    spouseYearsWithEmployer: z.string().optional(),
+    spouseMonthsWithEmployer: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -76,14 +80,14 @@ export const personalInfoSchema = z
         return (
           data.spouseFirstName &&
           data.spouseLastName &&
-          data.spouseDateOfBirth &&
+          data.spouseDOB &&
           data.spouseSSN &&
-          data.marriageDate &&
+          data.dateOfMarriage &&
           data.spouseEmployerName &&
           data.spouseEmployerAddress &&
-          data.spouseOccupation &&
-          data.spouseEmploymentYears &&
-          data.spouseEmploymentMonths
+          data.spouseJobTitle &&
+          data.spouseYearsWithEmployer &&
+          data.spouseMonthsWithEmployer
         );
       }
       return true;
@@ -95,15 +99,15 @@ export const personalInfoSchema = z
   )
   .refine(
     (data) => {
-      // If homeOwnership is "other", homeOwnershipOther is required
-      if (data.homeOwnership === "other") {
-        return data.homeOwnershipOther && data.homeOwnershipOther.length > 0;
+      // If housingStatus is "other", housingOtherDetails is required
+      if (data.housingStatus === "other") {
+        return data.housingOtherDetails && data.housingOtherDetails.length > 0;
       }
       return true;
     },
     {
       message: "Please specify other home ownership type",
-      path: ["homeOwnershipOther"],
+      path: ["housingOtherDetails"],
     }
   );
 
@@ -113,9 +117,9 @@ export const employmentSchema = z
     employerName: z.string().min(1, "Employer name is required"),
     payPeriod: z.enum(["weekly", "bi-weekly", "monthly", "other"]),
     employerAddress: z.string().min(1, "Employer address is required"),
-    occupation: z.string().min(1, "Occupation is required"),
-    employmentYears: z.coerce.number().min(0, "Years must be 0 or greater"),
-    employmentMonths: z.coerce
+    jobTitle: z.string().min(1, "Occupation is required"),
+    yearsWithEmployer: z.coerce.number().min(0, "Years must be 0 or greater"),
+    monthsWithEmployer: z.coerce
       .number()
       .min(0, "Months must be 0 or greater")
       .max(11, "Months must be 11 or less"),
@@ -127,10 +131,10 @@ export const employmentSchema = z
       .enum(["weekly", "bi-weekly", "monthly", "other"])
       .optional(),
     spouseEmployerAddress: z.string().optional(),
-    spouseOwnershipInterest: z.boolean().optional(),
-    spouseOccupation: z.string().optional(),
-    spouseEmploymentYears: z.coerce.number().optional(),
-    spouseEmploymentMonths: z.coerce.number().optional(),
+    spouseHasOwnershipInterest: z.boolean().optional(),
+    spouseJobTitle: z.string().optional(),
+    spouseYearsWithEmployer: z.coerce.number().optional(),
+    spouseMonthsWithEmployer: z.coerce.number().optional(),
   })
   .refine(
     (data) => {
@@ -139,9 +143,9 @@ export const employmentSchema = z
         return (
           data.spouseEmployerName &&
           data.spouseEmployerAddress &&
-          data.spouseOccupation &&
-          data.spouseEmploymentYears !== undefined &&
-          data.spouseEmploymentMonths !== undefined
+          data.spouseJobTitle &&
+          data.spouseYearsWithEmployer !== undefined &&
+          data.spouseMonthsWithEmployer !== undefined
         );
       }
       return true;
@@ -158,9 +162,8 @@ export const personalAssetsSchema = z.object({
     .array(
       z.object({
         accountType: z.string().min(1, "Account type is required"),
-        bankName: z
-          .string()
-          .min(1, "Bank name and country location is required"),
+        bankName: z.string().min(1, "Bank name is required"),
+        countryLocation: z.string().min(1, "Bank country location is required"),
         accountNumber: z.string().min(1, "Account number is required"),
         balance: z.coerce.number().min(0, "Balance cannot be negative"),
       })
@@ -169,13 +172,17 @@ export const personalAssetsSchema = z.object({
   investments: z
     .array(
       z.object({
-        type: z.string().min(1, "Investment type is required"),
+        investmentType: z.string().min(1, "Investment type is required"),
+        investmentTypeText: z.string().min(1, "Investment type is required"),
         institutionName: z
           .string()
           .min(
             1,
             "Name of financial institution and country location is required"
           ),
+        countryLocation: z
+          .string()
+          .min(1, "Financial institution country location is required"),
         accountNumber: z.string().min(1, "Account number is required"),
         marketValue: z.coerce
           .number()
@@ -1069,15 +1076,17 @@ export const completeFormSchema = z.object({
     .string()
     .min(1, "Last name is required")
     .max(50, "Last name must be less than 50 characters"),
-  dateOfBirth: dateSchema,
-  ssn: z.string().regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
+  dob: dateSchema,
+  ssnOrItin: z
+    .string()
+    .regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
   maritalStatus: z.enum(["unmarried", "married"]),
-  marriageDate: z.string().optional(),
+  dateOfMarriage: z.string().optional(),
   homeAddress: z.string().min(1, "Home address is required"),
-  homeOwnership: z.enum(["own", "rent", "other"]),
-  homeOwnershipOther: z.string().optional(),
-  communityPropertyState: z.boolean(),
-  county: z.string().min(1, "County is required"),
+  housingStatus: z.enum(["own", "rent", "other"]),
+  housingOtherDetails: z.string().optional(),
+  livedInCommunityPropertyStateInLast10Years: z.boolean(),
+  countyOfResidence: z.string().min(1, "County is required"),
   primaryPhone: z
     .string()
     .regex(
@@ -1105,17 +1114,19 @@ export const completeFormSchema = z.object({
   // Spouse fields
   spouseFirstName: z.string().optional(),
   spouseLastName: z.string().optional(),
-  spouseDateOfBirth: z.string().optional(),
-  spouseSSN: z.string().optional(),
+  spouseDOB: z.string().optional(),
+  spouseSSN: z
+    .string()
+    .regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
   spouseEmployerName: z.string().optional(),
   spousePayPeriod: z
     .enum(["weekly", "bi-weekly", "monthly", "other"])
     .optional(),
   spouseEmployerAddress: z.string().optional(),
-  spouseOwnershipInterest: z.boolean().optional(),
-  spouseOccupation: z.string().optional(),
-  spouseEmploymentYears: z.coerce.number().optional(),
-  spouseEmploymentMonths: z.coerce.number().optional(),
+  spouseHasOwnershipInterest: z.boolean().optional(),
+  spouseJobTitle: z.string().optional(),
+  spouseYearsWithEmployer: z.coerce.number().optional(),
+  spouseMonthsWithEmployer: z.coerce.number().optional(),
 
   // Household members
   householdMembers: z
@@ -1137,10 +1148,10 @@ export const completeFormSchema = z.object({
   employerName: z.string().min(1, "Employer name is required"),
   payPeriod: z.enum(["weekly", "bi-weekly", "monthly", "other"]),
   employerAddress: z.string().min(1, "Employer address is required"),
-  ownershipInterest: z.boolean(),
-  occupation: z.string().min(1, "Occupation is required"),
-  employmentYears: z.coerce.number().min(0, "Years must be 0 or greater"),
-  employmentMonths: z.coerce
+  hasOwnershipInterest: z.boolean(),
+  jobTitle: z.string().min(1, "Occupation is required"),
+  yearsWithEmployer: z.coerce.number().min(0, "Years must be 0 or greater"),
+  monthsWithEmployer: z.coerce
     .number()
     .min(0, "Months must be 0 or greater")
     .max(11, "Months must be 11 or less"),

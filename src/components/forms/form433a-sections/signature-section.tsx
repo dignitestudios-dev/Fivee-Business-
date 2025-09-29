@@ -17,6 +17,66 @@ interface SignatureSectionProps {
   validateStep: () => Promise<boolean>;
 }
 
+// Define attachment data to avoid repetition
+const attachmentData = [
+  {
+    id: 1,
+    text: "Copies of the most recent pay stub, earnings statement, etc., from each employer.",
+  },
+  {
+    id: 2,
+    text: "Copies of the most recent statement for each investment and retirement account.",
+  },
+  {
+    id: 3,
+    text: "Copies of all documents and records showing currently held digital assets.",
+  },
+  {
+    id: 4,
+    text: "Copies of the most recent statement from all other sources of income such as pensions, Social Security, rental income, interest and dividends, court order for child support, alimony, royalties, agricultural subsidies, gambling income, oil credits, rent subsidies, sharing economy income from providing on-demand work, services or goods (e.g., Uber, Lyft, DoorDash, AirBnb, VRBO), income through digital platforms like an app or website, etc., and recurring capital gains from the sale of securities or other property such as digital assets.",
+  },
+  {
+    id: 5,
+    text: "Copies of individual complete bank statements for the three most recent months. If you operate a business, copies of the six most recent complete statements for each business bank account.",
+  },
+  {
+    id: 6,
+    text: "Completed Form 433-B (Collection Information Statement for Businesses) if you or your spouse have an interest in a business entity other than a sole-proprietorship.",
+  },
+  {
+    id: 7,
+    text: "Copies of the most recent statement from lender(s) on loans such as mortgages, second mortgages, vehicles, etc., showing monthly payments, loan payoffs, and balances.",
+  },
+  {
+    id: 8,
+    text: "List of Accounts Receivable or Notes Receivable, if applicable.",
+  },
+  {
+    id: 9,
+    text: "Verification of delinquent State/Local Tax Liability showing total delinquent state/local taxes and amount of monthly payments, if applicable.",
+  },
+  {
+    id: 10,
+    text: "Copies of court orders for child support/alimony payments claimed in monthly expense section.",
+  },
+  {
+    id: 11,
+    text: "Copies of Trust documents if applicable per Section 9.",
+  },
+  {
+    id: 12,
+    text: 'Documentation to support any special circumstances described in the "Explanation of Circumstances" on Form 656, if applicable.',
+  },
+  {
+    id: 13,
+    text: "Attach a Form 2848, Power of Attorney and Declaration of Representative, if you would like your attorney, CPA, or enrolled agent to represent you and you do not have a current form on file with the IRS. Ensure all years and forms involved in your offer are listed on Form 2848 and include the current tax year.",
+  },
+  {
+    id: 14,
+    text: "Completed and signed current Form 656.",
+  },
+];
+
 export function SignatureSection({
   onNext,
   onPrevious,
@@ -49,6 +109,9 @@ export function SignatureSection({
     register("taxpayerSignatureImage", {
       required: "Taxpayer signature image is required",
     });
+    register("taxpayerSignatureDate", {
+      required: "Taxpayer signature date is required",
+    });
   }, [register]);
 
   // Register/unregister spouse signature fields based on marital status
@@ -57,16 +120,30 @@ export function SignatureSection({
       register("spouseSignatureImage", {
         required: "Spouse signature image is required",
       });
+      register("spouseSignatureDate", {
+        required: "Spouse signature date is required",
+      });
     } else {
       unregister("spouseSignatureImage");
+      unregister("spouseSignatureDate");
     }
 
     return () => {
       if (maritalStatus !== "married") {
         unregister("spouseSignatureImage");
+        unregister("spouseSignatureDate");
       }
     };
   }, [maritalStatus, register, unregister]);
+
+  // Register all attachment fields as required - but don't use register for Radix checkboxes
+  useEffect(() => {
+    for (let i = 1; i <= 14; i++) {
+      register(`attachment${i}` as keyof FormData433A, {
+        required: "You must confirm this attachment is included",
+      });
+    }
+  }, [register]);
 
   const handleTaxpayerSignatureUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -146,6 +223,12 @@ export function SignatureSection({
 
   const editSpouseSignature = () => {
     spouseFileInputRef.current?.click();
+  };
+
+  // Handle checkbox changes
+  const handleCheckboxChange = async (fieldName: string, checked: boolean) => {
+    setValue(fieldName as keyof FormData433A, checked);
+    await trigger(fieldName as keyof FormData433A);
   };
 
   return (
@@ -372,398 +455,39 @@ export function SignatureSection({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-4">
-            {/* Attachment 1 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment1"
-                  {...register("attachment1", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment1"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of the most recent pay stub, earnings statement, etc.,
-                  from each employer.
-                </Label>
-                {errors.attachment1 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment1.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
+            {attachmentData.map((attachment) => {
+              const fieldName = `attachment${attachment.id}`;
+              const isChecked = watch(fieldName as keyof FormData433A) === true;
+              const error = errors[fieldName as keyof FormData433A];
 
-            {/* Attachment 2 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment2"
-                  {...register("attachment2", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment2"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of the most recent statement for each investment and
-                  retirement account.
-                </Label>
-                {errors.attachment2 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment2.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 3 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment3"
-                  {...register("attachment3", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment3"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of all documents and records showing currently held
-                  digital assets.
-                </Label>
-                {errors.attachment3 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment3.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 4 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment4"
-                  {...register("attachment4", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment4"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of the most recent statement from all other sources of
-                  income such as pensions, Social Security, rental income,
-                  interest and dividends, court order for child support,
-                  alimony, royalties, agricultural subsidies, gambling income,
-                  oil credits, rent subsidies, sharing economy income from
-                  providing on-demand work, services or goods (e.g., Uber, Lyft,
-                  DoorDash, AirBnb, VRBO), income through digital platforms like
-                  an app or website, etc., and recurring capital gains from the
-                  sale of securities or other property such as digital assets.
-                </Label>
-                {errors.attachment4 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment4.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 5 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment5"
-                  {...register("attachment5", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment5"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of individual complete bank statements for the three
-                  most recent months. If you operate a business, copies of the
-                  six most recent complete statements for each business bank
-                  account.
-                </Label>
-                {errors.attachment5 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment5.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 6 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment6"
-                  {...register("attachment6", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment6"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Completed Form 433-B (Collection Information Statement for
-                  Businesses) if you or your spouse have an interest in a
-                  business entity other than a sole-proprietorship.
-                </Label>
-                {errors.attachment6 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment6.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 7 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment7"
-                  {...register("attachment7", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment7"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of the most recent statement from lender(s) on loans
-                  such as mortgages, second mortgages, vehicles, etc., showing
-                  monthly payments, loan payoffs, and balances.
-                </Label>
-                {errors.attachment7 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment7.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 8 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment8"
-                  {...register("attachment8", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment8"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  List of Accounts Receivable or Notes Receivable, if
-                  applicable.
-                </Label>
-                {errors.attachment8 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment8.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 9 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment9"
-                  {...register("attachment9", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment9"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Verification of delinquent State/Local Tax Liability showing
-                  total delinquent state/local taxes and amount of monthly
-                  payments, if applicable.
-                </Label>
-                {errors.attachment9 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment9.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 10 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment10"
-                  {...register("attachment10", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment10"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of court orders for child support/alimony payments
-                  claimed in monthly expense section.
-                </Label>
-                {errors.attachment10 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment10.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 11 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment11"
-                  {...register("attachment11", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment11"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Copies of Trust documents if applicable per Section 9.
-                </Label>
-                {errors.attachment11 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment11.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 12 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment12"
-                  {...register("attachment12", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment12"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Documentation to support any special circumstances described
-                  in the "Explanation of Circumstances" on Form 656, if
-                  applicable.
-                </Label>
-                {errors.attachment12 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment12.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 13 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment13"
-                  {...register("attachment13", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment13"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Attach a Form 2848, Power of Attorney and Declaration of
-                  Representative, if you would like your attorney, CPA, or
-                  enrolled agent to represent you and you do not have a current
-                  form on file with the IRS. Ensure all years and forms involved
-                  in your offer are listed on Form 2848 and include the current
-                  tax year.
-                </Label>
-                {errors.attachment13 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment13.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Attachment 14 */}
-            <div className="flex items-start space-x-3">
-              <div className="flex flex-col">
-                <Checkbox
-                  id="attachment14"
-                  {...register("attachment14", {
-                    required: "You must confirm this attachment is included",
-                  })}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
-                />
-              </div>
-              <div className="flex-grow">
-                <Label
-                  htmlFor="attachment14"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  Completed and signed current Form 656.
-                </Label>
-                {errors.attachment14 && (
-                  <p className="text-red-600 text-xs mt-1">
-                    {errors.attachment14.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
+              return (
+                <div key={attachment.id} className="flex items-start space-x-3">
+                  <div className="flex flex-col">
+                    <Checkbox
+                      id={fieldName}
+                      checked={isChecked}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(fieldName, checked === true)
+                      }
+                      className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <Label
+                      htmlFor={fieldName}
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      {attachment.text} *
+                    </Label>
+                    {error && (
+                      <p className="text-red-600 text-xs mt-1">
+                        {error.message as string}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

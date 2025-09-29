@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFieldArray, useFormContext, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Plus, Trash2 } from "lucide-react";
-import { toTitleCase } from "@/utils/helper";
 import { useEffect } from "react";
 
 interface PersonalAssetsSectionProps {
@@ -114,14 +113,29 @@ export function PersonalAssetsSection({
     remove: removeFurniture,
   } = useFieldArray({ control, name: "furniture" });
 
-  // Watch property sale status (unused, but kept as is)
-  const propertySaleStatus = watch("propertySaleStatus");
+  const bankAccountTypes = [
+    { title: "Cash", label: "cash" },
+    { title: "Checking", label: "checking" },
+    { title: "Savings", label: "savings" },
+    { title: "Money Market Account/CD", label: "money-market" },
+    { title: "Online Account", label: "online-account" },
+    { title: "Stored Value Card", label: "stored-value-card" },
+  ];
+
+  const investmentAccountTypes = [
+    { title: "Stocks", label: "stocks" },
+    { title: "Bonds", label: "bonds" },
+    { title: "Other", label: "other" },
+  ];
 
   // Compute all subtotals outside of UI
   const bankAccountsValue = watch("bankAccounts") || [];
   const bankTotal = Math.max(
     0,
-    bankAccountsValue.reduce((sum: any, acc: any) => sum + (acc.balance || 0), 0) - 1000
+    bankAccountsValue.reduce(
+      (sum: any, acc: any) => sum + (acc.balance || 0),
+      0
+    ) - 1000
   );
 
   const investmentsValue = watch("investments") || [];
@@ -267,29 +281,21 @@ export function PersonalAssetsSection({
                       onValueChange={field.onChange}
                       className="flex flex-wrap gap-4 mt-2"
                     >
-                      {[
-                        "Cash",
-                        "Checking",
-                        "Savings",
-                        "Money Market Account/CD",
-                        "Online Account",
-                        "Stored Value Card",
-                      ].map((type) => (
-                        <div key={type} className="flex items-center space-x-2">
+                      {bankAccountTypes.map((type) => (
+                        <div
+                          key={type.label}
+                          className="flex items-center space-x-2"
+                        >
                           <RadioGroupItem
-                            value={type}
-                            id={`bank-${index}-${type
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
+                            value={type.label}
+                            id={`bank-${index}-${type.label}`}
                             className="text-[#22b573]"
                           />
                           <Label
-                            htmlFor={`bank-${index}-${type
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
+                            htmlFor={`bank-${index}-${type.label}`}
                             className="text-sm"
                           >
-                            {type}
+                            {type.title}
                           </Label>
                         </div>
                       ))}
@@ -301,11 +307,19 @@ export function PersonalAssetsSection({
               {/* Account Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
-                  label="Bank Name & Country Location"
+                  label="Bank Name"
                   id={`bankAccounts.${index}.bankName`}
                   required
                   {...register(`bankAccounts.${index}.bankName`)}
                   error={errors.bankAccounts?.[index]?.bankName?.message}
+                />
+
+                <FormInput
+                  label="Bank Country Location"
+                  id={`bankAccounts.${index}.countryLocation`}
+                  required
+                  {...register(`bankAccounts.${index}.countryLocation`)}
+                  error={errors.bankAccounts?.[index]?.countryLocation?.message}
                 />
 
                 <FormInput
@@ -340,6 +354,7 @@ export function PersonalAssetsSection({
               addBankAccount({
                 accountType: "",
                 bankName: "",
+                countryLocation: "",
                 accountNumber: "",
                 balance: 0,
               })
@@ -358,131 +373,159 @@ export function PersonalAssetsSection({
           <CardTitle>Investment Accounts (Domestic and Foreign)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {investments.map((field, index) => (
-            <div
-              key={field.id}
-              className="p-4 border border-gray-200 rounded-lg space-y-4"
-            >
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium text-gray-900">
-                  Investment Account {index + 1}
-                </h4>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeInvestment(index)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+          {investments.map((field, index) => {
+            const investmentAccountType = watch(
+              `investments.${index}.investmentType`
+            );
 
-              {/* Investment Type Radio Buttons */}
-              <FormField
-                label="Investment Type"
-                id={`investments.${index}.type`}
-                required
-                error={errors.investments?.[index]?.type?.message}
+            return (
+              <div
+                key={field.id}
+                className="p-4 border border-gray-200 rounded-lg space-y-4"
               >
-                <Controller
-                  name={`investments.${index}.type`}
-                  control={control}
-                  rules={{ required: "Investment type is required" }}
-                  render={({ field }) => (
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      className="flex flex-wrap gap-4 mt-2"
-                    >
-                      {["Investment Account", "Stocks", "Bonds", "Other"].map(
-                        (type) => (
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium text-gray-900">
+                    Investment Account {index + 1}
+                  </h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeInvestment(index)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Investment Type Radio Buttons */}
+                <FormField
+                  label="Investment Account"
+                  id={`investments.${index}.investmentType`}
+                  required
+                  error={errors.investments?.[index]?.investmentType?.message}
+                >
+                  <Controller
+                    name={`investments.${index}.investmentType`}
+                    control={control}
+                    rules={{ required: "Investment type is required" }}
+                    render={({ field }) => (
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="flex flex-wrap gap-4 mt-2"
+                      >
+                        {investmentAccountTypes.map((type) => (
                           <div
-                            key={type}
+                            key={type.label}
                             className="flex items-center space-x-2"
                           >
                             <RadioGroupItem
-                              value={type}
-                              id={`investment-${index}-${type
-                                .replace(/\s+/g, "-")
-                                .toLowerCase()}`}
+                              value={type.label}
+                              id={`investment-${index}-${type.label}`}
                               className="text-[#22b573]"
                             />
                             <Label
-                              htmlFor={`investment-${index}-${type
-                                .replace(/\s+/g, "-")
-                                .toLowerCase()}`}
+                              htmlFor={`investment-${index}-${type.label}`}
                               className="text-sm"
                             >
-                              {type}
+                              {type.title}
                             </Label>
                           </div>
-                        )
-                      )}
-                    </RadioGroup>
-                  )}
-                />
-              </FormField>
+                        ))}
+                      </RadioGroup>
+                    )}
+                  />
+                </FormField>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormInput
-                  label="Name of Financial Institution & Country Location"
-                  id={`investments.${index}.institutionName`}
-                  required
-                  {...register(`investments.${index}.institutionName`)}
-                  error={errors.investments?.[index]?.institutionName?.message}
-                />
+                {investmentAccountType === "other" && (
+                  <FormInput
+                    label="Other"
+                    id={`investments.${index}.investmentTypeText`}
+                    required
+                    {...register(`investments.${index}.investmentTypeText`)}
+                    error={
+                      errors.investments?.[index]?.investmentTypeText?.message
+                    }
+                  />
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormInput
+                    label="Name of Financial Institution"
+                    id={`investments.${index}.institutionName`}
+                    required
+                    {...register(`investments.${index}.institutionName`)}
+                    error={
+                      errors.investments?.[index]?.institutionName?.message
+                    }
+                  />
+
+                  <FormInput
+                    label="Financial Institution Country Location"
+                    id={`investments.${index}.countryLocation`}
+                    required
+                    {...register(`investments.${index}.countryLocation`)}
+                    error={
+                      errors.investments?.[index]?.countryLocation?.message
+                    }
+                  />
+
+                  <FormInput
+                    label="Account Number"
+                    type="number"
+                    id={`investments.${index}.accountNumber`}
+                    required
+                    {...register(`investments.${index}.accountNumber`)}
+                    error={errors.investments?.[index]?.accountNumber?.message}
+                  />
+
+                  <FormInput
+                    label="Current Market Value ($)"
+                    id={`investments.${index}.marketValue`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    required
+                    {...register(`investments.${index}.marketValue`, {
+                      valueAsNumber: true,
+                      min: { value: 0, message: "Value cannot be negative" },
+                    })}
+                    error={errors.investments?.[index]?.marketValue?.message}
+                  />
+                </div>
 
                 <FormInput
-                  label="Account Number"
-                  id={`investments.${index}.accountNumber`}
-                  required
-                  {...register(`investments.${index}.accountNumber`)}
-                  error={errors.investments?.[index]?.accountNumber?.message}
-                />
-
-                <FormInput
-                  label="Current Market Value ($)"
-                  id={`investments.${index}.marketValue`}
+                  label="Minus Loan Balance ($)"
+                  id={`investments.${index}.loanBalance`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  required
-                  {...register(`investments.${index}.marketValue`, {
+                  {...register(`investments.${index}.loanBalance`, {
                     valueAsNumber: true,
-                    min: { value: 0, message: "Value cannot be negative" },
+                    min: {
+                      value: 0,
+                      message: "Loan balance cannot be negative",
+                    },
                   })}
-                  error={errors.investments?.[index]?.marketValue?.message}
+                  error={errors.investments?.[index]?.loanBalance?.message}
+                  className="max-w-md"
                 />
-              </div>
 
-              <FormInput
-                label="Minus Loan Balance ($)"
-                id={`investments.${index}.loanBalance`}
-                type="number"
-                min="0"
-                placeholder="0"
-                {...register(`investments.${index}.loanBalance`, {
-                  valueAsNumber: true,
-                  min: { value: 0, message: "Loan balance cannot be negative" },
-                })}
-                error={errors.investments?.[index]?.loanBalance?.message}
-                className="max-w-md"
-              />
-
-              {/* Auto-calculated net value */}
-              <div className="bg-gray-50 p-3 rounded">
-                <Label className="text-sm font-medium">
-                  Net Value: $
-                  {Math.max(
-                    0,
-                    (watch(`investments.${index}.marketValue`) || 0) -
-                      (watch(`investments.${index}.loanBalance`) || 0)
-                  ).toLocaleString()}
-                </Label>
+                {/* Auto-calculated net value */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <Label className="text-sm font-medium">
+                    Net Value: $
+                    {Math.max(
+                      0,
+                      (watch(`investments.${index}.marketValue`) || 0) -
+                        (watch(`investments.${index}.loanBalance`) || 0)
+                    ).toLocaleString()}
+                  </Label>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <Button
             type="button"
@@ -491,6 +534,7 @@ export function PersonalAssetsSection({
               addInvestment({
                 type: "",
                 institutionName: "",
+                countryLocation: "",
                 accountNumber: "",
                 marketValue: 0,
                 loanBalance: 0,
@@ -1053,7 +1097,7 @@ export function PersonalAssetsSection({
               </div>
 
               <FormInput
-                label="Location (street, city, state, ZIP code, county, and country)"
+                label="Location (street, city, state, ZIP code, country, and country)"
                 id={`realProperty.${index}.location`}
                 required
                 {...register(`realProperty.${index}.location`)}

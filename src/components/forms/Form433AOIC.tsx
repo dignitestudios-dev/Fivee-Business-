@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormStepper } from "@/components/forms/form433a-sections/form-stepper";
@@ -17,6 +17,7 @@ import { CalculationSection } from "@/components/forms/form433a-sections/calcula
 import { OtherInfoSection } from "@/components/forms/form433a-sections/other-info-section";
 import { SignatureSection } from "@/components/forms/form433a-sections/signature-section";
 import { completeFormSchema } from "@/lib/validation-schemas";
+import { storage } from "@/utils/helper";
 
 const steps = [
   {
@@ -71,49 +72,66 @@ const steps = [
   },
 ];
 
+const defaultValues = {
+  firstName: "",
+  lastName: "",
+  dob: "",
+  ssnOrItin: "",
+  maritalStatus: "unmarried" as const,
+  dateOfMarriage: "",
+  homeAddress: "",
+  housingStatus: "own" as const,
+  housingOtherDetails: "",
+  livedInCommunityPropertyStateInLast10Years: false,
+  countyOfResidence: "",
+  primaryPhone: "",
+  secondaryPhone: "",
+  faxNumber: "",
+  mailingAddress: "",
+  spouseFirstName: "",
+  spouseLastName: "",
+  spouseDOB: "",
+  spouseSSN: "",
+  householdMembers: [],
+  employerName: "",
+  payPeriod: "weekly" as const,
+  employerAddress: "",
+  hasOwnershipInterest: false,
+  jobTitle: "",
+  yearsWithEmployer: "",
+  monthsWithEmployer: "",
+  spouseEmployerName: "",
+  spousePayPeriod: "weekly" as const,
+  spouseEmployerAddress: "",
+  spouseHasOwnershipInterest: false,
+  spouseJobTitle: "",
+  spouseYearsWithEmployer: "",
+  spouseMonthsWithEmployer: "",
+};
+
 export default function Form433AOIC() {
-  const [currentStep, setCurrentStep] = useState<number>(10);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+
+  // Load saved data from localStorage
+  const getSavedData = () => {
+    const savedData = storage.get<FormData433A>("433a_data");
+    return savedData ? { ...defaultValues, ...savedData } : defaultValues;
+  };
+
+  // Load saved progress from localStorage
+  const getSavedProgress = () => {
+    const savedProgress = storage.get<{
+      currentStep: number;
+      completedSteps: number[];
+    }>("433a_progress");
+    return savedProgress || { currentStep: 1, completedSteps: [] };
+  };
 
   const methods = useForm<FormData433A>({
     resolver: zodResolver(completeFormSchema),
     mode: "onChange",
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      dateOfBirth: "",
-      ssn: "",
-      maritalStatus: "unmarried",
-      marriageDate: "",
-      homeAddress: "",
-      homeOwnership: "own",
-      homeOwnershipOther: "",
-      communityPropertyState: false,
-      county: "",
-      primaryPhone: "",
-      secondaryPhone: "",
-      faxNumber: "",
-      mailingAddress: "",
-      spouseFirstName: "",
-      spouseLastName: "",
-      spouseDateOfBirth: "",
-      spouseSSN: "",
-      householdMembers: [],
-      employerName: "",
-      payPeriod: "weekly",
-      employerAddress: "",
-      ownershipInterest: false,
-      occupation: "",
-      employmentYears: "",
-      employmentMonths: "",
-      spouseEmployerName: "",
-      spousePayPeriod: "weekly",
-      spouseEmployerAddress: "",
-      spouseOwnershipInterest: false,
-      spouseOccupation: "",
-      spouseEmploymentYears: "",
-      spouseEmploymentMonths: "",
-    },
+    defaultValues: getSavedData(),
   });
 
   const {
@@ -122,7 +140,51 @@ export default function Form433AOIC() {
     formState: { errors },
     setError,
     clearErrors,
+    reset,
   } = methods;
+
+  // Load saved progress on component mount
+  useEffect(() => {
+    const savedProgress = getSavedProgress();
+    setCurrentStep(savedProgress.currentStep);
+    setCompletedSteps(new Set(savedProgress.completedSteps));
+  }, []);
+
+  // Save form data to localStorage
+  const saveFormData = () => {
+    try {
+      const currentData = getValues();
+      storage.set("433a_data", currentData);
+      console.log("Form data saved to localStorage");
+    } catch (error) {
+      console.error("Error saving form data:", error);
+    }
+  };
+
+  // Save progress to localStorage
+  const saveProgress = (step: number, completed: Set<number>) => {
+    try {
+      const progressData = {
+        currentStep: step,
+        completedSteps: Array.from(completed),
+      };
+      storage.set("433a_progress", progressData);
+      console.log("Progress saved to localStorage");
+    } catch (error) {
+      console.error("Error saving progress:", error);
+    }
+  };
+
+  // Clear saved data from localStorage
+  const clearSavedData = () => {
+    try {
+      storage.remove("433a_data");
+      storage.remove("433a_progress");
+      console.log("Saved form data cleared");
+    } catch (error) {
+      console.error("Error clearing saved data:", error);
+    }
+  };
 
   const validateCurrentStep = async (): Promise<boolean> => {
     console.log("current step validation runs:");
@@ -138,12 +200,12 @@ export default function Form433AOIC() {
         fieldsToValidate = [
           "firstName",
           "lastName",
-          "dateOfBirth",
-          "ssn",
+          "dob",
+          "ssnOrItin",
           "maritalStatus",
           "homeAddress",
-          "homeOwnership",
-          "county",
+          "housingStatus",
+          "countyOfResidence",
           "primaryPhone",
         ];
 
@@ -152,7 +214,7 @@ export default function Form433AOIC() {
         isValid = basicValidation1;
 
         const maritalStatus = getValues("maritalStatus");
-        const homeOwnership = getValues("homeOwnership");
+        const housingStatus = getValues("housingStatus");
         const householdMembers = getValues("householdMembers") || [];
 
         // Validate household members if any exist
@@ -224,9 +286,9 @@ export default function Form433AOIC() {
         if (maritalStatus === "married") {
           const spouseFirstName = getValues("spouseFirstName");
           const spouseLastName = getValues("spouseLastName");
-          const spouseDateOfBirth = getValues("spouseDateOfBirth");
+          const spouseDOB = getValues("spouseDOB");
           const spouseSSN = getValues("spouseSSN");
-          const marriageDate = getValues("marriageDate");
+          const dateOfMarriage = getValues("dateOfMarriage");
 
           if (!spouseFirstName || spouseFirstName.trim() === "") {
             setError("spouseFirstName", {
@@ -244,8 +306,8 @@ export default function Form433AOIC() {
             isValid = false;
           }
 
-          if (!spouseDateOfBirth || spouseDateOfBirth.trim() === "") {
-            setError("spouseDateOfBirth", {
+          if (!spouseDOB || spouseDOB.trim() === "") {
+            setError("spouseDOB", {
               type: "required",
               message: "Spouse's date of birth is required",
             });
@@ -260,8 +322,8 @@ export default function Form433AOIC() {
             isValid = false;
           }
 
-          if (!marriageDate || marriageDate.trim() === "") {
-            setError("marriageDate", {
+          if (!dateOfMarriage || dateOfMarriage.trim() === "") {
+            setError("dateOfMarriage", {
               type: "required",
               message: "Marriage date is required",
             });
@@ -272,10 +334,9 @@ export default function Form433AOIC() {
           const spouseFieldsToValidate: (keyof FormData433A)[] = [];
           if (spouseFirstName) spouseFieldsToValidate.push("spouseFirstName");
           if (spouseLastName) spouseFieldsToValidate.push("spouseLastName");
-          if (spouseDateOfBirth)
-            spouseFieldsToValidate.push("spouseDateOfBirth");
+          if (spouseDOB) spouseFieldsToValidate.push("spouseDOB");
           if (spouseSSN) spouseFieldsToValidate.push("spouseSSN");
-          if (marriageDate) spouseFieldsToValidate.push("marriageDate");
+          if (dateOfMarriage) spouseFieldsToValidate.push("dateOfMarriage");
 
           if (spouseFieldsToValidate.length > 0) {
             const spouseValidation = await trigger(spouseFieldsToValidate);
@@ -284,17 +345,17 @@ export default function Form433AOIC() {
         }
 
         // Add conditional validation for home ownership
-        if (homeOwnership === "other") {
-          const homeOwnershipOther = getValues("homeOwnershipOther");
-          if (!homeOwnershipOther || homeOwnershipOther.trim() === "") {
-            setError("homeOwnershipOther", {
+        if (housingStatus === "other") {
+          const housingOtherDetails = getValues("housingOtherDetails");
+          if (!housingOtherDetails || housingOtherDetails.trim() === "") {
+            setError("housingOtherDetails", {
               type: "required",
               message: "Please specify other home ownership type",
             });
             isValid = false;
           } else {
             // Validate format if value exists
-            const otherValidation = await trigger(["homeOwnershipOther"]);
+            const otherValidation = await trigger(["housingOtherDetails"]);
             isValid = isValid && otherValidation;
           }
         }
@@ -308,9 +369,9 @@ export default function Form433AOIC() {
           "employerName",
           "payPeriod",
           "employerAddress",
-          "occupation",
-          "employmentYears",
-          "employmentMonths",
+          "jobTitle",
+          "yearsWithEmployer",
+          "monthsWithEmployer",
         ];
 
         // Validate basic fields first
@@ -322,9 +383,11 @@ export default function Form433AOIC() {
           // Manual validation for spouse employment fields
           const spouseEmployerName = getValues("spouseEmployerName");
           const spouseEmployerAddress = getValues("spouseEmployerAddress");
-          const spouseOccupation = getValues("spouseOccupation");
-          const spouseEmploymentYears = getValues("spouseEmploymentYears");
-          const spouseEmploymentMonths = getValues("spouseEmploymentMonths");
+          const spouseJobTitle = getValues("spouseJobTitle");
+          const spouseYearsWithEmployer = getValues("spouseYearsWithEmployer");
+          const spouseMonthsWithEmployer = getValues(
+            "spouseMonthsWithEmployer"
+          );
 
           if (!spouseEmployerName || spouseEmployerName.trim() === "") {
             setError("spouseEmployerName", {
@@ -342,8 +405,8 @@ export default function Form433AOIC() {
             isValid = false;
           }
 
-          if (!spouseOccupation || spouseOccupation.trim() === "") {
-            setError("spouseOccupation", {
+          if (!spouseJobTitle || spouseJobTitle.trim() === "") {
+            setError("spouseJobTitle", {
               type: "required",
               message: "Spouse's occupation is required",
             });
@@ -351,11 +414,11 @@ export default function Form433AOIC() {
           }
 
           if (
-            spouseEmploymentYears === "" ||
-            spouseEmploymentYears === undefined ||
-            spouseEmploymentYears === null
+            spouseYearsWithEmployer === "" ||
+            spouseYearsWithEmployer === undefined ||
+            spouseYearsWithEmployer === null
           ) {
-            setError("spouseEmploymentYears", {
+            setError("spouseYearsWithEmployer", {
               type: "required",
               message: "Spouse's employment years is required",
             });
@@ -363,11 +426,11 @@ export default function Form433AOIC() {
           }
 
           if (
-            spouseEmploymentMonths === "" ||
-            spouseEmploymentMonths === undefined ||
-            spouseEmploymentMonths === null
+            spouseMonthsWithEmployer === "" ||
+            spouseMonthsWithEmployer === undefined ||
+            spouseMonthsWithEmployer === null
           ) {
-            setError("spouseEmploymentMonths", {
+            setError("spouseMonthsWithEmployer", {
               type: "required",
               message: "Spouse's employment months is required",
             });
@@ -375,11 +438,11 @@ export default function Form433AOIC() {
           }
 
           if (
-            spouseEmploymentMonths !== "" &&
-            Number(spouseEmploymentMonths) > 11
+            spouseMonthsWithEmployer !== "" &&
+            Number(spouseMonthsWithEmployer) > 11
           ) {
             console.log("spouse month more than 11");
-            setError("spouseEmploymentMonths", {
+            setError("spouseMonthsWithEmployer", {
               type: "max",
               message: "Months must be 11 or less",
             });
@@ -392,13 +455,13 @@ export default function Form433AOIC() {
             spouseEmploymentFieldsToValidate.push("spouseEmployerName");
           if (spouseEmployerAddress && spouseEmployerAddress.trim() !== "")
             spouseEmploymentFieldsToValidate.push("spouseEmployerAddress");
-          if (spouseOccupation && spouseOccupation.trim() !== "")
-            spouseEmploymentFieldsToValidate.push("spouseOccupation");
+          if (spouseJobTitle && spouseJobTitle.trim() !== "")
+            spouseEmploymentFieldsToValidate.push("spouseJobTitle");
           if (
-            spouseEmploymentYears !== "" &&
-            spouseEmploymentYears !== undefined
+            spouseYearsWithEmployer !== "" &&
+            spouseYearsWithEmployer !== undefined
           )
-            spouseEmploymentFieldsToValidate.push("spouseEmploymentYears");
+            spouseEmploymentFieldsToValidate.push("spouseYearsWithEmployer");
 
           if (spouseEmploymentFieldsToValidate.length > 0) {
             const spouseEmploymentValidation = await trigger(
@@ -426,7 +489,18 @@ export default function Form433AOIC() {
             if (!account.bankName || account.bankName.trim() === "") {
               setError(`bankAccounts.${index}.bankName`, {
                 type: "required",
-                message: "Bank name and country location is required",
+                message: "Bank name is required",
+              });
+              isValid = false;
+            }
+
+            if (
+              !account.countryLocation ||
+              account.countryLocation.trim() === ""
+            ) {
+              setError(`bankAccounts.${index}.countryLocation`, {
+                type: "required",
+                message: "Bank country location is required",
               });
               isValid = false;
             }
@@ -457,10 +531,18 @@ export default function Form433AOIC() {
         const investments = getValues("investments") || [];
         if (investments.length > 0) {
           investments.forEach((inv: any, index: number) => {
-            if (!inv.type || inv.type.trim() === "") {
-              setError(`investments.${index}.type`, {
+            if (!inv.investmentType || inv.investmentType.trim() === "") {
+              setError(`investments.${index}.investmentType`, {
                 type: "required",
                 message: "Investment type is required",
+              });
+              isValid = false;
+            }
+
+            if(inv.investmentType === "other"){
+                            setError(`investments.${index}.investmentTypeText`, {
+                type: "required",
+                message: "Details is required for other investment type",
               });
               isValid = false;
             }
@@ -470,6 +552,14 @@ export default function Form433AOIC() {
                 type: "required",
                 message:
                   "Name of financial institution and country location is required",
+              });
+              isValid = false;
+            }
+
+            if (!inv.countryLocation || inv.countryLocation.trim() === "") {
+              setError(`investments.${index}.countryLocation`, {
+                type: "required",
+                message: "Financial institution country location is required",
               });
               isValid = false;
             }
@@ -2681,16 +2771,7 @@ export default function Form433AOIC() {
       case 10: // Signatures
         console.log("Validating Step 10 - Signatures");
 
-        // Clear any existing errors first
-        clearErrors([
-          "taxpayerSignatureImage",
-          "taxpayerSignatureDate",
-          "spouseSignatureImage",
-          "spouseSignatureDate",
-          ...Array.from({ length: 14 }, (_, i) => `attachment${i + 1}`),
-        ]);
-
-        let validationErrors = [];
+        let validationErrors: string[] = [];
 
         // Taxpayer signature validation
         const taxpayerSignature = getValues("taxpayerSignatureImage");
@@ -2706,15 +2787,21 @@ export default function Form433AOIC() {
           });
           validationErrors.push("taxpayerSignatureImage");
           isValid = false;
+        } else {
+          // Clear the error if signature is provided
+          clearErrors("taxpayerSignatureImage");
         }
 
-        if (!taxpayerDate?.trim()) {
+        if (!taxpayerDate || taxpayerDate.trim() === "") {
           setError("taxpayerSignatureDate", {
             type: "required",
             message: "Taxpayer signature date is required",
           });
           validationErrors.push("taxpayerSignatureDate");
           isValid = false;
+        } else {
+          // Clear the error if date is provided
+          clearErrors("taxpayerSignatureDate");
         }
 
         // Spouse validation if married
@@ -2735,46 +2822,51 @@ export default function Form433AOIC() {
             });
             validationErrors.push("spouseSignatureImage");
             isValid = false;
+          } else {
+            clearErrors("spouseSignatureImage");
           }
 
-          if (!spouseDate?.trim()) {
+          if (!spouseDate || spouseDate.trim() === "") {
             setError("spouseSignatureDate", {
               type: "required",
               message: "Spouse signature date is required",
             });
             validationErrors.push("spouseSignatureDate");
             isValid = false;
+          } else {
+            clearErrors("spouseSignatureDate");
           }
+        } else {
+          // Clear spouse errors if not married
+          clearErrors(["spouseSignatureImage", "spouseSignatureDate"]);
         }
 
         // Attachment validations
         console.log("Checking attachments...");
         for (let i = 1; i <= 14; i++) {
-          const fieldName = `attachment${i}`;
+          const fieldName = `attachment${i}` as keyof FormData433A;
+          const fieldNameStr = String(fieldName);
           const fieldValue = getValues(fieldName);
 
-          console.log(`${fieldName}:`, fieldValue);
+          console.log(`${fieldNameStr}:`, fieldValue);
 
-          if (!fieldValue) {
+          // For Radix UI checkboxes with React Hook Form, we expect boolean values
+          if (fieldValue !== true) {
             setError(fieldName, {
               type: "required",
               message: "You must confirm this attachment is included",
             });
-            validationErrors.push(fieldName);
+            validationErrors.push(fieldNameStr);
             isValid = false;
+          } else {
+            // Clear the error if checkbox is checked
+            clearErrors(fieldName);
           }
         }
 
         console.log("Validation errors found:", validationErrors);
         console.log("Step 10 validation result:", isValid);
 
-        // Force a re-render to show errors immediately
-        if (validationErrors.length > 0) {
-          // Trigger validation on all fields that had errors to ensure they show up
-          setTimeout(() => {
-            trigger(validationErrors);
-          }, 0);
-        }
         break;
 
       default:
@@ -2794,17 +2886,35 @@ export default function Form433AOIC() {
     console.log("Next runs");
     const isValid = await validateCurrentStep();
     console.log("is valid: ", isValid);
-    if (isValid && currentStep < 10) {
-      // Mark current step as completed
-      setCompletedSteps((prev) => new Set([...prev, currentStep]));
-      setCurrentStep(currentStep + 1);
-      clearErrors();
+
+    if (isValid) {
+      // Save form data to localStorage after successful validation
+      saveFormData();
+
+      if (currentStep < 10) {
+        // Mark current step as completed
+        const newCompletedSteps = new Set([...completedSteps, currentStep]);
+        setCompletedSteps(newCompletedSteps);
+        const nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+
+        // Save progress to localStorage
+        saveProgress(nextStep, newCompletedSteps);
+
+        clearErrors();
+      }
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+
+      // Save current form data and update progress
+      saveFormData();
+      saveProgress(prevStep, completedSteps);
+
       clearErrors();
     }
   };
@@ -2813,6 +2923,11 @@ export default function Form433AOIC() {
     // Only allow navigation to completed steps or current step
     if (stepNumber <= currentStep || completedSteps.has(stepNumber)) {
       setCurrentStep(stepNumber);
+
+      // Save current form data and update progress
+      saveFormData();
+      saveProgress(stepNumber, completedSteps);
+
       clearErrors();
     }
   };
@@ -2824,7 +2939,31 @@ export default function Form433AOIC() {
     if (isValid) {
       const formData = getValues();
       console.log("Form submitted:", formData);
+
+      // Clear saved data after successful submission
+      // clearSavedData();
+
+      // You can add your form submission logic here
+      // e.g., send to API, show success message, etc.
     }
+  };
+
+  // Function to restore form from saved data
+  const restoreFromSaved = () => {
+    const savedData = getSavedData();
+    reset(savedData);
+
+    const savedProgress = getSavedProgress();
+    setCurrentStep(savedProgress.currentStep);
+    setCompletedSteps(new Set(savedProgress.completedSteps));
+  };
+
+  // Function to start fresh (clear saved data)
+  const startFresh = () => {
+    clearSavedData();
+    reset(defaultValues);
+    setCurrentStep(1);
+    setCompletedSteps(new Set());
   };
 
   const renderCurrentSection = () => {
