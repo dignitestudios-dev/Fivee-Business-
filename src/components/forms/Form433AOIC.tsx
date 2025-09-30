@@ -527,20 +527,23 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate investments
-        const investments = getValues("investments") || [];
-        if (investments.length > 0) {
-          investments.forEach((inv: any, index: number) => {
+        // Validate investment accounts (UPDATED: investmentAccounts instead of investments)
+        const investmentAccounts = getValues("investmentAccounts") || [];
+        if (investmentAccounts.length > 0) {
+          investmentAccounts.forEach((inv: any, index: number) => {
             if (!inv.investmentType || inv.investmentType.trim() === "") {
-              setError(`investments.${index}.investmentType`, {
+              setError(`investmentAccounts.${index}.investmentType`, {
                 type: "required",
                 message: "Investment type is required",
               });
               isValid = false;
             }
 
-            if(inv.investmentType === "other"){
-                            setError(`investments.${index}.investmentTypeText`, {
+            if (
+              inv.investmentType === "other" &&
+              (!inv.investmentTypeText || inv.investmentTypeText.trim() === "")
+            ) {
+              setError(`investmentAccounts.${index}.investmentTypeText`, {
                 type: "required",
                 message: "Details is required for other investment type",
               });
@@ -548,16 +551,15 @@ export default function Form433AOIC() {
             }
 
             if (!inv.institutionName || inv.institutionName.trim() === "") {
-              setError(`investments.${index}.institutionName`, {
+              setError(`investmentAccounts.${index}.institutionName`, {
                 type: "required",
-                message:
-                  "Name of financial institution and country location is required",
+                message: "Name of financial institution is required",
               });
               isValid = false;
             }
 
             if (!inv.countryLocation || inv.countryLocation.trim() === "") {
-              setError(`investments.${index}.countryLocation`, {
+              setError(`investmentAccounts.${index}.countryLocation`, {
                 type: "required",
                 message: "Financial institution country location is required",
               });
@@ -565,7 +567,7 @@ export default function Form433AOIC() {
             }
 
             if (!inv.accountNumber || inv.accountNumber.trim() === "") {
-              setError(`investments.${index}.accountNumber`, {
+              setError(`investmentAccounts.${index}.accountNumber`, {
                 type: "required",
                 message: "Account number is required",
               });
@@ -573,11 +575,11 @@ export default function Form433AOIC() {
             }
 
             if (
-              inv.marketValue == null ||
-              isNaN(inv.marketValue) ||
-              inv.marketValue < 0
+              inv.currentMarketValue == null ||
+              isNaN(inv.currentMarketValue) ||
+              inv.currentMarketValue < 0
             ) {
-              setError(`investments.${index}.marketValue`, {
+              setError(`investmentAccounts.${index}.currentMarketValue`, {
                 type: "required",
                 message:
                   "Current market value is required and cannot be negative",
@@ -590,7 +592,7 @@ export default function Form433AOIC() {
               !isNaN(inv.loanBalance) &&
               inv.loanBalance < 0
             ) {
-              setError(`investments.${index}.loanBalance`, {
+              setError(`investmentAccounts.${index}.loanBalance`, {
                 type: "min",
                 message: "Loan balance cannot be negative",
               });
@@ -599,7 +601,7 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate digital assets
+        // Validate digital assets (UPDATED: numberOfUnits and usdEquivalent)
         const digitalAssets = getValues("digitalAssets") || [];
         if (digitalAssets.length > 0) {
           digitalAssets.forEach((asset: any, index: number) => {
@@ -611,8 +613,12 @@ export default function Form433AOIC() {
               isValid = false;
             }
 
-            if (asset.units == null || isNaN(asset.units) || asset.units < 0) {
-              setError(`digitalAssets.${index}.units`, {
+            if (
+              asset.numberOfUnits == null ||
+              isNaN(asset.numberOfUnits) ||
+              asset.numberOfUnits < 0
+            ) {
+              setError(`digitalAssets.${index}.numberOfUnits`, {
                 type: "required",
                 message: "Number of units is required and cannot be negative",
               });
@@ -628,22 +634,24 @@ export default function Form433AOIC() {
             }
 
             if (
-              !asset.accountOrAddress ||
-              asset.accountOrAddress.trim() === ""
+              (!asset.accountNumber || asset.accountNumber.trim() === "") &&
+              (!asset.digitalAssetAddress ||
+                asset.digitalAssetAddress.trim() === "")
             ) {
-              setError(`digitalAssets.${index}.accountOrAddress`, {
+              setError(`digitalAssets.${index}.accountNumber`, {
                 type: "required",
-                message: "Account number or digital asset address is required",
+                message:
+                  "Either account number or digital asset address is required",
               });
               isValid = false;
             }
 
             if (
-              asset.dollarValue == null ||
-              isNaN(asset.dollarValue) ||
-              asset.dollarValue < 0
+              asset.usdEquivalent == null ||
+              isNaN(asset.usdEquivalent) ||
+              asset.usdEquivalent < 0
             ) {
-              setError(`digitalAssets.${index}.dollarValue`, {
+              setError(`digitalAssets.${index}.usdEquivalent`, {
                 type: "required",
                 message:
                   "US dollar equivalent is required and cannot be negative",
@@ -653,23 +661,43 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate retirement accounts
+        // Validate retirement accounts (UPDATED: currentMarketValue)
         const retirementAccounts = getValues("retirementAccounts") || [];
         if (retirementAccounts.length > 0) {
           retirementAccounts.forEach((ret: any, index: number) => {
-            if (!ret.type || ret.type.trim() === "") {
-              setError(`retirementAccounts.${index}.type`, {
+            if (!ret.retirementType || ret.retirementType.trim() === "") {
+              setError(`retirementAccounts.${index}.retirementType`, {
                 type: "required",
                 message: "Retirement account type is required",
               });
               isValid = false;
             }
 
+            if (ret.retirementType === "other") {
+              if (
+                !ret.retirementTypeText ||
+                ret.retirementTypeText.trim() === ""
+              ) {
+                setError(`retirementAccounts.${index}.retirementTypeText`, {
+                  type: "required",
+                  message: "Please specify the retirement account type",
+                });
+                isValid = false;
+              }
+            }
+
             if (!ret.institutionName || ret.institutionName.trim() === "") {
               setError(`retirementAccounts.${index}.institutionName`, {
                 type: "required",
-                message:
-                  "Name of financial institution and country location is required",
+                message: "Name of financial institution is required",
+              });
+              isValid = false;
+            }
+
+            if (!ret.countryLocation || ret.countryLocation.trim() === "") {
+              setError(`retirementAccounts.${index}.countryLocation`, {
+                type: "required",
+                message: "Country location is required",
               });
               isValid = false;
             }
@@ -681,16 +709,14 @@ export default function Form433AOIC() {
               });
               isValid = false;
             }
-
             if (
-              ret.marketValue == null ||
-              isNaN(ret.marketValue) ||
-              ret.marketValue < 0
+              ret.currentMarketValue != null &&
+              !isNaN(ret.currentMarketValue) &&
+              ret.currentMarketValue < 0
             ) {
-              setError(`retirementAccounts.${index}.marketValue`, {
-                type: "required",
-                message:
-                  "Current market value is required and cannot be negative",
+              setError(`retirementAccounts.${index}.currentMarketValue`, {
+                type: "min",
+                message: "Current market value cannot be negative",
               });
               isValid = false;
             }
@@ -709,12 +735,12 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate life insurance
-        const lifeInsurance = getValues("lifeInsurance") || [];
-        if (lifeInsurance.length > 0) {
-          lifeInsurance.forEach((ins: any, index: number) => {
+        // Validate life insurance policies (UPDATED: lifeInsurancePolicies and currentCashValue)
+        const lifeInsurancePolicies = getValues("lifeInsurancePolicies") || [];
+        if (lifeInsurancePolicies.length > 0) {
+          lifeInsurancePolicies.forEach((ins: any, index: number) => {
             if (!ins.companyName || ins.companyName.trim() === "") {
-              setError(`lifeInsurance.${index}.companyName`, {
+              setError(`lifeInsurancePolicies.${index}.companyName`, {
                 type: "required",
                 message: "Name of insurance company is required",
               });
@@ -722,7 +748,7 @@ export default function Form433AOIC() {
             }
 
             if (!ins.policyNumber || ins.policyNumber.trim() === "") {
-              setError(`lifeInsurance.${index}.policyNumber`, {
+              setError(`lifeInsurancePolicies.${index}.policyNumber`, {
                 type: "required",
                 message: "Policy number is required",
               });
@@ -730,11 +756,11 @@ export default function Form433AOIC() {
             }
 
             if (
-              ins.cashValue == null ||
-              isNaN(ins.cashValue) ||
-              ins.cashValue < 0
+              ins.currentCashValue == null ||
+              isNaN(ins.currentCashValue) ||
+              ins.currentCashValue < 0
             ) {
-              setError(`lifeInsurance.${index}.cashValue`, {
+              setError(`lifeInsurancePolicies.${index}.currentCashValue`, {
                 type: "required",
                 message:
                   "Current cash value is required and cannot be negative",
@@ -747,7 +773,7 @@ export default function Form433AOIC() {
               !isNaN(ins.loanBalance) &&
               ins.loanBalance < 0
             ) {
-              setError(`lifeInsurance.${index}.loanBalance`, {
+              setError(`lifeInsurancePolicies.${index}.loanBalance`, {
                 type: "min",
                 message: "Loan balance cannot be negative",
               });
@@ -756,35 +782,28 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate real property
-        const realProperty = getValues("realProperty") || [];
-        if (realProperty.length > 0) {
-          realProperty.forEach((prop: any, index: number) => {
-            // // Validate property sale status
-            // if (!prop.propertySaleStatus) {
-            //   setError(`realProperty.${index}.propertySaleStatus`, {
-            //     type: "required",
-            //     message: "Property sale status is required",
-            //   });
-            //   isValid = false;
-            // }
+        // Validate real properties (UPDATED: realProperties and separate lender fields)
+        const realProperties = getValues("realProperties") || [];
+        if (realProperties.length > 0) {
+          realProperties.forEach((prop: any, index: number) => {
+            const isSelling = prop.isForSale || prop.anticipateSelling;
 
-            // if (prop.propertySaleStatus === "yes") {
-            //   if (
-            //     prop.propertyListingPrice == null ||
-            //     isNaN(prop.propertyListingPrice) ||
-            //     prop.propertyListingPrice < 0
-            //   ) {
-            //     setError(`realProperty.${index}.propertySaleStatus`, {
-            //       type: "required",
-            //       message: "Listing price is required and cannot be negative",
-            //     });
-            //     isValid = false;
-            //   }
-            // }
+            if (isSelling) {
+              if (
+                prop.listingPrice == null ||
+                isNaN(prop.listingPrice) ||
+                prop.listingPrice < 0
+              ) {
+                setError(`realProperties.${index}.listingPrice`, {
+                  type: "required",
+                  message: "Property listing price is required",
+                });
+                isValid = false;
+              }
+            }
 
             if (!prop.description || prop.description.trim() === "") {
-              setError(`realProperty.${index}.description`, {
+              setError(`realProperties.${index}.description`, {
                 type: "required",
                 message: "Property description is required",
               });
@@ -792,7 +811,7 @@ export default function Form433AOIC() {
             }
 
             if (!prop.purchaseDate || prop.purchaseDate.trim() === "") {
-              setError(`realProperty.${index}.purchaseDate`, {
+              setError(`realProperties.${index}.purchaseDate`, {
                 type: "required",
                 message: "Purchase date is required",
               });
@@ -804,7 +823,7 @@ export default function Form433AOIC() {
               !isNaN(prop.mortgagePayment) &&
               prop.mortgagePayment < 0
             ) {
-              setError(`realProperty.${index}.mortgagePayment`, {
+              setError(`realProperties.${index}.mortgagePayment`, {
                 type: "min",
                 message: "Mortgage payment cannot be negative",
               });
@@ -812,7 +831,7 @@ export default function Form433AOIC() {
             }
 
             if (!prop.titleHeld || prop.titleHeld.trim() === "") {
-              setError(`realProperty.${index}.titleHeld`, {
+              setError(`realProperties.${index}.titleHeld`, {
                 type: "required",
                 message: "How title is held is required",
               });
@@ -820,7 +839,7 @@ export default function Form433AOIC() {
             }
 
             if (!prop.location || prop.location.trim() === "") {
-              setError(`realProperty.${index}.location`, {
+              setError(`realProperties.${index}.location`, {
                 type: "required",
                 message: "Location is required",
               });
@@ -828,11 +847,11 @@ export default function Form433AOIC() {
             }
 
             if (
-              prop.marketValue == null ||
-              isNaN(prop.marketValue) ||
-              prop.marketValue < 0
+              prop.currentMarketValue == null ||
+              isNaN(prop.currentMarketValue) ||
+              prop.currentMarketValue < 0
             ) {
-              setError(`realProperty.${index}.marketValue`, {
+              setError(`realProperties.${index}.currentMarketValue`, {
                 type: "required",
                 message:
                   "Current market value is required and cannot be negative",
@@ -845,7 +864,7 @@ export default function Form433AOIC() {
               !isNaN(prop.loanBalance) &&
               prop.loanBalance < 0
             ) {
-              setError(`realProperty.${index}.loanBalance`, {
+              setError(`realProperties.${index}.loanBalance`, {
                 type: "min",
                 message: "Loan balance cannot be negative",
               });
@@ -854,7 +873,7 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate vehicles
+        // Validate vehicles (UPDATED: purchaseDate, licenseTagNumber, ownershipType, monthlyLeaseLoanAmount, currentMarketValue)
         const vehicles = getValues("vehicles") || [];
         if (vehicles.length > 0) {
           vehicles.forEach((veh: any, index: number) => {
@@ -882,8 +901,8 @@ export default function Form433AOIC() {
               isValid = false;
             }
 
-            if (!veh.datePurchased || veh.datePurchased.trim() === "") {
-              setError(`vehicles.${index}.datePurchased`, {
+            if (!veh.purchaseDate || veh.purchaseDate.trim() === "") {
+              setError(`vehicles.${index}.purchaseDate`, {
                 type: "required",
                 message: "Date purchased is required",
               });
@@ -898,28 +917,28 @@ export default function Form433AOIC() {
               isValid = false;
             }
 
-            if (!veh.licenseNumber || veh.licenseNumber.trim() === "") {
-              setError(`vehicles.${index}.licenseNumber`, {
+            if (!veh.licenseTagNumber || veh.licenseTagNumber.trim() === "") {
+              setError(`vehicles.${index}.licenseTagNumber`, {
                 type: "required",
                 message: "License/tag number is required",
               });
               isValid = false;
             }
 
-            if (!veh.status || veh.status.trim() === "") {
-              setError(`vehicles.${index}.status`, {
+            if (!veh.ownershipType || veh.ownershipType.trim() === "") {
+              setError(`vehicles.${index}.ownershipType`, {
                 type: "required",
-                message: "Vehicle status (lease/own) is required",
+                message: "Vehicle ownership type (lease/own) is required",
               });
               isValid = false;
             }
 
             if (
-              veh.monthlyPayment != null &&
-              !isNaN(veh.monthlyPayment) &&
-              veh.monthlyPayment < 0
+              veh.monthlyLeaseLoanAmount != null &&
+              !isNaN(veh.monthlyLeaseLoanAmount) &&
+              veh.monthlyLeaseLoanAmount < 0
             ) {
-              setError(`vehicles.${index}.monthlyPayment`, {
+              setError(`vehicles.${index}.monthlyLeaseLoanAmount`, {
                 type: "min",
                 message: "Monthly payment cannot be negative",
               });
@@ -927,11 +946,11 @@ export default function Form433AOIC() {
             }
 
             if (
-              veh.marketValue == null ||
-              isNaN(veh.marketValue) ||
-              veh.marketValue < 0
+              veh.currentMarketValue == null ||
+              isNaN(veh.currentMarketValue) ||
+              veh.currentMarketValue < 0
             ) {
-              setError(`vehicles.${index}.marketValue`, {
+              setError(`vehicles.${index}.currentMarketValue`, {
                 type: "required",
                 message:
                   "Current market value is required and cannot be negative",
@@ -953,12 +972,12 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate valuables
-        const valuables = getValues("valuables") || [];
-        if (valuables.length > 0) {
-          valuables.forEach((val: any, index: number) => {
+        // Validate valuable items (UPDATED: valuableItems and currentMarketValue)
+        const valuableItems = getValues("valuableItems") || [];
+        if (valuableItems.length > 0) {
+          valuableItems.forEach((val: any, index: number) => {
             if (!val.description || val.description.trim() === "") {
-              setError(`valuables.${index}.description`, {
+              setError(`valuableItems.${index}.description`, {
                 type: "required",
                 message: "Description of asset is required",
               });
@@ -966,11 +985,11 @@ export default function Form433AOIC() {
             }
 
             if (
-              val.marketValue == null ||
-              isNaN(val.marketValue) ||
-              val.marketValue < 0
+              val.currentMarketValue == null ||
+              isNaN(val.currentMarketValue) ||
+              val.currentMarketValue < 0
             ) {
-              setError(`valuables.${index}.marketValue`, {
+              setError(`valuableItems.${index}.currentMarketValue`, {
                 type: "required",
                 message:
                   "Current market value is required and cannot be negative",
@@ -983,7 +1002,7 @@ export default function Form433AOIC() {
               !isNaN(val.loanBalance) &&
               val.loanBalance < 0
             ) {
-              setError(`valuables.${index}.loanBalance`, {
+              setError(`valuableItems.${index}.loanBalance`, {
                 type: "min",
                 message: "Loan balance cannot be negative",
               });
@@ -992,12 +1011,13 @@ export default function Form433AOIC() {
           });
         }
 
-        // Validate furniture
-        const furniture = getValues("furniture") || [];
-        if (furniture.length > 0) {
-          furniture.forEach((furn: any, index: number) => {
+        // Validate furniture and personal effects (UPDATED: furniturePersonalEffects and currentMarketValue)
+        const furniturePersonalEffects =
+          getValues("furniturePersonalEffects") || [];
+        if (furniturePersonalEffects.length > 0) {
+          furniturePersonalEffects.forEach((furn: any, index: number) => {
             if (!furn.description || furn.description.trim() === "") {
-              setError(`furniture.${index}.description`, {
+              setError(`furniturePersonalEffects.${index}.description`, {
                 type: "required",
                 message: "Description of asset is required",
               });
@@ -1005,11 +1025,11 @@ export default function Form433AOIC() {
             }
 
             if (
-              furn.marketValue == null ||
-              isNaN(furn.marketValue) ||
-              furn.marketValue < 0
+              furn.currentMarketValue == null ||
+              isNaN(furn.currentMarketValue) ||
+              furn.currentMarketValue < 0
             ) {
-              setError(`furniture.${index}.marketValue`, {
+              setError(`furniturePersonalEffects.${index}.currentMarketValue`, {
                 type: "required",
                 message:
                   "Current market value is required and cannot be negative",
@@ -1022,7 +1042,7 @@ export default function Form433AOIC() {
               !isNaN(furn.loanBalance) &&
               furn.loanBalance < 0
             ) {
-              setError(`furniture.${index}.loanBalance`, {
+              setError(`furniturePersonalEffects.${index}.loanBalance`, {
                 type: "min",
                 message: "Loan balance cannot be negative",
               });
@@ -1031,70 +1051,63 @@ export default function Form433AOIC() {
           });
         }
 
-        // Collect fields for additional trigger validation (e.g., patterns, mins from schema)
+        // Collect fields for additional trigger validation
         const assetFieldsToValidate: (keyof FormData433A)[] = [];
 
-        // For bank accounts
         bankAccounts.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
             `bankAccounts.${index}.balance` as keyof FormData433A
           );
         });
 
-        // For investments
-        investments.forEach((_: any, index: number) => {
+        investmentAccounts.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
-            `investments.${index}.marketValue` as keyof FormData433A
+            `investmentAccounts.${index}.currentMarketValue` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `investments.${index}.loanBalance` as keyof FormData433A
+            `investmentAccounts.${index}.loanBalance` as keyof FormData433A
           );
         });
 
-        // For digital assets
         digitalAssets.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
-            `digitalAssets.${index}.units` as keyof FormData433A
+            `digitalAssets.${index}.numberOfUnits` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `digitalAssets.${index}.dollarValue` as keyof FormData433A
+            `digitalAssets.${index}.usdEquivalent` as keyof FormData433A
           );
         });
 
-        // For retirement accounts
         retirementAccounts.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
-            `retirementAccounts.${index}.marketValue` as keyof FormData433A
+            `retirementAccounts.${index}.currentMarketValue` as keyof FormData433A
           );
           assetFieldsToValidate.push(
             `retirementAccounts.${index}.loanBalance` as keyof FormData433A
           );
         });
 
-        // For life insurance
-        lifeInsurance.forEach((_: any, index: number) => {
+        lifeInsurancePolicies.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
-            `lifeInsurance.${index}.cashValue` as keyof FormData433A
+            `lifeInsurancePolicies.${index}.currentCashValue` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `lifeInsurance.${index}.loanBalance` as keyof FormData433A
-          );
-        });
-
-        // For real property
-        realProperty.forEach((_: any, index: number) => {
-          assetFieldsToValidate.push(
-            `realProperty.${index}.mortgagePayment` as keyof FormData433A
-          );
-          assetFieldsToValidate.push(
-            `realProperty.${index}.marketValue` as keyof FormData433A
-          );
-          assetFieldsToValidate.push(
-            `realProperty.${index}.loanBalance` as keyof FormData433A
+            `lifeInsurancePolicies.${index}.loanBalance` as keyof FormData433A
           );
         });
 
-        // For vehicles
+        realProperties.forEach((_: any, index: number) => {
+          assetFieldsToValidate.push(
+            `realProperties.${index}.mortgagePayment` as keyof FormData433A
+          );
+          assetFieldsToValidate.push(
+            `realProperties.${index}.currentMarketValue` as keyof FormData433A
+          );
+          assetFieldsToValidate.push(
+            `realProperties.${index}.loanBalance` as keyof FormData433A
+          );
+        });
+
         vehicles.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
             `vehicles.${index}.year` as keyof FormData433A
@@ -1103,33 +1116,31 @@ export default function Form433AOIC() {
             `vehicles.${index}.mileage` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `vehicles.${index}.monthlyPayment` as keyof FormData433A
+            `vehicles.${index}.monthlyLeaseLoanAmount` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `vehicles.${index}.marketValue` as keyof FormData433A
+            `vehicles.${index}.currentMarketValue` as keyof FormData433A
           );
           assetFieldsToValidate.push(
             `vehicles.${index}.loanBalance` as keyof FormData433A
           );
         });
 
-        // For valuables
-        valuables.forEach((_: any, index: number) => {
+        valuableItems.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
-            `valuables.${index}.marketValue` as keyof FormData433A
+            `valuableItems.${index}.currentMarketValue` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `valuables.${index}.loanBalance` as keyof FormData433A
+            `valuableItems.${index}.loanBalance` as keyof FormData433A
           );
         });
 
-        // For furniture
-        furniture.forEach((_: any, index: number) => {
+        furniturePersonalEffects.forEach((_: any, index: number) => {
           assetFieldsToValidate.push(
-            `furniture.${index}.marketValue` as keyof FormData433A
+            `furniturePersonalEffects.${index}.currentMarketValue` as keyof FormData433A
           );
           assetFieldsToValidate.push(
-            `furniture.${index}.loanBalance` as keyof FormData433A
+            `furniturePersonalEffects.${index}.loanBalance` as keyof FormData433A
           );
         });
 
@@ -1138,7 +1149,6 @@ export default function Form433AOIC() {
           isValid = isValid && assetValidation;
         }
         break;
-
       case 4: // Self-Employed Information
         fieldsToValidate = ["isSelfEmployed"];
 
@@ -1158,7 +1168,7 @@ export default function Form433AOIC() {
             "businessDescription",
             "totalEmployees",
             "taxDepositFrequency",
-            "avgGrossMonthlyPayroll",
+            "averageGrossMonthlyPayroll",
             "hasOtherBusinessInterests",
           ];
           fieldsToValidate = [...fieldsToValidate, ...selfEmployedFields];
@@ -1197,12 +1207,15 @@ export default function Form433AOIC() {
           // Conditional for EIN if not sole proprietorship
           const soleProp = getValues("isSoleProprietorship");
           if (soleProp === false) {
-            const ein = getValues("ein");
+            const employerIdentificationNumber = getValues(
+              "employerIdentificationNumber"
+            );
             let einIsEmpty =
-              ein === undefined ||
-              (typeof ein === "string" && ein.trim() === "");
+              employerIdentificationNumber === undefined ||
+              (typeof employerIdentificationNumber === "string" &&
+                employerIdentificationNumber.trim() === "");
             if (einIsEmpty) {
-              setError("ein", {
+              setError("employerIdentificationNumber", {
                 type: "required",
                 message:
                   "EIN is required for non-sole proprietorship businesses",
@@ -1210,14 +1223,24 @@ export default function Form433AOIC() {
               isValid = false;
             } else {
               // Validate format if value exists
-              const einValidation = await trigger(["ein"]);
+              const einValidation = await trigger([
+                "employerIdentificationNumber",
+              ]);
               isValid = isValid && einValidation;
             }
           } else if (soleProp === true || soleProp !== false) {
             // Validate if provided
-            const ein = getValues("ein");
-            if (ein && typeof ein === "string" && ein.trim() !== "") {
-              const einValidation = await trigger(["ein"]);
+            const employerIdentificationNumber = getValues(
+              "employerIdentificationNumber"
+            );
+            if (
+              employerIdentificationNumber &&
+              typeof employerIdentificationNumber === "string" &&
+              employerIdentificationNumber.trim() !== ""
+            ) {
+              const einValidation = await trigger([
+                "employerIdentificationNumber",
+              ]);
               isValid = isValid && einValidation;
             }
           }
@@ -1253,14 +1276,28 @@ export default function Form433AOIC() {
             } else {
               // Validate each other business
               otherBusinesses.forEach((business: any, index: number) => {
+                if (business.businessType === "other") {
+                  if (
+                    !business.otherBusinessTypeDescription ||
+                    business.otherBusinessTypeDescription.trim() === ""
+                  ) {
+                    setError(`otherBusinesses.${index}.otherBusinessTypeDescription`, {
+                      type: "required",
+                      message:
+                        "Please specify the other business type",
+                    });
+                    isValid = false;
+                  }
+                }
+
                 // Check required subfields
                 const subFields = [
-                  "percentageOwnership",
+                  "ownershipPercentage",
                   "title",
                   "businessAddress",
                   "businessName",
                   "businessTelephone",
-                  "ein",
+                  "employerIdentificationNumber",
                   "businessType",
                 ];
                 subFields.forEach((subField) => {
@@ -1293,12 +1330,12 @@ export default function Form433AOIC() {
               const subFieldsToValidate: any = [];
               otherBusinesses.forEach((business: any, index: number) => {
                 const subFields = [
-                  "percentageOwnership",
+                  "ownershipPercentage",
                   "title",
                   "businessAddress",
                   "businessName",
                   "businessTelephone",
-                  "ein",
+                  "employerIdentificationNumber",
                   "businessType",
                 ];
                 subFields.forEach((subField) => {

@@ -54,12 +54,12 @@ export function SelfEmployedSection({
 
   const addOtherBusiness = () => {
     append({
-      percentageOwnership: "",
+      ownershipPercentage: "",
       title: "",
       businessAddress: "",
       businessName: "",
       businessTelephone: "",
-      ein: "",
+      employerIdentificationNumber: "",
       businessType: "",
     });
   };
@@ -148,6 +148,7 @@ export function SelfEmployedSection({
 
               <FormInput
                 label="Name of Business"
+                required
                 id="businessName"
                 {...register("businessName")}
                 error={errors.businessName?.message}
@@ -163,16 +164,18 @@ export function SelfEmployedSection({
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <FormInput
                   label="Business Telephone Number"
+                  required
                   id="businessTelephone"
                   {...register("businessTelephone")}
                   error={errors.businessTelephone?.message}
                 />
                 <FormInput
                   label="Employer Identification Number"
-                  id="ein"
+                  required
+                  id="employerIdentificationNumber"
                   placeholder="XX-XXXXXXX"
-                  {...register("ein")}
-                  error={errors.ein?.message}
+                  {...register("employerIdentificationNumber")}
+                  error={errors.employerIdentificationNumber?.message}
                 />
                 <FormInput
                   label="Business Website Address"
@@ -191,6 +194,7 @@ export function SelfEmployedSection({
 
               <FormInput
                 label="Description of Business"
+                required
                 id="businessDescription"
                 {...register("businessDescription")}
                 error={errors.businessDescription?.message}
@@ -199,6 +203,7 @@ export function SelfEmployedSection({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormInput
                   label="Total Number of Employees"
+                  required
                   id="totalEmployees"
                   type="number"
                   placeholder="0"
@@ -207,6 +212,7 @@ export function SelfEmployedSection({
                 />
                 <FormInput
                   label="Frequency of Tax Deposits"
+                  required
                   id="taxDepositFrequency"
                   placeholder="Monthly, Quarterly, etc."
                   {...register("taxDepositFrequency")}
@@ -214,11 +220,12 @@ export function SelfEmployedSection({
                 />
                 <FormInput
                   label="Average Gross Monthly Payroll ($)"
-                  id="avgGrossMonthlyPayroll"
+                  required
+                  id="averageGrossMonthlyPayroll"
                   type="number"
                   placeholder="0"
-                  {...register("avgGrossMonthlyPayroll")}
-                  error={errors.avgGrossMonthlyPayroll?.message}
+                  {...register("averageGrossMonthlyPayroll")}
+                  error={errors.averageGrossMonthlyPayroll?.message}
                 />
               </div>
             </CardContent>
@@ -286,18 +293,20 @@ export function SelfEmployedSection({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormInput
                           label="Percentage of Ownership (%)"
-                          id={`otherBusinesses.${index}.percentageOwnership`}
+                          required
+                          id={`otherBusinesses.${index}.ownershipPercentage`}
                           type="number"
                           {...register(
-                            `otherBusinesses.${index}.percentageOwnership`
+                            `otherBusinesses.${index}.ownershipPercentage`
                           )}
                           error={
-                            errors.otherBusinesses?.[index]?.percentageOwnership
+                            errors.otherBusinesses?.[index]?.ownershipPercentage
                               ?.message
                           }
                         />
                         <FormInput
                           label="Title"
+                          required
                           id={`otherBusinesses.${index}.title`}
                           {...register(`otherBusinesses.${index}.title`)}
                           error={
@@ -308,6 +317,7 @@ export function SelfEmployedSection({
 
                       <FormInput
                         label="Business Address (street, city, state, ZIP code)"
+                        required
                         id={`otherBusinesses.${index}.businessAddress`}
                         {...register(
                           `otherBusinesses.${index}.businessAddress`
@@ -321,6 +331,7 @@ export function SelfEmployedSection({
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <FormInput
                           label="Business Name"
+                          required
                           id={`otherBusinesses.${index}.businessName`}
                           {...register(`otherBusinesses.${index}.businessName`)}
                           error={
@@ -330,6 +341,7 @@ export function SelfEmployedSection({
                         />
                         <FormInput
                           label="Business Telephone Number"
+                          required
                           id={`otherBusinesses.${index}.businessTelephone`}
                           {...register(
                             `otherBusinesses.${index}.businessTelephone`
@@ -341,10 +353,16 @@ export function SelfEmployedSection({
                         />
                         <FormInput
                           label="Employer Identification Number"
-                          id={`otherBusinesses.${index}.ein`}
+                          required
+                          id={`otherBusinesses.${index}.employerIdentificationNumber`}
                           placeholder="XX-XXXXXXX"
-                          {...register(`otherBusinesses.${index}.ein`)}
-                          error={errors.otherBusinesses?.[index]?.ein?.message}
+                          {...register(
+                            `otherBusinesses.${index}.employerIdentificationNumber`
+                          )}
+                          error={
+                            errors.otherBusinesses?.[index]
+                              ?.employerIdentificationNumber?.message
+                          }
                         />
                       </div>
 
@@ -405,6 +423,22 @@ export function SelfEmployedSection({
                           </div>
                         </RadioGroup>
                       </FormField>
+
+                      {watch(`otherBusinesses.${index}.businessType`) ===
+                        "other" && (
+                        <FormInput
+                          label="Other Business Type Description"
+                          required
+                          id={`otherBusinesses.${index}.otherBusinessTypeDescription`}
+                          {...register(
+                            `otherBusinesses.${index}.otherBusinessTypeDescription`
+                          )}
+                          error={
+                            errors.otherBusinesses?.[index]
+                              ?.otherBusinessTypeDescription?.message
+                          }
+                        />
+                      )}
                     </div>
                   ))}
 

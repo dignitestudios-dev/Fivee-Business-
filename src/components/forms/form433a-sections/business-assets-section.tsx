@@ -9,6 +9,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect } from "react";
 
 interface BusinessAssetsSectionProps {
@@ -55,11 +56,11 @@ export function BusinessAssetsSection({
   });
 
   const {
-    fields: assetFields,
-    append: appendAsset,
-    remove: removeAsset,
+    fields: assetItemsFields,
+    append: appendAssetItem,
+    remove: removeAssetItem,
   } = useFieldArray({
-    name: "businessOtherAssets",
+    name: "assetItems",
   });
 
   const hasBusinessNotesReceivable = watch("hasBusinessNotesReceivable");
@@ -86,51 +87,65 @@ export function BusinessAssetsSection({
 
   const addBankAccount = () => {
     appendBank({
+      bankName: "",
+      countryLocation: "",
       accountType: undefined,
-      bankNameCountry: "",
       accountNumber: "",
-      amount: "",
+      value: "",
     });
   };
 
   const addDigitalAsset = () => {
     appendDigital({
       description: "",
-      units: "",
-      location: undefined,
-      custodianBroker: "",
-      address: "",
-      value: "",
+      numberOfUnits: "",
+      location: "",
+      accountNumber: "",
+      digitalAssetAddress: "",
+      usdEquivalent: "",
     });
   };
 
-  const addBusinessAsset = () => {
-    appendAsset({
+  const updateAssetTotal = (index: number) => {
+    const currentMarketValue = parseFloat(watch(`assetItems.${index}.currentMarketValue`)) || 0;
+    const quickSaleValue = currentMarketValue * 0.8;
+    setValue(`assetItems.${index}.quickSaleValue`, quickSaleValue.toString());
+    const loanBalance = parseFloat(watch(`assetItems.${index}.loanBalance`)) || 0;
+    const isLeased = watch(`assetItems.${index}.isLeased`) || false;
+    const usedInProductionOfIncome = watch(`assetItems.${index}.usedInProductionOfIncome`) || false;
+    const totalValue = (isLeased || usedInProductionOfIncome) ? 0 : quickSaleValue - loanBalance;
+    setValue(`assetItems.${index}.totalValue`, totalValue.toString());
+  };
+
+  const addBusinessAssetItem = () => {
+    appendAssetItem({
       description: "",
       currentMarketValue: "",
       quickSaleValue: "",
       loanBalance: "",
       totalValue: "",
+      isLeased: false,
+      usedInProductionOfIncome: false,
     });
   };
 
   // Calculate totals for display
   const bankSum = bankFields.reduce(
     (sum, _, index) =>
-      sum + (parseFloat(watch(`businessBankAccounts.${index}.amount`)) || 0),
+      sum + (parseFloat(watch(`businessBankAccounts.${index}.value`)) || 0),
     0
   );
   const digitalSum = digitalFields.reduce(
     (sum, _, index) =>
-      sum + (parseFloat(watch(`businessDigitalAssets.${index}.value`)) || 0),
+      sum + (parseFloat(watch(`businessDigitalAssets.${index}.usdEquivalent`)) || 0),
     0
   );
   const attachmentBank = parseFloat(watch("totalBusinessBankAttachment")) || 0;
   const total8 = bankSum + digitalSum + attachmentBank;
 
-  const assetSum = assetFields.reduce(
+  const assetSum = assetItemsFields.reduce(
     (sum, _, index) =>
-      sum + (parseFloat(watch(`businessOtherAssets.${index}.totalValue`)) || 0),
+      sum + (parseFloat(watch(`assetItems.${index}.totalValue`)) || 0),
     0
   );
   const attachmentAssets =
@@ -240,7 +255,7 @@ export function BusinessAssetsSection({
                         "Cash",
                         "Checking",
                         "Savings",
-                        "Money Market Account/CD",
+                        "Money Market/CD",
                         "Online Account",
                         "Stored Value Card",
                       ].map((type) => (
@@ -268,20 +283,38 @@ export function BusinessAssetsSection({
               </FormField>
 
               <FormInput
-                label="Bank name and country location"
-                id={`businessBankAccounts.${index}.bankNameCountry`}
-                {...register(`businessBankAccounts.${index}.bankNameCountry`, {
+                label="Bank name"
+                id={`businessBankAccounts.${index}.bankName`}
+                {...register(`businessBankAccounts.${index}.bankName`, {
                   onChange: (e) => {
                     if (e.target.value.trim() !== "") {
                       clearErrors(
-                        `businessBankAccounts.${index}.bankNameCountry`
+                        `businessBankAccounts.${index}.bankName`
                       );
-                      trigger(`businessBankAccounts.${index}.bankNameCountry`);
+                      trigger(`businessBankAccounts.${index}.bankName`);
                     }
                   },
                 })}
                 error={
-                  errors.businessBankAccounts?.[index]?.bankNameCountry?.message
+                  errors.businessBankAccounts?.[index]?.bankName?.message
+                }
+              />
+
+              <FormInput
+                label="Country location"
+                id={`businessBankAccounts.${index}.countryLocation`}
+                {...register(`businessBankAccounts.${index}.countryLocation`, {
+                  onChange: (e) => {
+                    if (e.target.value.trim() !== "") {
+                      clearErrors(
+                        `businessBankAccounts.${index}.countryLocation`
+                      );
+                      trigger(`businessBankAccounts.${index}.countryLocation`);
+                    }
+                  },
+                })}
+                error={
+                  errors.businessBankAccounts?.[index]?.countryLocation?.message
                 }
               />
 
@@ -304,19 +337,19 @@ export function BusinessAssetsSection({
               />
 
               <FormInput
-                label="Amount ($)"
-                id={`businessBankAccounts.${index}.amount`}
+                label="Value ($)"
+                id={`businessBankAccounts.${index}.value`}
                 type="number"
-                {...register(`businessBankAccounts.${index}.amount`, {
+                {...register(`businessBankAccounts.${index}.value`, {
                   onChange: (e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val) && val >= 0) {
-                      clearErrors(`businessBankAccounts.${index}.amount`);
-                      trigger(`businessBankAccounts.${index}.amount`);
+                      clearErrors(`businessBankAccounts.${index}.value`);
+                      trigger(`businessBankAccounts.${index}.value`);
                     }
                   },
                 })}
-                error={errors.businessBankAccounts?.[index]?.amount?.message}
+                error={errors.businessBankAccounts?.[index]?.value?.message}
               />
             </div>
           ))}
@@ -369,131 +402,80 @@ export function BusinessAssetsSection({
 
               <FormInput
                 label="Number of units"
-                id={`businessDigitalAssets.${index}.units`}
+                id={`businessDigitalAssets.${index}.numberOfUnits`}
                 type="number"
-                {...register(`businessDigitalAssets.${index}.units`, {
+                {...register(`businessDigitalAssets.${index}.numberOfUnits`, {
                   onChange: (e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val) && val >= 0) {
-                      clearErrors(`businessDigitalAssets.${index}.units`);
-                      trigger(`businessDigitalAssets.${index}.units`);
+                      clearErrors(`businessDigitalAssets.${index}.numberOfUnits`);
+                      trigger(`businessDigitalAssets.${index}.numberOfUnits`);
                     }
                   },
                 })}
-                error={errors.businessDigitalAssets?.[index]?.units?.message}
+                error={errors.businessDigitalAssets?.[index]?.numberOfUnits?.message}
               />
 
-              <FormField
+              <FormInput
                 label="Location of digital asset (exchange account, self-hosted wallet)"
                 id={`businessDigitalAssets.${index}.location`}
-                error={errors.businessDigitalAssets?.[index]?.location?.message}
-              >
-                <Controller
-                  name={`businessDigitalAssets.${index}.location`}
-                  control={control}
-                  render={({ field }) => (
-                    <RadioGroup
-                      {...field}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        clearErrors([
-                          field.name,
-                          `businessDigitalAssets.${index}.custodianBroker`,
-                          `businessDigitalAssets.${index}.address`,
-                        ]);
-                        trigger(field.name);
-                      }}
-                      className="flex gap-6 mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="accountExchange"
-                          id={`business-digital-location-account-${index}`}
-                          className="text-[#22b573]"
-                        />
-                        <Label
-                          htmlFor={`business-digital-location-account-${index}`}
-                        >
-                          Account/Exchange
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="selfHostedWallet"
-                          id={`business-digital-location-self-${index}`}
-                          className="text-[#22b573]"
-                        />
-                        <Label
-                          htmlFor={`business-digital-location-self-${index}`}
-                        >
-                          Self-hosted Wallet
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  )}
-                />
-              </FormField>
-
-              {watch(`businessDigitalAssets.${index}.location`) ===
-                "accountExchange" && (
-                <FormInput
-                  label="Account number; self-hosted wallet"
-                  id={`businessDigitalAssets.${index}.custodianBroker`}
-                  {...register(
-                    `businessDigitalAssets.${index}.custodianBroker`,
-                    {
-                      onChange: (e) => {
-                        if (e.target.value.trim() !== "") {
-                          clearErrors(
-                            `businessDigitalAssets.${index}.custodianBroker`
-                          );
-                          trigger(
-                            `businessDigitalAssets.${index}.custodianBroker`
-                          );
-                        }
-                      },
+                {...register(`businessDigitalAssets.${index}.location`, {
+                  onChange: (e) => {
+                    if (e.target.value.trim() !== "") {
+                      clearErrors(`businessDigitalAssets.${index}.location`);
+                      trigger(`businessDigitalAssets.${index}.location`);
                     }
-                  )}
-                  error={
-                    errors.businessDigitalAssets?.[index]?.custodianBroker
-                      ?.message
-                  }
-                />
-              )}
+                  },
+                })}
+                error={errors.businessDigitalAssets?.[index]?.location?.message}
+              />
 
-              {watch(`businessDigitalAssets.${index}.location`) ===
-                "selfHostedWallet" && (
-                <FormInput
-                  label="Digital asset address for self-hosted digital assets"
-                  id={`businessDigitalAssets.${index}.address`}
-                  {...register(`businessDigitalAssets.${index}.address`, {
-                    onChange: (e) => {
-                      if (e.target.value.trim() !== "") {
-                        clearErrors(`businessDigitalAssets.${index}.address`);
-                        trigger(`businessDigitalAssets.${index}.address`);
-                      }
-                    },
-                  })}
-                  error={
-                    errors.businessDigitalAssets?.[index]?.address?.message
-                  }
-                />
-              )}
+              <FormInput
+                label="Account number for assets held by a custodian or broker"
+                id={`businessDigitalAssets.${index}.accountNumber`}
+                {...register(`businessDigitalAssets.${index}.accountNumber`, {
+                  onChange: (e) => {
+                    if (e.target.value.trim() !== "") {
+                      clearErrors(`businessDigitalAssets.${index}.accountNumber`);
+                      trigger(`businessDigitalAssets.${index}.accountNumber`);
+                    }
+                  },
+                })}
+                error={
+                  errors.businessDigitalAssets?.[index]?.accountNumber?.message
+                }
+              />
+
+              <FormInput
+                label="Digital asset address for self-hosted digital assets"
+                id={`businessDigitalAssets.${index}.digitalAssetAddress`}
+                {...register(`businessDigitalAssets.${index}.digitalAssetAddress`, {
+                  onChange: (e) => {
+                    if (e.target.value.trim() !== "") {
+                      clearErrors(`businessDigitalAssets.${index}.digitalAssetAddress`);
+                      trigger(`businessDigitalAssets.${index}.digitalAssetAddress`);
+                    }
+                  },
+                })}
+                error={
+                  errors.businessDigitalAssets?.[index]?.digitalAssetAddress?.message
+                }
+              />
 
               <FormInput
                 label="US dollar ($) equivalent of the digital asset as of today"
-                id={`businessDigitalAssets.${index}.value`}
+                id={`businessDigitalAssets.${index}.usdEquivalent`}
                 type="number"
-                {...register(`businessDigitalAssets.${index}.value`, {
+                {...register(`businessDigitalAssets.${index}.usdEquivalent`, {
                   onChange: (e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val) && val >= 0) {
-                      clearErrors(`businessDigitalAssets.${index}.value`);
-                      trigger(`businessDigitalAssets.${index}.value`);
+                      clearErrors(`businessDigitalAssets.${index}.usdEquivalent`);
+                      trigger(`businessDigitalAssets.${index}.usdEquivalent`);
                     }
                   },
                 })}
-                error={errors.businessDigitalAssets?.[index]?.value?.message}
+                error={errors.businessDigitalAssets?.[index]?.usdEquivalent?.message}
               />
             </div>
           ))}
@@ -537,7 +519,7 @@ export function BusinessAssetsSection({
           <CardTitle>Other Assets</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {assetFields.map((field, index) => (
+          {assetItemsFields.map((field, index) => (
             <div
               key={field.id}
               className="p-4 border border-gray-200 rounded-lg space-y-4"
@@ -548,7 +530,7 @@ export function BusinessAssetsSection({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeAsset(index)}
+                  onClick={() => removeAssetItem(index)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -557,127 +539,142 @@ export function BusinessAssetsSection({
 
               <FormInput
                 label="Description of asset"
-                id={`businessOtherAssets.${index}.description`}
-                {...register(`businessOtherAssets.${index}.description`, {
+                id={`assetItems.${index}.description`}
+                {...register(`assetItems.${index}.description`, {
                   onChange: (e) => {
                     if (e.target.value.trim() !== "") {
-                      clearErrors(`businessOtherAssets.${index}.description`);
-                      trigger(`businessOtherAssets.${index}.description`);
+                      clearErrors(`assetItems.${index}.description`);
+                      trigger(`assetItems.${index}.description`);
                     }
                   },
                 })}
                 error={
-                  errors.businessOtherAssets?.[index]?.description?.message
+                  errors.assetItems?.[index]?.description?.message
                 }
               />
 
               <FormInput
                 label="Current market value ($)"
-                id={`businessOtherAssets.${index}.currentMarketValue`}
+                id={`assetItems.${index}.currentMarketValue`}
                 type="number"
                 {...register(
-                  `businessOtherAssets.${index}.currentMarketValue`,
+                  `assetItems.${index}.currentMarketValue`,
                   {
                     onChange: (e) => {
                       const val = parseFloat(e.target.value);
                       if (!isNaN(val) && val >= 0) {
                         clearErrors(
-                          `businessOtherAssets.${index}.currentMarketValue`
+                          `assetItems.${index}.currentMarketValue`
                         );
                         trigger(
-                          `businessOtherAssets.${index}.currentMarketValue`
+                          `assetItems.${index}.currentMarketValue`
                         );
                       }
-                      const quick = val * 0.8;
-                      setValue(
-                        `businessOtherAssets.${index}.quickSaleValue`,
-                        quick
-                      );
-                      const loan =
-                        parseFloat(
-                          watch(`businessOtherAssets.${index}.loanBalance`)
-                        ) || 0;
-                      setValue(
-                        `businessOtherAssets.${index}.totalValue`,
-                        quick - loan
-                      );
+                      updateAssetTotal(index);
                     },
                   }
                 )}
                 error={
-                  errors.businessOtherAssets?.[index]?.currentMarketValue
+                  errors.assetItems?.[index]?.currentMarketValue
                     ?.message
                 }
               />
 
               <FormInput
                 label="X .8 = ($)"
-                id={`businessOtherAssets.${index}.quickSaleValue`}
+                id={`assetItems.${index}.quickSaleValue`}
                 type="number"
-                {...register(`businessOtherAssets.${index}.quickSaleValue`, {
+                {...register(`assetItems.${index}.quickSaleValue`, {
                   onChange: (e) => {
                     const quick = parseFloat(e.target.value);
                     if (!isNaN(quick) && quick >= 0) {
                       clearErrors(
-                        `businessOtherAssets.${index}.quickSaleValue`
+                        `assetItems.${index}.quickSaleValue`
                       );
-                      trigger(`businessOtherAssets.${index}.quickSaleValue`);
+                      trigger(`assetItems.${index}.quickSaleValue`);
                     }
-                    const loan =
-                      parseFloat(
-                        watch(`businessOtherAssets.${index}.loanBalance`)
-                      ) || 0;
-                    setValue(
-                      `businessOtherAssets.${index}.totalValue`,
-                      quick - loan
-                    );
+                    updateAssetTotal(index);
                   },
                 })}
                 error={
-                  errors.businessOtherAssets?.[index]?.quickSaleValue?.message
+                  errors.assetItems?.[index]?.quickSaleValue?.message
                 }
               />
 
               <FormInput
                 label="Minus loan balance ($)"
-                id={`businessOtherAssets.${index}.loanBalance`}
+                id={`assetItems.${index}.loanBalance`}
                 type="number"
-                {...register(`businessOtherAssets.${index}.loanBalance`, {
+                {...register(`assetItems.${index}.loanBalance`, {
                   onChange: (e) => {
                     const loan = parseFloat(e.target.value);
                     if (!isNaN(loan) && loan >= 0) {
-                      clearErrors(`businessOtherAssets.${index}.loanBalance`);
-                      trigger(`businessOtherAssets.${index}.loanBalance`);
+                      clearErrors(`assetItems.${index}.loanBalance`);
+                      trigger(`assetItems.${index}.loanBalance`);
                     }
-                    const quick =
-                      parseFloat(
-                        watch(`businessOtherAssets.${index}.quickSaleValue`)
-                      ) || 0;
-                    setValue(
-                      `businessOtherAssets.${index}.totalValue`,
-                      quick - loan
-                    );
+                    updateAssetTotal(index);
                   },
                 })}
                 error={
-                  errors.businessOtherAssets?.[index]?.loanBalance?.message
+                  errors.assetItems?.[index]?.loanBalance?.message
                 }
               />
 
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name={`assetItems.${index}.isLeased`}
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id={`assetItems.${index}.isLeased`}
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          updateAssetTotal(index);
+                        }}
+                      />
+                    )}
+                  />
+                  <Label htmlFor={`assetItems.${index}.isLeased`}>
+                    Is leased?
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name={`assetItems.${index}.usedInProductionOfIncome`}
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id={`assetItems.${index}.usedInProductionOfIncome`}
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          updateAssetTotal(index);
+                        }}
+                      />
+                    )}
+                  />
+                  <Label htmlFor={`assetItems.${index}.usedInProductionOfIncome`}>
+                    Used in production of income?
+                  </Label>
+                </div>
+              </div>
+
               <FormInput
                 label="Total value (if leased or used in the production of income, enter 0 as the total value) ($)"
-                id={`businessOtherAssets.${index}.totalValue`}
+                id={`assetItems.${index}.totalValue`}
                 type="number"
-                {...register(`businessOtherAssets.${index}.totalValue`, {
+                {...register(`assetItems.${index}.totalValue`, {
                   onChange: (e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val) && val >= 0) {
-                      clearErrors(`businessOtherAssets.${index}.totalValue`);
-                      trigger(`businessOtherAssets.${index}.totalValue`);
+                      clearErrors(`assetItems.${index}.totalValue`);
+                      trigger(`assetItems.${index}.totalValue`);
                     }
                   },
                 })}
-                error={errors.businessOtherAssets?.[index]?.totalValue?.message}
+                error={errors.assetItems?.[index]?.totalValue?.message}
               />
             </div>
           ))}
@@ -685,7 +682,7 @@ export function BusinessAssetsSection({
           <Button
             type="button"
             variant="outline"
-            onClick={addBusinessAsset}
+            onClick={addBusinessAssetItem}
             className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
           >
             <Plus className="w-4 h-4 mr-2" />

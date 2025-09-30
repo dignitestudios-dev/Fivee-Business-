@@ -9,6 +9,7 @@ import { useFieldArray, useFormContext, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
+import { preventAlphabetInput } from "@/lib/validation-schemas";
 
 interface PersonalAssetsSectionProps {
   onNext: () => void;
@@ -45,14 +46,14 @@ export function PersonalAssetsSection({
     name: "bankAccounts",
   });
 
-  // --- INVESTMENTS ---
+  // --- INVESTMENT ACCOUNTS ---
   const {
-    fields: investments,
-    append: addInvestment,
-    remove: removeInvestment,
+    fields: investmentAccounts,
+    append: addInvestmentAccount,
+    remove: removeInvestmentAccount,
   } = useFieldArray({
     control,
-    name: "investments",
+    name: "investmentAccounts",
   });
 
   // --- DIGITAL ASSETS ---
@@ -75,22 +76,22 @@ export function PersonalAssetsSection({
     name: "retirementAccounts",
   });
 
-  // --- LIFE INSURANCE ---
+  // --- LIFE INSURANCE POLICIES ---
   const {
-    fields: lifeInsurance,
-    append: addLifeInsurance,
-    remove: removeLifeInsurance,
+    fields: lifeInsurancePolicies,
+    append: addLifeInsurancePolicy,
+    remove: removeLifeInsurancePolicy,
   } = useFieldArray({
     control,
-    name: "lifeInsurance",
+    name: "lifeInsurancePolicies",
   });
 
-  // --- REAL PROPERTY ---
+  // --- REAL PROPERTIES ---
   const {
-    fields: realProperty,
+    fields: realProperties,
     append: addRealProperty,
     remove: removeRealProperty,
-  } = useFieldArray({ control, name: "realProperty" });
+  } = useFieldArray({ control, name: "realProperties" });
 
   // --- VEHICLES ---
   const {
@@ -99,19 +100,19 @@ export function PersonalAssetsSection({
     remove: removeVehicle,
   } = useFieldArray({ control, name: "vehicles" });
 
-  // --- OTHER VALUABLE ITEMS ---
+  // --- VALUABLE ITEMS ---
   const {
-    fields: valuables,
-    append: addValuable,
-    remove: removeValuable,
-  } = useFieldArray({ control, name: "valuables" });
+    fields: valuableItems,
+    append: addValuableItem,
+    remove: removeValuableItem,
+  } = useFieldArray({ control, name: "valuableItems" });
 
-  // --- FURNITURE ---
+  // --- FURNITURE PERSONAL EFFECTS ---
   const {
-    fields: furniture,
-    append: addFurniture,
-    remove: removeFurniture,
-  } = useFieldArray({ control, name: "furniture" });
+    fields: furniturePersonalEffects,
+    append: addFurniturePersonalEffect,
+    remove: removeFurniturePersonalEffect,
+  } = useFieldArray({ control, name: "furniturePersonalEffects" });
 
   const bankAccountTypes = [
     { title: "Cash", label: "cash" },
@@ -138,48 +139,52 @@ export function PersonalAssetsSection({
     ) - 1000
   );
 
-  const investmentsValue = watch("investments") || [];
-  const investmentTotal = investmentsValue.reduce(
+  const investmentAccountsValue = watch("investmentAccounts") || [];
+  const investmentTotal = investmentAccountsValue.reduce(
     (sum: any, inv: any) =>
-      sum + Math.max(0, (inv.marketValue || 0) - (inv.loanBalance || 0)),
+      sum + Math.max(0, (inv.currentMarketValue || 0) - (inv.loanBalance || 0)),
     0
   );
 
   const digitalAssetsValue = watch("digitalAssets") || [];
   const digitalTotal = digitalAssetsValue.reduce(
-    (sum: any, asset: any) => sum + (asset.dollarValue || 0),
+    (sum: any, asset: any) => sum + (asset.usdEquivalent || 0),
     0
   );
 
   const retirementAccountsValue = watch("retirementAccounts") || [];
   const retirementTotal = retirementAccountsValue.reduce(
     (sum: any, ret: any) =>
-      sum + Math.max(0, (ret.marketValue || 0) * 0.8 - (ret.loanBalance || 0)),
+      sum +
+      Math.max(0, (ret.currentMarketValue || 0) * 0.8 - (ret.loanBalance || 0)),
     0
   );
 
-  const lifeInsuranceValue = watch("lifeInsurance") || [];
-  const insuranceTotal = lifeInsuranceValue.reduce(
+  const lifeInsurancePoliciesValue = watch("lifeInsurancePolicies") || [];
+  const insuranceTotal = lifeInsurancePoliciesValue.reduce(
     (sum: any, ins: any) =>
-      sum + Math.max(0, (ins.cashValue || 0) - (ins.loanBalance || 0)),
+      sum + Math.max(0, (ins.currentCashValue || 0) - (ins.loanBalance || 0)),
     0
   );
 
-  const realPropertyValue = watch("realProperty") || [];
-  const propertyTotal = realPropertyValue.reduce(
+  const realPropertiesValue = watch("realProperties") || [];
+  const propertyTotal = realPropertiesValue.reduce(
     (sum: any, prop: any) =>
       sum +
-      Math.max(0, (prop.marketValue || 0) * 0.8 - (prop.loanBalance || 0)),
+      Math.max(
+        0,
+        (prop.currentMarketValue || 0) * 0.8 - (prop.loanBalance || 0)
+      ),
     0
   );
 
   const vehiclesValue = watch("vehicles") || [];
   let vehicleTotal = 0;
   vehiclesValue.forEach((vehicle: any, index: any) => {
-    if (vehicle.status !== "lease") {
+    if (vehicle.ownershipType !== "lease") {
       const vehicleValue = Math.max(
         0,
-        (vehicle.marketValue || 0) * 0.8 - (vehicle.loanBalance || 0)
+        (vehicle.currentMarketValue || 0) * 0.8 - (vehicle.loanBalance || 0)
       );
       if (index === 0) {
         vehicleTotal += Math.max(0, vehicleValue - 3450);
@@ -189,19 +194,25 @@ export function PersonalAssetsSection({
     }
   });
 
-  const valuablesValue = watch("valuables") || [];
-  const valuablesTotal = valuablesValue.reduce(
+  const valuableItemsValue = watch("valuableItems") || [];
+  const valuablesTotal = valuableItemsValue.reduce(
     (sum: any, item: any) =>
       sum +
-      Math.max(0, (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)),
+      Math.max(
+        0,
+        (item.currentMarketValue || 0) * 0.8 - (item.loanBalance || 0)
+      ),
     0
   );
 
-  const furnitureValue = watch("furniture") || [];
-  const furnitureTotal = furnitureValue.reduce(
+  const furniturePersonalEffectsValue = watch("furniturePersonalEffects") || [];
+  const furnitureTotal = furniturePersonalEffectsValue.reduce(
     (sum: any, item: any) =>
       sum +
-      Math.max(0, (item.marketValue || 0) * 0.8 - (item.loanBalance || 0)),
+      Math.max(
+        0,
+        (item.currentMarketValue || 0) * 0.8 - (item.loanBalance || 0)
+      ),
     0
   );
   const otherTotal = Math.max(0, valuablesTotal + furnitureTotal - 11710);
@@ -237,7 +248,7 @@ export function PersonalAssetsSection({
         </p>
       </div>
 
-      {/* Cash and Investments (Domestic and Foreign) */}
+      {/* Bank Accounts (Domestic and Foreign) */}
       <Card>
         <CardHeader>
           <CardTitle>Cash and Investments (Domestic and Foreign)</CardTitle>
@@ -327,6 +338,7 @@ export function PersonalAssetsSection({
                   id={`bankAccounts.${index}.accountNumber`}
                   required
                   {...register(`bankAccounts.${index}.accountNumber`)}
+                  onChange={(e) => preventAlphabetInput(e)}
                   error={errors.bankAccounts?.[index]?.accountNumber?.message}
                 />
 
@@ -373,9 +385,9 @@ export function PersonalAssetsSection({
           <CardTitle>Investment Accounts (Domestic and Foreign)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {investments.map((field, index) => {
+          {investmentAccounts.map((field, index) => {
             const investmentAccountType = watch(
-              `investments.${index}.investmentType`
+              `investmentAccounts.${index}.investmentType`
             );
 
             return (
@@ -391,7 +403,7 @@ export function PersonalAssetsSection({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => removeInvestment(index)}
+                    onClick={() => removeInvestmentAccount(index)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -401,12 +413,14 @@ export function PersonalAssetsSection({
                 {/* Investment Type Radio Buttons */}
                 <FormField
                   label="Investment Account"
-                  id={`investments.${index}.investmentType`}
+                  id={`investmentAccounts.${index}.investmentType`}
                   required
-                  error={errors.investments?.[index]?.investmentType?.message}
+                  error={
+                    errors.investmentAccounts?.[index]?.investmentType?.message
+                  }
                 >
                   <Controller
-                    name={`investments.${index}.investmentType`}
+                    name={`investmentAccounts.${index}.investmentType`}
                     control={control}
                     rules={{ required: "Investment type is required" }}
                     render={({ field }) => (
@@ -441,11 +455,14 @@ export function PersonalAssetsSection({
                 {investmentAccountType === "other" && (
                   <FormInput
                     label="Other"
-                    id={`investments.${index}.investmentTypeText`}
+                    id={`investmentAccounts.${index}.investmentTypeText`}
                     required
-                    {...register(`investments.${index}.investmentTypeText`)}
+                    {...register(
+                      `investmentAccounts.${index}.investmentTypeText`
+                    )}
                     error={
-                      errors.investments?.[index]?.investmentTypeText?.message
+                      errors.investmentAccounts?.[index]?.investmentTypeText
+                        ?.message
                     }
                   />
                 )}
@@ -453,62 +470,74 @@ export function PersonalAssetsSection({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormInput
                     label="Name of Financial Institution"
-                    id={`investments.${index}.institutionName`}
+                    id={`investmentAccounts.${index}.institutionName`}
                     required
-                    {...register(`investments.${index}.institutionName`)}
+                    {...register(`investmentAccounts.${index}.institutionName`)}
                     error={
-                      errors.investments?.[index]?.institutionName?.message
+                      errors.investmentAccounts?.[index]?.institutionName
+                        ?.message
                     }
                   />
 
                   <FormInput
                     label="Financial Institution Country Location"
-                    id={`investments.${index}.countryLocation`}
+                    id={`investmentAccounts.${index}.countryLocation`}
                     required
-                    {...register(`investments.${index}.countryLocation`)}
+                    {...register(`investmentAccounts.${index}.countryLocation`)}
                     error={
-                      errors.investments?.[index]?.countryLocation?.message
+                      errors.investmentAccounts?.[index]?.countryLocation
+                        ?.message
                     }
                   />
 
                   <FormInput
                     label="Account Number"
-                    type="number"
-                    id={`investments.${index}.accountNumber`}
+                    id={`investmentAccounts.${index}.accountNumber`}
                     required
-                    {...register(`investments.${index}.accountNumber`)}
-                    error={errors.investments?.[index]?.accountNumber?.message}
+                    {...register(`investmentAccounts.${index}.accountNumber`)}
+                    onChange={(e) => preventAlphabetInput(e)}
+                    error={
+                      errors.investmentAccounts?.[index]?.accountNumber?.message
+                    }
                   />
 
                   <FormInput
                     label="Current Market Value ($)"
-                    id={`investments.${index}.marketValue`}
+                    id={`investmentAccounts.${index}.currentMarketValue`}
                     type="number"
                     min="0"
                     placeholder="0"
                     required
-                    {...register(`investments.${index}.marketValue`, {
-                      valueAsNumber: true,
-                      min: { value: 0, message: "Value cannot be negative" },
-                    })}
-                    error={errors.investments?.[index]?.marketValue?.message}
+                    {...register(
+                      `investmentAccounts.${index}.currentMarketValue`,
+                      {
+                        valueAsNumber: true,
+                        min: { value: 0, message: "Value cannot be negative" },
+                      }
+                    )}
+                    error={
+                      errors.investmentAccounts?.[index]?.currentMarketValue
+                        ?.message
+                    }
                   />
                 </div>
 
                 <FormInput
                   label="Minus Loan Balance ($)"
-                  id={`investments.${index}.loanBalance`}
+                  id={`investmentAccounts.${index}.loanBalance`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  {...register(`investments.${index}.loanBalance`, {
+                  {...register(`investmentAccounts.${index}.loanBalance`, {
                     valueAsNumber: true,
                     min: {
                       value: 0,
                       message: "Loan balance cannot be negative",
                     },
                   })}
-                  error={errors.investments?.[index]?.loanBalance?.message}
+                  error={
+                    errors.investmentAccounts?.[index]?.loanBalance?.message
+                  }
                   className="max-w-md"
                 />
 
@@ -518,8 +547,10 @@ export function PersonalAssetsSection({
                     Net Value: $
                     {Math.max(
                       0,
-                      (watch(`investments.${index}.marketValue`) || 0) -
-                        (watch(`investments.${index}.loanBalance`) || 0)
+                      (watch(
+                        `investmentAccounts.${index}.currentMarketValue`
+                      ) || 0) -
+                        (watch(`investmentAccounts.${index}.loanBalance`) || 0)
                     ).toLocaleString()}
                   </Label>
                 </div>
@@ -531,12 +562,12 @@ export function PersonalAssetsSection({
             type="button"
             variant="outline"
             onClick={() =>
-              addInvestment({
-                type: "",
+              addInvestmentAccount({
+                investmentType: "",
                 institutionName: "",
                 countryLocation: "",
                 accountNumber: "",
-                marketValue: 0,
+                currentMarketValue: 0,
                 loanBalance: 0,
               })
             }
@@ -585,54 +616,62 @@ export function PersonalAssetsSection({
 
                 <FormInput
                   label="Number of Units"
-                  id={`digitalAssets.${index}.units`}
+                  id={`digitalAssets.${index}.numberOfUnits`}
                   type="number"
                   min="0"
                   step="any"
                   placeholder="0"
                   required
-                  {...register(`digitalAssets.${index}.units`, {
+                  {...register(`digitalAssets.${index}.numberOfUnits`, {
                     valueAsNumber: true,
                     min: { value: 0, message: "Units cannot be negative" },
                   })}
-                  error={errors.digitalAssets?.[index]?.units?.message}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  label="Location of Digital Asset (exchange account, self-hosted wallet)"
-                  id={`digitalAssets.${index}.location`}
-                  required
-                  {...register(`digitalAssets.${index}.location`)}
-                  error={errors.digitalAssets?.[index]?.location?.message}
-                />
-
-                <FormInput
-                  label="Account Number (for custodial assets) or Digital Asset Address (for self-hosted)"
-                  id={`digitalAssets.${index}.accountOrAddress`}
-                  required
-                  {...register(`digitalAssets.${index}.accountOrAddress`)}
-                  error={
-                    errors.digitalAssets?.[index]?.accountOrAddress?.message
-                  }
+                  error={errors.digitalAssets?.[index]?.numberOfUnits?.message}
                 />
               </div>
 
               <FormInput
-                label="US Dollar Equivalent as of Today ($)"
-                id={`digitalAssets.${index}.dollarValue`}
-                type="number"
-                min="0"
-                placeholder="0"
+                label="Location of Digital Asset (exchange account, self-hosted wallet)"
+                id={`digitalAssets.${index}.location`}
                 required
-                {...register(`digitalAssets.${index}.dollarValue`, {
-                  valueAsNumber: true,
-                  min: { value: 0, message: "Value cannot be negative" },
-                })}
-                error={errors.digitalAssets?.[index]?.dollarValue?.message}
-                className="max-w-md"
+                {...register(`digitalAssets.${index}.location`)}
+                error={errors.digitalAssets?.[index]?.location?.message}
               />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormInput
+                  label="Account Number (for custodial assets held by a broker)"
+                  id={`digitalAssets.${index}.accountNumber`}
+                  placeholder="Leave blank if self-hosted"
+                  {...register(`digitalAssets.${index}.accountNumber`)}
+                  error={errors.digitalAssets?.[index]?.accountNumber?.message}
+                />
+
+                <FormInput
+                  label="Digital Asset Address (for self-hosted assets)"
+                  id={`digitalAssets.${index}.digitalAssetAddress`}
+                  placeholder="Leave blank if custodial"
+                  {...register(`digitalAssets.${index}.digitalAssetAddress`)}
+                  error={
+                    errors.digitalAssets?.[index]?.digitalAssetAddress?.message
+                  }
+                />
+
+                <FormInput
+                  label="US Dollar Equivalent as of Today ($)"
+                  id={`digitalAssets.${index}.usdEquivalent`}
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  required
+                  {...register(`digitalAssets.${index}.usdEquivalent`, {
+                    valueAsNumber: true,
+                    min: { value: 0, message: "Value cannot be negative" },
+                  })}
+                  error={errors.digitalAssets?.[index]?.usdEquivalent?.message}
+                  className="col-span-1"
+                />
+              </div>
             </div>
           ))}
 
@@ -642,10 +681,11 @@ export function PersonalAssetsSection({
             onClick={() =>
               addDigitalAsset({
                 description: "",
-                units: 0,
+                numberOfUnits: null,
                 location: "",
-                accountOrAddress: "",
-                dollarValue: 0,
+                accountNumber: "",
+                digitalAssetAddress: "",
+                usdEquivalent: null,
               })
             }
             className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -685,12 +725,14 @@ export function PersonalAssetsSection({
               {/* Retirement Account Type Radio Buttons */}
               <FormField
                 label="Retirement Account Type"
-                id={`retirementAccounts.${index}.type`}
+                id={`retirementAccounts.${index}.retirementType`}
                 required
-                error={errors.retirementAccounts?.[index]?.type?.message}
+                error={
+                  errors.retirementAccounts?.[index]?.retirementType?.message
+                }
               >
                 <Controller
-                  name={`retirementAccounts.${index}.type`}
+                  name={`retirementAccounts.${index}.retirementType`}
                   control={control}
                   rules={{ required: "Retirement account type is required" }}
                   render={({ field }) => (
@@ -699,22 +741,25 @@ export function PersonalAssetsSection({
                       onValueChange={field.onChange}
                       className="flex flex-wrap gap-4 mt-2"
                     >
-                      {["401K", "IRA", "Other"].map((type) => (
-                        <div key={type} className="flex items-center space-x-2">
+                      {[
+                        { label: "401K", value: "401k" },
+                        { label: "IRA", value: "ira" },
+                        { label: "Other", value: "other" },
+                      ].map((type) => (
+                        <div
+                          key={type.value}
+                          className="flex items-center space-x-2"
+                        >
                           <RadioGroupItem
-                            value={type}
-                            id={`retirement-${index}-${type
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
+                            value={type.value}
+                            id={`retirement-${index}-${type.value}`}
                             className="text-[#22b573]"
                           />
                           <Label
-                            htmlFor={`retirement-${index}-${type
-                              .replace(/\s+/g, "-")
-                              .toLowerCase()}`}
+                            htmlFor={`retirement-${index}-${type.value}`}
                             className="text-sm"
                           >
-                            {type}
+                            {type.label}
                           </Label>
                         </div>
                       ))}
@@ -723,9 +768,34 @@ export function PersonalAssetsSection({
                 />
               </FormField>
 
+              {/* Conditional Other Type Text Field */}
+              {watch(`retirementAccounts.${index}.retirementType`) ===
+                "other" && (
+                <FormInput
+                  label="Please specify retirement account type"
+                  id={`retirementAccounts.${index}.retirementTypeText`}
+                  required
+                  placeholder="Enter retirement account type"
+                  {...register(
+                    `retirementAccounts.${index}.retirementTypeText`,
+                    {
+                      required:
+                        watch(`retirementAccounts.${index}.retirementType`) ===
+                        "other"
+                          ? "Please specify the retirement account type"
+                          : false,
+                    }
+                  )}
+                  error={
+                    errors.retirementAccounts?.[index]?.retirementTypeText
+                      ?.message
+                  }
+                />
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
-                  label="Name of Financial Institution & Country Location"
+                  label="Name of Financial Institution"
                   id={`retirementAccounts.${index}.institutionName`}
                   required
                   {...register(`retirementAccounts.${index}.institutionName`)}
@@ -735,30 +805,43 @@ export function PersonalAssetsSection({
                 />
 
                 <FormInput
-                  label="Account Number"
-                  id={`retirementAccounts.${index}.accountNumber`}
+                  label="Country Location"
+                  id={`retirementAccounts.${index}.countryLocation`}
                   required
-                  {...register(`retirementAccounts.${index}.accountNumber`)}
+                  {...register(`retirementAccounts.${index}.countryLocation`)}
                   error={
-                    errors.retirementAccounts?.[index]?.accountNumber?.message
+                    errors.retirementAccounts?.[index]?.countryLocation?.message
                   }
                 />
               </div>
 
+              <FormInput
+                label="Account Number"
+                id={`retirementAccounts.${index}.accountNumber`}
+                {...register(`retirementAccounts.${index}.accountNumber`)}
+                onChange={(e) => preventAlphabetInput(e)}
+                error={
+                  errors.retirementAccounts?.[index]?.accountNumber?.message
+                }
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormInput
                   label="Current Market Value ($)"
-                  id={`retirementAccounts.${index}.marketValue`}
+                  id={`retirementAccounts.${index}.currentMarketValue`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  required
-                  {...register(`retirementAccounts.${index}.marketValue`, {
-                    valueAsNumber: true,
-                    min: { value: 0, message: "Value cannot be negative" },
-                  })}
+                  {...register(
+                    `retirementAccounts.${index}.currentMarketValue`,
+                    {
+                      valueAsNumber: true,
+                      min: { value: 0, message: "Value cannot be negative" },
+                    }
+                  )}
                   error={
-                    errors.retirementAccounts?.[index]?.marketValue?.message
+                    errors.retirementAccounts?.[index]?.currentMarketValue
+                      ?.message
                   }
                 />
 
@@ -766,8 +849,9 @@ export function PersonalAssetsSection({
                   <Label className="text-sm font-medium">
                     Market Value × 0.8: $
                     {(
-                      (watch(`retirementAccounts.${index}.marketValue`) || 0) *
-                      0.8
+                      (watch(
+                        `retirementAccounts.${index}.currentMarketValue`
+                      ) || 0) * 0.8
                     ).toLocaleString()}
                   </Label>
                 </div>
@@ -797,7 +881,8 @@ export function PersonalAssetsSection({
                   Net Value: $
                   {Math.max(
                     0,
-                    (watch(`retirementAccounts.${index}.marketValue`) || 0) *
+                    (watch(`retirementAccounts.${index}.currentMarketValue`) ||
+                      0) *
                       0.8 -
                       (watch(`retirementAccounts.${index}.loanBalance`) || 0)
                   ).toLocaleString()}
@@ -811,10 +896,11 @@ export function PersonalAssetsSection({
             variant="outline"
             onClick={() =>
               addRetirementAccount({
-                type: "",
+                retirementType: "",
                 institutionName: "",
+                countryLocation: "",
                 accountNumber: "",
-                marketValue: 0,
+                currentMarketValue: 0,
                 loanBalance: 0,
               })
             }
@@ -838,7 +924,7 @@ export function PersonalAssetsSection({
           <CardTitle>Cash Value of Life Insurance Policies</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {lifeInsurance.map((field, index) => (
+          {lifeInsurancePolicies.map((field, index) => (
             <div
               key={field.id}
               className="p-4 border border-gray-200 rounded-lg space-y-4"
@@ -851,7 +937,7 @@ export function PersonalAssetsSection({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeLifeInsurance(index)}
+                  onClick={() => removeLifeInsurancePolicy(index)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -861,50 +947,65 @@ export function PersonalAssetsSection({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
                   label="Name of Insurance Company"
-                  id={`lifeInsurance.${index}.companyName`}
+                  id={`lifeInsurancePolicies.${index}.companyName`}
                   required
-                  {...register(`lifeInsurance.${index}.companyName`)}
-                  error={errors.lifeInsurance?.[index]?.companyName?.message}
+                  {...register(`lifeInsurancePolicies.${index}.companyName`)}
+                  error={
+                    errors.lifeInsurancePolicies?.[index]?.companyName?.message
+                  }
                 />
 
                 <FormInput
                   label="Policy Number"
-                  id={`lifeInsurance.${index}.policyNumber`}
+                  id={`lifeInsurancePolicies.${index}.policyNumber`}
                   required
-                  {...register(`lifeInsurance.${index}.policyNumber`)}
-                  error={errors.lifeInsurance?.[index]?.policyNumber?.message}
+                  {...register(`lifeInsurancePolicies.${index}.policyNumber`)}
+                  error={
+                    errors.lifeInsurancePolicies?.[index]?.policyNumber?.message
+                  }
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
                   label="Current Cash Value ($)"
-                  id={`lifeInsurance.${index}.cashValue`}
+                  id={`lifeInsurancePolicies.${index}.currentCashValue`}
                   type="number"
                   min="0"
                   placeholder="0"
                   required
-                  {...register(`lifeInsurance.${index}.cashValue`, {
-                    valueAsNumber: true,
-                    min: { value: 0, message: "Cash value cannot be negative" },
-                  })}
-                  error={errors.lifeInsurance?.[index]?.cashValue?.message}
+                  {...register(
+                    `lifeInsurancePolicies.${index}.currentCashValue`,
+                    {
+                      valueAsNumber: true,
+                      min: {
+                        value: 0,
+                        message: "Cash value cannot be negative",
+                      },
+                    }
+                  )}
+                  error={
+                    errors.lifeInsurancePolicies?.[index]?.currentCashValue
+                      ?.message
+                  }
                 />
 
                 <FormInput
                   label="Minus Loan Balance ($)"
-                  id={`lifeInsurance.${index}.loanBalance`}
+                  id={`lifeInsurancePolicies.${index}.loanBalance`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  {...register(`lifeInsurance.${index}.loanBalance`, {
+                  {...register(`lifeInsurancePolicies.${index}.loanBalance`, {
                     valueAsNumber: true,
                     min: {
                       value: 0,
                       message: "Loan balance cannot be negative",
                     },
                   })}
-                  error={errors.lifeInsurance?.[index]?.loanBalance?.message}
+                  error={
+                    errors.lifeInsurancePolicies?.[index]?.loanBalance?.message
+                  }
                 />
               </div>
 
@@ -914,8 +1015,9 @@ export function PersonalAssetsSection({
                   Net Value: $
                   {Math.max(
                     0,
-                    (watch(`lifeInsurance.${index}.cashValue`) || 0) -
-                      (watch(`lifeInsurance.${index}.loanBalance`) || 0)
+                    (watch(`lifeInsurancePolicies.${index}.currentCashValue`) ||
+                      0) -
+                      (watch(`lifeInsurancePolicies.${index}.loanBalance`) || 0)
                   ).toLocaleString()}
                 </Label>
               </div>
@@ -926,10 +1028,10 @@ export function PersonalAssetsSection({
             type="button"
             variant="outline"
             onClick={() =>
-              addLifeInsurance({
+              addLifeInsurancePolicy({
                 companyName: "",
                 policyNumber: "",
-                cashValue: 0,
+                currentCashValue: 0,
                 loanBalance: 0,
               })
             }
@@ -941,7 +1043,7 @@ export function PersonalAssetsSection({
         </CardContent>
       </Card>
 
-      {/* Real Property */}
+      {/* Real Properties */}
       <Card>
         <CardHeader>
           <CardTitle>Real Property</CardTitle>
@@ -952,236 +1054,271 @@ export function PersonalAssetsSection({
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {realProperty.map((field, index) => (
-            <div
-              key={field.id}
-              className="p-4 border border-gray-200 rounded-lg space-y-4"
-            >
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium text-gray-900">
-                  Property {index + 1}
-                </h4>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeRealProperty(index)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+          {realProperties.map((field, index) => {
+            const isForSale =
+              watch(`realProperties.${index}.isForSale`) || false;
+            const anticipateSelling =
+              watch(`realProperties.${index}.anticipateSelling`) || false;
+            const isSelling = isForSale || anticipateSelling;
 
-              {/* Property Sale Status Question */}
-              <FormField
-                label="Is this real property currently for sale or do you anticipate selling this real property to fund the offer amount?"
-                id={`realProperty.${index}.saleStatus`}
-                error={errors.realProperty?.[index]?.saleStatus?.message}
+            return (
+              <div
+                key={field.id}
+                className="p-4 border border-gray-200 rounded-lg space-y-4"
               >
-                <Controller
-                  name={`realProperty.${index}.saleStatus`}
-                  control={control}
-                  rules={{ required: "Please select an option" }}
-                  render={({ field }) => (
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={(value: "yes" | "no") => {
-                        field.onChange(value);
-                        if (value === "no") {
-                          setValue(
-                            `realProperty.${index}.listingPrice`,
-                            undefined
-                          );
-                        }
-                      }}
-                      className="flex gap-6 mt-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="yes"
-                          id={`property-sale-yes-${index}`}
-                          className="text-[#22b573]"
-                        />
-                        <Label htmlFor={`property-sale-yes-${index}`}>
-                          Yes
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="no"
-                          id={`property-sale-no-${index}`}
-                          className="text-[#22b573]"
-                        />
-                        <Label htmlFor={`property-sale-no-${index}`}>No</Label>
-                      </div>
-                    </RadioGroup>
-                  )}
-                />
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium text-gray-900">
+                    Property {index + 1}
+                  </h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeRealProperty(index)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
 
-                {watch(`realProperty.${index}.saleStatus`) === "yes" && (
-                  <div className="mt-3">
-                    <FormInput
-                      label="Listing Price ($)"
-                      id={`realProperty.${index}.listingPrice`}
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      required
-                      {...register(`realProperty.${index}.listingPrice`, {
-                        required: "Listing price is required",
-                        valueAsNumber: true,
-                        min: {
-                          value: 0,
-                          message: "Listing price cannot be negative",
-                        },
-                      })}
-                      error={
-                        errors.realProperty?.[index]?.listingPrice?.message
-                      }
-                      className="max-w-md"
-                    />
+                {/* Property Sale Status Questions */}
+                <FormField
+                  id="realProperties-sale-status"
+                  label="Is this real property currently for sale or do you anticipate selling this real property to fund the offer amount?"
+                >
+                  <div className="space-y-4 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Controller
+                        name={`realProperties.${index}.isForSale`}
+                        control={control}
+                        render={({ field }) => (
+                          <Checkbox
+                            id={`realProperties.${index}.isForSale`}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        )}
+                      />
+                      <Label htmlFor={`realProperties.${index}.isForSale`}>
+                        Is this property currently for sale?
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Controller
+                        name={`realProperties.${index}.anticipateSelling`}
+                        control={control}
+                        render={({ field }) => (
+                          <Checkbox
+                            id={`realProperties.${index}.anticipateSelling`}
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        )}
+                      />
+                      <Label
+                        htmlFor={`realProperties.${index}.anticipateSelling`}
+                      >
+                        Do you anticipate selling this property to fund the
+                        offer amount?
+                      </Label>
+                    </div>
                   </div>
-                )}
-              </FormField>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                  label="Property Description (indicate if personal residence, rental property, vacant, etc.)"
-                  id={`realProperty.${index}.description`}
-                  required
-                  {...register(`realProperty.${index}.description`)}
-                  error={errors.realProperty?.[index]?.description?.message}
-                />
+                  {isSelling && (
+                    <div className="mt-3">
+                      <FormInput
+                        label="Listing Price ($)"
+                        id={`realProperties.${index}.listingPrice`}
+                        type="number"
+                        min="0"
+                        required
+                        placeholder="0"
+                        {...register(`realProperties.${index}.listingPrice`, {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Listing price cannot be negative",
+                          },
+                        })}
+                        error={
+                          errors.realProperties?.[index]?.listingPrice?.message
+                        }
+                        className="max-w-md"
+                      />
+                    </div>
+                  )}
+                </FormField>
 
-                <FormInput
-                  label="Purchase Date (mm/dd/yyyy)"
-                  id={`realProperty.${index}.purchaseDate`}
-                  type="date"
-                  required
-                  {...register(`realProperty.${index}.purchaseDate`)}
-                  error={errors.realProperty?.[index]?.purchaseDate?.message}
-                />
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormInput
+                    label="Property Description (indicate if personal residence, rental property, vacant, etc.)"
+                    id={`realProperties.${index}.description`}
+                    required
+                    {...register(`realProperties.${index}.description`)}
+                    error={errors.realProperties?.[index]?.description?.message}
+                  />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormInput
-                  label="Amount of Mortgage Payment ($)"
-                  id={`realProperty.${index}.mortgagePayment`}
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  {...register(`realProperty.${index}.mortgagePayment`, {
-                    valueAsNumber: true,
-                    min: { value: 0, message: "Payment cannot be negative" },
-                  })}
-                  error={errors.realProperty?.[index]?.mortgagePayment?.message}
-                />
+                  <FormInput
+                    label="Purchase Date (mm/dd/yyyy)"
+                    id={`realProperties.${index}.purchaseDate`}
+                    type="date"
+                    required
+                    {...register(`realProperties.${index}.purchaseDate`)}
+                    error={
+                      errors.realProperties?.[index]?.purchaseDate?.message
+                    }
+                  />
+                </div>
 
-                <FormInput
-                  label="Date of Final Payment (mm/dd/yyyy)"
-                  id={`realProperty.${index}.finalPaymentDate`}
-                  type="date"
-                  {...register(`realProperty.${index}.finalPaymentDate`)}
-                  error={
-                    errors.realProperty?.[index]?.finalPaymentDate?.message
-                  }
-                />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormInput
+                    label="Amount of Mortgage Payment ($)"
+                    id={`realProperties.${index}.mortgagePayment`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register(`realProperties.${index}.mortgagePayment`, {
+                      valueAsNumber: true,
+                      min: { value: 0, message: "Payment cannot be negative" },
+                    })}
+                    error={
+                      errors.realProperties?.[index]?.mortgagePayment?.message
+                    }
+                  />
 
-                <FormInput
-                  label="How Title is Held (joint tenancy, etc.)"
-                  id={`realProperty.${index}.titleHeld`}
-                  required
-                  {...register(`realProperty.${index}.titleHeld`)}
-                  error={errors.realProperty?.[index]?.titleHeld?.message}
-                />
-              </div>
+                  <FormInput
+                    label="Date of Final Payment (mm/dd/yyyy)"
+                    id={`realProperties.${index}.finalPaymentDate`}
+                    type="date"
+                    {...register(`realProperties.${index}.finalPaymentDate`)}
+                    error={
+                      errors.realProperties?.[index]?.finalPaymentDate?.message
+                    }
+                  />
 
-              <FormInput
-                label="Location (street, city, state, ZIP code, country, and country)"
-                id={`realProperty.${index}.location`}
-                required
-                {...register(`realProperty.${index}.location`)}
-                error={errors.realProperty?.[index]?.location?.message}
-              />
-
-              <FormInput
-                label="Lender/Contract Holder Name, Address & Phone"
-                id={`realProperty.${index}.lenderInfo`}
-                {...register(`realProperty.${index}.lenderInfo`)}
-                error={errors.realProperty?.[index]?.lenderInfo?.message}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormInput
-                  label="Current Market Value ($)"
-                  id={`realProperty.${index}.marketValue`}
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  required
-                  {...register(`realProperty.${index}.marketValue`, {
-                    valueAsNumber: true,
-                    min: { value: 0, message: "Value cannot be negative" },
-                  })}
-                  error={errors.realProperty?.[index]?.marketValue?.message}
-                />
-
-                <div className="bg-gray-50 p-3 rounded">
-                  <Label className="text-sm font-medium">
-                    Market Value × 0.8: $
-                    {(
-                      (watch(`realProperty.${index}.marketValue`) || 0) * 0.8
-                    ).toLocaleString()}
-                  </Label>
+                  <FormInput
+                    label="How Title is Held (joint tenancy, etc.)"
+                    id={`realProperties.${index}.titleHeld`}
+                    required
+                    {...register(`realProperties.${index}.titleHeld`)}
+                    error={errors.realProperties?.[index]?.titleHeld?.message}
+                  />
                 </div>
 
                 <FormInput
-                  label="Minus Loan Balance ($)"
-                  id={`realProperty.${index}.loanBalance`}
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  {...register(`realProperty.${index}.loanBalance`, {
-                    valueAsNumber: true,
-                    min: {
-                      value: 0,
-                      message: "Loan balance cannot be negative",
-                    },
-                  })}
-                  error={errors.realProperty?.[index]?.loanBalance?.message}
+                  label="Location (street, city, state, ZIP code, country, and country)"
+                  id={`realProperties.${index}.location`}
+                  required
+                  {...register(`realProperties.${index}.location`)}
+                  error={errors.realProperties?.[index]?.location?.message}
                 />
-              </div>
 
-              {/* Auto-calculated net value */}
-              <div className="bg-gray-50 p-3 rounded">
-                <Label className="text-sm font-medium">
-                  Total Value of Real Estate: $
-                  {Math.max(
-                    0,
-                    (watch(`realProperty.${index}.marketValue`) || 0) * 0.8 -
-                      (watch(`realProperty.${index}.loanBalance`) || 0)
-                  ).toLocaleString()}
-                </Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormInput
+                    label="Lender Name"
+                    id={`realProperties.${index}.lenderName`}
+                    {...register(`realProperties.${index}.lenderName`)}
+                    error={errors.realProperties?.[index]?.lenderName?.message}
+                  />
+
+                  <FormInput
+                    label="Lender Address"
+                    id={`realProperties.${index}.lenderAddress`}
+                    {...register(`realProperties.${index}.lenderAddress`)}
+                    error={
+                      errors.realProperties?.[index]?.lenderAddress?.message
+                    }
+                  />
+
+                  <FormInput
+                    label="Lender Phone"
+                    id={`realProperties.${index}.lenderPhone`}
+                    {...register(`realProperties.${index}.lenderPhone`)}
+                    error={errors.realProperties?.[index]?.lenderPhone?.message}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormInput
+                    label="Current Market Value ($)"
+                    id={`realProperties.${index}.currentMarketValue`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    required
+                    {...register(`realProperties.${index}.currentMarketValue`, {
+                      valueAsNumber: true,
+                      min: { value: 0, message: "Value cannot be negative" },
+                    })}
+                    error={
+                      errors.realProperties?.[index]?.currentMarketValue
+                        ?.message
+                    }
+                  />
+
+                  <div className="bg-gray-50 p-3 rounded">
+                    <Label className="text-sm font-medium">
+                      Market Value × 0.8: $
+                      {(
+                        (watch(`realProperties.${index}.currentMarketValue`) ||
+                          0) * 0.8
+                      ).toLocaleString()}
+                    </Label>
+                  </div>
+
+                  <FormInput
+                    label="Minus Loan Balance ($)"
+                    id={`realProperties.${index}.loanBalance`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register(`realProperties.${index}.loanBalance`, {
+                      valueAsNumber: true,
+                      min: {
+                        value: 0,
+                        message: "Loan balance cannot be negative",
+                      },
+                    })}
+                    error={errors.realProperties?.[index]?.loanBalance?.message}
+                  />
+                </div>
+
+                {/* Auto-calculated net value */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <Label className="text-sm font-medium">
+                    Total Value of Real Estate: $
+                    {Math.max(
+                      0,
+                      (watch(`realProperties.${index}.currentMarketValue`) ||
+                        0) *
+                        0.8 -
+                        (watch(`realProperties.${index}.loanBalance`) || 0)
+                    ).toLocaleString()}
+                  </Label>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <Button
             type="button"
             variant="outline"
             onClick={() =>
               addRealProperty({
-                saleStatus: "",
-                listingPrice: 0,
                 description: "",
                 purchaseDate: "",
                 mortgagePayment: 0,
                 finalPaymentDate: "",
                 titleHeld: "",
                 location: "",
-                lenderInfo: "",
-                marketValue: 0,
+                lenderName: "",
+                lenderAddress: "",
+                lenderPhone: "",
+                currentMarketValue: 0,
                 loanBalance: 0,
+                isForSale: false,
+                anticipateSelling: false,
+                listingPrice: undefined,
               })
             }
             className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -1254,11 +1391,11 @@ export function PersonalAssetsSection({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormInput
                   label="Date Purchased (mm/dd/yyyy)"
-                  id={`vehicles.${index}.datePurchased`}
+                  id={`vehicles.${index}.purchaseDate`}
                   type="date"
                   required
-                  {...register(`vehicles.${index}.datePurchased`)}
-                  error={errors.vehicles?.[index]?.datePurchased?.message}
+                  {...register(`vehicles.${index}.purchaseDate`)}
+                  error={errors.vehicles?.[index]?.purchaseDate?.message}
                 />
 
                 <FormInput
@@ -1276,24 +1413,24 @@ export function PersonalAssetsSection({
 
                 <FormInput
                   label="License/Tag Number"
-                  id={`vehicles.${index}.licenseNumber`}
+                  id={`vehicles.${index}.licenseTagNumber`}
                   required
-                  {...register(`vehicles.${index}.licenseNumber`)}
-                  error={errors.vehicles?.[index]?.licenseNumber?.message}
+                  {...register(`vehicles.${index}.licenseTagNumber`)}
+                  error={errors.vehicles?.[index]?.licenseTagNumber?.message}
                 />
               </div>
 
-              {/* Lease or Own Radio Buttons */}
+              {/* Ownership Type Radio Buttons */}
               <FormField
-                label="Vehicle Status"
-                id={`vehicles.${index}.status`}
+                label="Vehicle Ownership Type"
+                id={`vehicles.${index}.ownershipType`}
                 required
-                error={errors.vehicles?.[index]?.status?.message}
+                error={errors.vehicles?.[index]?.ownershipType?.message}
               >
                 <Controller
-                  name={`vehicles.${index}.status`}
+                  name={`vehicles.${index}.ownershipType`}
                   control={control}
-                  rules={{ required: "Vehicle status is required" }}
+                  rules={{ required: "Vehicle ownership type is required" }}
                   render={({ field }) => (
                     <RadioGroup
                       value={field.value}
@@ -1339,38 +1476,40 @@ export function PersonalAssetsSection({
 
                 <FormInput
                   label="Monthly Lease/Loan Amount ($)"
-                  id={`vehicles.${index}.monthlyPayment`}
+                  id={`vehicles.${index}.monthlyLeaseLoanAmount`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  {...register(`vehicles.${index}.monthlyPayment`, {
+                  {...register(`vehicles.${index}.monthlyLeaseLoanAmount`, {
                     valueAsNumber: true,
                     min: { value: 0, message: "Payment cannot be negative" },
                   })}
-                  error={errors.vehicles?.[index]?.monthlyPayment?.message}
+                  error={
+                    errors.vehicles?.[index]?.monthlyLeaseLoanAmount?.message
+                  }
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormInput
                   label="Current Market Value ($)"
-                  id={`vehicles.${index}.marketValue`}
+                  id={`vehicles.${index}.currentMarketValue`}
                   type="number"
                   min="0"
                   placeholder="0"
                   required
-                  {...register(`vehicles.${index}.marketValue`, {
+                  {...register(`vehicles.${index}.currentMarketValue`, {
                     valueAsNumber: true,
                     min: { value: 0, message: "Value cannot be negative" },
                   })}
-                  error={errors.vehicles?.[index]?.marketValue?.message}
+                  error={errors.vehicles?.[index]?.currentMarketValue?.message}
                 />
 
                 <div className="bg-gray-50 p-3 rounded">
                   <Label className="text-sm font-medium">
                     Market Value × 0.8: $
                     {(
-                      (watch(`vehicles.${index}.marketValue`) || 0) * 0.8
+                      (watch(`vehicles.${index}.currentMarketValue`) || 0) * 0.8
                     ).toLocaleString()}
                   </Label>
                 </div>
@@ -1397,15 +1536,16 @@ export function PersonalAssetsSection({
                 <div>
                   <Label className="text-sm font-medium">
                     Total Value of Vehicle: $
-                    {watch(`vehicles.${index}.status`) === "lease"
+                    {watch(`vehicles.${index}.ownershipType`) === "lease"
                       ? "0"
                       : Math.max(
                           0,
-                          (watch(`vehicles.${index}.marketValue`) || 0) * 0.8 -
+                          (watch(`vehicles.${index}.currentMarketValue`) || 0) *
+                            0.8 -
                             (watch(`vehicles.${index}.loanBalance`) || 0)
                         ).toLocaleString()}
                   </Label>
-                  {watch(`vehicles.${index}.status`) === "lease" && (
+                  {watch(`vehicles.${index}.ownershipType`) === "lease" && (
                     <p className="text-xs text-gray-600">
                       If leased, enter 0 as total value
                     </p>
@@ -1416,11 +1556,12 @@ export function PersonalAssetsSection({
                     {index === 0 ? "Subtract $3,450" : "Net Vehicle Value"}: $
                     {(() => {
                       const totalValue =
-                        watch(`vehicles.${index}.status`) === "lease"
+                        watch(`vehicles.${index}.ownershipType`) === "lease"
                           ? 0
                           : Math.max(
                               0,
-                              (watch(`vehicles.${index}.marketValue`) || 0) *
+                              (watch(`vehicles.${index}.currentMarketValue`) ||
+                                0) *
                                 0.8 -
                                 (watch(`vehicles.${index}.loanBalance`) || 0)
                             );
@@ -1446,14 +1587,14 @@ export function PersonalAssetsSection({
               addVehicle({
                 makeModel: "",
                 year: new Date().getFullYear(),
-                datePurchased: "",
+                purchaseDate: "",
                 mileage: 0,
-                licenseNumber: "",
-                status: "",
+                licenseTagNumber: "",
+                ownershipType: "",
                 creditorName: "",
                 finalPaymentDate: "",
-                monthlyPayment: 0,
-                marketValue: 0,
+                monthlyLeaseLoanAmount: 0,
+                currentMarketValue: 0,
                 loanBalance: 0,
               })
             }
@@ -1475,7 +1616,7 @@ export function PersonalAssetsSection({
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {valuables.map((field, index) => (
+          {valuableItems.map((field, index) => (
             <div
               key={field.id}
               className="p-4 border border-gray-200 rounded-lg space-y-4"
@@ -1488,7 +1629,7 @@ export function PersonalAssetsSection({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeValuable(index)}
+                  onClick={() => removeValuableItem(index)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -1497,50 +1638,53 @@ export function PersonalAssetsSection({
 
               <FormInput
                 label="Description of Asset(s)"
-                id={`valuables.${index}.description`}
+                id={`valuableItems.${index}.description`}
                 required
-                {...register(`valuables.${index}.description`)}
-                error={errors.valuables?.[index]?.description?.message}
+                {...register(`valuableItems.${index}.description`)}
+                error={errors.valuableItems?.[index]?.description?.message}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormInput
                   label="Current Market Value ($)"
-                  id={`valuables.${index}.marketValue`}
+                  id={`valuableItems.${index}.currentMarketValue`}
                   type="number"
                   min="0"
                   placeholder="0"
                   required
-                  {...register(`valuables.${index}.marketValue`, {
+                  {...register(`valuableItems.${index}.currentMarketValue`, {
                     valueAsNumber: true,
                     min: { value: 0, message: "Value cannot be negative" },
                   })}
-                  error={errors.valuables?.[index]?.marketValue?.message}
+                  error={
+                    errors.valuableItems?.[index]?.currentMarketValue?.message
+                  }
                 />
 
                 <div className="bg-gray-50 p-3 rounded">
                   <Label className="text-sm font-medium">
                     Market Value × 0.8: $
                     {(
-                      (watch(`valuables.${index}.marketValue`) || 0) * 0.8
+                      (watch(`valuableItems.${index}.currentMarketValue`) ||
+                        0) * 0.8
                     ).toLocaleString()}
                   </Label>
                 </div>
 
                 <FormInput
                   label="Minus Loan Balance ($)"
-                  id={`valuables.${index}.loanBalance`}
+                  id={`valuableItems.${index}.loanBalance`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  {...register(`valuables.${index}.loanBalance`, {
+                  {...register(`valuableItems.${index}.loanBalance`, {
                     valueAsNumber: true,
                     min: {
                       value: 0,
                       message: "Loan balance cannot be negative",
                     },
                   })}
-                  error={errors.valuables?.[index]?.loanBalance?.message}
+                  error={errors.valuableItems?.[index]?.loanBalance?.message}
                 />
               </div>
 
@@ -1550,8 +1694,9 @@ export function PersonalAssetsSection({
                   Net Value: $
                   {Math.max(
                     0,
-                    (watch(`valuables.${index}.marketValue`) || 0) * 0.8 -
-                      (watch(`valuables.${index}.loanBalance`) || 0)
+                    (watch(`valuableItems.${index}.currentMarketValue`) || 0) *
+                      0.8 -
+                      (watch(`valuableItems.${index}.loanBalance`) || 0)
                   ).toLocaleString()}
                 </Label>
               </div>
@@ -1562,9 +1707,9 @@ export function PersonalAssetsSection({
             type="button"
             variant="outline"
             onClick={() =>
-              addValuable({
+              addValuableItem({
                 description: "",
-                marketValue: 0,
+                currentMarketValue: 0,
                 loanBalance: 0,
               })
             }
@@ -1585,7 +1730,7 @@ export function PersonalAssetsSection({
           <p className="text-sm text-gray-600">Items not listed above</p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {furniture.map((field, index) => (
+          {furniturePersonalEffects.map((field, index) => (
             <div
               key={field.id}
               className="p-4 border border-gray-200 rounded-lg space-y-4"
@@ -1598,7 +1743,7 @@ export function PersonalAssetsSection({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => removeFurniture(index)}
+                  onClick={() => removeFurniturePersonalEffect(index)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -1607,50 +1752,66 @@ export function PersonalAssetsSection({
 
               <FormInput
                 label="Description of Asset"
-                id={`furniture.${index}.description`}
+                id={`furniturePersonalEffects.${index}.description`}
                 required
-                {...register(`furniture.${index}.description`)}
-                error={errors.furniture?.[index]?.description?.message}
+                {...register(`furniturePersonalEffects.${index}.description`)}
+                error={
+                  errors.furniturePersonalEffects?.[index]?.description?.message
+                }
               />
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormInput
                   label="Current Market Value ($)"
-                  id={`furniture.${index}.marketValue`}
+                  id={`furniturePersonalEffects.${index}.currentMarketValue`}
                   type="number"
                   min="0"
                   placeholder="0"
                   required
-                  {...register(`furniture.${index}.marketValue`, {
-                    valueAsNumber: true,
-                    min: { value: 0, message: "Value cannot be negative" },
-                  })}
-                  error={errors.furniture?.[index]?.marketValue?.message}
+                  {...register(
+                    `furniturePersonalEffects.${index}.currentMarketValue`,
+                    {
+                      valueAsNumber: true,
+                      min: { value: 0, message: "Value cannot be negative" },
+                    }
+                  )}
+                  error={
+                    errors.furniturePersonalEffects?.[index]?.currentMarketValue
+                      ?.message
+                  }
                 />
 
                 <div className="bg-gray-50 p-3 rounded">
                   <Label className="text-sm font-medium">
                     Market Value × 0.8: $
                     {(
-                      (watch(`furniture.${index}.marketValue`) || 0) * 0.8
+                      (watch(
+                        `furniturePersonalEffects.${index}.currentMarketValue`
+                      ) || 0) * 0.8
                     ).toLocaleString()}
                   </Label>
                 </div>
 
                 <FormInput
                   label="Minus Loan Balance ($)"
-                  id={`furniture.${index}.loanBalance`}
+                  id={`furniturePersonalEffects.${index}.loanBalance`}
                   type="number"
                   min="0"
                   placeholder="0"
-                  {...register(`furniture.${index}.loanBalance`, {
-                    valueAsNumber: true,
-                    min: {
-                      value: 0,
-                      message: "Loan balance cannot be negative",
-                    },
-                  })}
-                  error={errors.furniture?.[index]?.loanBalance?.message}
+                  {...register(
+                    `furniturePersonalEffects.${index}.loanBalance`,
+                    {
+                      valueAsNumber: true,
+                      min: {
+                        value: 0,
+                        message: "Loan balance cannot be negative",
+                      },
+                    }
+                  )}
+                  error={
+                    errors.furniturePersonalEffects?.[index]?.loanBalance
+                      ?.message
+                  }
                 />
               </div>
 
@@ -1660,8 +1821,12 @@ export function PersonalAssetsSection({
                   Net Value: $
                   {Math.max(
                     0,
-                    (watch(`furniture.${index}.marketValue`) || 0) * 0.8 -
-                      (watch(`furniture.${index}.loanBalance`) || 0)
+                    (watch(
+                      `furniturePersonalEffects.${index}.currentMarketValue`
+                    ) || 0) *
+                      0.8 -
+                      (watch(`furniturePersonalEffects.${index}.loanBalance`) ||
+                        0)
                   ).toLocaleString()}
                 </Label>
               </div>
@@ -1672,9 +1837,9 @@ export function PersonalAssetsSection({
             type="button"
             variant="outline"
             onClick={() =>
-              addFurniture({
+              addFurniturePersonalEffect({
                 description: "",
-                marketValue: 0,
+                currentMarketValue: 0,
                 loanBalance: 0,
               })
             }

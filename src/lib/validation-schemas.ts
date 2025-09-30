@@ -169,22 +169,19 @@ export const personalAssetsSchema = z.object({
       })
     )
     .optional(),
-  investments: z
+  investmentAccounts: z
     .array(
       z.object({
         investmentType: z.string().min(1, "Investment type is required"),
-        investmentTypeText: z.string().min(1, "Investment type is required"),
+        investmentTypeText: z.string().optional(),
         institutionName: z
           .string()
-          .min(
-            1,
-            "Name of financial institution and country location is required"
-          ),
+          .min(1, "Name of financial institution is required"),
         countryLocation: z
           .string()
           .min(1, "Financial institution country location is required"),
         accountNumber: z.string().min(1, "Account number is required"),
-        marketValue: z.coerce
+        currentMarketValue: z.coerce
           .number()
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
@@ -196,48 +193,72 @@ export const personalAssetsSchema = z.object({
     .optional(),
   digitalAssets: z
     .array(
-      z.object({
-        description: z
-          .string()
-          .min(1, "Description of digital asset is required"),
-        units: z.coerce.number().min(0, "Number of units cannot be negative"),
-        location: z.string().min(1, "Location of digital asset is required"),
-        accountOrAddress: z
-          .string()
-          .min(1, "Account number or digital asset address is required"),
-        dollarValue: z.coerce
-          .number()
-          .min(0, "US dollar equivalent cannot be negative"),
-      })
+      z
+        .object({
+          description: z
+            .string()
+            .min(1, "Description of digital asset is required"),
+          numberOfUnits: z.coerce
+            .number()
+            .min(0, "Number of units cannot be negative"),
+          location: z.string().min(1, "Location of digital asset is required"),
+          accountNumber: z.string().optional(),
+          digitalAssetAddress: z.string().optional(),
+          usdEquivalent: z.coerce
+            .number()
+            .min(0, "US dollar equivalent cannot be negative"),
+        })
+        .refine((data) => data.accountNumber || data.digitalAssetAddress, {
+          message: "Either account number or digital asset address is required",
+          path: ["accountNumber"],
+        })
     )
     .optional(),
   retirementAccounts: z
     .array(
-      z.object({
-        type: z.string().min(1, "Retirement account type is required"),
-        institutionName: z
-          .string()
-          .min(
-            1,
-            "Name of financial institution and country location is required"
-          ),
-        accountNumber: z.string().min(1, "Account number is required"),
-        marketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
-      })
+      z
+        .object({
+          institutionName: z
+            .string()
+            .min(1, "Name of financial institution is required"),
+          countryLocation: z.string().min(1, "Country location is required"),
+          accountNumber: z.string().min(1, "Account number is required"),
+          retirementType: z.enum(["401k", "ira", "other"], {
+            message: "Retirement account type is required",
+          }),
+          retirementTypeText: z.string().optional(),
+          currentMarketValue: z.coerce
+            .number()
+            .min(0, "Current market value cannot be negative")
+            .optional(),
+          loanBalance: z.coerce
+            .number()
+            .min(0, "Loan balance cannot be negative")
+            .optional(),
+        })
+        .refine(
+          (data) => {
+            if (data.retirementType === "other") {
+              return (
+                data.retirementTypeText &&
+                data.retirementTypeText.trim().length > 0
+              );
+            }
+            return true;
+          },
+          {
+            message: "Please specify the retirement account type",
+            path: ["retirementTypeText"],
+          }
+        )
     )
     .optional(),
-  lifeInsurance: z
+  lifeInsurancePolicies: z
     .array(
       z.object({
         companyName: z.string().min(1, "Name of insurance company is required"),
         policyNumber: z.string().min(1, "Policy number is required"),
-        cashValue: z.coerce
+        currentCashValue: z.coerce
           .number()
           .min(0, "Current cash value cannot be negative"),
         loanBalance: z.coerce
@@ -247,7 +268,7 @@ export const personalAssetsSchema = z.object({
       })
     )
     .optional(),
-  realProperty: z
+  realProperties: z
     .array(
       z.object({
         description: z.string().min(1, "Property description is required"),
@@ -256,14 +277,24 @@ export const personalAssetsSchema = z.object({
           .number()
           .min(0, "Mortgage payment cannot be negative")
           .optional(),
+        finalPaymentDate: z.string().optional(),
         titleHeld: z.string().min(1, "How title is held is required"),
         location: z.string().min(1, "Location is required"),
-        marketValue: z.coerce
+        lenderName: z.string().optional(),
+        lenderAddress: z.string().optional(),
+        lenderPhone: z.string().optional(),
+        currentMarketValue: z.coerce
           .number()
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
           .number()
           .min(0, "Loan balance cannot be negative")
+          .optional(),
+        isForSale: z.boolean().optional(),
+        anticipateSelling: z.boolean().optional(),
+        listingPrice: z.coerce
+          .number()
+          .min(0, "Listing price cannot be negative")
           .optional(),
       })
     )
@@ -276,15 +307,17 @@ export const personalAssetsSchema = z.object({
           .number()
           .min(1900)
           .max(new Date().getFullYear() + 1, "Invalid year"),
-        datePurchased: z.string().min(1, "Date purchased is required"),
+        purchaseDate: z.string().min(1, "Date purchased is required"),
         mileage: z.coerce.number().min(0, "Mileage cannot be negative"),
-        licenseNumber: z.string().min(1, "License/tag number is required"),
-        status: z.string().min(1, "Vehicle status (lease/own) is required"),
-        monthlyPayment: z.coerce
+        licenseTagNumber: z.string().min(1, "License/tag number is required"),
+        ownershipType: z.string().min(1, "Vehicle ownership type is required"),
+        creditorName: z.string().optional(),
+        finalPaymentDate: z.string().optional(),
+        monthlyLeaseLoanAmount: z.coerce
           .number()
           .min(0, "Monthly payment cannot be negative")
           .optional(),
-        marketValue: z.coerce
+        currentMarketValue: z.coerce
           .number()
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
@@ -294,11 +327,11 @@ export const personalAssetsSchema = z.object({
       })
     )
     .optional(),
-  valuables: z
+  valuableItems: z
     .array(
       z.object({
         description: z.string().min(1, "Description of asset is required"),
-        marketValue: z.coerce
+        currentMarketValue: z.coerce
           .number()
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
@@ -308,11 +341,11 @@ export const personalAssetsSchema = z.object({
       })
     )
     .optional(),
-  furniture: z
+  furniturePersonalEffects: z
     .array(
       z.object({
         description: z.string().min(1, "Description of asset is required"),
-        marketValue: z.coerce
+        currentMarketValue: z.coerce
           .number()
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
@@ -339,7 +372,7 @@ export const selfEmployedSchema = z
       )
       .optional()
       .or(z.literal("")),
-    ein: z
+    employerIdentificationNumber: z
       .string()
       .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
       .optional()
@@ -353,7 +386,7 @@ export const selfEmployedSchema = z
     businessDescription: z.string().optional(),
     totalEmployees: z.coerce.number().min(0, "Must be 0 or greater").optional(),
     taxDepositFrequency: z.string().optional(),
-    avgGrossMonthlyPayroll: z.coerce
+    averageGrossMonthlyPayroll: z.coerce
       .number()
       .min(0, "Must be 0 or greater")
       .optional(),
@@ -361,7 +394,7 @@ export const selfEmployedSchema = z
     otherBusinesses: z
       .array(
         z.object({
-          percentageOwnership: z.coerce
+          ownershipPercentage: z.coerce
             .number()
             .min(0, "Must be between 0 and 100")
             .max(100, "Must be between 0 and 100")
@@ -377,7 +410,7 @@ export const selfEmployedSchema = z
             )
             .optional()
             .or(z.literal("")),
-          ein: z
+          employerIdentificationNumber: z
             .string()
             .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
             .optional()
@@ -403,7 +436,7 @@ export const selfEmployedSchema = z
           data.totalEmployees !== undefined &&
           data.taxDepositFrequency &&
           data.taxDepositFrequency.length > 0 &&
-          data.avgGrossMonthlyPayroll !== undefined &&
+          data.averageGrossMonthlyPayroll !== undefined &&
           data.hasOtherBusinessInterests !== undefined
         );
       }
@@ -417,13 +450,13 @@ export const selfEmployedSchema = z
   .refine(
     (data) => {
       if (data.isSelfEmployed && data.isSoleProprietorship === false) {
-        return data.ein && data.ein.length > 0;
+        return data.employerIdentificationNumber && data.employerIdentificationNumber.length > 0;
       }
       return true;
     },
     {
       message: "EIN is required for non-sole proprietorship businesses",
-      path: ["ein"],
+      path: ["employerIdentificationNumber"],
     }
   )
   .refine(
@@ -447,7 +480,7 @@ export const selfEmployedSchema = z
       ) {
         return data.otherBusinesses.every(
           (b) =>
-            b.percentageOwnership !== undefined &&
+            b.ownershipPercentage !== undefined &&
             b.title &&
             b.title.length > 0 &&
             b.businessAddress &&
@@ -456,8 +489,8 @@ export const selfEmployedSchema = z
             b.businessName.length > 0 &&
             b.businessTelephone &&
             b.businessTelephone.length > 0 &&
-            b.ein &&
-            b.ein.length > 0 &&
+            b.employerIdentificationNumber &&
+            b.employerIdentificationNumber.length > 0 &&
             b.businessType
         );
       }
@@ -586,7 +619,7 @@ export const businessAssetsSchema = z
               message: "Description of asset is required",
             })
             .min(1, { message: "Description of asset is required" }),
-          currentMarketValue: z.coerce
+          currentcurrentMarketValue: z.coerce
             .number({
               message: "Current market value must be a number",
             })
@@ -1198,7 +1231,7 @@ export const completeFormSchema = z.object({
     .array(
       z.object({
         description: z.string().optional(),
-        currentMarketValue: z.coerce.number().optional(),
+        currentcurrentMarketValue: z.coerce.number().optional(),
         quickSaleValue: z.coerce.number().optional(),
         loanBalance: z.coerce.number().optional(),
         totalValue: z.coerce.number().optional(),
@@ -1247,4 +1280,15 @@ export const validateSection = (sectionNumber: number, data: any): boolean => {
     console.log("[v0] Validation errors:", error);
     return false;
   }
+};
+
+export const preventAlphabetInput = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  e.target.value = e.target.value.replace(/[a-zA-Z]/g, "");
+};
+export const preventNonNumericInput = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  e.target.value = e.target.value.replace(/[^0-9.]/g, "");
 };
