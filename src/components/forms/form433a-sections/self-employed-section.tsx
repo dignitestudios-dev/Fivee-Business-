@@ -296,14 +296,29 @@ export function SelfEmployedSection({
                           required
                           id={`otherBusinesses.${index}.ownershipPercentage`}
                           type="number"
+                          max={100}
+                          min={0}
                           {...register(
-                            `otherBusinesses.${index}.ownershipPercentage`
+                            `otherBusinesses.${index}.ownershipPercentage`,
+                            {
+                              required: "Ownership percentage is required",
+                              min: {
+                                value: 0,
+                                message: "Percentage cannot be less than 0",
+                              },
+                              max: {
+                                value: 100,
+                                message: "Percentage cannot exceed 100",
+                              },
+                              valueAsNumber: true, // makes sure value is treated as a number
+                            }
                           )}
                           error={
                             errors.otherBusinesses?.[index]?.ownershipPercentage
                               ?.message
                           }
                         />
+
                         <FormInput
                           label="Title"
                           required

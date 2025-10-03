@@ -450,7 +450,10 @@ export const selfEmployedSchema = z
   .refine(
     (data) => {
       if (data.isSelfEmployed && data.isSoleProprietorship === false) {
-        return data.employerIdentificationNumber && data.employerIdentificationNumber.length > 0;
+        return (
+          data.employerIdentificationNumber &&
+          data.employerIdentificationNumber.length > 0
+        );
       }
       return true;
     },
@@ -546,7 +549,6 @@ export const businessAssetsSchema = z
                 message: "Number of units must be a number",
               })
               .min(0, { message: "Number of units must be 0 or greater" }),
-            location: z.literal("accountExchange"),
             custodianBroker: z
               .string({
                 message: "Custodian or broker is required",
@@ -585,32 +587,7 @@ export const businessAssetsSchema = z
           }),
         ])
       )
-      .default([])
-      .refine(
-        (assets) => {
-          return assets.every((asset) => {
-            if (asset.location === "selfHostedWallet") {
-              return asset.address && asset.address.trim().length > 0;
-            }
-            if (asset.location === "accountExchange") {
-              return (
-                asset.custodianBroker && asset.custodianBroker.trim().length > 0
-              );
-            }
-            return true;
-          });
-        },
-        {
-          message:
-            "Please provide the address or custodian/broker for each digital asset",
-        }
-      ),
-    totalBusinessBankAttachment: z.coerce
-      .number({
-        message: "Total must be a number",
-      })
-      .min(0, { message: "Total must be 0 or greater" })
-      .optional(),
+      .default([]),
     businessOtherAssets: z
       .array(
         z.object({
@@ -655,9 +632,7 @@ export const businessAssetsSchema = z
       .min(0, { message: "Deduction must be 0 or greater" })
       .optional(),
     hasBusinessNotesReceivable: z.boolean().optional(),
-    businessNotesListing: z.string().optional(),
     hasBusinessAccountsReceivable: z.boolean().optional(),
-    businessAccountsListing: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -678,44 +653,18 @@ export const businessAssetsSchema = z
       message: "Please select yes or no for accounts receivable",
       path: ["hasBusinessAccountsReceivable"],
     }
-  )
-  .refine(
-    (data) => {
-      if (!data.isSelfEmployed || !data.hasBusinessNotesReceivable) return true;
-      return (
-        data.businessNotesListing && data.businessNotesListing.trim().length > 0
-      );
-    },
-    {
-      message: "Please provide the listing for notes receivable",
-      path: ["businessNotesListing"],
-    }
-  )
-  .refine(
-    (data) => {
-      if (!data.isSelfEmployed || !data.hasBusinessAccountsReceivable)
-        return true;
-      return (
-        data.businessAccountsListing &&
-        data.businessAccountsListing.trim().length > 0
-      );
-    },
-    {
-      message: "Please provide the list for accounts receivable",
-      path: ["businessAccountsListing"],
-    }
   );
 
 // Business Income Schema
 export const businessIncomeSchema = z
   .object({
     isSelfEmployed: z.boolean(),
-    periodBeginning: z
+    periodStart: z
       .string({
         message: "Period beginning date is required",
       })
       .min(1, { message: "Period beginning date is required" }),
-    periodThrough: z
+    periodEnd: z
       .string({
         message: "Period through date is required",
       })
@@ -744,7 +693,7 @@ export const businessIncomeSchema = z
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
         message: "Dividends must be a number 0 or greater",
       }),
-    otherBusinessIncome: z
+    otherIncome: z
       .string()
       .min(1, { message: "Other business income is required" })
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
@@ -762,19 +711,19 @@ export const businessIncomeSchema = z
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
         message: "Inventory purchased must be a number 0 or greater",
       }),
-    grossWages: z
+    grossWagesSalaries: z
       .string()
       .min(1, { message: "Gross wages is required" })
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
         message: "Gross wages must be a number 0 or greater",
       }),
-    businessRent: z
+    rent: z
       .string()
       .min(1, { message: "Business rent is required" })
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
         message: "Business rent must be a number 0 or greater",
       }),
-    businessSupplies: z
+    supplies: z
       .string()
       .min(1, { message: "Business supplies is required" })
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
@@ -820,16 +769,16 @@ export const businessIncomeSchema = z
   .refine(
     (data) => {
       // Cross-field validation: period through should be after period beginning
-      if (data.isSelfEmployed && data.periodBeginning && data.periodThrough) {
-        const beginDate = new Date(data.periodBeginning);
-        const throughDate = new Date(data.periodThrough);
+      if (data.isSelfEmployed && data.periodStart && data.periodEnd) {
+        const beginDate = new Date(data.periodStart);
+        const throughDate = new Date(data.periodEnd);
         return throughDate > beginDate;
       }
       return true;
     },
     {
       message: "Period through date must be after the beginning date",
-      path: ["periodThrough"],
+      path: ["periodEnd"],
     }
   );
 
@@ -1219,14 +1168,13 @@ export const completeFormSchema = z.object({
       z.object({
         description: z.string().optional(),
         units: z.coerce.number().optional(),
-        location: z.enum(["accountExchange", "selfHostedWallet"]).optional(),
+        location: z.string().min(1, { message: "Location is required" }),
         custodianBroker: z.string().optional(),
         address: z.string().optional(),
         value: z.coerce.number().optional(),
       })
     )
     .optional(),
-  totalBusinessBankAttachment: z.coerce.number().optional(),
   businessOtherAssets: z
     .array(
       z.object({
@@ -1241,9 +1189,7 @@ export const completeFormSchema = z.object({
   totalBusinessAssetsAttachment: z.coerce.number().optional(),
   businessIrsDeduction: z.coerce.number().optional(),
   hasBusinessNotesReceivable: z.boolean().optional(),
-  businessNotesListing: z.string().optional(),
   hasBusinessAccountsReceivable: z.boolean().optional(),
-  businessAccountsListing: z.string().optional(),
 });
 
 export const validateSection = (sectionNumber: number, data: any): boolean => {

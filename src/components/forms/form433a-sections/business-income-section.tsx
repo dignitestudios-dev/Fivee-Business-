@@ -37,19 +37,19 @@ export function BusinessIncomeSection({
   const grossRentalIncome = parseFloat(watch("grossRentalIncome")) || 0;
   const interestIncome = parseFloat(watch("interestIncome")) || 0;
   const dividends = parseFloat(watch("dividends")) || 0;
-  const otherBusinessIncome = parseFloat(watch("otherBusinessIncome")) || 0;
+  const otherIncome = parseFloat(watch("otherIncome")) || 0;
   const totalBusinessIncome =
     grossReceipts +
     grossRentalIncome +
     interestIncome +
     dividends +
-    otherBusinessIncome;
+    otherIncome;
 
   const materialsPurchased = parseFloat(watch("materialsPurchased")) || 0;
   const inventoryPurchased = parseFloat(watch("inventoryPurchased")) || 0;
-  const grossWages = parseFloat(watch("grossWages")) || 0;
-  const businessRent = parseFloat(watch("businessRent")) || 0;
-  const businessSupplies = parseFloat(watch("businessSupplies")) || 0;
+  const grossWagesSalaries = parseFloat(watch("grossWagesSalaries")) || 0;
+  const rent = parseFloat(watch("rent")) || 0;
+  const supplies = parseFloat(watch("supplies")) || 0;
   const utilitiesTelephones = parseFloat(watch("utilitiesTelephones")) || 0;
   const vehicleCosts = parseFloat(watch("vehicleCosts")) || 0;
   const businessInsurance = parseFloat(watch("businessInsurance")) || 0;
@@ -60,9 +60,9 @@ export function BusinessIncomeSection({
   const totalBusinessExpenses =
     materialsPurchased +
     inventoryPurchased +
-    grossWages +
-    businessRent +
-    businessSupplies +
+    grossWagesSalaries +
+    rent +
+    supplies +
     utilitiesTelephones +
     vehicleCosts +
     businessInsurance +
@@ -130,29 +130,29 @@ export function BusinessIncomeSection({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormInput
               label="Period Provided Beginning *"
-              id="periodBeginning"
+              id="periodStart"
               type="date"
               required={true}
-              {...register("periodBeginning", {
+              {...register("periodStart", {
                 required: "Period beginning date is required",
                 onChange: (e) => {
                   if (e.target.value.trim() !== "") {
-                    clearErrors("periodBeginning");
-                    trigger("periodBeginning");
+                    clearErrors("periodStart");
+                    trigger("periodStart");
                   }
                 },
               })}
-              error={errors.periodBeginning?.message}
+              error={errors.periodStart?.message}
             />
             <FormInput
               label="Through *"
-              id="periodThrough"
+              id="periodEnd"
               type="date"
               required={true}
-              {...register("periodThrough", {
+              {...register("periodEnd", {
                 required: "Period through date is required",
                 validate: (value) => {
-                  const beginDate = watch("periodBeginning");
+                  const beginDate = watch("periodStart");
                   if (
                     beginDate &&
                     value &&
@@ -164,12 +164,12 @@ export function BusinessIncomeSection({
                 },
                 onChange: (e) => {
                   if (e.target.value.trim() !== "") {
-                    clearErrors("periodThrough");
-                    trigger("periodThrough");
+                    clearErrors("periodEnd");
+                    trigger("periodEnd");
                   }
                 },
               })}
-              error={errors.periodThrough?.message}
+              error={errors.periodEnd?.message}
             />
           </div>
         </CardContent>
@@ -275,22 +275,22 @@ export function BusinessIncomeSection({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormInput
               label="Other Income ($) *"
-              id="otherBusinessIncome"
+              id="otherIncome"
               type="number"
               required={true}
-              {...register("otherBusinessIncome", {
+              {...register("otherIncome", {
                 required: "Other business income is required",
                 min: { value: 0, message: "Must be 0 or greater" },
 
                 onChange: (e) => {
                   const val = parseFloat(e.target.value);
                   if (!isNaN(val) && val >= 0) {
-                    clearErrors("otherBusinessIncome");
-                    trigger("otherBusinessIncome");
+                    clearErrors("otherIncome");
+                    trigger("otherIncome");
                   }
                 },
               })}
-              error={errors.otherBusinessIncome?.message}
+              error={errors.otherIncome?.message}
             />
             <div className="bg-[#22b573]/5 p-4 rounded-lg">
               <div className="font-medium">Total Business Income ($)</div>
@@ -364,41 +364,41 @@ export function BusinessIncomeSection({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormInput
               label="Gross Wages and Salaries ($) *"
-              id="grossWages"
+              id="grossWagesSalaries"
               type="number"
               required={true}
-              {...register("grossWages", {
+              {...register("grossWagesSalaries", {
                 required: "Gross wages is required",
                 min: { value: 0, message: "Must be 0 or greater" },
 
                 onChange: (e) => {
                   const val = parseFloat(e.target.value);
                   if (!isNaN(val) && val >= 0) {
-                    clearErrors("grossWages");
-                    trigger("grossWages");
+                    clearErrors("grossWagesSalaries");
+                    trigger("grossWagesSalaries");
                   }
                 },
               })}
-              error={errors.grossWages?.message}
+              error={errors.grossWagesSalaries?.message}
             />
             <FormInput
               label="Rent ($) *"
-              id="businessRent"
+              id="rent"
               type="number"
               required={true}
-              {...register("businessRent", {
+              {...register("rent", {
                 required: "Business rent is required",
                 min: { value: 0, message: "Must be 0 or greater" },
 
                 onChange: (e) => {
                   const val = parseFloat(e.target.value);
                   if (!isNaN(val) && val >= 0) {
-                    clearErrors("businessRent");
-                    trigger("businessRent");
+                    clearErrors("rent");
+                    trigger("rent");
                   }
                 },
               })}
-              error={errors.businessRent?.message}
+              error={errors.rent?.message}
             />
           </div>
 
@@ -406,22 +406,22 @@ export function BusinessIncomeSection({
             <div className="space-y-2">
               <FormInput
                 label="Supplies ($) *"
-                id="businessSupplies"
+                id="supplies"
                 type="number"
                 required={true}
-                {...register("businessSupplies", {
+                {...register("supplies", {
                   required: "Business supplies is required",
                   min: { value: 0, message: "Must be 0 or greater" },
 
                   onChange: (e) => {
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val) && val >= 0) {
-                      clearErrors("businessSupplies");
-                      trigger("businessSupplies");
+                      clearErrors("supplies");
+                      trigger("supplies");
                     }
                   },
                 })}
-                error={errors.businessSupplies?.message}
+                error={errors.supplies?.message}
               />
               <p className="text-xs text-gray-500">
                 Items used to conduct business and used up within one year

@@ -52,7 +52,7 @@ const steps = [
   },
   {
     id: 7,
-    title: "Household Income",
+    title: "Household Income and Expenses",
     description: "Monthly household income and expenses",
   },
   {
@@ -1149,6 +1149,7 @@ export default function Form433AOIC() {
           isValid = isValid && assetValidation;
         }
         break;
+
       case 4: // Self-Employed Information
         fieldsToValidate = ["isSelfEmployed"];
 
@@ -1281,11 +1282,13 @@ export default function Form433AOIC() {
                     !business.otherBusinessTypeDescription ||
                     business.otherBusinessTypeDescription.trim() === ""
                   ) {
-                    setError(`otherBusinesses.${index}.otherBusinessTypeDescription`, {
-                      type: "required",
-                      message:
-                        "Please specify the other business type",
-                    });
+                    setError(
+                      `otherBusinesses.${index}.otherBusinessTypeDescription`,
+                      {
+                        type: "required",
+                        message: "Please specify the other business type",
+                      }
+                    );
                     isValid = false;
                   }
                 }
@@ -1370,146 +1373,67 @@ export default function Form433AOIC() {
 
         // Clear all errors first
         const sectionFields = [
-          "businessBankAccounts",
-          "businessDigitalAssets",
-          "totalBusinessBankAttachment",
-          "businessOtherAssets",
+          "bankAccountsInfo.bankAccounts",
+          "digitalAssetsInfo.digitalAssets",
+          "assetItems.assets",
+          "assetItems.irsAllowedDeduction",
           "totalBusinessAssetsAttachment",
-          "businessIrsDeduction",
-          "hasBusinessNotesReceivable",
-          "businessNotesListing",
-          "hasBusinessAccountsReceivable",
-          "businessAccountsListing",
+          "hasNotesReceivable",
+          "hasAccountsReceivable",
         ] as (keyof FormData433A)[];
 
         sectionFields.forEach((field) => clearErrors(field));
 
         // Get all business assets data
-        const businessBankAccounts = getValues("businessBankAccounts") || [];
-        const businessDigitalAssets = getValues("businessDigitalAssets") || [];
-        const businessOtherAssets = getValues("businessOtherAssets") || [];
-        const hasBusinessNotesReceivable = getValues(
-          "hasBusinessNotesReceivable"
-        );
-        const hasBusinessAccountsReceivable = getValues(
-          "hasBusinessAccountsReceivable"
-        );
-        const businessNotesListing = getValues("businessNotesListing");
-        const businessAccountsListing = getValues("businessAccountsListing");
+        const bankAccountsBusiness =
+          getValues("bankAccountsInfo.bankAccounts") || [];
+        const digitalAssetsBusiness =
+          getValues("digitalAssetsInfo.digitalAssets") || [];
+        const assets = getValues("assetItems.assets") || [];
+        const hasNotesReceivable = getValues("hasNotesReceivable");
+        const hasAccountsReceivable = getValues("hasAccountsReceivable");
 
         // Validate each business bank account
-        businessBankAccounts.forEach((account: any, index: number) => {
+        bankAccountsBusiness.forEach((account: any, index: number) => {
           if (!account.accountType || account.accountType.trim() === "") {
-            setError(`businessBankAccounts.${index}.accountType`, {
+            setError(`bankAccountsInfo.bankAccounts.${index}.accountType`, {
               type: "required",
               message: "Account type is required",
             });
             isValid = false;
           }
 
+          if (!account.bankName || account.bankName.trim() === "") {
+            setError(`bankAccountsInfo.bankAccounts.${index}.bankName`, {
+              type: "required",
+              message: "Bank name is required",
+            });
+            isValid = false;
+          }
+
           if (
-            !account.bankNameCountry ||
-            account.bankNameCountry.trim() === ""
+            !account.countryLocation ||
+            account.countryLocation.trim() === ""
           ) {
-            setError(`businessBankAccounts.${index}.bankNameCountry`, {
+            setError(`bankAccountsInfo.bankAccounts.${index}.countryLocation`, {
               type: "required",
-              message: "Bank name and country location is required",
+              message: "Country location is required",
             });
             isValid = false;
           }
 
-          if (!account.accountNumber || account.accountNumber.trim() === "") {
-            setError(`businessBankAccounts.${index}.accountNumber`, {
-              type: "required",
-              message: "Account number is required",
-            });
-            isValid = false;
-          }
+          // accountNumber is optional - no validation needed
 
-          if (!account.amount || account.amount.toString().trim() === "") {
-            setError(`businessBankAccounts.${index}.amount`, {
-              type: "required",
-              message: "Amount is required",
-            });
-            isValid = false;
-          } else {
-            const amount = parseFloat(account.amount);
-            if (isNaN(amount) || amount < 0) {
-              setError(`businessBankAccounts.${index}.amount`, {
-                type: "min",
-                message: "Amount must be 0 or greater",
-              });
-              isValid = false;
-            }
-          }
-        });
-
-        // Validate each digital asset
-        businessDigitalAssets.forEach((asset: any, index: number) => {
-          if (!asset.description || asset.description.trim() === "") {
-            setError(`businessDigitalAssets.${index}.description`, {
-              type: "required",
-              message: "Description of digital asset is required",
-            });
-            isValid = false;
-          }
-
-          if (!asset.units || asset.units.toString().trim() === "") {
-            setError(`businessDigitalAssets.${index}.units`, {
-              type: "required",
-              message: "Number of units is required",
-            });
-            isValid = false;
-          } else {
-            const units = parseFloat(asset.units);
-            if (isNaN(units) || units < 0) {
-              setError(`businessDigitalAssets.${index}.units`, {
-                type: "min",
-                message: "Number of units must be 0 or greater",
-              });
-              isValid = false;
-            }
-          }
-
-          if (!asset.location) {
-            setError(`businessDigitalAssets.${index}.location`, {
-              type: "required",
-              message: "Please select the location of digital asset",
-            });
-            isValid = false;
-          }
-
-          // Validate based on location
-          if (asset.location === "accountExchange") {
-            if (!asset.custodianBroker || asset.custodianBroker.trim() === "") {
-              setError(`businessDigitalAssets.${index}.custodianBroker`, {
-                type: "required",
-                message: "Custodian or broker is required",
-              });
-              isValid = false;
-            }
-          }
-
-          if (asset.location === "selfHostedWallet") {
-            if (!asset.address || asset.address.trim() === "") {
-              setError(`businessDigitalAssets.${index}.address`, {
-                type: "required",
-                message: "Digital asset address is required",
-              });
-              isValid = false;
-            }
-          }
-
-          if (!asset.value || asset.value.toString().trim() === "") {
-            setError(`businessDigitalAssets.${index}.value`, {
+          if (!account.value || account.value.toString().trim() === "") {
+            setError(`bankAccountsInfo.bankAccounts.${index}.value`, {
               type: "required",
               message: "Value is required",
             });
             isValid = false;
           } else {
-            const value = parseFloat(asset.value);
+            const value = parseFloat(account.value);
             if (isNaN(value) || value < 0) {
-              setError(`businessDigitalAssets.${index}.value`, {
+              setError(`bankAccountsInfo.bankAccounts.${index}.value`, {
                 type: "min",
                 message: "Value must be 0 or greater",
               });
@@ -1518,28 +1442,57 @@ export default function Form433AOIC() {
           }
         });
 
-        // Validate total business bank attachment
-        const totalBusinessBankAttachment = getValues(
-          "totalBusinessBankAttachment"
-        );
-        if (
-          totalBusinessBankAttachment !== undefined &&
-          totalBusinessBankAttachment !== ""
-        ) {
-          const amount = parseFloat(totalBusinessBankAttachment.toString());
-          if (isNaN(amount) || amount < 0) {
-            setError("totalBusinessBankAttachment", {
-              type: "min",
-              message: "Total must be 0 or greater",
+        // Validate each digital asset
+        digitalAssetsBusiness.forEach((asset: any, index: number) => {
+          if (!asset.description || asset.description.trim() === "") {
+            setError(`digitalAssetsInfo.digitalAssets.${index}.description`, {
+              type: "required",
+              message: "Description of digital asset is required",
             });
             isValid = false;
           }
-        }
 
-        // Validate each business other asset
-        businessOtherAssets.forEach((asset: any, index: number) => {
+          // numberOfUnits is optional - no validation needed
+
+          if (!asset.location || asset.location.trim() === "") {
+            setError(`digitalAssetsInfo.digitalAssets.${index}.location`, {
+              type: "required",
+              message: "Location of digital asset is required",
+            });
+            isValid = false;
+          }
+
+          // accountNumber is optional - no validation needed
+          // digitalAssetAddress is optional - no validation needed
+
+          if (
+            !asset.usdEquivalent ||
+            asset.usdEquivalent.toString().trim() === ""
+          ) {
+            setError(`digitalAssetsInfo.digitalAssets.${index}.usdEquivalent`, {
+              type: "required",
+              message: "USD equivalent is required",
+            });
+            isValid = false;
+          } else {
+            const value = parseFloat(asset.usdEquivalent);
+            if (isNaN(value) || value < 0) {
+              setError(
+                `digitalAssetsInfo.digitalAssets.${index}.usdEquivalent`,
+                {
+                  type: "min",
+                  message: "USD equivalent must be 0 or greater",
+                }
+              );
+              isValid = false;
+            }
+          }
+        });
+
+        // Validate each business asset
+        assets.forEach((asset: any, index: number) => {
           if (!asset.description || asset.description.trim() === "") {
-            setError(`businessOtherAssets.${index}.description`, {
+            setError(`assetItems.assets.${index}.description`, {
               type: "required",
               message: "Description of asset is required",
             });
@@ -1550,7 +1503,7 @@ export default function Form433AOIC() {
             !asset.currentMarketValue ||
             asset.currentMarketValue.toString().trim() === ""
           ) {
-            setError(`businessOtherAssets.${index}.currentMarketValue`, {
+            setError(`assetItems.assets.${index}.currentMarketValue`, {
               type: "required",
               message: "Current market value is required",
             });
@@ -1558,29 +1511,9 @@ export default function Form433AOIC() {
           } else {
             const value = parseFloat(asset.currentMarketValue);
             if (isNaN(value) || value < 0) {
-              setError(`businessOtherAssets.${index}.currentMarketValue`, {
+              setError(`assetItems.assets.${index}.currentMarketValue`, {
                 type: "min",
                 message: "Current market value must be 0 or greater",
-              });
-              isValid = false;
-            }
-          }
-
-          if (
-            !asset.quickSaleValue ||
-            asset.quickSaleValue.toString().trim() === ""
-          ) {
-            setError(`businessOtherAssets.${index}.quickSaleValue`, {
-              type: "required",
-              message: "Quick sale value is required",
-            });
-            isValid = false;
-          } else {
-            const value = parseFloat(asset.quickSaleValue);
-            if (isNaN(value) || value < 0) {
-              setError(`businessOtherAssets.${index}.quickSaleValue`, {
-                type: "min",
-                message: "Quick sale value must be 0 or greater",
               });
               isValid = false;
             }
@@ -1590,7 +1523,7 @@ export default function Form433AOIC() {
             !asset.loanBalance ||
             asset.loanBalance.toString().trim() === ""
           ) {
-            setError(`businessOtherAssets.${index}.loanBalance`, {
+            setError(`assetItems.assets.${index}.loanBalance`, {
               type: "required",
               message: "Loan balance is required",
             });
@@ -1598,7 +1531,7 @@ export default function Form433AOIC() {
           } else {
             const value = parseFloat(asset.loanBalance);
             if (isNaN(value) || value < 0) {
-              setError(`businessOtherAssets.${index}.loanBalance`, {
+              setError(`assetItems.assets.${index}.loanBalance`, {
                 type: "min",
                 message: "Loan balance must be 0 or greater",
               });
@@ -1606,25 +1539,10 @@ export default function Form433AOIC() {
             }
           }
 
-          if (!asset.totalValue || asset.totalValue.toString().trim() === "") {
-            setError(`businessOtherAssets.${index}.totalValue`, {
-              type: "required",
-              message: "Total value is required",
-            });
-            isValid = false;
-          } else {
-            const value = parseFloat(asset.totalValue);
-            if (isNaN(value) || value < 0) {
-              setError(`businessOtherAssets.${index}.totalValue`, {
-                type: "min",
-                message: "Total value must be 0 or greater",
-              });
-              isValid = false;
-            }
-          }
+          // isLeased and usedInProductionOfIncome are booleans, no validation needed
         });
 
-        // Validate total business assets attachment
+        // Validate total business assets attachment (optional)
         const totalBusinessAssetsAttachment = getValues(
           "totalBusinessAssetsAttachment"
         );
@@ -1642,12 +1560,12 @@ export default function Form433AOIC() {
           }
         }
 
-        // Validate business IRS deduction
-        const businessIrsDeduction = getValues("businessIrsDeduction");
-        if (businessIrsDeduction !== undefined && businessIrsDeduction !== "") {
-          const amount = parseFloat(businessIrsDeduction.toString());
+        // Validate IRS deduction
+        const irsAllowedDeduction = getValues("assetItems.irsAllowedDeduction");
+        if (irsAllowedDeduction !== undefined && irsAllowedDeduction !== "") {
+          const amount = parseFloat(irsAllowedDeduction.toString());
           if (isNaN(amount) || amount < 0) {
-            setError("businessIrsDeduction", {
+            setError("assetItems.irsAllowedDeduction", {
               type: "min",
               message: "Deduction must be 0 or greater",
             });
@@ -1655,53 +1573,25 @@ export default function Form433AOIC() {
           }
         }
 
-        // Validate notes receivable
-        if (hasBusinessNotesReceivable === undefined) {
-          setError("hasBusinessNotesReceivable", {
+        // Validate notes receivable (optional)
+        if (hasNotesReceivable === undefined) {
+          setError("hasNotesReceivable", {
             type: "required",
             message: "Please select yes or no for notes receivable",
           });
           isValid = false;
         }
 
-        if (
-          hasBusinessNotesReceivable &&
-          (!businessNotesListing || businessNotesListing.trim() === "")
-        ) {
-          setError("businessNotesListing", {
-            type: "required",
-            message: "Please provide the listing for notes receivable",
-          });
-          isValid = false;
-        }
-
-        // Validate accounts receivable
-        if (hasBusinessAccountsReceivable === undefined) {
-          setError("hasBusinessAccountsReceivable", {
+        // Validate accounts receivable (optional)
+        if (hasAccountsReceivable === undefined) {
+          setError("hasAccountsReceivable", {
             type: "required",
             message: "Please select yes or no for accounts receivable",
           });
           isValid = false;
         }
 
-        if (
-          hasBusinessAccountsReceivable &&
-          (!businessAccountsListing || businessAccountsListing.trim() === "")
-        ) {
-          setError("businessAccountsListing", {
-            type: "required",
-            message: "Please provide the list for accounts receivable",
-          });
-          isValid = false;
-        }
-
         // Add non-empty optional fields
-        if (
-          totalBusinessBankAttachment &&
-          totalBusinessBankAttachment.toString().trim() !== ""
-        ) {
-          fieldsToValidate.push("totalBusinessBankAttachment");
-        }
         if (
           totalBusinessAssetsAttachment &&
           totalBusinessAssetsAttachment.toString().trim() !== ""
@@ -1709,77 +1599,90 @@ export default function Form433AOIC() {
           fieldsToValidate.push("totalBusinessAssetsAttachment");
         }
         if (
-          businessIrsDeduction &&
-          businessIrsDeduction.toString().trim() !== ""
+          irsAllowedDeduction &&
+          irsAllowedDeduction.toString().trim() !== ""
         ) {
-          fieldsToValidate.push("businessIrsDeduction");
-        }
-        if (businessNotesListing && businessNotesListing.trim() !== "") {
-          fieldsToValidate.push("businessNotesListing");
-        }
-        if (businessAccountsListing && businessAccountsListing.trim() !== "") {
-          fieldsToValidate.push("businessAccountsListing");
+          fieldsToValidate.push("assetItems.irsAllowedDeduction");
         }
 
         // Add array fields with data
-        businessBankAccounts.forEach((account: any, index: number) => {
+        bankAccountsBusiness.forEach((account: any, index: number) => {
           if (account.accountType && account.accountType.trim() !== "") {
             fieldsToValidate.push(
-              `businessBankAccounts.${index}.accountType` as keyof FormData433A
+              `bankAccountsInfo.bankAccounts.${index}.accountType` as keyof FormData433A
+            );
+          }
+          if (account.bankName && account.bankName.trim() !== "") {
+            fieldsToValidate.push(
+              `bankAccountsInfo.bankAccounts.${index}.bankName` as keyof FormData433A
             );
           }
           if (
-            account.bankNameCountry &&
-            account.bankNameCountry.trim() !== ""
+            account.countryLocation &&
+            account.countryLocation.trim() !== ""
           ) {
             fieldsToValidate.push(
-              `businessBankAccounts.${index}.bankNameCountry` as keyof FormData433A
+              `bankAccountsInfo.bankAccounts.${index}.countryLocation` as keyof FormData433A
             );
           }
           if (account.accountNumber && account.accountNumber.trim() !== "") {
             fieldsToValidate.push(
-              `businessBankAccounts.${index}.accountNumber` as keyof FormData433A
+              `bankAccountsInfo.bankAccounts.${index}.accountNumber` as keyof FormData433A
             );
           }
-          if (account.amount && account.amount.toString().trim() !== "") {
+          if (account.value && account.value.toString().trim() !== "") {
             fieldsToValidate.push(
-              `businessBankAccounts.${index}.amount` as keyof FormData433A
-            );
-          }
-        });
-
-        businessDigitalAssets.forEach((asset: any, index: number) => {
-          if (asset.description && asset.description.trim() !== "") {
-            fieldsToValidate.push(
-              `businessDigitalAssets.${index}.description` as keyof FormData433A
-            );
-          }
-          if (asset.units && asset.units.toString().trim() !== "") {
-            fieldsToValidate.push(
-              `businessDigitalAssets.${index}.units` as keyof FormData433A
-            );
-          }
-          if (asset.custodianBroker && asset.custodianBroker.trim() !== "") {
-            fieldsToValidate.push(
-              `businessDigitalAssets.${index}.custodianBroker` as keyof FormData433A
-            );
-          }
-          if (asset.address && asset.address.trim() !== "") {
-            fieldsToValidate.push(
-              `businessDigitalAssets.${index}.address` as keyof FormData433A
-            );
-          }
-          if (asset.value && asset.value.toString().trim() !== "") {
-            fieldsToValidate.push(
-              `businessDigitalAssets.${index}.value` as keyof FormData433A
+              `bankAccountsInfo.bankAccounts.${index}.value` as keyof FormData433A
             );
           }
         });
 
-        businessOtherAssets.forEach((asset: any, index: number) => {
+        digitalAssetsBusiness.forEach((asset: any, index: number) => {
           if (asset.description && asset.description.trim() !== "") {
             fieldsToValidate.push(
-              `businessOtherAssets.${index}.description` as keyof FormData433A
+              `digitalAssetsInfo.digitalAssets.${index}.description` as keyof FormData433A
+            );
+          }
+          if (
+            asset.numberOfUnits &&
+            asset.numberOfUnits.toString().trim() !== ""
+          ) {
+            fieldsToValidate.push(
+              `digitalAssetsInfo.digitalAssets.${index}.numberOfUnits` as keyof FormData433A
+            );
+          }
+          if (asset.location && asset.location.trim() !== "") {
+            fieldsToValidate.push(
+              `digitalAssetsInfo.digitalAssets.${index}.location` as keyof FormData433A
+            );
+          }
+          if (asset.accountNumber && asset.accountNumber.trim() !== "") {
+            fieldsToValidate.push(
+              `digitalAssetsInfo.digitalAssets.${index}.accountNumber` as keyof FormData433A
+            );
+          }
+          if (
+            asset.digitalAssetAddress &&
+            asset.digitalAssetAddress.trim() !== ""
+          ) {
+            fieldsToValidate.push(
+              `digitalAssetsInfo.digitalAssets.${index}.digitalAssetAddress` as keyof FormData433A
+            );
+          }
+          if (
+            asset.usdEquivalent &&
+            asset.usdEquivalent.toString().trim() !== ""
+          ) {
+            fieldsToValidate.push(
+              `digitalAssetsInfo.digitalAssets.${index}.usdEquivalent` as keyof FormData433A
+            );
+          }
+        });
+
+        assets.forEach((asset: any, index: number) => {
+          if (asset.description && asset.description.trim() !== "") {
+            fieldsToValidate.push(
+              `assetItems.assets.${index}.description` as keyof FormData433A
             );
           }
           if (
@@ -1787,25 +1690,12 @@ export default function Form433AOIC() {
             asset.currentMarketValue.toString().trim() !== ""
           ) {
             fieldsToValidate.push(
-              `businessOtherAssets.${index}.currentMarketValue` as keyof FormData433A
-            );
-          }
-          if (
-            asset.quickSaleValue &&
-            asset.quickSaleValue.toString().trim() !== ""
-          ) {
-            fieldsToValidate.push(
-              `businessOtherAssets.${index}.quickSaleValue` as keyof FormData433A
+              `assetItems.assets.${index}.currentMarketValue` as keyof FormData433A
             );
           }
           if (asset.loanBalance && asset.loanBalance.toString().trim() !== "") {
             fieldsToValidate.push(
-              `businessOtherAssets.${index}.loanBalance` as keyof FormData433A
-            );
-          }
-          if (asset.totalValue && asset.totalValue.toString().trim() !== "") {
-            fieldsToValidate.push(
-              `businessOtherAssets.${index}.totalValue` as keyof FormData433A
+              `assetItems.assets.${index}.loanBalance` as keyof FormData433A
             );
           }
         });
@@ -1828,18 +1718,18 @@ export default function Form433AOIC() {
 
         // Clear all errors first
         const businessIncomeFields = [
-          "periodBeginning",
-          "periodThrough",
+          "periodStart",
+          "periodEnd",
           "grossReceipts",
           "grossRentalIncome",
           "interestIncome",
           "dividends",
-          "otherBusinessIncome",
+          "otherIncome",
           "materialsPurchased",
           "inventoryPurchased",
-          "grossWages",
-          "businessRent",
-          "businessSupplies",
+          "grossWagesSalaries",
+          "rent",
+          "supplies",
           "utilitiesTelephones",
           "vehicleCosts",
           "businessInsurance",
@@ -1851,18 +1741,18 @@ export default function Form433AOIC() {
         businessIncomeFields.forEach((field) => clearErrors(field));
 
         // Get all business income data
-        const periodBeginning = getValues("periodBeginning");
-        const periodThrough = getValues("periodThrough");
+        const periodStart = getValues("periodStart");
+        const periodEnd = getValues("periodEnd");
         const grossReceipts = getValues("grossReceipts");
         const grossRentalIncome = getValues("grossRentalIncome");
         const interestIncome = getValues("interestIncome");
         const dividends = getValues("dividends");
-        const otherBusinessIncome = getValues("otherBusinessIncome");
+        const otherIncome = getValues("otherIncome");
         const materialsPurchased = getValues("materialsPurchased");
         const inventoryPurchased = getValues("inventoryPurchased");
-        const grossWages = getValues("grossWages");
-        const businessRent = getValues("businessRent");
-        const businessSupplies = getValues("businessSupplies");
+        const grossWagesSalaries = getValues("grossWagesSalaries");
+        const rent = getValues("rent");
+        const supplies = getValues("supplies");
         const utilitiesTelephones = getValues("utilitiesTelephones");
         const vehicleCosts = getValues("vehicleCosts");
         const businessInsurance = getValues("businessInsurance");
@@ -1873,13 +1763,13 @@ export default function Form433AOIC() {
         // For self-employed, all fields are required
         const requiredFields = [
           {
-            name: "periodBeginning",
-            value: periodBeginning,
+            name: "periodStart",
+            value: periodStart,
             label: "Period beginning date",
           },
           {
-            name: "periodThrough",
-            value: periodThrough,
+            name: "periodEnd",
+            value: periodEnd,
             label: "Period through date",
           },
           {
@@ -1899,8 +1789,8 @@ export default function Form433AOIC() {
           },
           { name: "dividends", value: dividends, label: "Dividends" },
           {
-            name: "otherBusinessIncome",
-            value: otherBusinessIncome,
+            name: "otherIncome",
+            value: otherIncome,
             label: "Other business income",
           },
           {
@@ -1913,11 +1803,11 @@ export default function Form433AOIC() {
             value: inventoryPurchased,
             label: "Inventory purchased",
           },
-          { name: "grossWages", value: grossWages, label: "Gross wages" },
-          { name: "businessRent", value: businessRent, label: "Business rent" },
+          { name: "grossWagesSalaries", value: grossWagesSalaries, label: "Gross wages" },
+          { name: "rent", value: rent, label: "Business rent" },
           {
-            name: "businessSupplies",
-            value: businessSupplies,
+            name: "supplies",
+            value: supplies,
             label: "Business supplies",
           },
           {
@@ -2019,17 +1909,17 @@ export default function Form433AOIC() {
 
         // Cross-field validation: period through should be after period beginning
         if (
-          periodBeginning &&
-          periodThrough &&
-          periodBeginning.toString().trim() !== "" &&
-          periodThrough.toString().trim() !== ""
+          periodStart &&
+          periodEnd &&
+          periodStart.toString().trim() !== "" &&
+          periodEnd.toString().trim() !== ""
         ) {
-          const beginDate = new Date(periodBeginning.toString());
-          const throughDate = new Date(periodThrough.toString());
+          const beginDate = new Date(periodStart.toString());
+          const throughDate = new Date(periodEnd.toString());
 
           if (!isNaN(beginDate.getTime()) && !isNaN(throughDate.getTime())) {
             if (throughDate <= beginDate) {
-              setError("periodThrough", {
+              setError("periodEnd", {
                 type: "min",
                 message: "Period through date must be after the beginning date",
               });

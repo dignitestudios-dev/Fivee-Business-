@@ -136,8 +136,9 @@ export function PersonalAssetsSection({
     bankAccountsValue.reduce(
       (sum: any, acc: any) => sum + (acc.balance || 0),
       0
-    ) - 1000
+    )
   );
+  const bankTotalMinus1000 = Math.max(0, bankTotal - 1000);
 
   const investmentAccountsValue = watch("investmentAccounts") || [];
   const investmentTotal = investmentAccountsValue.reduce(
@@ -376,6 +377,14 @@ export function PersonalAssetsSection({
             <Plus className="w-4 h-4 mr-2" />
             Add Bank Account
           </Button>
+
+          {/* Auto-calculated bank accounts total value */}
+          <div className="bg-gray-50 p-3 rounded">
+            <Label className="text-sm font-medium">
+              Total of bank accounts from attachment: $
+              {bankTotal}
+            </Label>
+          </div>
         </CardContent>
       </Card>
 
@@ -1206,7 +1215,7 @@ export function PersonalAssetsSection({
                 </div>
 
                 <FormInput
-                  label="Location (street, city, state, ZIP code, country, and country)"
+                  label="Location (street, city, state, ZIP code, county, and country)"
                   id={`realProperties.${index}.location`}
                   required
                   {...register(`realProperties.${index}.location`)}
@@ -1267,7 +1276,7 @@ export function PersonalAssetsSection({
                   </div>
 
                   <FormInput
-                    label="Minus Loan Balance ($)"
+                    label="Minus Loan Balance (mortgages, etc.) ($)"
                     id={`realProperties.${index}.loanBalance`}
                     type="number"
                     min="0"
@@ -1875,7 +1884,7 @@ export function PersonalAssetsSection({
                 <span className="font-medium text-gray-600">
                   Bank Accounts (minus $1,000):{" "}
                 </span>
-                ${bankTotal.toLocaleString()}
+                ${bankTotalMinus1000.toLocaleString()}
               </div>
               <div className="text-sm">
                 <span className="font-medium text-gray-600">Investments: </span>

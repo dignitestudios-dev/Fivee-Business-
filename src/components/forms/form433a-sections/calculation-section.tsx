@@ -56,9 +56,9 @@ export function CalculationSection({
 
   // Set futureIncome based on paymentTimeline
   useEffect(() => {
-    if (paymentTimeline === "5-months") {
+    if (paymentTimeline === "5_months_or_less") {
       setValue("futureIncome", boxG);
-    } else if (paymentTimeline === "6-24-months") {
+    } else if (paymentTimeline === "6_to_24_months") {
       setValue("futureIncome", boxH);
     } else {
       setValue("futureIncome", 0);
@@ -113,12 +113,12 @@ export function CalculationSection({
                 >
                   <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg">
                     <RadioGroupItem
-                      value="5-months"
-                      id="5-months"
+                      value="5_months_or_less"
+                      id="5_months_or_less"
                       className="text-[#22b573] mt-1"
                     />
                     <div className="flex-1">
-                      <Label htmlFor="5-months" className="font-medium">
+                      <Label htmlFor="5_months_or_less" className="font-medium">
                         5 or fewer payments within 5 months or less
                       </Label>
                       <p className="text-sm text-gray-500 mt-1">
@@ -128,12 +128,12 @@ export function CalculationSection({
                   </div>
                   <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg">
                     <RadioGroupItem
-                      value="6-24-months"
-                      id="6-24-months"
+                      value="6_to_24_months"
+                      id="6_to_24_months"
                       className="text-[#22b573] mt-1"
                     />
                     <div className="flex-1">
-                      <Label htmlFor="6-24-months" className="font-medium">
+                      <Label htmlFor="6_to_24_months" className="font-medium">
                         6 to 24 months
                       </Label>
                       <p className="text-sm text-gray-500 mt-1">
