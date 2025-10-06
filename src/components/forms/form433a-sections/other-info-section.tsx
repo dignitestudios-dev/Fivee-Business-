@@ -14,7 +14,6 @@ interface OtherInfoSectionProps {
   onSubmit: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 export function OtherInfoSection({
@@ -23,7 +22,6 @@ export function OtherInfoSection({
   onSubmit,
   currentStep,
   totalSteps,
-  validateStep,
 }: OtherInfoSectionProps) {
   const {
     register,
@@ -840,7 +838,6 @@ export function OtherInfoSection({
         totalSteps={totalSteps}
         onPrevious={onPrevious}
         onNext={onNext}
-        validateStep={validateStep}
       />
     </div>
   );

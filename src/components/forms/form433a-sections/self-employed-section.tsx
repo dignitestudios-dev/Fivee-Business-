@@ -15,7 +15,6 @@ interface SelfEmployedSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 export function SelfEmployedSection({
@@ -23,7 +22,6 @@ export function SelfEmployedSection({
   onPrevious,
   currentStep,
   totalSteps,
-  validateStep,
 }: SelfEmployedSectionProps) {
   const {
     register,
@@ -478,7 +476,6 @@ export function SelfEmployedSection({
         totalSteps={totalSteps}
         onPrevious={onPrevious}
         onNext={onNext}
-        validateStep={validateStep}
       />
     </div>
   );

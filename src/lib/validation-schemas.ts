@@ -1,7 +1,30 @@
 import { z } from "zod";
+import { ZodType } from "zod";
 
-// US SSN regex
-const ssnRegex = /^\d{3}-?\d{2}-?\d{4}$/;
+/**
+ * @param schema - Zod created schema at src/schemas/
+ * @param data - Data to validate
+ * @throws {Error} If validation fails
+ */
+export const validate = <T extends ZodType>(
+  schema: T,
+  data: unknown
+): T["_output"] => {
+  const result = schema.safeParse(data);
+
+  if (!result.success) {
+    // Create a single string message
+    const errorMessage = result.error.issues
+      .map((issue) => issue.message)
+      .join(", ");
+
+    throw new Error(`${errorMessage}`);
+  }
+
+  return result.data; // Return the validated data
+};
+
+const ssnRegex = /^\d{3}-\d{2}-\d{4}$/;
 
 // US Date format validation
 const dateSchema = z.string().refine((date) => {
@@ -9,107 +32,6 @@ const dateSchema = z.string().refine((date) => {
   const parsedDate = new Date(date);
   return !isNaN(parsedDate.getTime());
 }, "Please enter a valid date");
-
-// Personal Information Schema
-export const personalInfoSchema = z
-  .object({
-    firstName: z
-      .string()
-      .min(1, "First name is required")
-      .max(50, "First name must be less than 50 characters"),
-    lastName: z
-      .string()
-      .min(1, "Last name is required")
-      .max(50, "Last name must be less than 50 characters"),
-    dob: dateSchema,
-    ssnOrItin: z
-      .string()
-      .regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
-    maritalStatus: z.enum(["unmarried", "married"]),
-    dateOfMarriage: z.string().optional(),
-    homeAddress: z.string().min(1, "Home address is required"),
-    housingStatus: z.enum(["own", "rent", "other"]),
-    housingOtherDetails: z.string().optional(),
-    livedInCommunityPropertyStateInLast10Years: z.boolean(),
-    countyOfResidence: z.string().min(1, "County is required"),
-    primaryPhone: z
-      .string()
-      .regex(
-        /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-        "Please enter a valid US phone number"
-      ),
-    secondaryPhone: z
-      .string()
-      .regex(
-        /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-        "Please enter a valid US phone number"
-      )
-      .optional()
-      .or(z.literal("")),
-    faxNumber: z
-      .string()
-      .regex(
-        /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-        "Please enter a valid US fax number"
-      )
-      .optional()
-      .or(z.literal("")),
-    mailingAddress: z.string().optional(),
-
-    // Spouse fields (conditional)
-    spouseFirstName: z.string().optional(),
-    spouseLastName: z.string().optional(),
-    spouseDOB: z.string().optional(),
-    spouseSSN: z
-      .string()
-      .regex(ssnRegex, "Please enter a valid SSN (XXX-XX-XXXX)"),
-    spouseEmployerName: z.string().optional(),
-    spousePayPeriod: z
-      .enum(["weekly", "bi-weekly", "monthly", "other"])
-      .optional(),
-    spouseEmployerAddress: z.string().optional(),
-    spouseHasOwnershipInterest: z.boolean().optional(),
-    spouseJobTitle: z.string().optional(),
-    spouseYearsWithEmployer: z.string().optional(),
-    spouseMonthsWithEmployer: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      // If married, spouse fields are required
-      if (data.maritalStatus === "married") {
-        return (
-          data.spouseFirstName &&
-          data.spouseLastName &&
-          data.spouseDOB &&
-          data.spouseSSN &&
-          data.dateOfMarriage &&
-          data.spouseEmployerName &&
-          data.spouseEmployerAddress &&
-          data.spouseJobTitle &&
-          data.spouseYearsWithEmployer &&
-          data.spouseMonthsWithEmployer
-        );
-      }
-      return true;
-    },
-    {
-      message: "Spouse information is required when married",
-      path: ["spouseFirstName"],
-    }
-  )
-  .refine(
-    (data) => {
-      // If housingStatus is "other", housingOtherDetails is required
-      if (data.housingStatus === "other") {
-        return data.housingOtherDetails && data.housingOtherDetails.length > 0;
-      }
-      return true;
-    },
-    {
-      message: "Please specify other home ownership type",
-      path: ["housingOtherDetails"],
-    }
-  );
 
 // Employment Information Schema
 export const employmentSchema = z
@@ -1033,7 +955,6 @@ export const signatureSchema = z
 
 // Combined schema for all sections
 export const formSchemas = {
-  1: personalInfoSchema,
   2: employmentSchema,
   3: personalAssetsSchema,
   4: selfEmployedSchema,
@@ -1195,9 +1116,6 @@ export const completeFormSchema = z.object({
 export const validateSection = (sectionNumber: number, data: any): boolean => {
   try {
     switch (sectionNumber) {
-      case 1:
-        personalInfoSchema.parse(data);
-        return true;
       case 2:
         // Include maritalStatus for employment validation
         employmentSchema.parse({ ...data, maritalStatus: data.maritalStatus });

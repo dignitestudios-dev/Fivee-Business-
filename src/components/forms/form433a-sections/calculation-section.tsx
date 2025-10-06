@@ -12,7 +12,6 @@ interface CalculationSectionProps {
   onSubmit: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 export function CalculationSection({
@@ -21,7 +20,6 @@ export function CalculationSection({
   onSubmit,
   currentStep,
   totalSteps,
-  validateStep,
 }: CalculationSectionProps) {
   const {
     register,
@@ -353,7 +351,6 @@ export function CalculationSection({
         totalSteps={totalSteps}
         onPrevious={onPrevious}
         onNext={onNext}
-        validateStep={validateStep}
       />
     </div>
   );

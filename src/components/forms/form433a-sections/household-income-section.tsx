@@ -14,7 +14,6 @@ interface HouseholdIncomeSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 export function HouseholdIncomeSection({
@@ -22,7 +21,6 @@ export function HouseholdIncomeSection({
   onPrevious,
   currentStep,
   totalSteps,
-  validateStep,
 }: HouseholdIncomeSectionProps) {
   const {
     register,
@@ -872,7 +870,6 @@ export function HouseholdIncomeSection({
         totalSteps={totalSteps}
         onPrevious={onPrevious}
         onNext={onNext}
-        validateStep={validateStep}
       />
     </div>
   );

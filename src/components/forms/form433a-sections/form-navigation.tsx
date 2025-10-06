@@ -2,15 +2,14 @@
 
 import { Button } from "@/components/ui/Button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 
 interface FormNavigationProps {
   currentStep: number;
   totalSteps: number;
-  onPrevious: () => void;
-  onNext: () => void;
-  onSubmit?: () => void;
-  validateStep?: () => Promise<boolean>;
+  onPrevious: any;
+  onNext: any;
+  onSubmit?: any;
+  loading?: boolean; // Add loading prop
 }
 
 export function FormNavigation({
@@ -19,21 +18,15 @@ export function FormNavigation({
   onPrevious,
   onNext,
   onSubmit,
-  validateStep,
+  loading = false,
 }: FormNavigationProps) {
-  const [isValidating, setIsValidating] = useState(false);
-
-  const handleNext = async () => {
-    onNext();
-  };
-
   return (
     <div className="flex justify-between items-center pt-6 border-t border-gray-200">
       <Button
         type="button"
         variant="outline"
         onClick={onPrevious}
-        disabled={currentStep === 1}
+        disabled={currentStep === 1 || loading}
         className="flex items-center gap-2 bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <ChevronLeft className="w-4 h-4" />
@@ -48,19 +41,20 @@ export function FormNavigation({
         <Button
           type="button"
           onClick={onSubmit}
-          className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2"
+          disabled={loading}
+          className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
         >
-          Submit Form
+          {loading ? "Submitting..." : "Submit Form"}
         </Button>
       ) : (
         <Button
           type="button"
-          onClick={handleNext}
-          disabled={isValidating}
+          onClick={onNext}
+          disabled={loading}
           className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
         >
-          {isValidating ? "Validating..." : "Next"}
-          {!isValidating && <ChevronRight className="w-4 h-4" />}
+          {loading ? "Saving..." : "Next"}
+          {!loading && <ChevronRight className="w-4 h-4" />}
         </Button>
       )}
     </div>

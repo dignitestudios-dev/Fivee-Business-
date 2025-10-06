@@ -17,7 +17,6 @@ interface PersonalAssetsSectionProps {
   onSubmit: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 export function PersonalAssetsSection({
@@ -26,7 +25,6 @@ export function PersonalAssetsSection({
   onSubmit,
   currentStep,
   totalSteps,
-  validateStep,
 }: PersonalAssetsSectionProps) {
   const {
     register,
@@ -1943,7 +1941,6 @@ export function PersonalAssetsSection({
         totalSteps={totalSteps}
         onPrevious={onPrevious}
         onNext={onNext}
-        validateStep={validateStep}
       />
     </div>
   );

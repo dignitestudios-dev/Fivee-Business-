@@ -110,14 +110,8 @@ const defaultValues = {
 };
 
 export default function Form433AOIC() {
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(2);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-
-  // Load saved data from localStorage
-  const getSavedData = () => {
-    const savedData = storage.get<FormData433A>("433a_data");
-    return savedData ? { ...defaultValues, ...savedData } : defaultValues;
-  };
 
   // Load saved progress from localStorage
   const getSavedProgress = () => {
@@ -131,7 +125,7 @@ export default function Form433AOIC() {
   const methods = useForm<FormData433A>({
     resolver: zodResolver(completeFormSchema),
     mode: "onChange",
-    defaultValues: getSavedData(),
+    defaultValues: defaultValues,
   });
 
   const {
@@ -150,17 +144,6 @@ export default function Form433AOIC() {
     setCompletedSteps(new Set(savedProgress.completedSteps));
   }, []);
 
-  // Save form data to localStorage
-  const saveFormData = () => {
-    try {
-      const currentData = getValues();
-      storage.set("433a_data", currentData);
-      console.log("Form data saved to localStorage");
-    } catch (error) {
-      console.error("Error saving form data:", error);
-    }
-  };
-
   // Save progress to localStorage
   const saveProgress = (step: number, completed: Set<number>) => {
     try {
@@ -178,7 +161,6 @@ export default function Form433AOIC() {
   // Clear saved data from localStorage
   const clearSavedData = () => {
     try {
-      storage.remove("433a_data");
       storage.remove("433a_progress");
       console.log("Saved form data cleared");
     } catch (error) {
@@ -2811,12 +2793,6 @@ export default function Form433AOIC() {
 
   const handleNext = async () => {
     console.log("Next runs");
-    const isValid = await validateCurrentStep();
-    console.log("is valid: ", isValid);
-
-    if (isValid) {
-      // Save form data to localStorage after successful validation
-      saveFormData();
 
       if (currentStep < 10) {
         // Mark current step as completed
@@ -2830,7 +2806,7 @@ export default function Form433AOIC() {
 
         clearErrors();
       }
-    }
+    
   };
 
   const handlePrevious = () => {
@@ -2838,8 +2814,7 @@ export default function Form433AOIC() {
       const prevStep = currentStep - 1;
       setCurrentStep(prevStep);
 
-      // Save current form data and update progress
-      saveFormData();
+      // Save progress to localStorage
       saveProgress(prevStep, completedSteps);
 
       clearErrors();
@@ -2851,8 +2826,7 @@ export default function Form433AOIC() {
     if (stepNumber <= currentStep || completedSteps.has(stepNumber)) {
       setCurrentStep(stepNumber);
 
-      // Save current form data and update progress
-      saveFormData();
+      // update progress
       saveProgress(stepNumber, completedSteps);
 
       clearErrors();
@@ -2875,16 +2849,6 @@ export default function Form433AOIC() {
     }
   };
 
-  // Function to restore form from saved data
-  const restoreFromSaved = () => {
-    const savedData = getSavedData();
-    reset(savedData);
-
-    const savedProgress = getSavedProgress();
-    setCurrentStep(savedProgress.currentStep);
-    setCompletedSteps(new Set(savedProgress.completedSteps));
-  };
-
   // Function to start fresh (clear saved data)
   const startFresh = () => {
     clearSavedData();
@@ -2900,7 +2864,6 @@ export default function Form433AOIC() {
       onSubmit: handleSubmit,
       currentStep,
       totalSteps: 10,
-      validateStep: validateCurrentStep,
     };
 
     switch (currentStep) {

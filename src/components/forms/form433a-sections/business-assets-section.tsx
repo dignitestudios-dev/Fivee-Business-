@@ -16,7 +16,6 @@ interface BusinessAssetsSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 export function BusinessAssetsSection({
@@ -24,7 +23,6 @@ export function BusinessAssetsSection({
   onPrevious,
   currentStep,
   totalSteps,
-  validateStep,
 }: BusinessAssetsSectionProps) {
   const {
     register,
@@ -185,7 +183,6 @@ export function BusinessAssetsSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={onNext}
-          validateStep={validateStep}
         />
       </div>
     );
@@ -902,7 +899,6 @@ export function BusinessAssetsSection({
         totalSteps={totalSteps}
         onPrevious={onPrevious}
         onNext={onNext}
-        validateStep={validateStep}
       />
     </div>
   );

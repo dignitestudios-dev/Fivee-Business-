@@ -14,7 +14,6 @@ interface SignatureSectionProps {
   onSubmit: () => void;
   currentStep: number;
   totalSteps: number;
-  validateStep: () => Promise<boolean>;
 }
 
 // Define attachment data to avoid repetition
@@ -83,7 +82,6 @@ export function SignatureSection({
   onSubmit,
   currentStep,
   totalSteps,
-  validateStep,
 }: SignatureSectionProps) {
   const {
     register,
@@ -542,7 +540,6 @@ export function SignatureSection({
         onPrevious={onPrevious}
         onNext={onNext}
         onSubmit={onSubmit}
-        validateStep={validateStep}
       />
     </div>
   );
