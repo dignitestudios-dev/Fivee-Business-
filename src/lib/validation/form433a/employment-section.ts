@@ -1,7 +1,11 @@
+import { makeStore } from "@/lib/store";
 import z from "zod";
 
+
+const maritalStatus = makeStore().getState().form433a.personalInfo // adjust path to match your slice
+
+
 export const employmentInitialValues: EmploymentFromSchema = {
-  maritalStatus: "unmarried",
   employerName: "",
   payPeriod: "weekly",
   employerAddress: "",
@@ -23,7 +27,6 @@ export const employmentInitialValues: EmploymentFromSchema = {
  */
 export const employmentSchema = z
   .object({
-    maritalStatus: z.enum(["unmarried", "married"]),
     employerName: z.string().min(1, "Employer name is required"),
     payPeriod: z.enum(["weekly", "bi-weekly", "monthly", "other"]),
     employerAddress: z.string().min(1, "Employer address is required"),
@@ -53,7 +56,7 @@ export const employmentSchema = z
   })
   .superRefine((data, ctx) => {
     // If married, spouse fields should be present
-    if (data.maritalStatus === "married") {
+    if (maritalStatus === "married") {
       if (!data.spouseEmployerName || String(data.spouseEmployerName).trim() === "") {
         ctx.addIssue({
           code: "custom",

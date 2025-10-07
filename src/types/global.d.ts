@@ -48,6 +48,18 @@ declare global {
     timestamp: Date;
   }
 
+  type Form433aSection =
+    | "personalInfo"
+    | "employmentInfo"
+    | "assetsInfo"
+    | "selfEmployedInfo"
+    | "businessInfo"
+    | "businessIncomeExpenseInfo"
+    | "householdIncomeExpenseInfo"
+    | "offerCalculationInfo"
+    | "otherInformation"
+    | "signaturesAndAttachmentsInfo";
+
   type FormData433A = z.infer<typeof completeFormSchema>;
 
   // Form 433a: React Hook Form Data Types

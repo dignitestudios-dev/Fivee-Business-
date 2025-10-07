@@ -15,6 +15,10 @@ import {
   personalInfoInitialValues,
   personalInfoSchema,
 } from "@/lib/validation/form433a/personal-info-section";
+import { useEffect } from "react";
+import { setCaseId } from "@/utils/helper";
+import { useAppSelector } from "@/lib/hooks";
+import FormLoader from "@/components/global/FormLoader";
 
 interface PersonalInfoSectionProps {
   onNext: () => void;
@@ -29,7 +33,9 @@ export function PersonalInfoSection({
   currentStep,
   totalSteps,
 }: PersonalInfoSectionProps) {
-  const { loading, handleSavePersonalInfo } = usePersonalInfo();
+  const { personalInfo } = useAppSelector((state) => state.form433a);
+  const { loading, loadingFormData, handleSavePersonalInfo, handleGetPersonalInfo } =
+    usePersonalInfo();
 
   // Initialize form with zodResolver
   const methods = useForm<PersonalInfoFromSchema>({
@@ -40,6 +46,7 @@ export function PersonalInfoSection({
 
   const {
     register,
+    reset,
     watch,
     handleSubmit,
     formState: { errors },
@@ -85,9 +92,12 @@ export function PersonalInfoSection({
     }
   };
 
-  const handleSSNInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSSNInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => {
     const formatted = formatSSN(e.target.value);
-    setValue("ssnOrItin", formatted, { shouldValidate: true });
+    setValue(fieldName, formatted, { shouldValidate: true });
   };
 
   const onSubmit = async (data: PersonalInfoFromSchema) => {
@@ -110,6 +120,20 @@ export function PersonalInfoSection({
       toast.error(error.message || "Failed to save personal info");
     }
   };
+
+  useEffect(() => {
+    handleGetPersonalInfo("personalInfo");
+  }, []);
+
+  useEffect(() => {
+    if (personalInfo) {
+      reset(personalInfo);
+    }
+  }, [personalInfo]);
+
+  if (loadingFormData) {
+    return <FormLoader />;
+  }
 
   return (
     <FormProvider {...methods}>
@@ -162,7 +186,7 @@ export function PersonalInfoSection({
                 placeholder="XXX-XX-XXXX"
                 required
                 {...register("ssnOrItin", {
-                  onChange: handleSSNInput,
+                  onChange: (e) => handleSSNInput(e, "ssnOrItin"),
                 })}
                 error={errors.ssnOrItin?.message}
               />
@@ -370,9 +394,8 @@ export function PersonalInfoSection({
                   id="spouseSSN"
                   placeholder="XXX-XX-XXXX"
                   required
-                  {...(register("spouseSSN"),
-                  {
-                    onChange: handleSSNInput,
+                  {...register("spouseSSN", {
+                    onChange: (e) => handleSSNInput(e, "spouseSSN"),
                   })}
                   error={errors.spouseSSN?.message}
                 />

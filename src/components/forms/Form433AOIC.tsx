@@ -18,6 +18,7 @@ import { OtherInfoSection } from "@/components/forms/form433a-sections/other-inf
 import { SignatureSection } from "@/components/forms/form433a-sections/signature-section";
 import { completeFormSchema } from "@/lib/validation-schemas";
 import { storage } from "@/utils/helper";
+import { useAppSelector } from "@/lib/hooks";
 
 const steps = [
   {
@@ -110,6 +111,11 @@ const defaultValues = {
 };
 
 export default function Form433AOIC() {
+  const formData = useAppSelector((state) => state.form433a);
+  useEffect(() => {
+    console.log("Form433A data from store: ", formData);
+  }, [formData]);
+
   const [currentStep, setCurrentStep] = useState<number>(2);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
@@ -1785,7 +1791,11 @@ export default function Form433AOIC() {
             value: inventoryPurchased,
             label: "Inventory purchased",
           },
-          { name: "grossWagesSalaries", value: grossWagesSalaries, label: "Gross wages" },
+          {
+            name: "grossWagesSalaries",
+            value: grossWagesSalaries,
+            label: "Gross wages",
+          },
           { name: "rent", value: rent, label: "Business rent" },
           {
             name: "supplies",
@@ -2794,19 +2804,18 @@ export default function Form433AOIC() {
   const handleNext = async () => {
     console.log("Next runs");
 
-      if (currentStep < 10) {
-        // Mark current step as completed
-        const newCompletedSteps = new Set([...completedSteps, currentStep]);
-        setCompletedSteps(newCompletedSteps);
-        const nextStep = currentStep + 1;
-        setCurrentStep(nextStep);
+    if (currentStep < 10) {
+      // Mark current step as completed
+      const newCompletedSteps = new Set([...completedSteps, currentStep]);
+      setCompletedSteps(newCompletedSteps);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
 
-        // Save progress to localStorage
-        saveProgress(nextStep, newCompletedSteps);
+      // Save progress to localStorage
+      saveProgress(nextStep, newCompletedSteps);
 
-        clearErrors();
-      }
-    
+      clearErrors();
+    }
   };
 
   const handlePrevious = () => {
@@ -2909,7 +2918,7 @@ export default function Form433AOIC() {
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 min-h-[60vh]">
             {/* Stepper Navigation */}
             <div className="lg:w-1/4">
               <FormStepper
@@ -2921,8 +2930,8 @@ export default function Form433AOIC() {
             </div>
 
             {/* Form Content */}
-            <div className="lg:w-3/4">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="lg:w-3/4 h-full">
+              <div className="bg-white h-full rounded-lg shadow-sm border border-gray-200 p-6">
                 {renderCurrentSection()}
               </div>
             </div>

@@ -107,3 +107,22 @@ export const formatDateTime = (date: string) => {
   const d = new Date(date);
   return d.toLocaleString("en-US");
 };
+
+/**
+ * Converts a date string (e.g. "2012-06-26T00:00:00.000Z")
+ * into the format "YYYY-MM-DD" for <input type="date" /> fields.
+ */
+export function formatDateForInput(dateString?: string | null): string {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
+}
+
+// Get case Id from localstorage
+export const getCaseId = () => storage.get<string>("caseId");
+
+// Set case Id in localstorage
+export const setCaseId = (caseId: string) => {
+  storage.set("caseId", caseId);
+};

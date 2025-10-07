@@ -112,36 +112,38 @@ export const personalInfoSchema = z
       if (!data.dateOfMarriage) {
         ctx.addIssue({
           code: "custom",
-          message:
-            "Date of marriage is required when marital status is 'married'",
+          message: "Date of marriage is required",
           path: ["dateOfMarriage"],
         });
       }
       if (!data.spouseFirstName || String(data.spouseFirstName).trim() === "") {
         ctx.addIssue({
           code: "custom",
-          message:
-            "Spouse first name is required when marital status is 'married'",
+          message: "Spouse first name is required",
           path: ["spouseFirstName"],
         });
       }
       if (!data.spouseLastName || String(data.spouseLastName).trim() === "") {
         ctx.addIssue({
           code: "custom",
-          message:
-            "Spouse last name is required when marital status is 'married'",
+          message: "Spouse last name is required",
           path: ["spouseLastName"],
         });
       }
       if (!data.spouseDOB) {
         ctx.addIssue({
           code: "custom",
-          message:
-            "Spouse date of birth is required when marital status is 'married'",
+          message: "Spouse date of birth is required",
           path: ["spouseDOB"],
         });
       }
-      // spouseSSN: optional but if present, validate format
+      if (!data.spouseSSN) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Spouse SSN is required",
+          path: ["spouseSSN"],
+        });
+      }
       if (data.spouseSSN && !ssnRegex.test(String(data.spouseSSN))) {
         ctx.addIssue({
           code: "custom",
@@ -159,8 +161,7 @@ export const personalInfoSchema = z
       ) {
         ctx.addIssue({
           code: "custom",
-          message:
-            "Please specify other housing details when 'Other' is selected",
+          message: "Please specify other housing details",
           path: ["housingOtherDetails"],
         });
       }

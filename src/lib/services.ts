@@ -29,7 +29,7 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401) {
+    if (error?.response?.statusCode === 401) {
       localStorage.removeItem("accessToken");
       window.location.href = "/auth/login";
     }
@@ -81,21 +81,25 @@ const apiHandler = async <T>(apiCall: () => Promise<T>): Promise<T> => {
 
 // Centralized API Handling functions end
 
-const staticCaseId = "68e37684434f542dca06fda3";
-
-const savePersonalInfo = (info: any) =>
+const savePersonalInfo = (info: any, caseId: string) =>
   apiHandler<{ data: any; message: string }>(() =>
-    API.post(`/form433a/${staticCaseId}/personal-info`, info)
+    API.post(`/form433a/${caseId}/personal-info`, info)
   );
 
-const saveEmploymentInfo = (info: any) =>
+const saveEmploymentInfo = (info: any, caseId: string) =>
   apiHandler<{ data: any; message: string }>(() =>
-    API.post(`/form433a/${staticCaseId}/employment`, info)
+    API.post(`/form433a/${caseId}/employment`, info)
+  );
+
+const getPersonalInfo = (caseId: string, section: Form433aSection) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.get(`/form433a/${caseId}/section?section=${section}`)
   );
 
 const api = {
   savePersonalInfo,
-  saveEmploymentInfo
+  saveEmploymentInfo,
+  getPersonalInfo,
 };
 
 export default api;

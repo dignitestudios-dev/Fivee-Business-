@@ -10,7 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
 import useEmployment from "@/hooks/433a-form-hooks/useEmployment";
-import { employmentInitialValues, employmentSchema } from "@/lib/validation/form433a/employment-section";
+import {
+  employmentInitialValues,
+  employmentSchema,
+} from "@/lib/validation/form433a/employment-section";
+import { useAppSelector } from "@/lib/hooks";
+import { useEffect, useMemo } from "react";
+import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
+import FormLoader from "@/components/global/FormLoader";
 
 interface EmploymentSectionProps {
   onNext: () => void;
@@ -25,6 +32,8 @@ export function EmploymentSection({
   currentStep,
   totalSteps,
 }: EmploymentSectionProps) {
+  const { personalInfo } = useAppSelector((state) => state.form433a);
+  const { loadingFormData, handleGetPersonalInfo } = usePersonalInfo();
   const { loading, handleSaveEmployment } = useEmployment();
 
   // Initialize form with zodResolver
@@ -42,10 +51,15 @@ export function EmploymentSection({
     setValue,
   } = methods;
 
-  const maritalStatus = watch("maritalStatus");
+  const maritalStatus = useMemo(
+    () => personalInfo?.maritalStatus,
+    [personalInfo]
+  );
 
   const onSubmit = async (data: EmploymentFromSchema) => {
     try {
+      delete data.maritalStatus;
+
       // Data is already validated by Zod through zodResolver
       await handleSaveEmployment(data);
 
@@ -57,6 +71,14 @@ export function EmploymentSection({
     }
   };
 
+  useEffect(() => {
+    handleGetPersonalInfo("personalInfo");
+  }, []);
+
+  if (loadingFormData) {
+    return <FormLoader />;
+  }
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -66,10 +88,10 @@ export function EmploymentSection({
           </h2>
           <p className="text-gray-600">
             Complete this section if you or your spouse are wage earners and
-            receive a Form W-2. If you or your spouse have self-employment income
-            (that is you file a Schedule C, E, F, etc.) instead of, or in addition
-            to wage income, you must also complete Business Information in
-            Sections 4, 5, and 6.
+            receive a Form W-2. If you or your spouse have self-employment
+            income (that is you file a Schedule C, E, F, etc.) instead of, or in
+            addition to wage income, you must also complete Business Information
+            in Sections 4, 5, and 6.
           </p>
         </div>
 
@@ -133,7 +155,9 @@ export function EmploymentSection({
                   </div>
                 </RadioGroup>
                 {errors.payPeriod && (
-                  <p className="text-red-500 text-sm mt-1">{errors.payPeriod.message}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.payPeriod.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -154,7 +178,9 @@ export function EmploymentSection({
               <RadioGroup
                 value={watch("hasOwnershipInterest") ? "yes" : "no"}
                 onValueChange={(value) =>
-                  setValue("hasOwnershipInterest", value === "yes", { shouldValidate: true })
+                  setValue("hasOwnershipInterest", value === "yes", {
+                    shouldValidate: true,
+                  })
                 }
                 className="flex gap-6"
               >
@@ -178,7 +204,9 @@ export function EmploymentSection({
                 </div>
               </RadioGroup>
               {errors.hasOwnershipInterest && (
-                <p className="text-red-500 text-sm mt-1">{errors.hasOwnershipInterest.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.hasOwnershipInterest.message}
+                </p>
               )}
             </div>
 
@@ -251,7 +279,11 @@ export function EmploymentSection({
                     value={watch("spousePayPeriod") || "weekly"}
                     onValueChange={(
                       value: "weekly" | "bi-weekly" | "monthly" | "other"
-                    ) => setValue("spousePayPeriod", value, { shouldValidate: true })}
+                    ) =>
+                      setValue("spousePayPeriod", value, {
+                        shouldValidate: true,
+                      })
+                    }
                     className="flex flex-wrap gap-4"
                   >
                     <div className="flex items-center space-x-2">
@@ -288,7 +320,9 @@ export function EmploymentSection({
                     </div>
                   </RadioGroup>
                   {errors.spousePayPeriod && (
-                    <p className="text-red-500 text-sm mt-1">{errors.spousePayPeriod.message}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.spousePayPeriod.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -304,12 +338,15 @@ export function EmploymentSection({
 
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700">
-                  Does your spouse have an ownership interest in this business? *
+                  Does your spouse have an ownership interest in this business?
+                  *
                 </Label>
                 <RadioGroup
                   value={watch("spouseHasOwnershipInterest") ? "yes" : "no"}
                   onValueChange={(value) =>
-                    setValue("spouseHasOwnershipInterest", value === "yes", { shouldValidate: true })
+                    setValue("spouseHasOwnershipInterest", value === "yes", {
+                      shouldValidate: true,
+                    })
                   }
                   className="flex gap-6"
                 >
@@ -333,7 +370,9 @@ export function EmploymentSection({
                   </div>
                 </RadioGroup>
                 {errors.spouseHasOwnershipInterest && (
-                  <p className="text-red-500 text-sm mt-1">{errors.spouseHasOwnershipInterest.message}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.spouseHasOwnershipInterest.message}
+                  </p>
                 )}
               </div>
 
@@ -361,7 +400,9 @@ export function EmploymentSection({
                         {...register("spouseYearsWithEmployer")}
                         error={errors.spouseYearsWithEmployer?.message}
                       />
-                      <Label className="text-xs text-gray-500 mt-1">Years</Label>
+                      <Label className="text-xs text-gray-500 mt-1">
+                        Years
+                      </Label>
                     </div>
                     <div className="flex-1">
                       <FormInput
@@ -374,7 +415,9 @@ export function EmploymentSection({
                         {...register("spouseMonthsWithEmployer")}
                         error={errors.spouseMonthsWithEmployer?.message}
                       />
-                      <Label className="text-xs text-gray-500 mt-1">Months</Label>
+                      <Label className="text-xs text-gray-500 mt-1">
+                        Months
+                      </Label>
                     </div>
                   </div>
                 </div>
