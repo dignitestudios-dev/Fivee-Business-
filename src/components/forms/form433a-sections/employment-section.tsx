@@ -18,6 +18,8 @@ import { useAppSelector } from "@/lib/hooks";
 import { useEffect, useMemo } from "react";
 import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
 import FormLoader from "@/components/global/FormLoader";
+import { useSearchParams } from "next/navigation";
+import { FORM_433A_SECTIONS } from "@/lib/constants";
 
 interface EmploymentSectionProps {
   onNext: () => void;
@@ -32,13 +34,27 @@ export function EmploymentSection({
   currentStep,
   totalSteps,
 }: EmploymentSectionProps) {
-  const { personalInfo } = useAppSelector((state) => state.form433a);
+  const searchParams = useSearchParams();
+  const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
+  const { personalInfo, employmentInfo } = useAppSelector(
+    (state) => state.form433a
+  );
   const { loadingFormData, handleGetPersonalInfo } = usePersonalInfo();
-  const { loading, handleSaveEmployment } = useEmployment();
+  const {
+    loading,
+    loadingFormData: loadingEmpFormData,
+    handleSaveEmployment,
+    handleGetEmploymentInfo,
+  } = useEmployment();
+
+  const maritalStatus = useMemo(
+    () => personalInfo?.maritalStatus || "unmarried",
+    [personalInfo]
+  );
 
   // Initialize form with zodResolver
   const methods = useForm<EmploymentFromSchema>({
-    resolver: zodResolver(employmentSchema),
+    resolver: zodResolver(employmentSchema(maritalStatus)),
     defaultValues: employmentInitialValues,
     mode: "onSubmit",
   });
@@ -46,22 +62,20 @@ export function EmploymentSection({
   const {
     register,
     watch,
+    reset,
+    getValues,
     handleSubmit,
     formState: { errors },
     setValue,
   } = methods;
 
-  const maritalStatus = useMemo(
-    () => personalInfo?.maritalStatus,
-    [personalInfo]
-  );
-
   const onSubmit = async (data: EmploymentFromSchema) => {
     try {
       delete data.maritalStatus;
+      console.log("emp info:", data);
 
       // Data is already validated by Zod through zodResolver
-      await handleSaveEmployment(data);
+      await handleSaveEmployment(data, caseId);
 
       // Only proceed to next step if successful
       onNext();
@@ -72,10 +86,36 @@ export function EmploymentSection({
   };
 
   useEffect(() => {
-    handleGetPersonalInfo("personalInfo");
+    if (!personalInfo) handleGetPersonalInfo(caseId, FORM_433A_SECTIONS[0]);
+    if (!employmentInfo) handleGetEmploymentInfo(caseId, FORM_433A_SECTIONS[1]);
   }, []);
 
-  if (loadingFormData) {
+  const normalizeEmploymentData = (data: any) => {
+    return {
+      ...data,
+      spouseYearsWithEmployer:
+        data.spouseYearsWithEmployer !== undefined &&
+        data.spouseYearsWithEmployer !== null &&
+        data.spouseYearsWithEmployer !== ""
+          ? Number(data.spouseYearsWithEmployer)
+          : 0,
+      spouseMonthsWithEmployer:
+        data.spouseMonthsWithEmployer !== undefined &&
+        data.spouseMonthsWithEmployer !== null &&
+        data.spouseMonthsWithEmployer !== ""
+          ? Number(data.spouseMonthsWithEmployer)
+          : 0,
+    };
+  };
+
+  useEffect(() => {
+    if (employmentInfo) {
+      const normalizedData = normalizeEmploymentData(employmentInfo);
+      reset(normalizedData);
+    }
+  }, [employmentInfo]);
+
+  if (loadingFormData || loadingEmpFormData) {
     return <FormLoader />;
   }
 

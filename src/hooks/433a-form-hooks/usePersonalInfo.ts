@@ -9,14 +9,16 @@ const usePersonalInfo = () => {
   const [loading, setLoading] = useState(false);
   const [loadingFormData, setLoadingFormData] = useState(false);
 
-  const handleSavePersonalInfo = async (info: PersonalInfoFromSchema) => {
+  const handleSavePersonalInfo = async (
+    info: PersonalInfoFromSchema,
+    caseId: string | null
+  ) => {
+    if (!caseId) return;
     setLoading(true);
 
     try {
-      const caseId = getCaseId();
-      if (!caseId) return;
-
       await api.savePersonalInfo(info, caseId);
+      dispatch(savePersonalInfo(info));
     } catch (error: any) {
       console.error("Error saving personal info:", error);
       throw new Error(error?.message || "Failed to save personal info");
@@ -25,17 +27,17 @@ const usePersonalInfo = () => {
     }
   };
 
-  const handleGetPersonalInfo = async (section: Form433aSection) => {
+  const handleGetPersonalInfo = async (
+    caseId: string | null,
+    section: Form433aSection
+  ) => {
     setLoadingFormData(true);
 
     try {
       console.log("Fetching personal info for section:", section);
-      const caseId = getCaseId();
-      console.log("caseId: ", caseId);
       if (!caseId) return;
 
-      const response = await api.getPersonalInfo(caseId, section);
-
+      const response = await api.get433aSectionInfo(caseId, section);
       dispatch(savePersonalInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching personal info:", error);

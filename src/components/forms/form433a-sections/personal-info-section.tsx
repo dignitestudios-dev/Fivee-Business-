@@ -15,10 +15,12 @@ import {
   personalInfoInitialValues,
   personalInfoSchema,
 } from "@/lib/validation/form433a/personal-info-section";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { setCaseId } from "@/utils/helper";
 import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
+import { useSearchParams } from "next/navigation";
+import { FORM_433A_SECTIONS } from "@/lib/constants";
 
 interface PersonalInfoSectionProps {
   onNext: () => void;
@@ -33,9 +35,15 @@ export function PersonalInfoSection({
   currentStep,
   totalSteps,
 }: PersonalInfoSectionProps) {
+  const searchParams = useSearchParams();
+  const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { personalInfo } = useAppSelector((state) => state.form433a);
-  const { loading, loadingFormData, handleSavePersonalInfo, handleGetPersonalInfo } =
-    usePersonalInfo();
+  const {
+    loading,
+    loadingFormData,
+    handleSavePersonalInfo,
+    handleGetPersonalInfo,
+  } = usePersonalInfo();
 
   // Initialize form with zodResolver
   const methods = useForm<PersonalInfoFromSchema>({
@@ -111,7 +119,7 @@ export function PersonalInfoSection({
       }
 
       // Data is already validated by Zod through zodResolver
-      await handleSavePersonalInfo(data);
+      await handleSavePersonalInfo(data, caseId);
 
       // Only proceed to next step if successful
       onNext();
@@ -122,7 +130,7 @@ export function PersonalInfoSection({
   };
 
   useEffect(() => {
-    handleGetPersonalInfo("personalInfo");
+    if (!personalInfo) handleGetPersonalInfo(caseId, FORM_433A_SECTIONS[0]);
   }, []);
 
   useEffect(() => {

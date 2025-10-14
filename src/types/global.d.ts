@@ -1,6 +1,9 @@
 import { completeFormSchema } from "@/lib/validation-schemas";
+import { businessAssetsSchema } from "@/lib/validation/form433a/business-assets-section";
 import { employmentSchema } from "@/lib/validation/form433a/employment-section";
+import { personalAssetsSchema } from "@/lib/validation/form433a/personal-assets-section";
 import { personalInfoSchema } from "@/lib/validation/form433a/personal-info-section";
+import { selfEmployedSchema } from "@/lib/validation/form433a/self-employed-section";
 
 export {}; // makes this a module
 
@@ -64,6 +67,8 @@ declare global {
 
   // Form 433a: React Hook Form Data Types
 
+  type MaritalStatus = "unmarried" | "married";
+
   type PersonalInfo = {
     firstName: string;
     lastName: string;
@@ -117,8 +122,15 @@ declare global {
 
   type EmploymentFromSchema = z.infer<typeof employmentSchema>;
 
+  type PersonalAssetsFormSchema = z.infer<typeof personalAssetsSchema>;
+
+  type SelfEmployedFormSchema = z.infer<typeof selfEmployedSchema>;
+
+  type BusinessAssetsFormSchema = z.infer<typeof businessAssetsSchema>;
+
   interface FormData433AState {
     personalInfo: PersonalInfoFromSchema;
     employment: EmploymentFromSchema;
+    personalAssets: PersonalAssetsFormSchema;
   }
 }

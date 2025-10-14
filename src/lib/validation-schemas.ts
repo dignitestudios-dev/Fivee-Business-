@@ -110,6 +110,8 @@ export const personalAssetsSchema = z.object({
           .number()
           .min(0, "Loan balance cannot be negative")
           .optional(),
+        // Whether this vehicle is part of a joint offer (default false)
+        isJointOffer: z.boolean().optional(),
       })
     )
     .optional(),

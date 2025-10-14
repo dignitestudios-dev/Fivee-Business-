@@ -9,7 +9,7 @@ export default function ToastProvider() {
       toastOptions={{
         className: "",
         duration: 2000,
-        removeDelay: 1000,
+        removeDelay: 5000,
       }}
     />
   );

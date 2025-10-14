@@ -46,7 +46,7 @@ const defaultLimit = 20;
 const handleApiError = (error: unknown): never => {
   if (axios.isAxiosError(error)) {
     const errorMessage =
-      error.response?.data?.message ||
+      error.response?.data?.data?.message ||
       error.message ||
       "An unexpected error occurred";
     console.error("API Error:", errorMessage);
@@ -63,7 +63,7 @@ const handleApiResponse = (response: any) => {
   // Check if status is false and throw an error
   if (!responseData.status) {
     throw new Error(
-      responseData.message || "Something went wrong, Please try again!"
+      responseData.data.message || "Something went wrong, Please try again!"
     );
   }
 
@@ -81,6 +81,11 @@ const apiHandler = async <T>(apiCall: () => Promise<T>): Promise<T> => {
 
 // Centralized API Handling functions end
 
+const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.get(`/form433a/${caseId}/section?section=${section}`)
+  );
+
 const savePersonalInfo = (info: any, caseId: string) =>
   apiHandler<{ data: any; message: string }>(() =>
     API.post(`/form433a/${caseId}/personal-info`, info)
@@ -91,15 +96,28 @@ const saveEmploymentInfo = (info: any, caseId: string) =>
     API.post(`/form433a/${caseId}/employment`, info)
   );
 
-const getPersonalInfo = (caseId: string, section: Form433aSection) =>
+const savePersonalAssetsInfo = (info: any, caseId: string) =>
   apiHandler<{ data: any; message: string }>(() =>
-    API.get(`/form433a/${caseId}/section?section=${section}`)
+    API.post(`/form433a/${caseId}/assets`, info)
+  );
+
+const saveSelfEmployedInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/self-employed-info`, info)
+  );
+
+const saveBusinessAssetsInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/business`, info)
   );
 
 const api = {
   savePersonalInfo,
   saveEmploymentInfo,
-  getPersonalInfo,
+  get433aSectionInfo,
+  savePersonalAssetsInfo,
+  saveSelfEmployedInfo,
+  saveBusinessAssetsInfo,
 };
 
 export default api;
