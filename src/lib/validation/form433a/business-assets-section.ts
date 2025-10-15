@@ -11,7 +11,6 @@ export const businessAssetsInitialValues: BusinessAssetsFormSchema = {
     assets: [],
     irsAllowedDeduction: 0,
   },
-  totalBusinessAssetsAttachment: 0,
   hasNotesReceivable: false,
   hasAccountsReceivable: false,
   boxB: 0,
@@ -76,11 +75,6 @@ export const businessAssetsSchema = z.object({
       .number()
       .min(0, "IRS allowed deduction cannot be negative"),
   }),
-
-  totalBusinessAssetsAttachment: z.coerce
-    .number()
-    .min(0, "Total business assets attachment cannot be negative"),
-
   hasNotesReceivable: z.boolean(),
   hasAccountsReceivable: z.boolean(),
 });

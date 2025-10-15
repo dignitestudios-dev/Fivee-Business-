@@ -1,9 +1,13 @@
+import { calculationSchema } from "@/lib/validation/form433a/calculation-section";
 import { completeFormSchema } from "@/lib/validation-schemas";
 import { businessAssetsSchema } from "@/lib/validation/form433a/business-assets-section";
+import { businessIncomeSchema } from "@/lib/validation/form433a/business-income-section";
 import { employmentSchema } from "@/lib/validation/form433a/employment-section";
+import { householdIncomeSchema } from "@/lib/validation/form433a/household-income-section";
 import { personalAssetsSchema } from "@/lib/validation/form433a/personal-assets-section";
 import { personalInfoSchema } from "@/lib/validation/form433a/personal-info-section";
 import { selfEmployedSchema } from "@/lib/validation/form433a/self-employed-section";
+import { otherInfoSchema } from "@/lib/validation/form433a/other-info-section";
 
 export {}; // makes this a module
 
@@ -128,9 +132,23 @@ declare global {
 
   type BusinessAssetsFormSchema = z.infer<typeof businessAssetsSchema>;
 
+  type BusinessIncomeFormSchema = z.infer<typeof businessIncomeSchema>;
+
+  type HouseholdIncomeFormSchema = z.infer<typeof householdIncomeSchema>;
+
+  type CalculationFormSchema = z.infer<typeof calculationSchema>;
+
+  type OtherInfoFormSchema = z.infer<typeof otherInfoSchema>;
+
   interface FormData433AState {
     personalInfo: PersonalInfoFromSchema;
     employment: EmploymentFromSchema;
     personalAssets: PersonalAssetsFormSchema;
+    selfEmployedSchema: SelfEmployedFormSchema;
+    businessAssetsSchema: BusinessAssetsFormSchema;
+    businessIncomeSchema: BusinessIncomeFormSchema;
+    householdIncomeSchema: HouseholdIncomeFormSchema;
+    calculationSchema: CalculationFormSchema;
+    otherInfoSchema: OtherInfoFormSchema;
   }
 }

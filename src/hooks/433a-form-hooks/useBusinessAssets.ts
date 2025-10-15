@@ -28,9 +28,14 @@ const useBusinessAssets = () => {
 
       if (!parsedInfo.assetItems?.assets?.length) {
         delete parsedInfo.assetItems;
+      } else {
+        parsedInfo.assetItems.assets = parsedInfo.assetItems?.assets.map(
+          (asset: any) => {
+            delete asset.totalValue;
+            return asset;
+          }
+        );
       }
-
-      delete parsedInfo.totalBusinessAssetsAttachment;
 
       console.log("parsedInfo: ", parsedInfo);
 

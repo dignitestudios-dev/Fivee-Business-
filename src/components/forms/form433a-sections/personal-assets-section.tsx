@@ -11,10 +11,11 @@ import {
   Controller,
   useForm,
   FormProvider,
+  useWatch,
 } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { preventAlphabetInput } from "@/lib/validation-schemas";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import toast from "react-hot-toast";
@@ -185,7 +186,8 @@ export function PersonalAssetsSection({
   ];
 
   // Compute all subtotals with useMemo for optimization
-  const bankAccountsValue = watch("bankAccounts");
+  // useWatch subscribes to array fields and is more optimized than many individual watch() calls
+  const bankAccountsValue = useWatch({ control, name: "bankAccounts" }) || [];
   const bankTotal = useMemo(
     () =>
       Math.max(
@@ -202,7 +204,8 @@ export function PersonalAssetsSection({
     [bankTotal]
   );
 
-  const investmentAccountsValue = watch("investmentAccounts");
+  const investmentAccountsValue =
+    useWatch({ control, name: "investmentAccounts" }) || [];
   const investmentTotal = useMemo(
     () =>
       (investmentAccountsValue || []).reduce(
@@ -214,7 +217,7 @@ export function PersonalAssetsSection({
     [investmentAccountsValue]
   );
 
-  const digitalAssetsValue = watch("digitalAssets");
+  const digitalAssetsValue = useWatch({ control, name: "digitalAssets" }) || [];
   const digitalTotal = useMemo(
     () =>
       (digitalAssetsValue || []).reduce(
@@ -224,7 +227,8 @@ export function PersonalAssetsSection({
     [digitalAssetsValue]
   );
 
-  const retirementAccountsValue = watch("retirementAccounts");
+  const retirementAccountsValue =
+    useWatch({ control, name: "retirementAccounts" }) || [];
   const retirementTotal = useMemo(
     () =>
       (retirementAccountsValue || []).reduce(
@@ -239,7 +243,8 @@ export function PersonalAssetsSection({
     [retirementAccountsValue]
   );
 
-  const lifeInsurancePoliciesValue = watch("lifeInsurancePolicies");
+  const lifeInsurancePoliciesValue =
+    useWatch({ control, name: "lifeInsurancePolicies" }) || [];
   const insuranceTotal = useMemo(
     () =>
       (lifeInsurancePoliciesValue || []).reduce(
@@ -251,7 +256,8 @@ export function PersonalAssetsSection({
     [lifeInsurancePoliciesValue]
   );
 
-  const realPropertiesValue = watch("realProperties");
+  const realPropertiesValue =
+    useWatch({ control, name: "realProperties" }) || [];
   const propertyTotal = useMemo(
     () =>
       (realPropertiesValue || []).reduce(
@@ -259,14 +265,14 @@ export function PersonalAssetsSection({
           sum +
           Math.max(
             0,
-            (prop.currentMarketValue || 0) * 0.8 - (prop.loanBalance || 0)
+            (prop?.currentMarketValue || 0) * 0.8 - (prop?.loanBalance || 0)
           ),
         0
       ),
     [realPropertiesValue]
   );
 
-  const vehiclesValue = watch("vehicles");
+  const vehiclesValue = useWatch({ control, name: "vehicles" }) || [];
   const vehicleTotal = useMemo(() => {
     let total = 0;
     (vehiclesValue || []).forEach((vehicle: any, index: any) => {
@@ -289,7 +295,7 @@ export function PersonalAssetsSection({
     return total;
   }, [vehiclesValue]);
 
-  const valuableItemsValue = watch("valuableItems");
+  const valuableItemsValue = useWatch({ control, name: "valuableItems" }) || [];
   const valuablesTotal = useMemo(
     () =>
       (valuableItemsValue || []).reduce(
@@ -304,7 +310,8 @@ export function PersonalAssetsSection({
     [valuableItemsValue]
   );
 
-  const furniturePersonalEffectsValue = watch("furniturePersonalEffects");
+  const furniturePersonalEffectsValue =
+    useWatch({ control, name: "furniturePersonalEffects" }) || [];
   const furnitureTotal = useMemo(
     () =>
       (furniturePersonalEffectsValue || []).reduce(
@@ -345,15 +352,29 @@ export function PersonalAssetsSection({
     ]
   );
 
-  // Save boxA in form state
+  // Save boxA in form state (debounced to avoid excessive setValue calls & re-renders)
+  const boxADebounceRef = useRef<number | null>(null);
   useEffect(() => {
-    setValue("boxA", totalEquity);
+    // clear existing timeout
+    if (boxADebounceRef.current) {
+      clearTimeout(boxADebounceRef.current);
+    }
+    // set a short debounce to batch rapid updates
+    boxADebounceRef.current = window.setTimeout(() => {
+      setValue("boxA", totalEquity);
+    }, 120);
+
+    return () => {
+      if (boxADebounceRef.current) clearTimeout(boxADebounceRef.current);
+    };
   }, [totalEquity, setValue]);
 
   // Ensure first vehicle's isJointOffer is always false (do not allow joint offer for first vehicle)
   useEffect(() => {
-    if ((vehiclesValue || []).length > 0) {
-      // force first vehicle to false
+    const first = (vehiclesValue || [])[0];
+    // Only update if the first vehicle exists and isJointOffer is truthy.
+    // Avoid setting the same value repeatedly which causes update loops.
+    if (first && first.isJointOffer) {
       setValue("vehicles.0.isJointOffer", false);
     }
   }, [vehiclesValue, setValue]);
@@ -527,9 +548,8 @@ export function PersonalAssetsSection({
           </CardHeader>
           <CardContent className="space-y-4">
             {investmentAccounts.map((field, index) => {
-              const investmentAccountType = watch(
-                `investmentAccounts.${index}.investmentType`
-              );
+              const inv = investmentAccountsValue[index] || {};
+              const investmentAccountType = inv.investmentType || "";
 
               return (
                 <div
@@ -697,11 +717,7 @@ export function PersonalAssetsSection({
                       Net Value: $
                       {Math.max(
                         0,
-                        (watch(
-                          `investmentAccounts.${index}.currentMarketValue`
-                        ) || 0) -
-                          (watch(`investmentAccounts.${index}.loanBalance`) ||
-                            0)
+                        (inv.currentMarketValue || 0) - (inv.loanBalance || 0)
                       ).toLocaleString()}
                     </Label>
                   </div>
@@ -860,198 +876,203 @@ export function PersonalAssetsSection({
             <CardTitle>Retirement Accounts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {retirementAccounts.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 border border-gray-200 rounded-lg space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">
-                    Retirement Account {index + 1}
-                  </h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeRetirementAccount(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+            {retirementAccounts.map((field, index) => {
+              const ret = retirementAccountsValue[index] || {};
+              const retirementAccountType = ret.retirementType || "";
 
-                {/* Retirement Account Type Radio Buttons */}
-                <FormField
-                  label="Retirement Account Type"
-                  id={`retirementAccounts.${index}.retirementType`}
-                  required
-                  error={
-                    errors.retirementAccounts?.[index]?.retirementType?.message
-                  }
+              return (
+                <div
+                  key={field.id}
+                  className="p-4 border border-gray-200 rounded-lg space-y-4"
                 >
-                  <Controller
-                    name={`retirementAccounts.${index}.retirementType`}
-                    control={control}
-                    rules={{ required: "Retirement account type is required" }}
-                    render={({ field }) => (
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="flex flex-wrap gap-4 mt-2"
-                      >
-                        {[
-                          { label: "401K", value: "401k" },
-                          { label: "IRA", value: "ira" },
-                          { label: "Other", value: "other" },
-                        ].map((type) => (
-                          <div
-                            key={type.value}
-                            className="flex items-center space-x-2"
-                          >
-                            <RadioGroupItem
-                              value={type.value}
-                              id={`retirement-${index}-${type.value}`}
-                              className="text-[#22b573]"
-                            />
-                            <Label
-                              htmlFor={`retirement-${index}-${type.value}`}
-                              className="text-sm"
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium text-gray-900">
+                      Retirement Account {index + 1}
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeRetirementAccount(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Retirement Account Type Radio Buttons */}
+                  <FormField
+                    label="Retirement Account Type"
+                    id={`retirementAccounts.${index}.retirementType`}
+                    required
+                    error={
+                      errors.retirementAccounts?.[index]?.retirementType
+                        ?.message
+                    }
+                  >
+                    <Controller
+                      name={`retirementAccounts.${index}.retirementType`}
+                      control={control}
+                      rules={{
+                        required: "Retirement account type is required",
+                      }}
+                      render={({ field }) => (
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="flex flex-wrap gap-4 mt-2"
+                        >
+                          {[
+                            { label: "401K", value: "401k" },
+                            { label: "IRA", value: "ira" },
+                            { label: "Other", value: "other" },
+                          ].map((type) => (
+                            <div
+                              key={type.value}
+                              className="flex items-center space-x-2"
                             >
-                              {type.label}
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    )}
-                  />
-                </FormField>
+                              <RadioGroupItem
+                                value={type.value}
+                                id={`retirement-${index}-${type.value}`}
+                                className="text-[#22b573]"
+                              />
+                              <Label
+                                htmlFor={`retirement-${index}-${type.value}`}
+                                className="text-sm"
+                              >
+                                {type.label}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      )}
+                    />
+                  </FormField>
 
-                {/* Conditional Other Type Text Field */}
-                {watch(`retirementAccounts.${index}.retirementType`) ===
-                  "other" && (
-                  <FormInput
-                    label="Please specify retirement account type"
-                    id={`retirementAccounts.${index}.retirementTypeText`}
-                    required
-                    placeholder="Enter retirement account type"
-                    {...register(
-                      `retirementAccounts.${index}.retirementTypeText`,
-                      {
-                        required:
-                          watch(
-                            `retirementAccounts.${index}.retirementType`
-                          ) === "other"
-                            ? "Please specify the retirement account type"
-                            : false,
+                  {/* Conditional Other Type Text Field */}
+                  {ret.retirementType === "other" && (
+                    <FormInput
+                      label="Please specify retirement account type"
+                      id={`retirementAccounts.${index}.retirementTypeText`}
+                      required
+                      placeholder="Enter retirement account type"
+                      {...register(
+                        `retirementAccounts.${index}.retirementTypeText`,
+                        {
+                          required:
+                            ret.retirementType === "other"
+                              ? "Please specify the retirement account type"
+                              : false,
+                        }
+                      )}
+                      error={
+                        errors.retirementAccounts?.[index]?.retirementTypeText
+                          ?.message
                       }
-                    )}
-                    error={
-                      errors.retirementAccounts?.[index]?.retirementTypeText
-                        ?.message
-                    }
-                  />
-                )}
+                    />
+                  )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    label="Name of Financial Institution"
-                    id={`retirementAccounts.${index}.institutionName`}
-                    required
-                    {...register(`retirementAccounts.${index}.institutionName`)}
-                    error={
-                      errors.retirementAccounts?.[index]?.institutionName
-                        ?.message
-                    }
-                  />
-
-                  <FormInput
-                    label="Country Location"
-                    id={`retirementAccounts.${index}.countryLocation`}
-                    required
-                    {...register(`retirementAccounts.${index}.countryLocation`)}
-                    error={
-                      errors.retirementAccounts?.[index]?.countryLocation
-                        ?.message
-                    }
-                  />
-                </div>
-
-                <FormInput
-                  label="Account Number"
-                  id={`retirementAccounts.${index}.accountNumber`}
-                  {...register(`retirementAccounts.${index}.accountNumber`)}
-                  onChange={(e) => preventAlphabetInput(e)}
-                  error={
-                    errors.retirementAccounts?.[index]?.accountNumber?.message
-                  }
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput
-                    label="Current Market Value ($)"
-                    id={`retirementAccounts.${index}.currentMarketValue`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    {...register(
-                      `retirementAccounts.${index}.currentMarketValue`,
-                      {
-                        valueAsNumber: true,
-                        min: { value: 0, message: "Value cannot be negative" },
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      label="Name of Financial Institution"
+                      id={`retirementAccounts.${index}.institutionName`}
+                      required
+                      {...register(
+                        `retirementAccounts.${index}.institutionName`
+                      )}
+                      error={
+                        errors.retirementAccounts?.[index]?.institutionName
+                          ?.message
                       }
-                    )}
-                    error={
-                      errors.retirementAccounts?.[index]?.currentMarketValue
-                        ?.message
-                    }
-                  />
+                    />
 
-                  <div className="bg-gray-50 p-3 rounded">
-                    <Label className="text-sm font-medium">
-                      Market Value × 0.8: $
-                      {(
-                        (watch(
-                          `retirementAccounts.${index}.currentMarketValue`
-                        ) || 0) * 0.8
-                      ).toLocaleString()}
-                    </Label>
+                    <FormInput
+                      label="Country Location"
+                      id={`retirementAccounts.${index}.countryLocation`}
+                      required
+                      {...register(
+                        `retirementAccounts.${index}.countryLocation`
+                      )}
+                      error={
+                        errors.retirementAccounts?.[index]?.countryLocation
+                          ?.message
+                      }
+                    />
                   </div>
 
                   <FormInput
-                    label="Minus Loan Balance ($)"
-                    id={`retirementAccounts.${index}.loanBalance`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    {...register(`retirementAccounts.${index}.loanBalance`, {
-                      valueAsNumber: true,
-                      min: {
-                        value: 0,
-                        message: "Loan balance cannot be negative",
-                      },
-                    })}
+                    label="Account Number"
+                    id={`retirementAccounts.${index}.accountNumber`}
+                    {...register(`retirementAccounts.${index}.accountNumber`)}
+                    onChange={(e) => preventAlphabetInput(e)}
                     error={
-                      errors.retirementAccounts?.[index]?.loanBalance?.message
+                      errors.retirementAccounts?.[index]?.accountNumber?.message
                     }
                   />
-                </div>
 
-                {/* Auto-calculated net value */}
-                <div className="bg-gray-50 p-3 rounded">
-                  <Label className="text-sm font-medium">
-                    Net Value: $
-                    {Math.max(
-                      0,
-                      (watch(
-                        `retirementAccounts.${index}.currentMarketValue`
-                      ) || 0) *
-                        0.8 -
-                        (watch(`retirementAccounts.${index}.loanBalance`) || 0)
-                    ).toLocaleString()}
-                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput
+                      label="Current Market Value ($)"
+                      id={`retirementAccounts.${index}.currentMarketValue`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(
+                        `retirementAccounts.${index}.currentMarketValue`,
+                        {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Value cannot be negative",
+                          },
+                        }
+                      )}
+                      error={
+                        errors.retirementAccounts?.[index]?.currentMarketValue
+                          ?.message
+                      }
+                    />
+
+                    <div className="bg-gray-50 p-3 rounded">
+                      <Label className="text-sm font-medium">
+                        Market Value × 0.8: $
+                        {((ret.currentMarketValue || 0) * 0.8).toLocaleString()}
+                      </Label>
+                    </div>
+
+                    <FormInput
+                      label="Minus Loan Balance ($)"
+                      id={`retirementAccounts.${index}.loanBalance`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(`retirementAccounts.${index}.loanBalance`, {
+                        valueAsNumber: true,
+                        min: {
+                          value: 0,
+                          message: "Loan balance cannot be negative",
+                        },
+                      })}
+                      error={
+                        errors.retirementAccounts?.[index]?.loanBalance?.message
+                      }
+                    />
+                  </div>
+
+                  {/* Auto-calculated net value */}
+                  <div className="bg-gray-50 p-3 rounded">
+                    <Label className="text-sm font-medium">
+                      Net Value: $
+                      {Math.max(
+                        0,
+                        (ret.currentMarketValue || 0) * 0.8 -
+                          (ret.loanBalance || 0)
+                      ).toLocaleString()}
+                    </Label>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <Button
               type="button"
@@ -1086,110 +1107,116 @@ export function PersonalAssetsSection({
             <CardTitle>Cash Value of Life Insurance Policies</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {lifeInsurancePolicies.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 border border-gray-200 rounded-lg space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">
-                    Life Insurance Policy {index + 1}
-                  </h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeLifeInsurancePolicy(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+            {lifeInsurancePolicies.map((field, index) => {
+              const ins = lifeInsurancePoliciesValue[index] || {};
+              return (
+                <div
+                  key={field.id}
+                  className="p-4 border border-gray-200 rounded-lg space-y-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium text-gray-900">
+                      Life Insurance Policy {index + 1}
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeLifeInsurancePolicy(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    label="Name of Insurance Company"
-                    id={`lifeInsurancePolicies.${index}.companyName`}
-                    required
-                    {...register(`lifeInsurancePolicies.${index}.companyName`)}
-                    error={
-                      errors.lifeInsurancePolicies?.[index]?.companyName
-                        ?.message
-                    }
-                  />
-
-                  <FormInput
-                    label="Policy Number"
-                    id={`lifeInsurancePolicies.${index}.policyNumber`}
-                    required
-                    {...register(`lifeInsurancePolicies.${index}.policyNumber`)}
-                    error={
-                      errors.lifeInsurancePolicies?.[index]?.policyNumber
-                        ?.message
-                    }
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    label="Current Cash Value ($)"
-                    id={`lifeInsurancePolicies.${index}.currentCashValue`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    required
-                    {...register(
-                      `lifeInsurancePolicies.${index}.currentCashValue`,
-                      {
-                        valueAsNumber: true,
-                        min: {
-                          value: 0,
-                          message: "Cash value cannot be negative",
-                        },
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      label="Name of Insurance Company"
+                      id={`lifeInsurancePolicies.${index}.companyName`}
+                      required
+                      {...register(
+                        `lifeInsurancePolicies.${index}.companyName`
+                      )}
+                      error={
+                        errors.lifeInsurancePolicies?.[index]?.companyName
+                          ?.message
                       }
-                    )}
-                    error={
-                      errors.lifeInsurancePolicies?.[index]?.currentCashValue
-                        ?.message
-                    }
-                  />
+                    />
 
-                  <FormInput
-                    label="Minus Loan Balance ($)"
-                    id={`lifeInsurancePolicies.${index}.loanBalance`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    {...register(`lifeInsurancePolicies.${index}.loanBalance`, {
-                      valueAsNumber: true,
-                      min: {
-                        value: 0,
-                        message: "Loan balance cannot be negative",
-                      },
-                    })}
-                    error={
-                      errors.lifeInsurancePolicies?.[index]?.loanBalance
-                        ?.message
-                    }
-                  />
-                </div>
+                    <FormInput
+                      label="Policy Number"
+                      id={`lifeInsurancePolicies.${index}.policyNumber`}
+                      required
+                      {...register(
+                        `lifeInsurancePolicies.${index}.policyNumber`
+                      )}
+                      error={
+                        errors.lifeInsurancePolicies?.[index]?.policyNumber
+                          ?.message
+                      }
+                    />
+                  </div>
 
-                {/* Auto-calculated net value */}
-                <div className="bg-gray-50 p-3 rounded">
-                  <Label className="text-sm font-medium">
-                    Net Value: $
-                    {Math.max(
-                      0,
-                      (watch(
-                        `lifeInsurancePolicies.${index}.currentCashValue`
-                      ) || 0) -
-                        (watch(`lifeInsurancePolicies.${index}.loanBalance`) ||
-                          0)
-                    ).toLocaleString()}
-                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      label="Current Cash Value ($)"
+                      id={`lifeInsurancePolicies.${index}.currentCashValue`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      required
+                      {...register(
+                        `lifeInsurancePolicies.${index}.currentCashValue`,
+                        {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Cash value cannot be negative",
+                          },
+                        }
+                      )}
+                      error={
+                        errors.lifeInsurancePolicies?.[index]?.currentCashValue
+                          ?.message
+                      }
+                    />
+
+                    <FormInput
+                      label="Minus Loan Balance ($)"
+                      id={`lifeInsurancePolicies.${index}.loanBalance`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(
+                        `lifeInsurancePolicies.${index}.loanBalance`,
+                        {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Loan balance cannot be negative",
+                          },
+                        }
+                      )}
+                      error={
+                        errors.lifeInsurancePolicies?.[index]?.loanBalance
+                          ?.message
+                      }
+                    />
+                  </div>
+
+                  {/* Auto-calculated net value */}
+                  <div className="bg-gray-50 p-3 rounded">
+                    <Label className="text-sm font-medium">
+                      Net Value: $
+                      {Math.max(
+                        0,
+                        (ins.currentCashValue || 0) - (ins.loanBalance || 0)
+                      ).toLocaleString()}
+                    </Label>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <Button
               type="button"
@@ -1222,10 +1249,9 @@ export function PersonalAssetsSection({
           </CardHeader>
           <CardContent className="space-y-6">
             {realProperties.map((field, index) => {
-              const isForSale =
-                watch(`realProperties.${index}.isForSale`) || false;
-              const anticipateSelling =
-                watch(`realProperties.${index}.anticipateSelling`) || false;
+              const prop = realPropertiesValue[index] || {};
+              const isForSale = prop.isForSale || false;
+              const anticipateSelling = prop.anticipateSelling || false;
               const isSelling = isForSale || anticipateSelling;
 
               return (
@@ -1444,9 +1470,7 @@ export function PersonalAssetsSection({
                       <Label className="text-sm font-medium">
                         Market Value × 0.8: $
                         {(
-                          (watch(
-                            `realProperties.${index}.currentMarketValue`
-                          ) || 0) * 0.8
+                          (prop.currentMarketValue || 0) * 0.8
                         ).toLocaleString()}
                       </Label>
                     </div>
@@ -1476,10 +1500,8 @@ export function PersonalAssetsSection({
                       Total Value of Real Estate: $
                       {Math.max(
                         0,
-                        (watch(`realProperties.${index}.currentMarketValue`) ||
-                          0) *
-                          0.8 -
-                          (watch(`realProperties.${index}.loanBalance`) || 0)
+                        (prop.currentMarketValue || 0) * 0.8 -
+                          (prop.loanBalance || 0)
                       ).toLocaleString()}
                     </Label>
                   </div>
@@ -1527,277 +1549,291 @@ export function PersonalAssetsSection({
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {vehicles.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 border border-gray-200 rounded-lg space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">
-                    Vehicle {index + 1}
-                  </h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeVehicle(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+            {vehicles.map((field, index) => {
+              const veh = vehiclesValue[index] || {};
+              return (
+                <div
+                  key={field.id}
+                  className="p-4 border border-gray-200 rounded-lg space-y-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium text-gray-900">
+                      Vehicle {index + 1}
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeVehicle(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-                {/* Joint offer checkbox (not shown for first vehicle) */}
-                {index !== 0 && (
-                  <div className="flex items-center space-x-2 mt-2">
-                    <Controller
-                      name={`vehicles.${index}.isJointOffer`}
-                      control={control}
-                      render={({ field }) => (
-                        <>
-                          <Checkbox
-                            id={`vehicles.${index}.isJointOffer`}
-                            checked={!!field.value}
-                            onCheckedChange={(v) => field.onChange(!!v)}
-                          />
-                          <Label
-                            htmlFor={`vehicles.${index}.isJointOffer`}
-                            className="ml-2"
-                          >
-                            Filling a joint offer
-                          </Label>
-                        </>
-                      )}
+                  {/* Joint offer checkbox (not shown for first vehicle) */}
+                  {index !== 0 && (
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Controller
+                        name={`vehicles.${index}.isJointOffer`}
+                        control={control}
+                        render={({ field }) => (
+                          <>
+                            <Checkbox
+                              id={`vehicles.${index}.isJointOffer`}
+                              checked={!!field.value}
+                              onCheckedChange={(v) => field.onChange(!!v)}
+                            />
+                            <Label
+                              htmlFor={`vehicles.${index}.isJointOffer`}
+                              className="ml-2"
+                            >
+                              Filling a joint offer
+                            </Label>
+                          </>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormInput
+                      label="Vehicle Make & Model"
+                      id={`vehicles.${index}.makeModel`}
+                      required
+                      {...register(`vehicles.${index}.makeModel`)}
+                      error={errors.vehicles?.[index]?.makeModel?.message}
+                    />
+
+                    <FormInput
+                      label="Year"
+                      id={`vehicles.${index}.year`}
+                      type="number"
+                      min="1900"
+                      max={new Date().getFullYear() + 1}
+                      required
+                      {...register(`vehicles.${index}.year`, {
+                        valueAsNumber: true,
+                        min: { value: 1900, message: "Invalid year" },
+                        max: {
+                          value: new Date().getFullYear() + 1,
+                          message: "Invalid year",
+                        },
+                      })}
+                      error={errors.vehicles?.[index]?.year?.message}
                     />
                   </div>
-                )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    label="Vehicle Make & Model"
-                    id={`vehicles.${index}.makeModel`}
-                    required
-                    {...register(`vehicles.${index}.makeModel`)}
-                    error={errors.vehicles?.[index]?.makeModel?.message}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput
+                      label="Date Purchased (mm/dd/yyyy)"
+                      id={`vehicles.${index}.purchaseDate`}
+                      type="date"
+                      required
+                      {...register(`vehicles.${index}.purchaseDate`)}
+                      error={errors.vehicles?.[index]?.purchaseDate?.message}
+                    />
 
-                  <FormInput
-                    label="Year"
-                    id={`vehicles.${index}.year`}
-                    type="number"
-                    min="1900"
-                    max={new Date().getFullYear() + 1}
-                    required
-                    {...register(`vehicles.${index}.year`, {
-                      valueAsNumber: true,
-                      min: { value: 1900, message: "Invalid year" },
-                      max: {
-                        value: new Date().getFullYear() + 1,
-                        message: "Invalid year",
-                      },
-                    })}
-                    error={errors.vehicles?.[index]?.year?.message}
-                  />
-                </div>
+                    <FormInput
+                      label="Mileage"
+                      id={`vehicles.${index}.mileage`}
+                      type="number"
+                      min="0"
+                      required
+                      {...register(`vehicles.${index}.mileage`, {
+                        valueAsNumber: true,
+                        min: {
+                          value: 0,
+                          message: "Mileage cannot be negative",
+                        },
+                      })}
+                      error={errors.vehicles?.[index]?.mileage?.message}
+                    />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput
-                    label="Date Purchased (mm/dd/yyyy)"
-                    id={`vehicles.${index}.purchaseDate`}
-                    type="date"
-                    required
-                    {...register(`vehicles.${index}.purchaseDate`)}
-                    error={errors.vehicles?.[index]?.purchaseDate?.message}
-                  />
-
-                  <FormInput
-                    label="Mileage"
-                    id={`vehicles.${index}.mileage`}
-                    type="number"
-                    min="0"
-                    required
-                    {...register(`vehicles.${index}.mileage`, {
-                      valueAsNumber: true,
-                      min: { value: 0, message: "Mileage cannot be negative" },
-                    })}
-                    error={errors.vehicles?.[index]?.mileage?.message}
-                  />
-
-                  <FormInput
-                    label="License/Tag Number"
-                    id={`vehicles.${index}.licenseTagNumber`}
-                    required
-                    {...register(`vehicles.${index}.licenseTagNumber`)}
-                    error={errors.vehicles?.[index]?.licenseTagNumber?.message}
-                  />
-                </div>
-
-                {/* Ownership Type Radio Buttons */}
-                <FormField
-                  label="Vehicle Ownership Type"
-                  id={`vehicles.${index}.ownershipType`}
-                  required
-                  error={errors.vehicles?.[index]?.ownershipType?.message}
-                >
-                  <Controller
-                    name={`vehicles.${index}.ownershipType`}
-                    control={control}
-                    rules={{ required: "Vehicle ownership type is required" }}
-                    render={({ field }) => (
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="flex gap-6 mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem
-                            value="lease"
-                            id={`vehicle-${index}-lease`}
-                            className="text-[#22b573]"
-                          />
-                          <Label htmlFor={`vehicle-${index}-lease`}>
-                            Lease
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem
-                            value="own"
-                            id={`vehicle-${index}-own`}
-                            className="text-[#22b573]"
-                          />
-                          <Label htmlFor={`vehicle-${index}-own`}>Own</Label>
-                        </div>
-                      </RadioGroup>
-                    )}
-                  />
-                </FormField>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput
-                    label="Name of Creditor"
-                    id={`vehicles.${index}.creditorName`}
-                    {...register(`vehicles.${index}.creditorName`)}
-                    error={errors.vehicles?.[index]?.creditorName?.message}
-                  />
-
-                  <FormInput
-                    label="Date of Final Payment (mm/dd/yyyy)"
-                    id={`vehicles.${index}.finalPaymentDate`}
-                    type="date"
-                    {...register(`vehicles.${index}.finalPaymentDate`)}
-                    error={errors.vehicles?.[index]?.finalPaymentDate?.message}
-                  />
-
-                  <FormInput
-                    label="Monthly Lease/Loan Amount ($)"
-                    id={`vehicles.${index}.monthlyLeaseLoanAmount`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    {...register(`vehicles.${index}.monthlyLeaseLoanAmount`, {
-                      valueAsNumber: true,
-                      min: { value: 0, message: "Payment cannot be negative" },
-                    })}
-                    error={
-                      errors.vehicles?.[index]?.monthlyLeaseLoanAmount?.message
-                    }
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput
-                    label="Current Market Value ($)"
-                    id={`vehicles.${index}.currentMarketValue`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    required
-                    {...register(`vehicles.${index}.currentMarketValue`, {
-                      valueAsNumber: true,
-                      min: { value: 0, message: "Value cannot be negative" },
-                    })}
-                    error={
-                      errors.vehicles?.[index]?.currentMarketValue?.message
-                    }
-                  />
-
-                  <div className="bg-gray-50 p-3 rounded">
-                    <Label className="text-sm font-medium">
-                      Market Value × 0.8: $
-                      {(
-                        (watch(`vehicles.${index}.currentMarketValue`) || 0) *
-                        0.8
-                      ).toLocaleString()}
-                    </Label>
+                    <FormInput
+                      label="License/Tag Number"
+                      id={`vehicles.${index}.licenseTagNumber`}
+                      required
+                      {...register(`vehicles.${index}.licenseTagNumber`)}
+                      error={
+                        errors.vehicles?.[index]?.licenseTagNumber?.message
+                      }
+                    />
                   </div>
 
-                  <FormInput
-                    label="Minus Loan Balance ($)"
-                    id={`vehicles.${index}.loanBalance`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    {...register(`vehicles.${index}.loanBalance`, {
-                      valueAsNumber: true,
-                      min: {
-                        value: 0,
-                        message: "Loan balance cannot be negative",
-                      },
-                    })}
-                    error={errors.vehicles?.[index]?.loanBalance?.message}
-                  />
-                </div>
+                  {/* Ownership Type Radio Buttons */}
+                  <FormField
+                    label="Vehicle Ownership Type"
+                    id={`vehicles.${index}.ownershipType`}
+                    required
+                    error={errors.vehicles?.[index]?.ownershipType?.message}
+                  >
+                    <Controller
+                      name={`vehicles.${index}.ownershipType`}
+                      control={control}
+                      rules={{ required: "Vehicle ownership type is required" }}
+                      render={({ field }) => (
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="flex gap-6 mt-2"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem
+                              value="lease"
+                              id={`vehicle-${index}-lease`}
+                              className="text-[#22b573]"
+                            />
+                            <Label htmlFor={`vehicle-${index}-lease`}>
+                              Lease
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem
+                              value="own"
+                              id={`vehicle-${index}-own`}
+                              className="text-[#22b573]"
+                            />
+                            <Label htmlFor={`vehicle-${index}-own`}>Own</Label>
+                          </div>
+                        </RadioGroup>
+                      )}
+                    />
+                  </FormField>
 
-                {/* Auto-calculated values */}
-                <div className="space-y-2 bg-gray-50 p-3 rounded">
-                  <div>
-                    <Label className="text-sm font-medium">
-                      Total Value of Vehicle: $
-                      {watch(`vehicles.${index}.ownershipType`) === "lease"
-                        ? "0"
-                        : Math.max(
-                            0,
-                            (watch(`vehicles.${index}.currentMarketValue`) ||
-                              0) *
-                              0.8 -
-                              (watch(`vehicles.${index}.loanBalance`) || 0)
-                          ).toLocaleString()}
-                    </Label>
-                    {watch(`vehicles.${index}.ownershipType`) === "lease" && (
-                      <p className="text-xs text-gray-600">
-                        If leased, enter 0 as total value
-                      </p>
-                    )}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput
+                      label="Name of Creditor"
+                      id={`vehicles.${index}.creditorName`}
+                      {...register(`vehicles.${index}.creditorName`)}
+                      error={errors.vehicles?.[index]?.creditorName?.message}
+                    />
+
+                    <FormInput
+                      label="Date of Final Payment (mm/dd/yyyy)"
+                      id={`vehicles.${index}.finalPaymentDate`}
+                      type="date"
+                      {...register(`vehicles.${index}.finalPaymentDate`)}
+                      error={
+                        errors.vehicles?.[index]?.finalPaymentDate?.message
+                      }
+                    />
+
+                    <FormInput
+                      label="Monthly Lease/Loan Amount ($)"
+                      id={`vehicles.${index}.monthlyLeaseLoanAmount`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(`vehicles.${index}.monthlyLeaseLoanAmount`, {
+                        valueAsNumber: true,
+                        min: {
+                          value: 0,
+                          message: "Payment cannot be negative",
+                        },
+                      })}
+                      error={
+                        errors.vehicles?.[index]?.monthlyLeaseLoanAmount
+                          ?.message
+                      }
+                    />
                   </div>
-                  <div>
-                    <Label className="text-sm font-medium">
-                      {index === 0 ? "Subtract $3,450" : "Net Vehicle Value"}: $
-                      {(() => {
-                        const totalValue =
-                          watch(`vehicles.${index}.ownershipType`) === "lease"
-                            ? 0
-                            : Math.max(
-                                0,
-                                (watch(
-                                  `vehicles.${index}.currentMarketValue`
-                                ) || 0) *
-                                  0.8 -
-                                  (watch(`vehicles.${index}.loanBalance`) || 0)
-                              );
-                        return index === 0
-                          ? Math.max(0, totalValue - 3450).toLocaleString()
-                          : totalValue.toLocaleString();
-                      })()}
-                    </Label>
-                    {index === 0 && (
-                      <p className="text-xs text-gray-600">
-                        First vehicle gets $3,450 deduction
-                      </p>
-                    )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput
+                      label="Current Market Value ($)"
+                      id={`vehicles.${index}.currentMarketValue`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      required
+                      {...register(`vehicles.${index}.currentMarketValue`, {
+                        valueAsNumber: true,
+                        min: { value: 0, message: "Value cannot be negative" },
+                      })}
+                      error={
+                        errors.vehicles?.[index]?.currentMarketValue?.message
+                      }
+                    />
+
+                    <div className="bg-gray-50 p-3 rounded">
+                      <Label className="text-sm font-medium">
+                        Market Value × 0.8: $
+                        {((veh.currentMarketValue || 0) * 0.8).toLocaleString()}
+                      </Label>
+                    </div>
+
+                    <FormInput
+                      label="Minus Loan Balance ($)"
+                      id={`vehicles.${index}.loanBalance`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(`vehicles.${index}.loanBalance`, {
+                        valueAsNumber: true,
+                        min: {
+                          value: 0,
+                          message: "Loan balance cannot be negative",
+                        },
+                      })}
+                      error={errors.vehicles?.[index]?.loanBalance?.message}
+                    />
+                  </div>
+
+                  {/* Auto-calculated values */}
+                  <div className="space-y-2 bg-gray-50 p-3 rounded">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Total Value of Vehicle: $
+                        {veh.ownershipType === "lease"
+                          ? "0"
+                          : Math.max(
+                              0,
+                              (veh.currentMarketValue || 0) * 0.8 -
+                                (veh.loanBalance || 0)
+                            ).toLocaleString()}
+                      </Label>
+                      {veh.ownershipType === "lease" && (
+                        <p className="text-xs text-gray-600">
+                          If leased, enter 0 as total value
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">
+                        {index === 0 ? "Subtract $3,450" : "Net Vehicle Value"}:
+                        $
+                        {(() => {
+                          const totalValue =
+                            veh.ownershipType === "lease"
+                              ? 0
+                              : veh.isJointOffer
+                              ? Math.max(
+                                  0,
+                                  (veh.currentMarketValue || 0) * 0.8 -
+                                    (veh.loanBalance || 0) -
+                                    3450
+                                )
+                              : Math.max(
+                                  0,
+                                  (veh.currentMarketValue || 0) * 0.8 -
+                                    (veh.loanBalance || 0)
+                                );
+                          return index === 0
+                            ? Math.max(0, totalValue - 3450).toLocaleString()
+                            : totalValue.toLocaleString();
+                        })()}
+                      </Label>
+                      {index === 0 && (
+                        <p className="text-xs text-gray-600">
+                          First vehicle gets $3,450 deduction
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <Button
               type="button"
@@ -1837,93 +1873,100 @@ export function PersonalAssetsSection({
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {valuableItems.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 border border-gray-200 rounded-lg space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">
-                    Valuable Item {index + 1}
-                  </h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeValuableItem(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <FormInput
-                  label="Description of Asset(s)"
-                  id={`valuableItems.${index}.description`}
-                  required
-                  {...register(`valuableItems.${index}.description`)}
-                  error={errors.valuableItems?.[index]?.description?.message}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput
-                    label="Current Market Value ($)"
-                    id={`valuableItems.${index}.currentMarketValue`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    required
-                    {...register(`valuableItems.${index}.currentMarketValue`, {
-                      valueAsNumber: true,
-                      min: { value: 0, message: "Value cannot be negative" },
-                    })}
-                    error={
-                      errors.valuableItems?.[index]?.currentMarketValue?.message
-                    }
-                  />
-
-                  <div className="bg-gray-50 p-3 rounded">
-                    <Label className="text-sm font-medium">
-                      Market Value × 0.8: $
-                      {(
-                        (watch(`valuableItems.${index}.currentMarketValue`) ||
-                          0) * 0.8
-                      ).toLocaleString()}
-                    </Label>
+            {valuableItems.map((field, index) => {
+              const val = valuableItemsValue[index] || {};
+              return (
+                <div
+                  key={field.id}
+                  className="p-4 border border-gray-200 rounded-lg space-y-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium text-gray-900">
+                      Valuable Item {index + 1}
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeValuableItem(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
 
                   <FormInput
-                    label="Minus Loan Balance ($)"
-                    id={`valuableItems.${index}.loanBalance`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    {...register(`valuableItems.${index}.loanBalance`, {
-                      valueAsNumber: true,
-                      min: {
-                        value: 0,
-                        message: "Loan balance cannot be negative",
-                      },
-                    })}
-                    error={errors.valuableItems?.[index]?.loanBalance?.message}
+                    label="Description of Asset(s)"
+                    id={`valuableItems.${index}.description`}
+                    required
+                    {...register(`valuableItems.${index}.description`)}
+                    error={errors.valuableItems?.[index]?.description?.message}
                   />
-                </div>
 
-                {/* Auto-calculated net value */}
-                <div className="bg-gray-50 p-3 rounded">
-                  <Label className="text-sm font-medium">
-                    Net Value: $
-                    {Math.max(
-                      0,
-                      (watch(`valuableItems.${index}.currentMarketValue`) ||
-                        0) *
-                        0.8 -
-                        (watch(`valuableItems.${index}.loanBalance`) || 0)
-                    ).toLocaleString()}
-                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput
+                      label="Current Market Value ($)"
+                      id={`valuableItems.${index}.currentMarketValue`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      required
+                      {...register(
+                        `valuableItems.${index}.currentMarketValue`,
+                        {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Value cannot be negative",
+                          },
+                        }
+                      )}
+                      error={
+                        errors.valuableItems?.[index]?.currentMarketValue
+                          ?.message
+                      }
+                    />
+
+                    <div className="bg-gray-50 p-3 rounded">
+                      <Label className="text-sm font-medium">
+                        Market Value × 0.8: $
+                        {((val.currentMarketValue || 0) * 0.8).toLocaleString()}
+                      </Label>
+                    </div>
+
+                    <FormInput
+                      label="Minus Loan Balance ($)"
+                      id={`valuableItems.${index}.loanBalance`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(`valuableItems.${index}.loanBalance`, {
+                        valueAsNumber: true,
+                        min: {
+                          value: 0,
+                          message: "Loan balance cannot be negative",
+                        },
+                      })}
+                      error={
+                        errors.valuableItems?.[index]?.loanBalance?.message
+                      }
+                    />
+                  </div>
+
+                  {/* Auto-calculated net value */}
+                  <div className="bg-gray-50 p-3 rounded">
+                    <Label className="text-sm font-medium">
+                      Net Value: $
+                      {Math.max(
+                        0,
+                        (val.currentMarketValue || 0) * 0.8 -
+                          (val.loanBalance || 0)
+                      ).toLocaleString()}
+                    </Label>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <Button
               type="button"
@@ -1952,110 +1995,111 @@ export function PersonalAssetsSection({
             <p className="text-sm text-gray-600">Items not listed above</p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {furniturePersonalEffects.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 border border-gray-200 rounded-lg space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">
-                    Furniture/Personal Effect {index + 1}
-                  </h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeFurniturePersonalEffect(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <FormInput
-                  label="Description of Asset"
-                  id={`furniturePersonalEffects.${index}.description`}
-                  required
-                  {...register(`furniturePersonalEffects.${index}.description`)}
-                  error={
-                    errors.furniturePersonalEffects?.[index]?.description
-                      ?.message
-                  }
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput
-                    label="Current Market Value ($)"
-                    id={`furniturePersonalEffects.${index}.currentMarketValue`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    required
-                    {...register(
-                      `furniturePersonalEffects.${index}.currentMarketValue`,
-                      {
-                        valueAsNumber: true,
-                        min: { value: 0, message: "Value cannot be negative" },
-                      }
-                    )}
-                    error={
-                      errors.furniturePersonalEffects?.[index]
-                        ?.currentMarketValue?.message
-                    }
-                  />
-
-                  <div className="bg-gray-50 p-3 rounded">
-                    <Label className="text-sm font-medium">
-                      Market Value × 0.8: $
-                      {(
-                        (watch(
-                          `furniturePersonalEffects.${index}.currentMarketValue`
-                        ) || 0) * 0.8
-                      ).toLocaleString()}
-                    </Label>
+            {furniturePersonalEffects.map((field, index) => {
+              const furn = furniturePersonalEffectsValue[index] || {};
+              return (
+                <div
+                  key={field.id}
+                  className="p-4 border border-gray-200 rounded-lg space-y-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium text-gray-900">
+                      Furniture/Personal Effect {index + 1}
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeFurniturePersonalEffect(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
 
                   <FormInput
-                    label="Minus Loan Balance ($)"
-                    id={`furniturePersonalEffects.${index}.loanBalance`}
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    label="Description of Asset"
+                    id={`furniturePersonalEffects.${index}.description`}
+                    required
                     {...register(
-                      `furniturePersonalEffects.${index}.loanBalance`,
-                      {
-                        valueAsNumber: true,
-                        min: {
-                          value: 0,
-                          message: "Loan balance cannot be negative",
-                        },
-                      }
+                      `furniturePersonalEffects.${index}.description`
                     )}
                     error={
-                      errors.furniturePersonalEffects?.[index]?.loanBalance
+                      errors.furniturePersonalEffects?.[index]?.description
                         ?.message
                     }
                   />
-                </div>
 
-                {/* Auto-calculated net value */}
-                <div className="bg-gray-50 p-3 rounded">
-                  <Label className="text-sm font-medium">
-                    Net Value: $
-                    {Math.max(
-                      0,
-                      (watch(
-                        `furniturePersonalEffects.${index}.currentMarketValue`
-                      ) || 0) *
-                        0.8 -
-                        (watch(
-                          `furniturePersonalEffects.${index}.loanBalance`
-                        ) || 0)
-                    ).toLocaleString()}
-                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput
+                      label="Current Market Value ($)"
+                      id={`furniturePersonalEffects.${index}.currentMarketValue`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      required
+                      {...register(
+                        `furniturePersonalEffects.${index}.currentMarketValue`,
+                        {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Value cannot be negative",
+                          },
+                        }
+                      )}
+                      error={
+                        errors.furniturePersonalEffects?.[index]
+                          ?.currentMarketValue?.message
+                      }
+                    />
+
+                    <div className="bg-gray-50 p-3 rounded">
+                      <Label className="text-sm font-medium">
+                        Market Value × 0.8: $
+                        {(
+                          (furn.currentMarketValue || 0) * 0.8
+                        ).toLocaleString()}
+                      </Label>
+                    </div>
+
+                    <FormInput
+                      label="Minus Loan Balance ($)"
+                      id={`furniturePersonalEffects.${index}.loanBalance`}
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      {...register(
+                        `furniturePersonalEffects.${index}.loanBalance`,
+                        {
+                          valueAsNumber: true,
+                          min: {
+                            value: 0,
+                            message: "Loan balance cannot be negative",
+                          },
+                        }
+                      )}
+                      error={
+                        errors.furniturePersonalEffects?.[index]?.loanBalance
+                          ?.message
+                      }
+                    />
+                  </div>
+
+                  {/* Auto-calculated net value */}
+                  <div className="bg-gray-50 p-3 rounded">
+                    <Label className="text-sm font-medium">
+                      Net Value: $
+                      {Math.max(
+                        0,
+                        (furn.currentMarketValue || 0) * 0.8 -
+                          (furn.loanBalance || 0)
+                      ).toLocaleString()}
+                    </Label>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <Button
               type="button"

@@ -543,12 +543,6 @@ export const businessAssetsSchema = z
         })
       )
       .default([]),
-    totalBusinessAssetsAttachment: z.coerce
-      .number({
-        message: "Total must be a number",
-      })
-      .min(0, { message: "Total must be 0 or greater" })
-      .optional(),
     businessIrsDeduction: z.coerce
       .number({
         message: "Deduction must be a number",
@@ -841,7 +835,7 @@ export const householdIncomeSchema = z.object({
     .min(0, "Life insurance premiums must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 48
-  lifeInsurancePolicyAmount: z
+  lifeInsuranceAmount: z
     .number()
     .min(0, "Life insurance policy amount must be 0 or greater")
     .optional()
@@ -1109,7 +1103,6 @@ export const completeFormSchema = z.object({
       })
     )
     .optional(),
-  totalBusinessAssetsAttachment: z.coerce.number().optional(),
   businessIrsDeduction: z.coerce.number().optional(),
   hasBusinessNotesReceivable: z.boolean().optional(),
   hasBusinessAccountsReceivable: z.boolean().optional(),

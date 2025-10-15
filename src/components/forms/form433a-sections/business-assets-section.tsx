@@ -14,6 +14,7 @@ import {
   FormProvider,
   Controller,
   useFieldArray,
+  useWatch,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -157,7 +158,11 @@ export function BusinessAssetsSection({
   };
 
   // Compute totals with useMemo
-  const bankAccountsValue = watch("bankAccountsInfo.bankAccounts");
+  const bankAccountsValue =
+    useWatch({
+      control,
+      name: "bankAccountsInfo.bankAccounts",
+    }) || [];
   const bankSum = useMemo(
     () =>
       Math.max(
@@ -170,7 +175,11 @@ export function BusinessAssetsSection({
     [bankAccountsValue]
   );
 
-  const digitalAssetsValue = watch("digitalAssetsInfo.digitalAssets");
+  const digitalAssetsValue =
+    useWatch({
+      control,
+      name: "digitalAssetsInfo.digitalAssets",
+    }) || [];
   const digitalSum = useMemo(
     () =>
       Math.max(
@@ -184,7 +193,7 @@ export function BusinessAssetsSection({
   );
   const total8 = bankSum + digitalSum;
 
-  const assetsValue = watch("assetItems.assets");
+  const assetsValue = useWatch({ control, name: "assetItems.assets" }) || [];
   const assetSum = useMemo(
     () =>
       (assetsValue || []).reduce((sum: number, asset: any) => {
@@ -198,8 +207,7 @@ export function BusinessAssetsSection({
       }, 0),
     [assetsValue]
   );
-  const attachmentAssets = watch("totalBusinessAssetsAttachment") || 0;
-  const total9 = assetSum + attachmentAssets;
+  const total9 = assetSum;
   const deduction = watch("assetItems.irsAllowedDeduction") || 0;
   const value11 = Math.max(0, total9 - deduction);
   const boxB = total8 + value11;
@@ -695,18 +703,6 @@ export function BusinessAssetsSection({
               <Plus className="w-4 h-4 mr-2" />
               Add Asset
             </Button>
-
-            <FormInput
-              label="Total value of assets listed from attachment [current market value X .8 minus any loan balance(s)] (9c) ($)"
-              type="number"
-              min="0"
-              placeholder="0"
-              id="totalBusinessAssetsAttachment"
-              {...register("totalBusinessAssetsAttachment", {
-                valueAsNumber: true,
-              })}
-              error={errors.totalBusinessAssetsAttachment?.message}
-            />
 
             <div className="flex justify-between font-medium">
               <span>Add lines (9a) through (9c) = (9)</span>

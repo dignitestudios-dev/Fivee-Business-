@@ -18,22 +18,30 @@ const useSelfEmployed = () => {
     try {
       let parsedInfo = { ...info };
 
-      if (parsedInfo.hasOtherBusinessInterests) {
-        if (parsedInfo.otherBusinessInterests) {
-          parsedInfo.otherBusinessInterests =
-            parsedInfo.otherBusinessInterests.map((business: any) => {
-              if (business.businessType !== "other") {
-                const { otherBusinessTypeDescription, ...rest } = business;
-                return rest;
-              }
-              return business;
-            });
-        }
+      if (!parsedInfo.isSelfEmployed) {
+        parsedInfo = { isSelfEmployed: false };
       } else {
-        delete parsedInfo.otherBusinessInterests;
-      }
+        if (parsedInfo.hasOtherBusinessInterests) {
+          if (parsedInfo.otherBusinessInterests) {
+            parsedInfo.otherBusinessInterests =
+              parsedInfo.otherBusinessInterests.map((business: any) => {
+                business.ownershipPercentage = String(
+                  business.ownershipPercentage
+                );
 
-      // await api.saveSelfEmployedInfo(parsedInfo, caseId);
+                if (business.businessType !== "other") {
+                  const { otherBusinessTypeDescription, ...rest } = business;
+                  return rest;
+                }
+
+                return business;
+              });
+          }
+        } else {
+          delete parsedInfo.otherBusinessInterests;
+        }
+      }
+      await api.saveSelfEmployedInfo(parsedInfo, caseId);
       dispatch(saveSelfEmployedInfo(info));
     } catch (error: any) {
       console.error("Error saving self-employed info:", error);

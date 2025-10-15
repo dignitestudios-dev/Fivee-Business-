@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, FormProvider, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormStepper } from "@/components/forms/form433a-sections/form-stepper";
@@ -19,6 +19,7 @@ import { SignatureSection } from "@/components/forms/form433a-sections/signature
 import { completeFormSchema } from "@/lib/validation-schemas";
 import { storage } from "@/utils/helper";
 import { useAppSelector } from "@/lib/hooks";
+import { useSearchParams } from "next/navigation";
 
 const steps = [
   {
@@ -111,10 +112,14 @@ const defaultValues = {
 };
 
 export default function Form433AOIC() {
-  const formData = useAppSelector((state) => state.form433a);
+  const searchParams = useSearchParams();
+  const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
+
   useEffect(() => {
-    console.log("Form433A data from store: ", formData);
-  }, [formData]);
+    if (!caseId) {
+      clearSavedData();
+    }
+  }, [caseId]);
 
   const [currentStep, setCurrentStep] = useState<number>(2);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -1954,7 +1959,7 @@ export default function Form433AOIC() {
           "courtOrderedPayments",
           "childDependentCare",
           "lifeInsurancePremiums",
-          "lifeInsurancePolicyAmount",
+          "lifeInsuranceAmount",
           "currentMonthlyTaxes",
           "securedDebtsOther",
           "monthlyDelinquentTaxPayments",
@@ -2136,8 +2141,8 @@ export default function Form433AOIC() {
             label: "Life insurance premiums (Box 48)",
           },
           {
-            name: "lifeInsurancePolicyAmount",
-            value: getValues("lifeInsurancePolicyAmount"),
+            name: "lifeInsuranceAmount",
+            value: getValues("lifeInsuranceAmount"),
             label: "Life insurance policy amount",
           },
           {

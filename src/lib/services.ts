@@ -111,6 +111,26 @@ const saveBusinessAssetsInfo = (info: any, caseId: string) =>
     API.post(`/form433a/${caseId}/business`, info)
   );
 
+const saveBusinessIncomeInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/business-income-expense`, info)
+  );
+
+const saveHouseholdIncomeInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/household-income-expense`, info)
+  );
+
+const saveCalculationInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/offer-calculation`, info)
+  );
+
+const saveOtherInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/other-information`, info)
+  );
+
 const api = {
   savePersonalInfo,
   saveEmploymentInfo,
@@ -118,6 +138,10 @@ const api = {
   savePersonalAssetsInfo,
   saveSelfEmployedInfo,
   saveBusinessAssetsInfo,
+  saveBusinessIncomeInfo,
+  saveHouseholdIncomeInfo,
+  saveCalculationInfo,
+  saveOtherInfo,
 };
 
 export default api;
