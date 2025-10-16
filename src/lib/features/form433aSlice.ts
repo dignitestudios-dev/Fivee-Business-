@@ -13,6 +13,7 @@ interface FormData433AState {
   householdIncomeInfo: HouseholdIncomeFormSchema | null;
   calculationInfo: CalculationFormSchema | null;
   otherInfo: OtherInfoFormSchema | null;
+  signatureInfo: SignatureFormSchema | null;
 }
 
 // --- Initial State ---
@@ -26,6 +27,7 @@ const initialState: FormData433AState = {
   householdIncomeInfo: null,
   calculationInfo: null,
   otherInfo: null,
+  signatureInfo: null,
 };
 
 // --- Slice ---
@@ -135,7 +137,57 @@ const form433aSlice = createSlice({
       state,
       action: PayloadAction<OtherInfoFormSchema | null>
     ) => {
-      state.otherInfo = action.payload;
+      if (action.payload) {
+        // Format litigation date
+        action.payload.litigation.possibleCompletionDate = formatDateForInput(
+          action.payload.litigation?.possibleCompletionDate
+        );
+
+        // Format bankruptcy dates
+        action.payload.bankruptcy.dateFiled = formatDateForInput(
+          action.payload.bankruptcy?.dateFiled
+        );
+        action.payload.bankruptcy.dateDismissed = formatDateForInput(
+          action.payload.bankruptcy?.dateDismissed
+        );
+        action.payload.bankruptcy.dateDischarged = formatDateForInput(
+          action.payload.bankruptcy?.dateDischarged
+        );
+
+        // Format foreignResidence dates
+        action.payload.foreignResidence.dateFrom = formatDateForInput(
+          action.payload.foreignResidence?.dateFrom
+        );
+        action.payload.foreignResidence.dateTo = formatDateForInput(
+          action.payload.foreignResidence?.dateTo
+        );
+
+        // // Format trustBeneficiary date
+        // action.payload.trustBeneficiary.whenAmountReceived = formatDateForInput(
+        //   action.payload.trustBeneficiary?.whenAmountReceived
+        // );
+
+        // Format assetTransfers dates in array
+        if (action.payload.assetTransfers?.transfers) {
+          action.payload.assetTransfers.transfers =
+            action.payload.assetTransfers.transfers.map((transfer: any) => ({
+              ...transfer,
+              dateTransferred: formatDateForInput(transfer.dateTransferred),
+            }));
+        }
+
+        state.otherInfo = action.payload;
+      } else {
+        state.otherInfo = null;
+      }
+    },
+
+    // Save entire calculation info data
+    saveSignatureInfo: (
+      state,
+      action: PayloadAction<SignatureFormSchema | null>
+    ) => {
+      state.signatureInfo = action.payload;
     },
   },
 });
@@ -151,5 +203,6 @@ export const {
   saveHouseholdIncomeInfo,
   saveCalculationInfo,
   saveOtherInfo,
+  saveSignatureInfo,
 } = form433aSlice.actions;
 export default form433aSlice.reducer;

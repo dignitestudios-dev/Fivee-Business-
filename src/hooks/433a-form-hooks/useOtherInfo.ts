@@ -20,10 +20,78 @@ const useOtherInfo = () => {
     try {
       const parsedInfo = { ...info };
 
-      if (!parsedInfo.assetTransfers.transferredAssets)
-        delete parsedInfo.assetTransfers.transfers;
+      // Parse litigation
+      if (!parsedInfo.litigation.isInvolvedInLitigation) {
+        parsedInfo.litigation = {
+          isInvolvedInLitigation: false,
+          
+        };
+      }
 
-      await api.saveOtherInfo(info, caseId);
+      // Parse bankruptcy
+      if (!parsedInfo.bankruptcy.filedBankruptcyInPast7Years) {
+        parsedInfo.bankruptcy = {
+          filedBankruptcyInPast7Years: false,
+        };
+      }
+
+      // Parse foreignResidence
+      if (!parsedInfo.foreignResidence.livedOutsideUS) {
+        parsedInfo.foreignResidence = {
+          livedOutsideUS: false,
+        };
+      }
+
+      // Parse irsLitigation
+      if (!parsedInfo.irsLitigation.involvedWithIRSLitigation) {
+        parsedInfo.irsLitigation = {
+          involvedWithIRSLitigation: false,
+        };
+      }
+
+      // Parse trustBeneficiary
+      if (!parsedInfo.trustBeneficiary.isBeneficiary) {
+        parsedInfo.trustBeneficiary = {
+          isBeneficiary: false,
+        };
+      }
+
+      // Parse trustFiduciary
+      if (!parsedInfo.trustFiduciary.isTrusteeOrFiduciary) {
+        parsedInfo.trustFiduciary = {
+          isTrusteeOrFiduciary: false,
+        };
+      }
+
+      // Parse safeDepositBox
+      if (!parsedInfo.safeDepositBox.hasSafeDepositBox) {
+        parsedInfo.safeDepositBox = {
+          hasSafeDepositBox: false,
+        };
+      }
+
+      // Parse assetTransfers
+      if (!parsedInfo.assetTransfers.transferredAssets) {
+        parsedInfo.assetTransfers = {
+          transferredAssets: false,
+        };
+      }
+
+      // Parse foreignAssets
+      if (!parsedInfo.foreignAssets.hasForeignAssets) {
+        parsedInfo.foreignAssets = {
+          hasForeignAssets: false,
+        };
+      }
+
+      // Parse thirdPartyTrusts
+      if (!parsedInfo.thirdPartyTrusts.hasThirdPartyTrustFunds) {
+        parsedInfo.thirdPartyTrusts = {
+          hasThirdPartyTrustFunds: false,
+        };
+      }
+
+      await api.saveOtherInfo(parsedInfo, caseId);
       dispatch(saveOtherInfo(info));
     } catch (error: any) {
       console.error("Error saving other info:", error);

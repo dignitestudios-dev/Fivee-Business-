@@ -3,8 +3,6 @@ import { z } from "zod";
 export const otherInfoInitialValues: OtherInfoFormSchema = {
   litigation: {
     isInvolvedInLitigation: false,
-    plaintiff: "",
-    defendant: "",
     locationOfFiling: "",
     representedBy: "",
     docketCaseNumber: "",
@@ -64,8 +62,6 @@ export const otherInfoSchema = z
   .object({
     litigation: z.object({
       isInvolvedInLitigation: z.boolean(),
-      plaintiff: z.string().optional(),
-      defendant: z.string().optional(),
       locationOfFiling: z.string().optional(),
       representedBy: z.string().optional(),
       docketCaseNumber: z.string().optional(),
@@ -165,20 +161,6 @@ export const otherInfoSchema = z
   .superRefine((data, ctx) => {
     // Conditional validation for litigation
     if (data.litigation.isInvolvedInLitigation) {
-      if (!data.litigation.plaintiff) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["litigation", "plaintiff"],
-          message: "Plaintiff is required when involved in litigation",
-        });
-      }
-      if (!data.litigation.defendant) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["litigation", "defendant"],
-          message: "Defendant is required when involved in litigation",
-        });
-      }
       if (!data.litigation.locationOfFiling) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

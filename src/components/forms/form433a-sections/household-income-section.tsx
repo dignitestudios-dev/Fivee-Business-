@@ -134,8 +134,9 @@ export function HouseholdIncomeSection({
       Number(income.netRentalIncome || 0) +
       Number(income.childSupportReceived || 0) +
       Number(income.alimonyReceived || 0) +
-      Number(income.additionalSourcesIncome || 0),
-    [totalPrimaryIncome, totalSpouseIncome, income]
+      Number(income.additionalSourcesIncome || 0) +
+      boxC,
+    [totalPrimaryIncome, totalSpouseIncome, income, boxC]
   );
 
   const totalHouseholdExpenses = useMemo(

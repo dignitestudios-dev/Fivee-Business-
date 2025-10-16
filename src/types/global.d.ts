@@ -8,6 +8,7 @@ import { personalAssetsSchema } from "@/lib/validation/form433a/personal-assets-
 import { personalInfoSchema } from "@/lib/validation/form433a/personal-info-section";
 import { selfEmployedSchema } from "@/lib/validation/form433a/self-employed-section";
 import { otherInfoSchema } from "@/lib/validation/form433a/other-info-section";
+import { signatureSchema } from "@/lib/validation/form433a/signature-section";
 
 export {}; // makes this a module
 
@@ -64,7 +65,7 @@ declare global {
     | "businessIncomeExpenseInfo"
     | "householdIncomeExpenseInfo"
     | "offerCalculationInfo"
-    | "otherInformation"
+    | "otherInfo"
     | "signaturesAndAttachmentsInfo";
 
   type FormData433A = z.infer<typeof completeFormSchema>;
@@ -140,6 +141,8 @@ declare global {
 
   type OtherInfoFormSchema = z.infer<typeof otherInfoSchema>;
 
+  type SignatureFormSchema = z.infer<typeof signatureSchema>;
+
   interface FormData433AState {
     personalInfo: PersonalInfoFromSchema;
     employment: EmploymentFromSchema;
@@ -150,5 +153,6 @@ declare global {
     householdIncomeSchema: HouseholdIncomeFormSchema;
     calculationSchema: CalculationFormSchema;
     otherInfoSchema: OtherInfoFormSchema;
+    signatureSchema: SignatureFormSchema;
   }
 }

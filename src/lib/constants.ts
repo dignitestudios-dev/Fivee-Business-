@@ -37,7 +37,7 @@ export const FORM_433A_SECTIONS: Form433aSection[] = [
   "businessIncomeExpenseInfo",
   "householdIncomeExpenseInfo",
   "offerCalculationInfo",
-  "otherInformation",
+  "otherInfo",
   "signaturesAndAttachmentsInfo",
 ];
 

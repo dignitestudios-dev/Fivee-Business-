@@ -131,6 +131,15 @@ const saveOtherInfo = (info: any, caseId: string) =>
     API.post(`/form433a/${caseId}/other-information`, info)
   );
 
+const saveSignatureInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433a/${caseId}/signatures-and-attachments`, info)
+  );
+
+// Signature APIs
+const getSignatures = () =>
+  apiHandler<{ data: any; message: string }>(() => API.get(`/media/image`));
+
 const api = {
   savePersonalInfo,
   saveEmploymentInfo,
@@ -142,6 +151,8 @@ const api = {
   saveHouseholdIncomeInfo,
   saveCalculationInfo,
   saveOtherInfo,
+  saveSignatureInfo,
+  getSignatures,
 };
 
 export default api;

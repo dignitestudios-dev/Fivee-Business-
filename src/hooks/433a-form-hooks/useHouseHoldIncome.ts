@@ -23,6 +23,8 @@ const useHouseholdIncome = () => {
       delete parsedInfo.boxF;
       delete parsedInfo.income.netBusinessIncomeFromBoxC;
 
+      console.log("Box F when saving: ", info);
+
       await api.saveHouseholdIncomeInfo(parsedInfo, caseId);
       dispatch(saveHouseholdIncomeInfo(info));
     } catch (error: any) {

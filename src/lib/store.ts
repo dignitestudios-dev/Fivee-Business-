@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userSlice from "./features/userSlice";
 import form433aSlice from "./features/form433aSlice";
+import signaturesSlice from "./features/signaturesSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       user: userSlice,
       form433a: form433aSlice,
+      signatures: signaturesSlice,
     },
   });
 };

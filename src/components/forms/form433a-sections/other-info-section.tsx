@@ -59,6 +59,8 @@ export function OtherInfoSection({
     trigger,
   } = methods;
 
+  console.log("errors in other info: ", errors);
+
   // Field arrays
   const {
     fields: assetTransfers,
