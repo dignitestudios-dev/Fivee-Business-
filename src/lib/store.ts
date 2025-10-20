@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userSlice from "./features/userSlice";
 import form433aSlice from "./features/form433aSlice";
+import form433bSlice from "./features/form433bSlice";
 import signaturesSlice from "./features/signaturesSlice";
 
 export const makeStore = () => {
@@ -8,6 +9,7 @@ export const makeStore = () => {
     reducer: {
       user: userSlice,
       form433a: form433aSlice,
+      form433b: form433bSlice,
       signatures: signaturesSlice,
     },
   });

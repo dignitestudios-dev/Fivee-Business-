@@ -2,6 +2,7 @@ import { saveSignatureInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useSignatureAndAttachments = () => {
   const dispatch = useAppDispatch();
@@ -20,7 +21,7 @@ const useSignatureAndAttachments = () => {
       dispatch(saveSignatureInfo(info));
     } catch (error: any) {
       console.error("Error saving signature info:", error);
-      throw new Error(error?.message || "Failed to save signature info");
+      toast.error(typeof error === "string" ? error : error.message);
     } finally {
       setLoading(false);
     }
@@ -35,10 +36,10 @@ const useSignatureAndAttachments = () => {
     try {
       if (!caseId) return;
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(saveSignatureInfo(response.data || {}));
+      console.log("Signature data: ", response);
+      dispatch(saveSignatureInfo(response?.data || {}));
     } catch (error: any) {
       console.error("Error fetching signature info:", error);
-      throw new Error(error?.message || "Failed to fetch signature info");
     } finally {
       setLoadingFormData(false);
     }

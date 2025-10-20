@@ -16,8 +16,14 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   // ✅ Run only once on mount: hydrate user from storage
   useEffect(() => {
     const cachedUser: User | null = storage.get("user");
-    if (cachedUser) {
-      dispatch(loginUser({ user: cachedUser }));
+    const accessToken: string | null = storage.get("accessToken");
+    if (cachedUser && accessToken) {
+      dispatch(
+        loginUser({
+          user: cachedUser,
+          accessToken: accessToken,
+        })
+      );
     }
     setLoading(false);
   }, [dispatch]);

@@ -1,12 +1,12 @@
-import Form433AOIC from "@/components/forms/Form433AOIC";
+import Form433BOIC from "@/components/forms/Form433BOIC";
 import React from "react";
 
-const IndividualTaxForm = () => {
+const BusinessTaxForm = () => {
   return (
     <>
-      <Form433AOIC />
+      <Form433BOIC />
     </>
   );
 };
 
-export default IndividualTaxForm;
+export default BusinessTaxForm;

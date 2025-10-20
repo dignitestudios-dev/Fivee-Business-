@@ -2,6 +2,7 @@ import { saveBusinessIncomeInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useBusinessIncome = () => {
   const dispatch = useAppDispatch();
@@ -26,7 +27,7 @@ const useBusinessIncome = () => {
       dispatch(saveBusinessIncomeInfo(info));
     } catch (error: any) {
       console.error("Error saving business income info:", error);
-      throw new Error(error?.message || "Failed to save business income info");
+      toast.error(error?.message || "Failed to save business income info");
     } finally {
       setLoading(false);
     }
@@ -44,7 +45,6 @@ const useBusinessIncome = () => {
       dispatch(saveBusinessIncomeInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching business income info:", error);
-      throw new Error(error?.message || "Failed to fetch business income info");
     } finally {
       setLoadingFormData(false);
     }

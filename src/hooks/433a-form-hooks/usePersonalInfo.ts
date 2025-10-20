@@ -3,6 +3,7 @@ import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { getCaseId } from "@/utils/helper";
 import { savePersonalInfo } from "@/lib/features/form433aSlice";
+import toast from "react-hot-toast";
 
 const usePersonalInfo = () => {
   const dispatch = useAppDispatch();
@@ -21,7 +22,7 @@ const usePersonalInfo = () => {
       dispatch(savePersonalInfo(info));
     } catch (error: any) {
       console.error("Error saving personal info:", error);
-      throw new Error(error?.message || "Failed to save personal info");
+      toast.error(error?.message || "Failed to save personal info");
     } finally {
       setLoading(false);
     }
@@ -41,7 +42,6 @@ const usePersonalInfo = () => {
       dispatch(savePersonalInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching personal info:", error);
-      throw new Error(error?.message || "Failed to fetch personal info");
     } finally {
       setLoadingFormData(false);
     }

@@ -1,4 +1,4 @@
-import { isBrowser } from "@/utils/helper";
+import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
 // Create an Axios instance
@@ -14,7 +14,7 @@ const API = axios.create({
 API.interceptors.request.use(
   (config) => {
     if (isBrowser) {
-      const token = localStorage.getItem("accessToken"); // Retrieve token from storage
+      const token = storage.get("accessToken"); // Retrieve token from storage
 
       if (token) {
         config.headers.authorization = `Bearer ${token}`;
@@ -29,9 +29,12 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.statusCode === 401) {
-      localStorage.removeItem("accessToken");
-      window.location.href = "/auth/login";
+    console.log("Code: ", error?.response);
+
+    if (error?.response?.data?.statusCode === 401) {
+      storage.remove("accessToken");
+      storage.remove("user");
+      // window.location.href = "/auth/login";
     }
     console.log(error);
     console.log("API Error:", error.response?.data || error);
@@ -80,6 +83,13 @@ const apiHandler = async <T>(apiCall: () => Promise<T>): Promise<T> => {
 };
 
 // Centralized API Handling functions end
+
+// Auth API's
+
+const login = (payload: LoginPayload) =>
+  apiHandler(() => API.post("/user/signin", payload));
+
+// Form 433A OIC
 
 const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
   apiHandler<{ data: any; message: string }>(() =>
@@ -137,8 +147,42 @@ const saveSignatureInfo = (info: any, caseId: string) =>
   );
 
 // Signature APIs
+
 const getSignatures = () =>
-  apiHandler<{ data: any; message: string }>(() => API.get(`/media/image`));
+  apiHandler<{ data: { images: any[] }; message: string }>(() =>
+    API.get(`/media/image`)
+  );
+
+const createSignature = (data: FormData) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/media/image`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );
+
+const updateSignature = (id: string, data: FormData) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.patch(`/media/image/${id}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );
+
+const deleteSignature = (id: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.delete(`/media/image/${id}`)
+  );
+
+// Form 433B OIC
+
+const get433bSectionInfo = (caseId: string, section: Form433bSection) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.get(`/form433boic/${caseId}/section?section=${section}`)
+  );
+
+const saveBusinessInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form433boic/${caseId}/business-information`, info)
+  );
 
 const api = {
   savePersonalInfo,
@@ -153,6 +197,12 @@ const api = {
   saveOtherInfo,
   saveSignatureInfo,
   getSignatures,
+  createSignature,
+  updateSignature,
+  deleteSignature,
+  login,
+  get433bSectionInfo,
+  saveBusinessInfo,
 };
 
 export default api;

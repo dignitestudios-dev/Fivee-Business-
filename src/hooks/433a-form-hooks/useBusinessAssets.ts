@@ -2,6 +2,7 @@ import { saveBusinessAssetsInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useBusinessAssets = () => {
   const dispatch = useAppDispatch();
@@ -43,7 +44,7 @@ const useBusinessAssets = () => {
       dispatch(saveBusinessAssetsInfo(info));
     } catch (error: any) {
       console.error("Error saving business assets info:", error);
-      throw new Error(error?.message || "Failed to save business assets info");
+      toast.error(error?.message || "Failed to save business assets info");
     } finally {
       setLoading(false);
     }
@@ -61,7 +62,6 @@ const useBusinessAssets = () => {
       dispatch(saveBusinessAssetsInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching business assets info:", error);
-      throw new Error(error?.message || "Failed to fetch business assets info");
     } finally {
       setLoadingFormData(false);
     }

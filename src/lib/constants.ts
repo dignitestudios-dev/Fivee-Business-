@@ -41,6 +41,16 @@ export const FORM_433A_SECTIONS: Form433aSection[] = [
   "signaturesAndAttachmentsInfo",
 ];
 
+export const FORM_433B_SECTIONS: Form433bSection[] = [
+  "businessInformation",
+  "businessAssetInfo",
+  "businessIncomeInfo",
+  "businessExpenseInfo",
+  "offerCalculationInfo",
+  "otherInfo",
+  "signaturesAndAttachmentsInfo",
+];
+
 // Figma Link: https://www.figma.com/proto/vB5GejkG3ufyjQoprPUNMd/Fivee-Business---Siweh-Harris?page-id=376%3A160&node-id=376-760&viewport=-1002%2C-1727%2C0.18&t=Wz5Umzb9k5qM0H9E-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=376%3A760
 // Form A: https://www.irs.gov/pub/irs-pdf/f433aoi.pdf
 // Form B: https://www.irs.gov/pub/irs-pdf/f433b.pdf

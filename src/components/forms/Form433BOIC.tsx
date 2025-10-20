@@ -1,74 +1,53 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FormStepper } from "@/components/forms/form433a-sections/form-stepper";
-import { PersonalInfoSection } from "@/components/forms/form433a-sections/personal-info-section";
-import { EmploymentSection } from "@/components/forms/form433a-sections/employment-section";
-import { PersonalAssetsSection } from "@/components/forms/form433a-sections/personal-assets-section";
-import { SelfEmployedSection } from "@/components/forms/form433a-sections/self-employed-section";
-import { BusinessAssetsSection } from "@/components/forms/form433a-sections/business-assets-section";
-import { BusinessIncomeSection } from "@/components/forms/form433a-sections/business-income-section";
-import { HouseholdIncomeSection } from "@/components/forms/form433a-sections/household-income-section";
-import { CalculationSection } from "@/components/forms/form433a-sections/calculation-section";
-import { OtherInfoSection } from "@/components/forms/form433a-sections/other-info-section";
-import { SignatureSection } from "@/components/forms/form433a-sections/signature-section";
+import { FormStepper } from "@/components/forms/form433a-sections/form-stepper"; // Reuse if possible, or create similar for 433B
+import { BusinessInfoSection } from "@/components/forms/form433b-sections/business-info-section"; // We'll create this
+// Import other sections as you create them, e.g.:
+// import { BusinessAssetSection } from "@/components/forms/form433b-sections/business-asset-section";
+// etc.
 import { storage } from "@/utils/helper";
 import { useSearchParams } from "next/navigation";
 
 const steps = [
   {
     id: 1,
-    title: "Personal Information",
-    description: "Basic personal and household details",
+    title: "Business Information",
+    description: "Basic business details (domestic and foreign)",
   },
   {
     id: 2,
-    title: "Employment",
-    description: "Employment information for wage earners",
+    title: "Business Assets",
+    description: "Asset information (domestic and foreign)",
   },
   {
     id: 3,
-    title: "Personal Assets",
-    description: "Domestic and foreign assets",
+    title: "Business Income",
+    description: "Monthly business income",
   },
   {
     id: 4,
-    title: "Self-Employed Info",
-    description: "Business information if applicable",
+    title: "Business Expenses",
+    description: "Monthly business expenses",
   },
   {
     id: 5,
-    title: "Business Assets",
-    description: "Business asset information",
-  },
-  {
-    id: 6,
-    title: "Business Income and Expense",
-    description: "Business income and expenses",
-  },
-  {
-    id: 7,
-    title: "Household Income and Expenses",
-    description: "Monthly household income and expenses",
-  },
-  {
-    id: 8,
     title: "Calculations",
     description: "Calculate minimum offer amount",
   },
   {
-    id: 9,
+    id: 6,
     title: "Other Information",
     description: "Additional required information",
   },
   {
-    id: 10,
+    id: 7,
     title: "Signatures",
     description: "Final signatures and submission",
   },
 ];
 
-export default function Form433AOIC() {
+export default function Form433BOIC() {
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
 
@@ -78,7 +57,7 @@ export default function Form433AOIC() {
     }
   }, [caseId]);
 
-  const [currentStep, setCurrentStep] = useState<number>(2);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
   // Load saved progress from localStorage
@@ -86,7 +65,7 @@ export default function Form433AOIC() {
     const savedProgress = storage.get<{
       currentStep: number;
       completedSteps: number[];
-    }>("433a_progress");
+    }>("433b_progress");
     return savedProgress || { currentStep: 1, completedSteps: [] };
   };
 
@@ -104,7 +83,7 @@ export default function Form433AOIC() {
         currentStep: step,
         completedSteps: Array.from(completed),
       };
-      storage.set("433a_progress", progressData);
+      storage.set("433b_progress", progressData);
       console.log("Progress saved to localStorage");
     } catch (error) {
       console.error("Error saving progress:", error);
@@ -114,7 +93,7 @@ export default function Form433AOIC() {
   // Clear saved data from localStorage
   const clearSavedData = () => {
     try {
-      storage.remove("433a_progress");
+      storage.remove("433b_progress");
       console.log("Saved form data cleared");
     } catch (error) {
       console.error("Error clearing saved data:", error);
@@ -124,7 +103,7 @@ export default function Form433AOIC() {
   const handleNext = async () => {
     console.log("Next runs");
 
-    if (currentStep < 10) {
+    if (currentStep < 7) {
       // Mark current step as completed
       const newCompletedSteps = new Set([...completedSteps, currentStep]);
       setCompletedSteps(newCompletedSteps);
@@ -161,32 +140,17 @@ export default function Form433AOIC() {
       onNext: handleNext,
       onPrevious: handlePrevious,
       currentStep,
-      totalSteps: 10,
+      totalSteps: 7,
     };
 
     switch (currentStep) {
       case 1:
-        return <PersonalInfoSection {...commonProps} />;
-      case 2:
-        return <EmploymentSection {...commonProps} />;
-      case 3:
-        return <PersonalAssetsSection {...commonProps} />;
-      case 4:
-        return <SelfEmployedSection {...commonProps} />;
-      case 5:
-        return <BusinessAssetsSection {...commonProps} />;
-      case 6:
-        return <BusinessIncomeSection {...commonProps} />;
-      case 7:
-        return <HouseholdIncomeSection {...commonProps} />;
-      case 8:
-        return <CalculationSection {...commonProps} />;
-      case 9:
-        return <OtherInfoSection {...commonProps} />;
-      case 10:
-        return <SignatureSection {...commonProps} />;
+        return <BusinessInfoSection {...commonProps} />;
+      // case 2:
+      //   return <BusinessAssetSection {...commonProps} />;
+      // Add other cases as sections are implemented
       default:
-        return <PersonalInfoSection {...commonProps} />;
+        return <BusinessInfoSection {...commonProps} />;
     }
   };
 
@@ -195,11 +159,10 @@ export default function Form433AOIC() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Form 433-A (OIC)
+            Form 433-B (OIC)
           </h1>
           <p className="text-lg text-gray-600">
-            Collection Information Statement for Wage Earners and Self-Employed
-            Individuals
+            Collection Information Statement for Businesses
           </p>
           <p className="text-sm text-gray-500 mt-2">
             Department of the Treasury — Internal Revenue Service

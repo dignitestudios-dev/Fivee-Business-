@@ -2,6 +2,7 @@ import { savePersonalAssetsInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const usePersonalAssets = () => {
   const dispatch = useAppDispatch();
@@ -46,7 +47,7 @@ const usePersonalAssets = () => {
       dispatch(savePersonalAssetsInfo(info));
     } catch (error: any) {
       console.error("Error saving assets info:", error);
-      throw new Error(error?.message || "Failed to save assets info");
+      toast.error(error?.message || "Failed to save assets info");
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,6 @@ const usePersonalAssets = () => {
       dispatch(savePersonalAssetsInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching assets info:", error);
-      throw new Error(error?.message || "Failed to fetch assets info");
     } finally {
       setLoadingFormData(false);
     }

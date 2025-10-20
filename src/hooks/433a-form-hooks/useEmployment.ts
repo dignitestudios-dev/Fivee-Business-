@@ -20,7 +20,6 @@ const useEmployment = () => {
       dispatch(saveEmploymentInfo(info));
     } catch (error: any) {
       console.error("Error saving employment info:", error);
-      throw new Error(error?.message || "Failed to save employment info");
     } finally {
       setLoading(false);
     }
@@ -41,7 +40,6 @@ const useEmployment = () => {
       dispatch(saveEmploymentInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching employment info:", error);
-      throw new Error(error?.message || "Failed to fetch employment info");
     } finally {
       setLoadingFormData(false);
     }

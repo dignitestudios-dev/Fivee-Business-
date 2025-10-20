@@ -9,6 +9,7 @@ import { personalInfoSchema } from "@/lib/validation/form433a/personal-info-sect
 import { selfEmployedSchema } from "@/lib/validation/form433a/self-employed-section";
 import { otherInfoSchema } from "@/lib/validation/form433a/other-info-section";
 import { signatureSchema } from "@/lib/validation/form433a/signature-section";
+import { businessInfoSchema } from "@/lib/validation/form433b/business-info-section";
 
 export {}; // makes this a module
 
@@ -56,6 +57,18 @@ declare global {
     timestamp: Date;
   }
 
+  interface Signature {
+    _id: string;
+    title: string;
+    description: string;
+    url: string;
+  }
+
+  interface LoginPayload {
+    email: string;
+    password: string;
+  }
+
   type Form433aSection =
     | "personalInfo"
     | "employmentInfo"
@@ -64,6 +77,15 @@ declare global {
     | "businessInfo"
     | "businessIncomeExpenseInfo"
     | "householdIncomeExpenseInfo"
+    | "offerCalculationInfo"
+    | "otherInfo"
+    | "signaturesAndAttachmentsInfo";
+
+  type Form433bSection =
+    | "businessInformation"
+    | "businessAssetInfo"
+    | "businessIncomeInfo"
+    | "businessExpenseInfo"
     | "offerCalculationInfo"
     | "otherInfo"
     | "signaturesAndAttachmentsInfo";
@@ -155,4 +177,6 @@ declare global {
     otherInfoSchema: OtherInfoFormSchema;
     signatureSchema: SignatureFormSchema;
   }
+
+  type BusinessInfoFormSchema = z.infer<typeof businessInfoSchema>
 }

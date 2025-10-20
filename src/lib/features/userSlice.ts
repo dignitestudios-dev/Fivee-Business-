@@ -18,11 +18,15 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     // Action to login user set user data and is login to true
-    loginUser: (state, action: PayloadAction<{ user: User | null }>) => {
+    loginUser: (
+      state,
+      action: PayloadAction<{ user: User | null; accessToken: string }>
+    ) => {
       state.user = action.payload.user;
       state.isLoggedIn = true;
-
+      console.log("accessToken: ", action.payload.accessToken);
       storage.set("user", action.payload.user);
+      storage.set("accessToken", action.payload.accessToken);
     },
 
     // Action to logout user
@@ -31,6 +35,7 @@ const userSlice = createSlice({
       state.isLoggedIn = false;
 
       storage.remove("user");
+      storage.remove("accessToken");
     },
   },
 });

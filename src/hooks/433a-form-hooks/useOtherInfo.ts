@@ -2,6 +2,7 @@ import { saveOtherInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useOtherInfo = () => {
   const dispatch = useAppDispatch();
@@ -13,7 +14,8 @@ const useOtherInfo = () => {
     caseId: string | null
   ) => {
     if (!caseId) {
-      throw new Error("Case ID is required");
+      console.log("Case ID is required");
+      return;
     }
     setLoading(true);
 
@@ -24,7 +26,6 @@ const useOtherInfo = () => {
       if (!parsedInfo.litigation.isInvolvedInLitigation) {
         parsedInfo.litigation = {
           isInvolvedInLitigation: false,
-          
         };
       }
 
@@ -95,7 +96,7 @@ const useOtherInfo = () => {
       dispatch(saveOtherInfo(info));
     } catch (error: any) {
       console.error("Error saving other info:", error);
-      throw new Error(error?.message || "Failed to save other information");
+      toast.error(error?.message || "Failed to save other information");
     } finally {
       setLoading(false);
     }
@@ -106,7 +107,8 @@ const useOtherInfo = () => {
     section: Form433aSection
   ) => {
     if (!caseId) {
-      throw new Error("Case ID is required");
+      console.log("Case ID is required");
+      return;
     }
     setLoadingFormData(true);
 
@@ -116,7 +118,6 @@ const useOtherInfo = () => {
       dispatch(saveOtherInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching other info:", error);
-      throw new Error(error?.message || "Failed to fetch other information");
     } finally {
       setLoadingFormData(false);
     }

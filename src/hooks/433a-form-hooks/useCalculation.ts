@@ -2,6 +2,7 @@ import { saveCalculationInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useCalculation = () => {
   const dispatch = useAppDispatch();
@@ -24,7 +25,7 @@ const useCalculation = () => {
       dispatch(saveCalculationInfo(info));
     } catch (error: any) {
       console.error("Error saving calculation info:", error);
-      throw new Error(error?.message || "Failed to save calculation info");
+      toast.error(error?.message || "Failed to save calculation info");
     } finally {
       setLoading(false);
     }
@@ -42,7 +43,6 @@ const useCalculation = () => {
       dispatch(saveCalculationInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching calculation info:", error);
-      throw new Error(error?.message || "Failed to fetch calculation info");
     } finally {
       setLoadingFormData(false);
     }

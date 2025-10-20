@@ -60,7 +60,13 @@ const SignupForm = () => {
   const onSubmit = (data: SignupFormValues) => {
     console.log(data);
 
-    dispatch(loginUser({ user: DUMMY_USER }));
+    dispatch(
+      loginUser({
+        user: DUMMY_USER,
+        accessToken:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZDEzOWI1YzBmMDViZGI2NmFhNjJlOCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzYwOTQwOTY4LCJleHAiOjE3NjEwMjczNjh9.jbP5NMkaprF3NLtM3rEE_w3mwo6vbN6NMxXqiiQ2wtA",
+      })
+    );
 
     router.push("/dashboard/onboard");
   };

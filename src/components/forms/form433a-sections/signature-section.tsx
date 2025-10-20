@@ -21,28 +21,15 @@ import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignatureAndAttachments from "@/hooks/433a-form-hooks/useSignatureAndAttachments";
+import DropdownPopup from "@/components/ui/DropdownPopup";
 
 interface SignatureSectionProps {
   onNext: () => void;
   onPrevious: () => void;
-  onSubmit: () => void;
   currentStep: number;
   totalSteps: number;
-}
-
-interface Signature {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
 }
 
 const attachmentData = [
@@ -121,7 +108,6 @@ const attachmentData = [
 export function SignatureSection({
   onNext,
   onPrevious,
-  onSubmit: propOnSubmit,
   currentStep,
   totalSteps,
 }: SignatureSectionProps) {
@@ -131,7 +117,7 @@ export function SignatureSection({
     (state) => state.form433a
   );
   const signatures = useAppSelector(
-    (state) => state.signatures?.list
+    (state) => state.signatures?.images
   ) as Signature[];
 
   const { loadingFormData: loadingPersonal, handleGetPersonalInfo } =
@@ -142,7 +128,7 @@ export function SignatureSection({
     handleSaveSignatureInfo,
     handleGetSignatureInfo,
   } = useSignatureAndAttachments();
-  const { fetchSignatures, loading: loadingSignatures } = useSignatures();
+  const { handleGetSignatures, getting: loadingSignatures } = useSignatures();
 
   const maritalStatus = useMemo(
     () => personalInfo?.maritalStatus || "unmarried",
@@ -171,23 +157,17 @@ export function SignatureSection({
     trigger,
   } = methods;
 
-  console.log("getValues: ", getValues());
-  console.log("errors sign: ", errors);
-
   const [taxpayerSignaturePreview, setTaxpayerSignaturePreview] = useState<
     string | null
   >(null);
   const [spouseSignaturePreview, setSpouseSignaturePreview] = useState<
     string | null
   >(null);
-  const [openTaxpayerDropdown, setOpenTaxpayerDropdown] = useState(false);
-  const [openSpouseDropdown, setOpenSpouseDropdown] = useState(false);
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
     try {
       console.log("signature data:", data);
       await handleSaveSignatureInfo(data, caseId);
-      propOnSubmit();
     } catch (error: any) {
       console.error("Error saving signature info:", error);
       toast.error(error.message || "Failed to save signature info");
@@ -200,7 +180,7 @@ export function SignatureSection({
   }, [caseId]);
 
   useEffect(() => {
-    fetchSignatures();
+    handleGetSignatures();
   }, []);
 
   useEffect(() => {
@@ -215,7 +195,7 @@ export function SignatureSection({
       signatures?.length > 0
     ) {
       const sig = signatures?.find(
-        (s) => s.id === signatureInfo.taxpayerSignature.signatureId
+        (s) => s._id === signatureInfo.taxpayerSignature.signatureId
       );
       if (sig) {
         setTaxpayerSignaturePreview(sig.url);
@@ -223,7 +203,7 @@ export function SignatureSection({
     }
     if (signatureInfo?.spouseSignature?.signatureId && signatures?.length > 0) {
       const sig = signatures?.find(
-        (s) => s.id === signatureInfo.spouseSignature.signatureId
+        (s) => s._id === signatureInfo.spouseSignature.signatureId
       );
       if (sig) {
         setSpouseSignaturePreview(sig.url);
@@ -233,16 +213,15 @@ export function SignatureSection({
 
   const handleSelectTaxpayerSignature = async (id: string, url: string) => {
     setTaxpayerSignaturePreview(url);
+    console.log("tax payer id: ", id);
     setValue("taxpayerSignature.signatureId", id, { shouldValidate: true });
     await trigger("taxpayerSignature.signatureId");
-    setOpenTaxpayerDropdown(false);
   };
 
   const handleSelectSpouseSignature = async (id: string, url: string) => {
     setSpouseSignaturePreview(url);
     setValue("spouseSignature.signatureId", id, { shouldValidate: true });
     await trigger("spouseSignature.signatureId");
-    setOpenSpouseDropdown(false);
   };
 
   const removeTaxpayerSignature = async () => {
@@ -258,7 +237,7 @@ export function SignatureSection({
   };
 
   const handleReloadSignatures = () => {
-    fetchSignatures();
+    handleGetSignatures();
   };
 
   if (loadingFormData || loadingPersonal) {
@@ -305,19 +284,16 @@ export function SignatureSection({
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label>Signature of Taxpayer *</Label>
+                  <Label className="mb-2">Signature of Taxpayer *</Label>
                   {/* Hidden input to register the field with react-hook-form */}
                   <input
                     type="hidden"
                     {...register("taxpayerSignature.signatureId")}
                   />
-                  <div className="space-y-3">
+                  <div className="space-y-3 w-full">
                     {!taxpayerSignaturePreview ? (
-                      <Popover
-                        open={openTaxpayerDropdown}
-                        onOpenChange={setOpenTaxpayerDropdown}
-                      >
-                        <PopoverTrigger asChild>
+                      <DropdownPopup
+                        trigger={
                           <Button
                             type="button"
                             variant="outline"
@@ -327,40 +303,27 @@ export function SignatureSection({
                             Select Signature
                             <Upload className="w-4 h-4 ml-2" />
                           </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                          <ScrollArea className="h-[300px]">
-                            {signatures?.length === 0 ? (
-                              <p className="text-center text-gray-500 py-4">
-                                No signatures available
-                              </p>
-                            ) : (
-                              signatures?.map((sig) => (
-                                <div
-                                  key={sig.id}
-                                  className="p-2 border-b cursor-pointer hover:bg-gray-50"
-                                  onClick={() =>
-                                    handleSelectTaxpayerSignature(
-                                      sig.id,
-                                      sig.url
-                                    )
-                                  }
-                                >
-                                  <img
-                                    src={sig.url}
-                                    alt={sig.title}
-                                    className="w-20 h-10 object-contain mb-2"
-                                  />
-                                  <p className="font-medium">{sig.title}</p>
-                                  <p className="text-sm text-gray-500 truncate">
-                                    {sig.description}
-                                  </p>
-                                </div>
-                              ))
-                            )}
-                          </ScrollArea>
-                        </PopoverContent>
-                      </Popover>
+                        }
+                        options={
+                          signatures?.map((sig) => ({
+                            key: sig._id,
+                            label: `${sig.title}${
+                              sig.description ? ` - ${sig.description}` : ""
+                            }`,
+                            icon: (
+                              <img
+                                src={sig.url}
+                                alt={sig.title}
+                                className="w-20 h-10 object-contain"
+                              />
+                            ),
+                            onClick: () =>
+                              handleSelectTaxpayerSignature(sig._id, sig.url),
+                          })) || []
+                        }
+                        dropdownClassName="w-80"
+                        placement="bottom-left"
+                      />
                     ) : (
                       <div className="border border-gray-300 rounded-lg p-4">
                         <img
@@ -369,11 +332,8 @@ export function SignatureSection({
                           className="max-h-24 mx-auto mb-3"
                         />
                         <div className="flex justify-center gap-2">
-                          <Popover
-                            open={openTaxpayerDropdown}
-                            onOpenChange={setOpenTaxpayerDropdown}
-                          >
-                            <PopoverTrigger asChild>
+                          <DropdownPopup
+                            trigger={
                               <Button
                                 type="button"
                                 variant="outline"
@@ -383,40 +343,30 @@ export function SignatureSection({
                                 <Edit className="w-4 h-4 mr-1" />
                                 Change
                               </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-80">
-                              <ScrollArea className="h-[300px]">
-                                {signatures?.length === 0 ? (
-                                  <p className="text-center text-gray-500 py-4">
-                                    No signatures available
-                                  </p>
-                                ) : (
-                                  signatures?.map((sig) => (
-                                    <div
-                                      key={sig.id}
-                                      className="p-2 border-b cursor-pointer hover:bg-gray-50"
-                                      onClick={() =>
-                                        handleSelectTaxpayerSignature(
-                                          sig.id,
-                                          sig.url
-                                        )
-                                      }
-                                    >
-                                      <img
-                                        src={sig.url}
-                                        alt={sig.title}
-                                        className="w-20 h-10 object-contain mb-2"
-                                      />
-                                      <p className="font-medium">{sig.title}</p>
-                                      <p className="text-sm text-gray-500 truncate">
-                                        {sig.description}
-                                      </p>
-                                    </div>
-                                  ))
-                                )}
-                              </ScrollArea>
-                            </PopoverContent>
-                          </Popover>
+                            }
+                            options={
+                              signatures?.map((sig) => ({
+                                key: sig._id,
+                                label: `${sig.title}${
+                                  sig.description ? ` - ${sig.description}` : ""
+                                }`,
+                                icon: (
+                                  <img
+                                    src={sig.url}
+                                    alt={sig.title}
+                                    className="w-20 h-10 object-contain"
+                                  />
+                                ),
+                                onClick: () =>
+                                  handleSelectTaxpayerSignature(
+                                    sig._id,
+                                    sig.url
+                                  ),
+                              })) || []
+                            }
+                            dropdownClassName="w-80"
+                            placement="bottom-left"
+                          />
                           <Button
                             type="button"
                             variant="outline"
@@ -431,7 +381,7 @@ export function SignatureSection({
                       </div>
                     )}
                     {errors.taxpayerSignature?.signatureId && (
-                      <p className="text-red-600 text-sm mt-1">
+                      <p className="text-red-600 text-sm">
                         {errors.taxpayerSignature.signatureId.message}
                       </p>
                     )}
@@ -458,7 +408,7 @@ export function SignatureSection({
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label>Signature of Spouse *</Label>
+                    <Label className="mb-2">Signature of Spouse *</Label>
                     {/* Hidden input to register the field with react-hook-form */}
                     <input
                       type="hidden"
@@ -466,11 +416,8 @@ export function SignatureSection({
                     />
                     <div className="space-y-3">
                       {!spouseSignaturePreview ? (
-                        <Popover
-                          open={openSpouseDropdown}
-                          onOpenChange={setOpenSpouseDropdown}
-                        >
-                          <PopoverTrigger asChild>
+                        <DropdownPopup
+                          trigger={
                             <Button
                               type="button"
                               variant="outline"
@@ -480,40 +427,27 @@ export function SignatureSection({
                               Select Signature
                               <Upload className="w-4 h-4 ml-2" />
                             </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80">
-                            <ScrollArea className="h-[300px]">
-                              {signatures?.length === 0 ? (
-                                <p className="text-center text-gray-500 py-4">
-                                  No signatures available
-                                </p>
-                              ) : (
-                                signatures?.map((sig) => (
-                                  <div
-                                    key={sig.id}
-                                    className="p-2 border-b cursor-pointer hover:bg-gray-50"
-                                    onClick={() =>
-                                      handleSelectSpouseSignature(
-                                        sig.id,
-                                        sig.url
-                                      )
-                                    }
-                                  >
-                                    <img
-                                      src={sig.url}
-                                      alt={sig.title}
-                                      className="w-20 h-10 object-contain mb-2"
-                                    />
-                                    <p className="font-medium">{sig.title}</p>
-                                    <p className="text-sm text-gray-500 truncate">
-                                      {sig.description}
-                                    </p>
-                                  </div>
-                                ))
-                              )}
-                            </ScrollArea>
-                          </PopoverContent>
-                        </Popover>
+                          }
+                          options={
+                            signatures?.map((sig) => ({
+                              key: sig._id,
+                              label: `${sig.title}${
+                                sig.description ? ` - ${sig.description}` : ""
+                              }`,
+                              icon: (
+                                <img
+                                  src={sig.url}
+                                  alt={sig.title}
+                                  className="w-20 h-10 object-contain"
+                                />
+                              ),
+                              onClick: () =>
+                                handleSelectSpouseSignature(sig._id, sig.url),
+                            })) || []
+                          }
+                          dropdownClassName="w-80"
+                          placement="bottom-left"
+                        />
                       ) : (
                         <div className="border border-gray-300 rounded-lg p-4">
                           <img
@@ -522,11 +456,8 @@ export function SignatureSection({
                             className="max-h-24 mx-auto mb-3"
                           />
                           <div className="flex justify-center gap-2">
-                            <Popover
-                              open={openSpouseDropdown}
-                              onOpenChange={setOpenSpouseDropdown}
-                            >
-                              <PopoverTrigger asChild>
+                            <DropdownPopup
+                              trigger={
                                 <Button
                                   type="button"
                                   variant="outline"
@@ -536,42 +467,32 @@ export function SignatureSection({
                                   <Edit className="w-4 h-4 mr-1" />
                                   Change
                                 </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-80">
-                                <ScrollArea className="h-[300px]">
-                                  {signatures?.length === 0 ? (
-                                    <p className="text-center text-gray-500 py-4">
-                                      No signatures available
-                                    </p>
-                                  ) : (
-                                    signatures?.map((sig) => (
-                                      <div
-                                        key={sig.id}
-                                        className="p-2 border-b cursor-pointer hover:bg-gray-50"
-                                        onClick={() =>
-                                          handleSelectSpouseSignature(
-                                            sig.id,
-                                            sig.url
-                                          )
-                                        }
-                                      >
-                                        <img
-                                          src={sig.url}
-                                          alt={sig.title}
-                                          className="w-20 h-10 object-contain mb-2"
-                                        />
-                                        <p className="font-medium">
-                                          {sig.title}
-                                        </p>
-                                        <p className="text-sm text-gray-500 truncate">
-                                          {sig.description}
-                                        </p>
-                                      </div>
-                                    ))
-                                  )}
-                                </ScrollArea>
-                              </PopoverContent>
-                            </Popover>
+                              }
+                              options={
+                                signatures?.map((sig) => ({
+                                  key: sig._id,
+                                  label: `${sig.title}${
+                                    sig.description
+                                      ? ` - ${sig.description}`
+                                      : ""
+                                  }`,
+                                  icon: (
+                                    <img
+                                      src={sig.url}
+                                      alt={sig.title}
+                                      className="w-20 h-10 object-contain"
+                                    />
+                                  ),
+                                  onClick: () =>
+                                    handleSelectSpouseSignature(
+                                      sig._id,
+                                      sig.url
+                                    ),
+                                })) || []
+                              }
+                              dropdownClassName="w-80"
+                              placement="bottom-left"
+                            />
                             <Button
                               type="button"
                               variant="outline"
@@ -586,7 +507,7 @@ export function SignatureSection({
                         </div>
                       )}
                       {errors.spouseSignature?.signatureId && (
-                        <p className="text-red-600 text-sm mt-1">
+                        <p className="text-red-600 text-sm">
                           {errors.spouseSignature.signatureId.message}
                         </p>
                       )}

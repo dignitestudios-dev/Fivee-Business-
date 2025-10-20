@@ -2,6 +2,7 @@ import { saveHouseholdIncomeInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useHouseholdIncome = () => {
   const dispatch = useAppDispatch();
@@ -29,7 +30,7 @@ const useHouseholdIncome = () => {
       dispatch(saveHouseholdIncomeInfo(info));
     } catch (error: any) {
       console.error("Error saving household income info:", error);
-      throw new Error(error?.message || "Failed to save household income info");
+      toast.error(error?.message || "Failed to save household income info");
     } finally {
       setLoading(false);
     }
@@ -47,9 +48,6 @@ const useHouseholdIncome = () => {
       dispatch(saveHouseholdIncomeInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching household income info:", error);
-      throw new Error(
-        error?.message || "Failed to fetch household income info"
-      );
     } finally {
       setLoadingFormData(false);
     }

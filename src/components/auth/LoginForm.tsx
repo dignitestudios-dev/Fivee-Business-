@@ -11,10 +11,12 @@ import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/hooks";
 import { loginUser } from "@/lib/features/userSlice";
+import useAuth from "@/hooks/auth/useAuth";
 
 const LoginForm = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { loading, handleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -56,13 +58,19 @@ const LoginForm = () => {
   };
 
   const onSubmit = (data: LoginFormValues) => {
+    // handleLogin(data);
     console.log(data);
     dispatch(
-      loginUser({ user: { ...DUMMY_USER, employmentType: "self-employed" } })
+      loginUser({
+        user: { ...DUMMY_USER, employmentType: "self-employed" },
+        accessToken:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZDEzOWI1YzBmMDViZGI2NmFhNjJlOCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzYwOTY3OTExLCJleHAiOjE3NjEwNTQzMTF9.XKE-jmpPfQrkOVkb-2HGiOe6S5Le8IgLBgUOB-6E9YI",
+      })
     );
 
     router.push("/dashboard");
   };
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -74,6 +82,7 @@ const LoginForm = () => {
         autoComplete="email"
         id="email"
         type="email"
+        disabled={loading}
         {...register("email", { required: "Email is required" })}
         error={errors.email?.message}
       />
@@ -89,6 +98,7 @@ const LoginForm = () => {
           validate: validatePassword,
         })}
         error={errors.password?.message}
+        disabled={loading}
         rightIcon={
           <button
             type="button"
@@ -111,7 +121,7 @@ const LoginForm = () => {
         Forgot Password?
       </Link>
 
-      <FButton variant="primary" size="lg" className="w-full">
+      <FButton loading={loading} variant="primary" size="lg" className="w-full">
         Login
       </FButton>
     </form>

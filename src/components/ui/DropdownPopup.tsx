@@ -204,7 +204,7 @@ const DropdownPopup = forwardRef<HTMLButtonElement, DropdownPopupProps>(
     };
 
     return (
-      <div className="relative inline-block" ref={containerRef}>
+      <div className={`relative inline-block`} ref={containerRef}>
         {renderTrigger()}
 
         {/* Dropdown */}

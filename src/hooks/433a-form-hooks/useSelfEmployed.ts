@@ -2,6 +2,7 @@ import { saveSelfEmployedInfo } from "@/lib/features/form433aSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useSelfEmployed = () => {
   const dispatch = useAppDispatch();
@@ -45,7 +46,7 @@ const useSelfEmployed = () => {
       dispatch(saveSelfEmployedInfo(info));
     } catch (error: any) {
       console.error("Error saving self-employed info:", error);
-      throw new Error(error?.message || "Failed to save self-employed info");
+      toast.error(error?.message || "Failed to save self-employed info");
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,6 @@ const useSelfEmployed = () => {
       );
     } catch (error: any) {
       console.error("Error fetching self-employed info:", error);
-      throw new Error(error?.message || "Failed to fetch self-employed info");
     } finally {
       setLoadingFormData(false);
     }

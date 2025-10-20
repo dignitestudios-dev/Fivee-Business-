@@ -1,14 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-interface Signature {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-}
 
 const initialState = {
-  list: [] as Signature[],
+  images: [] as Signature[],
 };
 
 const signaturesSlice = createSlice({
@@ -16,10 +10,25 @@ const signaturesSlice = createSlice({
   initialState,
   reducers: {
     setSignatures: (state, action) => {
-      state.list = action.payload;
+      state.images = action.payload;
+    },
+    addSignature: (state, action) => {
+      state.images.push(action.payload);
+    },
+    updateSignature: (state, action) => {
+      const index = state.images.findIndex(
+        (sig) => sig._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.images[index] = action.payload;
+      }
+    },
+    deleteSignature: (state, action) => {
+      state.images = state.images.filter((sig) => sig._id !== action.payload);
     },
   },
 });
 
-export const { setSignatures } = signaturesSlice.actions;
+export const { setSignatures, addSignature, updateSignature, deleteSignature } =
+  signaturesSlice.actions;
 export default signaturesSlice.reducer;

@@ -37,7 +37,7 @@ export function Popover({
 
   return (
     <PopoverContext.Provider value={{ isOpen, onOpenChange: handleOpenChange }}>
-      <div className="relative">{children}</div>
+      <div className="relative w-full">{children}</div>
     </PopoverContext.Provider>
   );
 }
