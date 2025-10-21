@@ -5,7 +5,7 @@ import { FiEyeOff } from "react-icons/fi";
 import { FaEye } from "react-icons/fa";
 
 import FInput from "@/components/ui/FInput";
-import { DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
+import { DUMMY_TOKEN, DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
 import Link from "next/link";
 import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
@@ -59,12 +59,11 @@ const LoginForm = () => {
 
   const onSubmit = (data: LoginFormValues) => {
     // handleLogin(data);
-    console.log(data);
+
     dispatch(
       loginUser({
         user: { ...DUMMY_USER, employmentType: "self-employed" },
-        accessToken:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZDEzOWI1YzBmMDViZGI2NmFhNjJlOCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzYwOTY3OTExLCJleHAiOjE3NjEwNTQzMTF9.XKE-jmpPfQrkOVkb-2HGiOe6S5Le8IgLBgUOB-6E9YI",
+        accessToken: DUMMY_TOKEN,
       })
     );
 

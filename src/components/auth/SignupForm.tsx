@@ -6,7 +6,7 @@ import { FaEye } from "react-icons/fa";
 import { GoCheckCircleFill } from "react-icons/go";
 
 import FInput from "@/components/ui/FInput";
-import { DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
+import { DUMMY_TOKEN, DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
 import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/lib/features/userSlice";
@@ -63,8 +63,7 @@ const SignupForm = () => {
     dispatch(
       loginUser({
         user: DUMMY_USER,
-        accessToken:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZDEzOWI1YzBmMDViZGI2NmFhNjJlOCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzYwOTQwOTY4LCJleHAiOjE3NjEwMjczNjh9.jbP5NMkaprF3NLtM3rEE_w3mwo6vbN6NMxXqiiQ2wtA",
+        accessToken: DUMMY_TOKEN,
       })
     );
 

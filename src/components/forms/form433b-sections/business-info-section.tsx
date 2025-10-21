@@ -63,10 +63,10 @@ export function BusinessInfoSection({
   console.log("errors: ", errors);
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "associates",
+    name: "partners",
   });
 
-  const outsourcePayroll = watch("outsourcePayroll");
+  const doesOutsourcePayroll = watch("doesOutsourcePayroll");
 
   const formatEIN = (value: string) => {
     const cleaned = value.replace(/[^0-9-]/g, "");
@@ -95,17 +95,19 @@ export function BusinessInfoSection({
 
   const handleEINInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatEIN(e.target.value);
-    setValue("ein", formatted, { shouldValidate: true });
+    setValue("employerIdentificationNumber", formatted, {
+      shouldValidate: true,
+    });
   };
 
   const onSubmit = async (data: BusinessInfoFormSchema) => {
     try {
-      if (data.outsourcePayroll === false) {
+      if (data.doesOutsourcePayroll === false) {
         delete data.payrollProviderName;
         delete data.payrollProviderAddress;
       }
 
-      console.log("handleSaveBusinessInfo going to runs")
+      console.log("handleSaveBusinessInfo going to runs");
 
       await handleSaveBusinessInfo(data, caseId);
 
@@ -131,14 +133,14 @@ export function BusinessInfoSection({
     return <FormLoader />;
   }
 
-  const addAssociate = () => {
+  const addPartner = () => {
     append({
       lastName: "",
       firstName: "",
       title: "",
-      percentOwnership: "",
-      annualSalary: "",
-      ssn: "",
+      percentOwnership: 0,
+      annualSalary: 0,
+      socialSecurityNumber: "",
       homeAddress: "",
       primaryPhone: "",
       secondaryPhone: "",
@@ -173,40 +175,48 @@ export function BusinessInfoSection({
               />
               <FormInput
                 label="Employer Identification Number (EIN)"
-                id="ein"
+                id="employerIdentificationNumber"
                 placeholder="XX-XXXXXXX"
                 required
-                {...register("ein", {
+                {...register("employerIdentificationNumber", {
                   onChange: handleEINInput,
                 })}
-                error={errors.ein?.message}
+                error={errors.employerIdentificationNumber?.message}
               />
             </div>
 
             <FormInput
               label="Business Physical Address (street, city, state, ZIP code)"
-              id="physicalAddress"
+              id="businessPhysicalAddress"
               required
-              {...register("physicalAddress")}
-              error={errors.physicalAddress?.message}
+              {...register("businessPhysicalAddress")}
+              error={errors.businessPhysicalAddress?.message}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
                 label="County of Business Location"
-                id="county"
+                id="countyOfBusinessLocation"
                 required
-                {...register("county")}
-                error={errors.county?.message}
+                {...register("countyOfBusinessLocation")}
+                error={errors.countyOfBusinessLocation?.message}
               />
               <FormInput
-                label="Description of Business and DBA or 'Trade Name'"
-                id="description"
+                label="Description of Business"
+                id="descriptionOfBusiness"
                 required
-                {...register("description")}
-                error={errors.description?.message}
+                {...register("descriptionOfBusiness")}
+                error={errors.descriptionOfBusiness?.message}
               />
             </div>
+
+            <FormInput
+              label="DBA or Trade Name"
+              id="dbaTradeName"
+              required
+              {...register("dbaTradeName")}
+              error={errors.dbaTradeName?.message}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormInput
@@ -226,17 +236,17 @@ export function BusinessInfoSection({
               />
               <FormInput
                 label="Business Website Address"
-                id="website"
-                {...register("website")}
-                error={errors.website?.message}
+                id="businessWebsiteAddress"
+                {...register("businessWebsiteAddress")}
+                error={errors.businessWebsiteAddress?.message}
               />
             </div>
 
             <FormInput
               label="Business Mailing Address (if different or P.O. box)"
-              id="mailingAddress"
-              {...register("mailingAddress")}
-              error={errors.mailingAddress?.message}
+              id="businessMailingAddress"
+              {...register("businessMailingAddress")}
+              error={errors.businessMailingAddress?.message}
             />
 
             <FormInput
@@ -284,19 +294,19 @@ export function BusinessInfoSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
                 label="Total Number of Employees"
-                id="totalEmployees"
+                id="totalNumberOfEmployees"
                 type="number"
                 required
-                {...register("totalEmployees")}
-                error={errors.totalEmployees?.message}
+                {...register("totalNumberOfEmployees")}
+                error={errors.totalNumberOfEmployees?.message}
               />
               <div className="flex items-center space-x-2 pt-6">
                 <Checkbox
-                  id="onlyEmployee"
-                  {...register("onlyEmployee")}
+                  id="isSoleEmployee"
+                  {...register("isSoleEmployee")}
                   className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                 />
-                <Label htmlFor="onlyEmployee" className="text-sm">
+                <Label htmlFor="isSoleEmployee" className="text-sm">
                   Check here if you are the only employee
                 </Label>
               </div>
@@ -305,31 +315,32 @@ export function BusinessInfoSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
                 label="Frequency of Tax Deposits"
-                id="taxDepositFrequency"
+                id="frequencyOfTaxDeposits"
+                type="number"
                 required
-                {...register("taxDepositFrequency")}
-                error={errors.taxDepositFrequency?.message}
+                {...register("frequencyOfTaxDeposits")}
+                error={errors.frequencyOfTaxDeposits?.message}
               />
               <FormInput
                 label="Average Gross Monthly Payroll ($)"
-                id="averageMonthlyPayroll"
+                id="averageGrossMonthlyPayroll"
                 type="number"
                 required
-                {...register("averageMonthlyPayroll")}
-                error={errors.averageMonthlyPayroll?.message}
+                {...register("averageGrossMonthlyPayroll")}
+                error={errors.averageGrossMonthlyPayroll?.message}
               />
             </div>
 
             <FormField
               label="Does the business outsource its payroll processing and tax return preparation for a fee?"
-              id="outsourcePayroll"
+              id="doesOutsourcePayroll"
               required
-              error={errors.outsourcePayroll?.message}
+              error={errors.doesOutsourcePayroll?.message}
             >
               <RadioGroup
-                value={outsourcePayroll ? "yes" : "no"}
+                value={doesOutsourcePayroll ? "yes" : "no"}
                 onValueChange={(value) =>
-                  setValue("outsourcePayroll", value === "yes", {
+                  setValue("doesOutsourcePayroll", value === "yes", {
                     shouldValidate: true,
                   })
                 }
@@ -354,7 +365,7 @@ export function BusinessInfoSection({
               </RadioGroup>
             </FormField>
 
-            {outsourcePayroll && (
+            {doesOutsourcePayroll && (
               <div className="space-y-4">
                 <FormInput
                   label="Provider Name"
@@ -375,7 +386,7 @@ export function BusinessInfoSection({
           </CardContent>
         </Card>
 
-        {/* Associates (Partners, Officers, etc.) */}
+        {/* Partners (Partners, Officers, etc.) */}
         <Card>
           <CardHeader>
             <CardTitle>
@@ -394,7 +405,7 @@ export function BusinessInfoSection({
               >
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium text-gray-900">
-                    Associate {index + 1}
+                    Partner {index + 1}
                   </h4>
                   <Button
                     type="button"
@@ -410,77 +421,93 @@ export function BusinessInfoSection({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormInput
                     label="Last Name"
-                    id={`associates.${index}.lastName`}
+                    id={`partners.${index}.lastName`}
                     required
-                    {...register(`associates.${index}.lastName`)}
-                    error={errors.associates?.[index]?.lastName?.message}
+                    {...register(`partners.${index}.lastName`)}
+                    error={errors.partners?.[index]?.lastName?.message}
                   />
                   <FormInput
                     label="First Name"
-                    id={`associates.${index}.firstName`}
+                    id={`partners.${index}.firstName`}
                     required
-                    {...register(`associates.${index}.firstName`)}
-                    error={errors.associates?.[index]?.firstName?.message}
+                    {...register(`partners.${index}.firstName`)}
+                    error={errors.partners?.[index]?.firstName?.message}
                   />
                   <FormInput
                     label="Title"
-                    id={`associates.${index}.title`}
+                    id={`partners.${index}.title`}
                     required
-                    {...register(`associates.${index}.title`)}
-                    error={errors.associates?.[index]?.title?.message}
+                    {...register(`partners.${index}.title`)}
+                    error={errors.partners?.[index]?.title?.message}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormInput
-                    label="Percent of Ownership and Annual Salary"
-                    id={`associates.${index}.percentOwnership`}
+                    label="Percent Ownership"
+                    id={`partners.${index}.percentOwnership`}
+                    type="number"
                     required
-                    {...register(`associates.${index}.percentOwnership`)}
-                    error={
-                      errors.associates?.[index]?.percentOwnership?.message
-                    }
+                    {...register(`partners.${index}.percentOwnership`)}
+                    error={errors.partners?.[index]?.percentOwnership?.message}
                   />
                   <FormInput
+                    label="Annual Salary"
+                    id={`partners.${index}.annualSalary`}
+                    type="number"
+                    required
+                    {...register(`partners.${index}.annualSalary`)}
+                    error={errors.partners?.[index]?.annualSalary?.message}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormInput
                     label="Social Security Number"
-                    id={`associates.${index}.ssn`}
+                    id={`partners.${index}.socialSecurityNumber`}
                     placeholder="XXX-XX-XXXX"
                     required
-                    {...register(`associates.${index}.ssn`, {
+                    {...register(`partners.${index}.socialSecurityNumber`, {
                       onChange: (e) => {
                         const formatted = formatSSN(e.target.value);
-                        setValue(`associates.${index}.ssn`, formatted, {
-                          shouldValidate: true,
-                        });
+                        setValue(
+                          `partners.${index}.socialSecurityNumber`,
+                          formatted,
+                          {
+                            shouldValidate: true,
+                          }
+                        );
                       },
                     })}
-                    error={errors.associates?.[index]?.ssn?.message}
+                    error={
+                      errors.partners?.[index]?.socialSecurityNumber?.message
+                    }
                   />
                 </div>
 
                 <FormInput
                   label="Home Address (street, city, state, ZIP code)"
-                  id={`associates.${index}.homeAddress`}
+                  id={`partners.${index}.homeAddress`}
                   required
-                  {...register(`associates.${index}.homeAddress`)}
-                  error={errors.associates?.[index]?.homeAddress?.message}
+                  {...register(`partners.${index}.homeAddress`)}
+                  error={errors.partners?.[index]?.homeAddress?.message}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormInput
                     label="Primary Phone"
-                    id={`associates.${index}.primaryPhone`}
+                    id={`partners.${index}.primaryPhone`}
                     placeholder="(123) 456-7890"
                     required
-                    {...register(`associates.${index}.primaryPhone`)}
-                    error={errors.associates?.[index]?.primaryPhone?.message}
+                    {...register(`partners.${index}.primaryPhone`)}
+                    error={errors.partners?.[index]?.primaryPhone?.message}
                   />
                   <FormInput
                     label="Secondary Phone"
-                    id={`associates.${index}.secondaryPhone`}
+                    id={`partners.${index}.secondaryPhone`}
                     placeholder="(123) 456-7890"
-                    {...register(`associates.${index}.secondaryPhone`)}
-                    error={errors.associates?.[index]?.secondaryPhone?.message}
+                    {...register(`partners.${index}.secondaryPhone`)}
+                    error={errors.partners?.[index]?.secondaryPhone?.message}
                   />
                 </div>
               </div>
@@ -489,11 +516,11 @@ export function BusinessInfoSection({
             <Button
               type="button"
               variant="outline"
-              onClick={addAssociate}
+              onClick={addPartner}
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Associate
+              Add Partner
             </Button>
           </CardContent>
         </Card>

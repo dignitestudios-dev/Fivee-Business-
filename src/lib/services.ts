@@ -184,6 +184,16 @@ const saveBusinessInfo = (info: any, caseId: string) =>
     API.post(`/form433boic/${caseId}/business-information`, info)
   );
 
+const saveBusinessAssetInfo = (info: any, caseId: string) =>
+  apiHandler(() =>
+    API.post(`/form433boic/${caseId}/business-asset-info`, info)
+  );
+
+const saveBusinessIncomeInfoFormB = (info: any, caseId: string) =>
+  apiHandler(() =>
+    API.post(`/form433boic/${caseId}/business-income-info`, info)
+  );
+
 const api = {
   savePersonalInfo,
   saveEmploymentInfo,
@@ -203,6 +213,8 @@ const api = {
   login,
   get433bSectionInfo,
   saveBusinessInfo,
+  saveBusinessAssetInfo,
+  saveBusinessIncomeInfoFormB,
 };
 
 export default api;

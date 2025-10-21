@@ -4,7 +4,7 @@ import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/lib/hooks";
 import { loginUser } from "@/lib/features/userSlice";
-import { DUMMY_USER } from "@/lib/constants";
+import { DUMMY_TOKEN, DUMMY_USER } from "@/lib/constants";
 
 const OnBoardForm = () => {
   const dispatch = useAppDispatch();
@@ -19,8 +19,7 @@ const OnBoardForm = () => {
     dispatch(
       loginUser({
         user: { ...DUMMY_USER, employmentType: employmentType },
-        accessToken:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZDEzOWI1YzBmMDViZGI2NmFhNjJlOCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzYwOTQwOTY4LCJleHAiOjE3NjEwMjczNjh9.jbP5NMkaprF3NLtM3rEE_w3mwo6vbN6NMxXqiiQ2wtA",
+        accessToken: DUMMY_TOKEN,
       })
     );
 

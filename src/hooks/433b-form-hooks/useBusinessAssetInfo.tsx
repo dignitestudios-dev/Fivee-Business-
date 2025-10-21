@@ -1,46 +1,43 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
-import { saveBusinessInformation } from "@/lib/features/form433bSlice"; // We'll create the slice
+import { saveBusinessAssetInfo } from "@/lib/features/form433bSlice";
 import toast from "react-hot-toast";
 
-const useBusinessInfo = () => {
+const useBusinessAssetInfo = () => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [loadingFormData, setLoadingFormData] = useState(false);
 
-  const handleSaveBusinessInfo = async (
-    info: BusinessInfoFormSchema,
+  const handleSaveBusinessAssetsInfo = async (
+    info: any,
     caseId: string | null
   ) => {
     if (!caseId) return;
     setLoading(true);
 
     try {
-      await api.saveBusinessInfo(info, caseId);
-      dispatch(saveBusinessInformation(info));
+      await api.saveBusinessAssetInfo(info, caseId);
+      dispatch(saveBusinessAssetInfo(info));
     } catch (error: any) {
-      console.error("Error saving business info:", error);
-      toast.error(error?.message || "Failed to save business info");
+      toast.error(error?.message || "Failed to save business asset info");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGetBusinessInfo = async (
+  const handleGetBusinessAssetsInfo = async (
     caseId: string | null,
     section: Form433bSection
   ) => {
     setLoadingFormData(true);
 
     try {
-      console.log("Fetching business info for section:", section);
       if (!caseId) return;
-
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveBusinessInformation(response.data || {}));
+      dispatch(saveBusinessAssetInfo(response.data || {}));
     } catch (error: any) {
-      console.error("Error fetching business info:", error);
+      console.error("Error fetching business asset info:", error);
     } finally {
       setLoadingFormData(false);
     }
@@ -49,9 +46,9 @@ const useBusinessInfo = () => {
   return {
     loading,
     loadingFormData,
-    handleSaveBusinessInfo,
-    handleGetBusinessInfo,
+    handleSaveBusinessAssetsInfo,
+    handleGetBusinessAssetsInfo,
   };
 };
 
-export default useBusinessInfo;
+export default useBusinessAssetInfo;

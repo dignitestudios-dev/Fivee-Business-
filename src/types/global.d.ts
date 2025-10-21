@@ -10,6 +10,8 @@ import { selfEmployedSchema } from "@/lib/validation/form433a/self-employed-sect
 import { otherInfoSchema } from "@/lib/validation/form433a/other-info-section";
 import { signatureSchema } from "@/lib/validation/form433a/signature-section";
 import { businessInfoSchema } from "@/lib/validation/form433b/business-info-section";
+import { businessAssetSchema } from "@/lib/validation/form433b/business-asset-section";
+import { businessIncomeSchemaFormB } from "@/lib/validation/form433b/business-income-section";
 
 export {}; // makes this a module
 
@@ -166,17 +168,27 @@ declare global {
   type SignatureFormSchema = z.infer<typeof signatureSchema>;
 
   interface FormData433AState {
-    personalInfo: PersonalInfoFromSchema;
-    employment: EmploymentFromSchema;
-    personalAssets: PersonalAssetsFormSchema;
-    selfEmployedSchema: SelfEmployedFormSchema;
-    businessAssetsSchema: BusinessAssetsFormSchema;
-    businessIncomeSchema: BusinessIncomeFormSchema;
-    householdIncomeSchema: HouseholdIncomeFormSchema;
-    calculationSchema: CalculationFormSchema;
-    otherInfoSchema: OtherInfoFormSchema;
-    signatureSchema: SignatureFormSchema;
+    personalInfo: PersonalInfoFromSchema | null;
+    employmentInfo: EmploymentFromSchema | null;
+    personalAssetsInfo: PersonalAssetsFormSchema | null;
+    selfEmployedSchema: SelfEmployedFormSchema | null;
+    businessAssetsSchema: BusinessAssetsFormSchema | null;
+    businessIncomeSchema: BusinessIncomeFormSchema | null;
+    householdIncomeSchema: HouseholdIncomeFormSchema | null;
+    calculationSchema: CalculationFormSchema | null;
+    otherInfoSchema: OtherInfoFormSchema | null;
+    signatureSchema: SignatureFormSchema | null;
   }
 
-  type BusinessInfoFormSchema = z.infer<typeof businessInfoSchema>
+  type BusinessInfoFormSchema = z.infer<typeof businessInfoSchema>;
+  type BusinessAssetsFormSchema2 = z.infer<typeof businessAssetSchema>;
+  type BusinessAssetsFormSchemaFormB = z.infer<
+    typeof businessIncomeSchemaFormB
+  >;
+
+  interface FormData433BState {
+    businessInformation: BusinessInfoFormSchema | null;
+    businessAssetsInfo: BusinessAssetsFormSchema2 | null;
+    businessIncomeInfo: BusinessAssetsFormSchemaFormB | null;
+  }
 }

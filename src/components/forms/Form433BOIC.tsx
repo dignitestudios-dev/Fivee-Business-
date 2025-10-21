@@ -8,6 +8,8 @@ import { BusinessInfoSection } from "@/components/forms/form433b-sections/busine
 // etc.
 import { storage } from "@/utils/helper";
 import { useSearchParams } from "next/navigation";
+import { BusinessAssetsSection } from "./form433b-sections/business-asset-section";
+import { BusinessIncomeSection } from "./form433b-sections/business-income-section";
 
 const steps = [
   {
@@ -101,8 +103,6 @@ export default function Form433BOIC() {
   };
 
   const handleNext = async () => {
-    console.log("Next runs");
-
     if (currentStep < 7) {
       // Mark current step as completed
       const newCompletedSteps = new Set([...completedSteps, currentStep]);
@@ -146,9 +146,10 @@ export default function Form433BOIC() {
     switch (currentStep) {
       case 1:
         return <BusinessInfoSection {...commonProps} />;
-      // case 2:
-      //   return <BusinessAssetSection {...commonProps} />;
-      // Add other cases as sections are implemented
+      case 2:
+        return <BusinessAssetsSection {...commonProps} />;
+      case 3:
+        return <BusinessIncomeSection {...commonProps} />;
       default:
         return <BusinessInfoSection {...commonProps} />;
     }

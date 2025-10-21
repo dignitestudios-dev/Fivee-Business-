@@ -1,15 +1,11 @@
+import { formatDateForInput } from "@/utils/helper";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-// --- Types ---
-interface FormData433BState {
-  businessInformation: BusinessInfoFormSchema | null;
-  // Add other sections: businessAssetInfo, etc.
-}
 
 // --- Initial State ---
 const initialState: FormData433BState = {
   businessInformation: null,
-  // Add others: null,
+  businessAssetsInfo: null,
+  businessIncomeInfo: null,
 };
 
 // --- Slice ---
@@ -24,10 +20,36 @@ const form433bSlice = createSlice({
     ) => {
       state.businessInformation = action.payload;
     },
-    // Add reducers for other sections as implemented
+
+    saveBusinessAssetInfo: (state, action: PayloadAction<any | null>) => {
+      if (action.payload) {
+        // Format dates
+        action.payload.realEstate = action.payload.realEstate?.map(
+          (r: any) => ({
+            ...r,
+            datePurchased: formatDateForInput(r.datePurchased),
+            finalPaymentDate: formatDateForInput(r.finalPaymentDate),
+          })
+        );
+        action.payload.vehicles = action.payload.vehicles?.map((v: any) => ({
+          ...v,
+          datePurchased: formatDateForInput(v.datePurchased),
+          finalPaymentDate: formatDateForInput(v.finalPaymentDate),
+        }));
+      }
+      state.businessAssetsInfo = action.payload;
+    },
+
+    saveBusinessIncomeInfo: (state, action: PayloadAction<any | null>) => {
+      state.businessIncomeInfo = action.payload;
+    },
   },
 });
 
 // --- Export actions & reducer ---
-export const { saveBusinessInformation } = form433bSlice.actions;
+export const {
+  saveBusinessInformation,
+  saveBusinessAssetInfo,
+  saveBusinessIncomeInfo,
+} = form433bSlice.actions;
 export default form433bSlice.reducer;
