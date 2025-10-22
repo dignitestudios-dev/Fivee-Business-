@@ -12,6 +12,10 @@ import { signatureSchema } from "@/lib/validation/form433a/signature-section";
 import { businessInfoSchema } from "@/lib/validation/form433b/business-info-section";
 import { businessAssetSchema } from "@/lib/validation/form433b/business-asset-section";
 import { businessIncomeSchemaFormB } from "@/lib/validation/form433b/business-income-section";
+import { businessExpenseSchema } from "@/lib/validation/form433b/business-expense-section";
+import { calculationSchemaFormB } from "@/lib/validation/form433b/calculation-section";
+import { otherInfoSchemaFormB } from "@/lib/validation/form433b/other-info-section";
+import { signatureSchemaFormB } from "@/lib/validation/form433b/signature-section";
 
 export {}; // makes this a module
 
@@ -84,7 +88,7 @@ declare global {
     | "signaturesAndAttachmentsInfo";
 
   type Form433bSection =
-    | "businessInformation"
+    | "businessInfo"
     | "businessAssetInfo"
     | "businessIncomeInfo"
     | "businessExpenseInfo"
@@ -182,13 +186,19 @@ declare global {
 
   type BusinessInfoFormSchema = z.infer<typeof businessInfoSchema>;
   type BusinessAssetsFormSchema2 = z.infer<typeof businessAssetSchema>;
-  type BusinessAssetsFormSchemaFormB = z.infer<
-    typeof businessIncomeSchemaFormB
-  >;
+  type BusinessIncomeFormBSchema = z.infer<typeof businessIncomeSchemaFormB>;
+  type BusinessExpenseFormSchema = z.infer<typeof businessExpenseSchema>;
+  type CalculationInfo = z.infer<typeof calculationSchemaFormB>;
+  type OtherInfoFormBSchema = z.infer<typeof otherInfoSchemaFormB>;
+  type SignatureInfoFormB = z.infer<typeof signatureSchemaFormB>;
 
   interface FormData433BState {
     businessInformation: BusinessInfoFormSchema | null;
     businessAssetsInfo: BusinessAssetsFormSchema2 | null;
     businessIncomeInfo: BusinessAssetsFormSchemaFormB | null;
+    businessExpenseInfo: BusinessExpenseFormSchema | null;
+    calculationInfo: CalculationInfo | null;
+    otherInfo: OtherInfoFormBSchema | null;
+    signatureInfo: SignatureInfoFormB | null;
   }
 }

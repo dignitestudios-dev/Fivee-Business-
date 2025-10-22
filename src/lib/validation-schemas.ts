@@ -647,7 +647,7 @@ export const businessIncomeSchema = z
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
         message: "Business supplies must be a number 0 or greater",
       }),
-    utilitiesTelephones: z
+    utilities: z
       .string()
       .min(1, { message: "Utilities/telephones is required" })
       .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {

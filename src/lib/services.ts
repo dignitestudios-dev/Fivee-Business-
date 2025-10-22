@@ -52,7 +52,7 @@ const handleApiError = (error: unknown): never => {
       error.response?.data?.data?.message ||
       error.message ||
       "An unexpected error occurred";
-    console.error("API Error:", errorMessage);
+    console.log("API Error:", errorMessage);
     throw new Error(errorMessage);
   }
   throw new Error(
@@ -65,6 +65,7 @@ const handleApiResponse = (response: any) => {
 
   // Check if status is false and throw an error
   if (!responseData.status) {
+    console.log("responseData: ", responseData);
     throw new Error(
       responseData.data.message || "Something went wrong, Please try again!"
     );
@@ -194,6 +195,22 @@ const saveBusinessIncomeInfoFormB = (info: any, caseId: string) =>
     API.post(`/form433boic/${caseId}/business-income-info`, info)
   );
 
+const saveBusinessExpenseInfoFormB = (info: any, caseId: string) =>
+  apiHandler(() =>
+    API.post(`/form433boic/${caseId}/business-expense-info`, info)
+  );
+
+const saveCalculationInfoFormB = (info: any, caseId: string) =>
+  apiHandler(() => API.post(`/form433boic/${caseId}/section5`, info));
+
+const saveOtherInfoFormB = (info: any, caseId: string) =>
+  apiHandler(() => API.post(`/form433boic/${caseId}/other-information`, info));
+
+const saveSignaturesAndAttachmentsFormB = (info: any, caseId: string) =>
+  apiHandler(() =>
+    API.post(`/form433boic/${caseId}/signatures`, info)
+  );
+
 const api = {
   savePersonalInfo,
   saveEmploymentInfo,
@@ -215,6 +232,10 @@ const api = {
   saveBusinessInfo,
   saveBusinessAssetInfo,
   saveBusinessIncomeInfoFormB,
+  saveBusinessExpenseInfoFormB,
+  saveCalculationInfoFormB,
+  saveOtherInfoFormB,
+  saveSignaturesAndAttachmentsFormB,
 };
 
 export default api;

@@ -42,7 +42,7 @@ export const FORM_433A_SECTIONS: Form433aSection[] = [
 ];
 
 export const FORM_433B_SECTIONS: Form433bSection[] = [
-  "businessInformation",
+  "businessInfo",
   "businessAssetInfo",
   "businessIncomeInfo",
   "businessExpenseInfo",

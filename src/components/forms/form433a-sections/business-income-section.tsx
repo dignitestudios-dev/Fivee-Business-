@@ -114,8 +114,8 @@ export function BusinessIncomeSection({
     useWatch({ control, name: "grossWagesSalaries" }) || 0;
   const rent = useWatch({ control, name: "rent" }) || 0;
   const supplies = useWatch({ control, name: "supplies" }) || 0;
-  const utilitiesTelephones =
-    useWatch({ control, name: "utilitiesTelephones" }) || 0;
+  const utilities =
+    useWatch({ control, name: "utilities" }) || 0;
   const vehicleCosts = useWatch({ control, name: "vehicleCosts" }) || 0;
   const businessInsurance =
     useWatch({ control, name: "businessInsurance" }) || 0;
@@ -132,7 +132,7 @@ export function BusinessIncomeSection({
       grossWagesSalaries +
       rent +
       supplies +
-      utilitiesTelephones +
+      utilities +
       vehicleCosts +
       businessInsurance +
       currentBusinessTaxes +
@@ -144,7 +144,7 @@ export function BusinessIncomeSection({
       grossWagesSalaries,
       rent,
       supplies,
-      utilitiesTelephones,
+      utilities,
       vehicleCosts,
       businessInsurance,
       currentBusinessTaxes,
@@ -394,12 +394,12 @@ export function BusinessIncomeSection({
               </div>
               <FormInput
                 label="Utilities/Telephones ($) *"
-                id="utilitiesTelephones"
+                id="utilities"
                 type="number"
                 min="0"
                 required
-                {...register("utilitiesTelephones", { valueAsNumber: true })}
-                error={errors.utilitiesTelephones?.message}
+                {...register("utilities", { valueAsNumber: true })}
+                error={errors.utilities?.message}
               />
             </div>
 

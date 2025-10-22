@@ -39,7 +39,7 @@ export function BusinessIncomeSection({
     handleGetBusinessIncomeInfo,
   } = useBusinessIncomeInfo();
 
-  const methods = useForm<BusinessIncomeFormSchema>({
+  const methods = useForm<BusinessIncomeFormBSchema>({
     resolver: zodResolver(businessIncomeSchemaFormB),
     defaultValues: businessIncomeFormBInitialValues,
     mode: "onSubmit",
@@ -53,13 +53,18 @@ export function BusinessIncomeSection({
     formState: { errors },
   } = methods;
 
-  const onSubmit = async (data: BusinessIncomeFormSchema) => {
+  const onSubmit = async (data: BusinessIncomeFormBSchema) => {
     try {
       await handleSaveBusinessIncomeInfo(data, caseId);
       onNext();
     } catch (error: any) {
-      console.error("Error saving business income info:", error);
-      toast.error(error.message || "Failed to save business income info");
+      console.log("Error saving business income info:", error);
+      console.log("Error save: ", error)
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Failed to save business income info"
+      );
     }
   };
 

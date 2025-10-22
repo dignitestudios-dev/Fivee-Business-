@@ -10,6 +10,10 @@ import { storage } from "@/utils/helper";
 import { useSearchParams } from "next/navigation";
 import { BusinessAssetsSection } from "./form433b-sections/business-asset-section";
 import { BusinessIncomeSection } from "./form433b-sections/business-income-section";
+import { BusinessExpenseSection } from "./form433b-sections/business-expense-section";
+import { CalculationSection } from "./form433b-sections/calculation-section";
+import { OtherInfoSection } from "./form433b-sections/other-info-section";
+import { SignatureSection } from "./form433b-sections/signature-section";
 
 const steps = [
   {
@@ -150,6 +154,14 @@ export default function Form433BOIC() {
         return <BusinessAssetsSection {...commonProps} />;
       case 3:
         return <BusinessIncomeSection {...commonProps} />;
+      case 4:
+        return <BusinessExpenseSection {...commonProps} />;
+      case 5:
+        return <CalculationSection {...commonProps} />;
+      case 6:
+        return <OtherInfoSection {...commonProps} />;
+      case 7:
+        return <SignatureSection {...commonProps} />;
       default:
         return <BusinessInfoSection {...commonProps} />;
     }

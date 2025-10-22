@@ -1,32 +1,31 @@
 import { useState } from "react";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
-import { saveBusinessIncomeInfo } from "@/lib/features/form433bSlice";
+import { saveSignatureInfo } from "@/lib/features/form433bSlice";
 import toast from "react-hot-toast";
 
-const useBusinessIncomeInfo = () => {
+const useSignaturesAndAttachments = () => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [loadingFormData, setLoadingFormData] = useState(false);
 
-  const handleSaveBusinessIncomeInfo = async (
-    info: any,
-    caseId: string | null
-  ) => {
+  const handleSaveSignatureInfo = async (info: any, caseId: string | null) => {
     if (!caseId) return;
     setLoading(true);
 
     try {
-      await api.saveBusinessIncomeInfo(info, caseId);
-      dispatch(saveBusinessIncomeInfo(info));
+      await api.saveSignaturesAndAttachmentsFormB(info, caseId);
+      dispatch(saveSignatureInfo(info));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to save business income info");
+      toast.error(
+        error?.message || "Failed to save signatures and attachments"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGetBusinessIncomeInfo = async (
+  const handleGetSignatureInfo = async (
     caseId: string | null,
     section: Form433bSection
   ) => {
@@ -35,9 +34,9 @@ const useBusinessIncomeInfo = () => {
     try {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveBusinessIncomeInfo(response.data || {}));
+      dispatch(saveSignatureInfo(response.data || {}));
     } catch (error: any) {
-      console.error("Error fetching business income info:", error);
+      console.error("Error fetching signatures info:", error);
     } finally {
       setLoadingFormData(false);
     }
@@ -46,9 +45,9 @@ const useBusinessIncomeInfo = () => {
   return {
     loading,
     loadingFormData,
-    handleSaveBusinessIncomeInfo,
-    handleGetBusinessIncomeInfo,
+    handleSaveSignatureInfo,
+    handleGetSignatureInfo,
   };
 };
 
-export default useBusinessIncomeInfo;
+export default useSignaturesAndAttachments;

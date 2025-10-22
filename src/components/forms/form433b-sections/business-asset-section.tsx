@@ -221,7 +221,6 @@ export function BusinessAssetsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business asset info:", error);
-      toast.error(error.message || "Failed to save business asset info");
     }
   };
 
@@ -1175,7 +1174,7 @@ export function BusinessAssetsSection({
             <CardTitle>Asset Subtotals</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div>(1) Cash and Investments: ${assets.box1.toLocaleString()}</div>
+            <div>(1) Bank Accounts: ${assets.box1.toLocaleString()}</div>
             <div>
               (2) Investment Accounts and Digital Assets: $
               {assets.box2.toLocaleString()}
