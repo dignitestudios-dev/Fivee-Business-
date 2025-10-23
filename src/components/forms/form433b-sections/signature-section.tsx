@@ -124,7 +124,6 @@ export function SignatureSection({
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
     try {
-      console.log("signature data:", data);
       await handleSaveSignatureInfo(data, caseId);
     } catch (error: any) {
       console.error("Error saving signature info:", error);
@@ -147,9 +146,12 @@ export function SignatureSection({
   }, [signatureInfo, reset]);
 
   useEffect(() => {
-    if (signatureInfo?.taxpayerSignature?.signature && signatures?.length > 0) {
+    if (
+      signatureInfo?.taxpayerSignature?.signatureId &&
+      signatures?.length > 0
+    ) {
       const sig = signatures?.find(
-        (s) => s._id === signatureInfo.taxpayerSignature.signature
+        (s) => s._id === signatureInfo.taxpayerSignature.signatureId
       );
       if (sig) {
         setRepresentativeSignaturePreview(sig.url);
@@ -162,18 +164,18 @@ export function SignatureSection({
     url: string
   ) => {
     setRepresentativeSignaturePreview(url);
-    setValue("taxpayerSignature.signature", id, {
+    setValue("taxpayerSignature.signatureId", id, {
       shouldValidate: true,
     });
-    await trigger("taxpayerSignature.signature");
+    await trigger("taxpayerSignature.signatureId");
   };
 
   const removeRepresentativeSignature = async () => {
     setRepresentativeSignaturePreview(null);
-    setValue("taxpayerSignature.signature", "", {
+    setValue("taxpayerSignature.signatureId", "", {
       shouldValidate: true,
     });
-    await trigger("taxpayerSignature.signature");
+    await trigger("taxpayerSignature.signatureId");
   };
 
   const handleReloadSignatures = () => {
@@ -230,7 +232,7 @@ export function SignatureSection({
                   {/* Hidden input to register the field with react-hook-form */}
                   <input
                     type="hidden"
-                    {...register("taxpayerSignature.signature")}
+                    {...register("taxpayerSignature.signatureId")}
                   />
                   <div className="space-y-3 w-full">
                     {!representativeSignaturePreview ? (
@@ -325,9 +327,9 @@ export function SignatureSection({
                         </div>
                       </div>
                     )}
-                    {errors.taxpayerSignature?.signature && (
+                    {errors.taxpayerSignature?.signatureId && (
                       <p className="text-red-600 text-sm">
-                        {errors.taxpayerSignature.signature.message}
+                        {errors.taxpayerSignature.signatureId.message}
                       </p>
                     )}
                   </div>

@@ -1,9 +1,10 @@
 "use client";
 import DeletePref from "@/components/icons/DeletePref";
 import Popup from "@/components/ui/Popup";
+import usePayment from "@/hooks/payments/usePayment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiFillEdit } from "react-icons/ai";
 import { FaCcMastercard } from "react-icons/fa";
 import { GoPlus } from "react-icons/go";
@@ -13,6 +14,7 @@ import { SiVisa } from "react-icons/si";
 
 const ManagePaymentMethods = () => {
   const router = useRouter();
+  const { handleGetPaymentMethods } = usePayment();
   const [deletePaymentMethod, setDeletePaymentMethod] = useState<string | null>(
     null
   );
@@ -67,6 +69,10 @@ const ManagePaymentMethods = () => {
     setDeletePaymentMethod(null);
     setConfirmDeletePaymentMethod(true);
   };
+
+  useEffect(() => {
+    handleGetPaymentMethods();
+  }, []);
 
   return (
     <>

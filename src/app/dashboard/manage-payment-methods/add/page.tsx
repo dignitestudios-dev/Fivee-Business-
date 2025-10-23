@@ -12,9 +12,6 @@ const AddPaymentMethod = () => {
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
   );
 
-  const handlePaymentError = () => {};
-  const handlePaymentSuccess = () => {};
-
   return (
     <>
       <div className="border-b border-[#E3E3E3] flex items-center gap-5 h-14">

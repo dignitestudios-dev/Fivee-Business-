@@ -158,3 +158,11 @@ export const getBase64FromUrl = async (
     return null;
   }
 };
+
+export const getError = (error: any) => {
+  const errorMessage = error?.response?.data?.data?.message
+    ? error?.response?.data?.data?.message
+    : error.message;
+
+  return errorMessage || "Something went wrong, Please try again!";
+};

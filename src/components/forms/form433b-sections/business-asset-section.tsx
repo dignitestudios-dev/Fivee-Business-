@@ -64,7 +64,6 @@ export function BusinessAssetsSection({
     formState: { errors },
     setValue,
     control,
-    getValues,
   } = methods;
 
   // Field arrays
@@ -144,10 +143,11 @@ export function BusinessAssetsSection({
   const hasNotes = watch("hasNotesReceivable");
   const hasAccounts = watch("hasAccountsReceivable");
 
-  // Real-time calculations
-  const calculateAssets = () => {
-    const data = getValues();
+  // Watch entire form for real-time updates
+  const formData = useWatch({ control });
 
+  // Real-time calculations
+  const calculateAssets = (data: BusinessAssetsFormSchema) => {
     const banksSum = data.bankAccounts.reduce(
       (sum: number, acc: any) => sum + (acc.balance || 0),
       0
@@ -203,20 +203,13 @@ export function BusinessAssetsSection({
     };
   };
 
-  const assets = calculateAssets();
+  const assets = calculateAssets(formData as BusinessAssetsFormSchema);
 
   const onSubmit = async (data: BusinessAssetsFormSchema) => {
     try {
-      // Clear arrays if no
-      if (!data.hasNotesReceivable) data.notesReceivable = [];
-      if (!data.hasAccountsReceivable) data.accountsReceivable = [];
-
-      // Remove calculated, only send payload fields
-      const payload = { ...data };
-      delete payload.hasNotesReceivable;
-      delete payload.hasAccountsReceivable;
-
-      await handleSaveBusinessAssetsInfo(payload, caseId);
+      const calculatedAssets = calculateAssets(data);
+      const info = { ...data, BoxA: calculatedAssets.boxA || 0 };
+      await handleSaveBusinessAssetsInfo(info, caseId);
 
       onNext();
     } catch (error: any) {

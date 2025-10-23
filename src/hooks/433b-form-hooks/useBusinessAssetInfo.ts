@@ -17,7 +17,19 @@ const useBusinessAssetInfo = () => {
     setLoading(true);
 
     try {
-      await api.saveBusinessAssetInfo(info, caseId);
+      const data = { ...info };
+
+      // Clear arrays if no
+      if (!data.hasNotesReceivable) data.notesReceivable = [];
+      if (!data.hasAccountsReceivable) data.accountsReceivable = [];
+
+      // Remove calculated, only send payload fields
+      const payload = { ...data };
+      delete payload.hasNotesReceivable;
+      delete payload.hasAccountsReceivable;
+      delete payload.BoxA;
+
+      await api.saveBusinessAssetInfo(payload, caseId);
       dispatch(saveBusinessAssetInfo(info));
     } catch (error: any) {
       toast.error(error?.message || "Failed to save business asset info");
@@ -35,7 +47,7 @@ const useBusinessAssetInfo = () => {
     try {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
-      console.log("response.data business info: ", response.data)
+      console.log("response.data business info: ", response.data);
       dispatch(saveBusinessAssetInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching business asset info:", error);

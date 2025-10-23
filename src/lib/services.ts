@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const API = axios.create({
-  baseURL: "http://localhost:3001/",
+  baseURL: "http://18.117.169.39/",
   timeout: 10000, // Set a timeout (optional)
   headers: {
     "Content-Type": "application/json",
@@ -201,15 +201,26 @@ const saveBusinessExpenseInfoFormB = (info: any, caseId: string) =>
   );
 
 const saveCalculationInfoFormB = (info: any, caseId: string) =>
-  apiHandler(() => API.post(`/form433boic/${caseId}/section5`, info));
+  apiHandler(() =>
+    API.post(`/form433boic/${caseId}/calculate-minimum-offer-amount`, info)
+  );
 
 const saveOtherInfoFormB = (info: any, caseId: string) =>
   apiHandler(() => API.post(`/form433boic/${caseId}/other-information`, info));
 
 const saveSignaturesAndAttachmentsFormB = (info: any, caseId: string) =>
-  apiHandler(() =>
-    API.post(`/form433boic/${caseId}/signatures`, info)
-  );
+  apiHandler(() => API.post(`/form433boic/${caseId}/signatures`, info));
+
+// Payment Method API's
+
+const addPaymentMethod = (payload: AddCardPayload) =>
+  apiHandler(() => API.post(`/payment/add-card`, payload));
+
+const deletePaymentMethod = (payload: any) =>
+  apiHandler(() => API.post(`/payment/add-card`, payload));
+
+const getAllPaymentMethods = () =>
+  apiHandler(() => API.get(`/payment/list-cards`));
 
 const api = {
   savePersonalInfo,
@@ -236,6 +247,9 @@ const api = {
   saveCalculationInfoFormB,
   saveOtherInfoFormB,
   saveSignaturesAndAttachmentsFormB,
+  addPaymentMethod,
+  deletePaymentMethod,
+  getAllPaymentMethods,
 };
 
 export default api;

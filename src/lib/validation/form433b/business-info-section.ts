@@ -1,7 +1,6 @@
 import z from "zod";
 
 export const businessInfoInitialValues: BusinessInfoFormSchema = {
-  userId: "",
   businessName: "",
   employerIdentificationNumber: "",
   businessPhysicalAddress: "",
@@ -54,14 +53,15 @@ const partnerSchema = z.object({
     .regex(phoneLooseRegex, "Invalid phone number"),
   secondaryPhone: z
     .string()
-    .regex(phoneLooseRegex, "Invalid phone number")
     .optional()
-    .nullable(),
+    .nullable()
+    .refine((val) => !val || phoneLooseRegex.test(val), {
+      message: "Invalid phone number",
+    }),
 });
 
 export const businessInfoSchema = z
   .object({
-    userId: z.string().optional().nullable(),
     businessName: z.string().min(1, "Business name is required"),
     employerIdentificationNumber: z
       .string()
@@ -77,16 +77,20 @@ export const businessInfoSchema = z
       .regex(phoneLooseRegex, "Invalid phone number"),
     secondaryPhone: z
       .string()
-      .regex(phoneLooseRegex, "Invalid phone number")
       .optional()
-      .nullable(),
+      .nullable()
+      .refine((val) => !val || phoneLooseRegex.test(val), {
+        message: "Invalid phone number",
+      }),
     businessMailingAddress: z.string().optional().nullable(),
     businessWebsiteAddress: z.string().optional().nullable(),
     faxNumber: z
       .string()
-      .regex(phoneLooseRegex, "Invalid fax number")
       .optional()
-      .nullable(),
+      .nullable()
+      .refine((val) => !val || phoneLooseRegex.test(val), {
+        message: "Invalid fax number",
+      }),
     federalContractor: z.boolean(),
     totalNumberOfEmployees: z.preprocess(
       (v) => Number(v),

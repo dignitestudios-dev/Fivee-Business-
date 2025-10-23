@@ -98,6 +98,10 @@ const form433bSlice = createSlice({
     },
 
     saveSignatureInfo: (state, action: PayloadAction<any | null>) => {
+      action.payload.taxpayerSignature.date = action.payload?.taxpayerSignature
+        ?.date
+        ? formatDateForInput(action.payload.taxpayerSignature.date)
+        : action.payload.taxpayerSignature.date;
       state.signatureInfo = action.payload;
     },
   },

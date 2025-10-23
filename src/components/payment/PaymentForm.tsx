@@ -1,6 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
-import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import React, { useState } from "react";
 import {
   CardNumberElement,
   CardExpiryElement,
@@ -9,8 +7,8 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import FButton from "../ui/FButton";
-import { MdLock } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import usePayment from "@/hooks/payments/usePayment";
 // import { api } from "@/lib/services";
 // import { OrderData } from "@/lib/types";
 // import { utils } from "@/lib/utils";
@@ -25,7 +23,6 @@ const PaymentForm = ({
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [cardComplete, setCardComplete] = useState({
     cardNumber: false,
@@ -34,7 +31,7 @@ const PaymentForm = ({
     zipCode: "",
     cardHolderName: "",
   });
-  // const { cart } = useAppSelector((state) => state.cart);
+  const { adding, handleAddPaymentMethod } = usePayment();
 
   const elementOptions = {
     style: {
@@ -78,70 +75,12 @@ const PaymentForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // if (!stripe || !elements) {
-    //   onPaymentError("Stripe not loaded");
-    //   return;
-    // }
-
-    // Check if all card fields are complete
-    if (
-      !cardComplete.cardNumber ||
-      !cardComplete.cardExpiry ||
-      !cardComplete.cardCvc ||
-      !cardComplete.zipCode ||
-      !cardComplete.cardHolderName
-    ) {
-      setError("Please fill all fields");
-      onPaymentError("Please complete all card details");
-      return;
-    }
-
-    setLoading(true);
-    // const cardNumberElement = elements.getElement(CardNumberElement);
-    // if (!cardNumberElement) {
-    //   onPaymentError("Card number element not found");
-    //   setLoading(false);
-    //   return;
-    // }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    try {
-      // // Create payment method
-      // const { error: pmError, paymentMethod } =
-      //   await stripe.createPaymentMethod({
-      //     type: "card",
-      //     card: cardNumberElement,
-      //   });
-      // if (pmError || !paymentMethod) {
-      //   onPaymentError(pmError?.message || "Payment method creation failed");
-      //   setLoading(false);
-      //   return;
-      // }
-      // // If saving payment method, call backend API
-      // const response = await fetch("/api/payment-methods", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     paymentMethodId: paymentMethod.id,
-      //   }),
-      // });
-      // const data = await response.json();
-      // if (!response.ok) {
-      //   throw new Error(data.error || "Failed to save payment method");
-      // }
-      // toast.success("Payment method saved successfully!");
-      // onPaymentSuccess(data);
-      router.push("/dashboard/manage-payment-methods");
-    } catch (err: any) {
-      const errorMessage = err?.message || "Payment method processing failed";
-      onPaymentError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    handleAddPaymentMethod(
+      stripe,
+      elements,
+      cardComplete,
+      CardNumberElement
+    );
   };
 
   return (
@@ -209,7 +148,7 @@ const PaymentForm = ({
           type="submit"
           disabled={
             !stripe ||
-            loading ||
+            adding ||
             !cardComplete.cardNumber ||
             !cardComplete.cardExpiry ||
             !cardComplete.cardCvc ||
@@ -218,7 +157,7 @@ const PaymentForm = ({
           }
           className="flex justify-center items-center py-3 text-white bg-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? (
+          {adding ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               Processing Payment...

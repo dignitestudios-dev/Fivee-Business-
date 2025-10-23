@@ -201,4 +201,10 @@ declare global {
     otherInfo: OtherInfoFormBSchema | null;
     signatureInfo: SignatureInfoFormB | null;
   }
+
+  // API Payload Types
+
+  interface AddCardPayload {
+    paymentMethodId: string;
+  }
 }
