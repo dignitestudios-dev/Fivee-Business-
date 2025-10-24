@@ -7,71 +7,75 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { AiFillEdit } from "react-icons/ai";
 import { FaCcMastercard } from "react-icons/fa";
+import { CiCreditCard1 } from "react-icons/ci";
 import { GoPlus } from "react-icons/go";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { SiVisa } from "react-icons/si";
+import { Loader2 } from "lucide-react";
+import FormLoader from "@/components/global/FormLoader";
+import { useAppSelector } from "@/lib/hooks";
+import toast from "react-hot-toast";
 
 const ManagePaymentMethods = () => {
-  const router = useRouter();
-  const { handleGetPaymentMethods } = usePayment();
+  const {
+    handleGetPaymentMethods,
+    getting,
+    handleDeletePaymentMethod,
+    deleting,
+  } = usePayment();
+  const cards = useAppSelector((state) => state.cards.list);
+
+  const getCardIcon = (brand: CardBrand) => {
+    switch (brand) {
+      case "visa":
+        return <SiVisa className="text-[#1A1F71]" />;
+      case "mastercard":
+        return <FaCcMastercard className="text-[#EB001B]" />;
+      case "amex":
+        return (
+          <span className="font-semibold text-blue-700 text-[10px]">Amex</span>
+        );
+      case "discover":
+        return (
+          <span className="font-semibold text-orange-600 text-[9px]">
+            Discover
+          </span>
+        );
+      case "jcb":
+        return (
+          <span className="font-semibold text-green-600 text-[12px]">JCB</span>
+        );
+      case "unionpay":
+        return (
+          <span className="font-semibold text-red-600 text-[9px]">
+            UnionPay
+          </span>
+        );
+      default:
+        return <CiCreditCard1 className="text-green-600" />;
+    }
+  };
+
   const [deletePaymentMethod, setDeletePaymentMethod] = useState<string | null>(
     null
   );
   const [confirmDeletePaymentMethod, setConfirmDeletePaymentMethod] =
     useState<boolean>(false);
 
-  const cards = [
-    {
-      brandIcon: <SiVisa />,
-      cardHolderName: "Siweh Harris",
-      last4: "9864",
-    },
-    {
-      brandIcon: <FaCcMastercard />,
-      cardHolderName: "Siweh Harris",
-      last4: "4052",
-    },
-    {
-      brandIcon: <SiVisa />,
-      cardHolderName: "Siweh Harris",
-      last4: "9864",
-    },
-    {
-      brandIcon: <FaCcMastercard />,
-      cardHolderName: "Siweh Harris",
-      last4: "4052",
-    },
-    {
-      brandIcon: <SiVisa />,
-      cardHolderName: "Siweh Harris",
-      last4: "9864",
-    },
-    {
-      brandIcon: <FaCcMastercard />,
-      cardHolderName: "Siweh Harris",
-      last4: "4052",
-    },
-    {
-      brandIcon: <SiVisa />,
-      cardHolderName: "Siweh Harris",
-      last4: "9864",
-    },
-    {
-      brandIcon: <FaCcMastercard />,
-      cardHolderName: "Siweh Harris",
-      last4: "4052",
-    },
-  ];
-
-  const handleDeletePaymentMethod = () => {
-    console.log("Deleting...", deletePaymentMethod);
+  const onDeletePaymentMethod = async () => {
+    if (deletePaymentMethod) {
+      await handleDeletePaymentMethod(deletePaymentMethod);
+      handleGetPaymentMethods();
+    } else {
+      toast.error("Payment method ID is missing");
+    }
     setDeletePaymentMethod(null);
     setConfirmDeletePaymentMethod(true);
   };
 
   useEffect(() => {
-    handleGetPaymentMethods();
+    if (!cards || !cards?.length) handleGetPaymentMethods();
   }, []);
 
   return (
@@ -96,30 +100,42 @@ const ManagePaymentMethods = () => {
         </Link>
       </div>
       <div className="px-10 pb-18 h-full overflow-y-auto">
-        {cards.map((card, index) => (
-          <div
-            key={index}
-            className={`${
-              index !== 0 && "border-t border-[#E3E3E3]"
-            } py-4 flex items-center gap-2`}
-          >
-            <div className="rounded-lg bg-[var(--primary)]/10 h-[50px] w-[50px] flex justify-center items-center text-[200%]">
-              {card.brandIcon}
-            </div>
-            <div className="flex-1">
-              <p className="text-base font-semibold">Siweh Harris</p>
-              <p className="font-medium">Card ending with {card.last4}</p>
-            </div>
+        {getting ? (
+          <FormLoader />
+        ) : !cards?.length ? (
+          <p className="text-gray-400 text-center">No Card Added</p>
+        ) : (
+          cards?.map((card, index) => (
+            <div
+              key={index}
+              className={`${
+                index !== 0 && "border-t border-[#E3E3E3]"
+              } py-4 flex items-center gap-2`}
+            >
+              <div className="rounded-lg bg-[var(--primary)]/10 h-[50px] w-[50px] flex justify-center items-center text-[200%]">
+                {getCardIcon(card?.brand)}
+              </div>
 
-            <RiDeleteBin6Fill
-              size={20}
-              className="text-red-600 cursor-pointer"
-              onClick={() => {
-                setDeletePaymentMethod("123");
-              }}
-            />
-          </div>
-        ))}
+              <div className="flex-1">
+                <div className="flex gap-2 items-center">
+                  <p className="text-base font-semibold">
+                    {card?.name || "_ _ _"}
+                  </p>
+                  {card?.isDefault && (
+                    <div className="w-fit px-3 py-[2px] text-[var(--primary)] bg-[var(--primary)]/20 rounded-full">default</div>
+                  )}
+                </div>
+                <p className="font-medium">Card ending with {card?.last4}</p>
+              </div>
+
+              <RiDeleteBin6Fill
+                size={20}
+                className="text-red-600 cursor-pointer"
+                onClick={() => setDeletePaymentMethod(card?.id || null)}
+              />
+            </div>
+          ))
+        )}
       </div>
 
       {/* Deleting Payment Method */}
@@ -132,7 +148,7 @@ const ManagePaymentMethods = () => {
         confirmText="Delete"
         cancelText="Cancel"
         confirmVariant="danger"
-        onConfirm={handleDeletePaymentMethod}
+        onConfirm={onDeletePaymentMethod}
         onCancel={() => setDeletePaymentMethod(null)}
       />
 

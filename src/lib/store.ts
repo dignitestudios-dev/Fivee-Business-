@@ -3,6 +3,8 @@ import userSlice from "./features/userSlice";
 import form433aSlice from "./features/form433aSlice";
 import form433bSlice from "./features/form433bSlice";
 import signaturesSlice from "./features/signaturesSlice";
+import cardsSlice from "./features/cardsSlice";
+import formsSlice from "./features/formsSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -11,6 +13,8 @@ export const makeStore = () => {
       form433a: form433aSlice,
       form433b: form433bSlice,
       signatures: signaturesSlice,
+      cards: cardsSlice,
+      forms: formsSlice
     },
   });
 };

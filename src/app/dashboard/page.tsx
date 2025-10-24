@@ -10,14 +10,31 @@ import DropdownPopup from "@/components/ui/DropdownPopup";
 import { formatDate, formatDateWithName } from "@/utils/helper";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import useInitializeForm433A from "@/hooks/433a-form-hooks/useInitializeForm";
+import useInitializeForm433B from "@/hooks/433b-form-hooks/useInitializeForm";
+import { setCaseId } from "@/utils/helper";
 import { BiChevronRight } from "react-icons/bi";
 import { GoArrowRight } from "react-icons/go";
+import Popup from "@/components/ui/Popup";
+import EditPref from "@/components/icons/EditPref";
+import FInput from "@/components/ui/FInput";
 
 const Dashboard = () => {
   const router = useRouter();
-  const [showViewSavedPref, setShowViewSavedPref] = useState<boolean>(false);
+  const [openForm, setOpenForm] = useState<"433a-oic" | "433b-oic" | null>(
+    null
+  );
+  const [formTitle, setFormTitle] = useState<string>("");
+  const [formTitleError, setFormTitleError] = useState<string>("");
+  const [showViewSavedPref, setShowViewSavedPref] = useState<
+    "individual" | "business" | null
+  >(null);
   const [showManageSavedPref, setShowManageSavedPref] =
     useState<boolean>(false);
+
+  // Initialize hooks for starting forms (must be called at top-level)
+  const init433a = useInitializeForm433A();
+  const init433b = useInitializeForm433B();
 
   const savedPref = [
     {
@@ -38,16 +55,13 @@ const Dashboard = () => {
     console.log(type);
 
     setShowManageSavedPref(false);
-    setShowViewSavedPref(true);
+    setShowViewSavedPref(type);
   };
 
   const handleFileTax = (type: "individual" | "business") => {
     console.log(type);
-    router.push(
-      type === "individual"
-        ? "/dashboard/individual-tax-form"
-        : "/dashboard/business-tax-form"
-    );
+
+    type === "individual" ? setOpenForm("433a-oic") : setOpenForm("433b-oic");
   };
 
   const IndividualTaxOptions = [
@@ -75,6 +89,37 @@ const Dashboard = () => {
       onClick: () => handleSelectFromSavedPrefs("business"),
     },
   ];
+
+  const handleIntializeTaxForm = async () => {
+    if (!formTitle || !formTitle.trim()) {
+      setFormTitleError("Form title is required");
+      return;
+    }
+    try {
+      if (openForm === "433a-oic") {
+        const res = await init433a.start(formTitle);
+        const caseId = res.caseId;
+        if (caseId) {
+          setCaseId(caseId);
+          setOpenForm(null);
+          setFormTitle("");
+          router.push(`/dashboard/433a-oic?caseId=${caseId}`);
+        }
+      } else if (openForm === "433b-oic") {
+        const res = await init433b.start(formTitle);
+        const caseId = res.caseId;
+        if (caseId) {
+          setCaseId(caseId);
+          setOpenForm(null);
+          setFormTitle("");
+          router.push(`/dashboard/433b-oic?caseId=${caseId}`);
+        }
+      }
+    } catch (error) {
+      // errors are shown by hooks via toast; optionally set form error
+      setFormTitleError("");
+    }
+  };
 
   return (
     <>
@@ -130,7 +175,7 @@ const Dashboard = () => {
                 {savedPref.map((pref, index) => (
                   <button
                     onClick={() => {
-                      setShowViewSavedPref(false);
+                      setShowViewSavedPref("individual");
                       setShowManageSavedPref(true);
                     }}
                     disabled={showManageSavedPref}
@@ -174,14 +219,49 @@ const Dashboard = () => {
       </div>
 
       <ViewSavedPreferencesSlider
-        isOpen={showViewSavedPref}
-        onClose={() => setShowViewSavedPref(false)}
+        formType={showViewSavedPref}
+        isOpen={showViewSavedPref ? true : false}
+        onClose={() => setShowViewSavedPref(null)}
       />
 
       <ManageSavedPreferencesSlider
         isOpen={showManageSavedPref}
         onClose={() => setShowManageSavedPref(false)}
       />
+
+      {/* Start form: Title input popup */}
+      <Popup
+        open={openForm ? true : false}
+        icon={<EditPref />}
+        title={`Form ${openForm?.toUpperCase()}`}
+        textOptions={{ title: "left" }}
+        type="confirm"
+        confirmText="Start"
+        cancelText="Cancel"
+        onConfirm={handleIntializeTaxForm}
+        onCancel={() => {
+          setOpenForm(null);
+          setFormTitleError("");
+          setFormTitle("");
+        }}
+      >
+        <div className="w-full">
+          <FInput
+            autoFocus
+            value={formTitle}
+            placeholder="Enter title"
+            className={formTitleError && "border-red-500"}
+            onChange={(e) => {
+              setFormTitleError("");
+              setFormTitle(e.target.value);
+            }}
+          />
+
+          {formTitleError && (
+            <p className="text-red-500 mt-1">{formTitleError}</p>
+          )}
+        </div>
+      </Popup>
     </>
   );
 };

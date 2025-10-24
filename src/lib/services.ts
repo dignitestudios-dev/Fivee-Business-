@@ -92,6 +92,9 @@ const login = (payload: LoginPayload) =>
 
 // Form 433A OIC
 
+const getUserForm433ACases = () =>
+  apiHandler(() => API.get("/form433a/my-cases"));
+
 const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
   apiHandler<{ data: any; message: string }>(() =>
     API.get(`/form433a/${caseId}/section?section=${section}`)
@@ -175,6 +178,20 @@ const deleteSignature = (id: string) =>
 
 // Form 433B OIC
 
+const getUserForm433BCases = () =>
+  apiHandler(() => API.get("/form433boic/my-cases"));
+
+// Start Form APIs
+const startForm433a = (payload: { title: string }) =>
+  apiHandler<{ data: { caseId: string }; message: string }>(() =>
+    API.post(`/form433a/start`, payload)
+  );
+
+const startForm433b = (payload: { title: string }) =>
+  apiHandler<{ data: { caseId: string }; message: string }>(() =>
+    API.post(`/form433boic/start`, payload)
+  );
+
 const get433bSectionInfo = (caseId: string, section: Form433bSection) =>
   apiHandler<{ data: any; message: string }>(() =>
     API.get(`/form433boic/${caseId}/section?section=${section}`)
@@ -216,8 +233,8 @@ const saveSignaturesAndAttachmentsFormB = (info: any, caseId: string) =>
 const addPaymentMethod = (payload: AddCardPayload) =>
   apiHandler(() => API.post(`/payment/add-card`, payload));
 
-const deletePaymentMethod = (payload: any) =>
-  apiHandler(() => API.post(`/payment/add-card`, payload));
+const deletePaymentMethod = (paymentMethodId: string) =>
+  apiHandler(() => API.delete(`/payment/delete-card/${paymentMethodId}`));
 
 const getAllPaymentMethods = () =>
   apiHandler(() => API.get(`/payment/list-cards`));
@@ -250,6 +267,10 @@ const api = {
   addPaymentMethod,
   deletePaymentMethod,
   getAllPaymentMethods,
+  getUserForm433ACases,
+  getUserForm433BCases,
+  startForm433a,
+  startForm433b,
 };
 
 export default api;

@@ -1,3 +1,5 @@
+import { emptyCards, setCards } from "@/lib/features/cardsSlice";
+import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { getError } from "@/utils/helper";
 import { useRouter } from "next/navigation";
@@ -6,7 +8,7 @@ import toast from "react-hot-toast";
 
 const usePayment = () => {
   const router = useRouter();
-  const [cards, setCards] = useState([]);
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState({
     adding: false,
     getting: false,
@@ -20,6 +22,8 @@ const usePayment = () => {
     cardComplete: any,
     CardNumberElement: any
   ) => {
+    setLoading((prev) => ({ ...prev, adding: true }));
+
     try {
       if (!stripe || !elements) {
         const msg = "Stripe has not loaded yet. Please try again in a moment.";
@@ -59,26 +63,45 @@ const usePayment = () => {
         throw new Error(msg);
       }
 
-      router.push("/dashboard/manage-payment-methods");
-
       await api.addPaymentMethod({ paymentMethodId: paymentMethod.id });
+
+      dispatch(emptyCards());
+      router.push("/dashboard/manage-payment-methods");
     } catch (error: any) {
       const err = getError(error);
       toast.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, adding: false }));
     }
   };
 
   const handleGetPaymentMethods = async () => {
+    setLoading((prev) => ({ ...prev, getting: true }));
     try {
       const response = await api.getAllPaymentMethods();
-      console.log("Card data: ", response);
+      if (response?.data?.cards && response?.data?.cards?.length)
+        dispatch(setCards(response.data.cards));
     } catch (error: any) {
       const err = getError(error);
       toast.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, getting: false }));
     }
   };
 
-  const handleDeletePaymentMethod = async () => {};
+  const handleDeletePaymentMethod = async (paymentMethodId: string) => {
+    setLoading((prev) => ({ ...prev, deleting: true }));
+    try {
+      await api.deletePaymentMethod(paymentMethodId);
+
+      dispatch(emptyCards());
+    } catch (error) {
+      const err = getError(error);
+      toast.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, deleting: false }));
+    }
+  };
 
   const handleProcessPayment = async () => {};
 

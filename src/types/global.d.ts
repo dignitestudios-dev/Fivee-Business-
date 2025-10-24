@@ -70,9 +70,33 @@ declare global {
     url: string;
   }
 
-  interface LoginPayload {
-    email: string;
-    password: string;
+  type CardBrand =
+    | "amex"
+    | "diners"
+    | "discover"
+    | "eftpos_au"
+    | "jcb"
+    | "mastercard"
+    | "unionpay"
+    | "visa"
+    | "interac"
+    | "unknown";
+
+  interface Card {
+    id: string;
+    brand: CardBrand;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+    isDefault: boolean;
+    name: string | null;
+  }
+
+  interface FormCase {
+    _id: string;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
   }
 
   type Form433aSection =
@@ -203,6 +227,11 @@ declare global {
   }
 
   // API Payload Types
+
+  interface LoginPayload {
+    email: string;
+    password: string;
+  }
 
   interface AddCardPayload {
     paymentMethodId: string;
