@@ -24,7 +24,7 @@ const useUser433bCases = () => {
     } catch (err: any) {
       const msg = err?.message || "Failed to load cases";
       setError(msg);
-      toast.error(msg);
+      console.log(msg);
       return null;
     } finally {
       setLoading(false);

@@ -48,6 +48,15 @@ export function BusinessAssetsSection({
     (state) => state.form433a
   );
   const isSelfEmployed = selfEmployedInfo?.isSelfEmployed ?? false;
+
+  useEffect(() => {
+    console.log("selfEmployedInfo: ", selfEmployedInfo);
+    console.log("isSelfEmployed: ", isSelfEmployed);
+    if (selfEmployedInfo && !isSelfEmployed) {
+      onNext();
+    }
+  }, [selfEmployedInfo]);
+
   const {
     loading,
     loadingFormData,

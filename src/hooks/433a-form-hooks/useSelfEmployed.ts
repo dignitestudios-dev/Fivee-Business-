@@ -61,9 +61,7 @@ const useSelfEmployed = () => {
 
     try {
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(
-        saveSelfEmployedInfo({ ...response.data, isSelfEmployed: true })
-      );
+      dispatch(saveSelfEmployedInfo({ ...response.data }));
     } catch (error: any) {
       console.error("Error fetching self-employed info:", error);
     } finally {

@@ -109,7 +109,8 @@ declare global {
     | "householdIncomeExpenseInfo"
     | "offerCalculationInfo"
     | "otherInfo"
-    | "signaturesAndAttachmentsInfo";
+    | "signaturesAndAttachmentsInfo"
+    | "sectionStatus";
 
   type Form433bSection =
     | "businessInfo"
@@ -118,7 +119,8 @@ declare global {
     | "businessExpenseInfo"
     | "offerCalculationInfo"
     | "otherInfo"
-    | "signaturesAndAttachmentsInfo";
+    | "signaturesAndAttachmentsInfo"
+    | "sectionStatus";
 
   type FormData433A = z.infer<typeof completeFormSchema>;
 
@@ -217,6 +219,7 @@ declare global {
   type SignatureInfoFormB = z.infer<typeof signatureSchemaFormB>;
 
   interface FormData433BState {
+    caseId: string | null;
     businessInformation: BusinessInfoFormSchema | null;
     businessAssetsInfo: BusinessAssetsFormSchema2 | null;
     businessIncomeInfo: BusinessAssetsFormSchemaFormB | null;

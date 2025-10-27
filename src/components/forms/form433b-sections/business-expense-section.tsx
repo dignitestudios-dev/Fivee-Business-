@@ -61,7 +61,12 @@ export function BusinessExpenseSection({
 
   const onSubmit = async (data: BusinessExpenseFormSchema) => {
     try {
-      await handleSaveBusinessExpenseInfo(data, caseId);
+      const payload = {
+        ...data,
+        BoxC: totalExpenses,
+        BoxD: remainingMonthlyIncome,
+      };
+      await handleSaveBusinessExpenseInfo(payload, caseId);
       onNext();
     } catch (error: any) {
       console.error("Error saving business expense info:", error);

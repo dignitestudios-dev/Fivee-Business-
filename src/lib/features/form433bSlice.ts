@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // --- Initial State ---
 const initialState: FormData433BState = {
+  caseId: null,
   businessInformation: null,
   businessAssetsInfo: null,
   businessIncomeInfo: null,
@@ -17,6 +18,19 @@ const form433bSlice = createSlice({
   name: "form433b",
   initialState,
   reducers: {
+    setCaseId: (state, action: PayloadAction<string | null>) => {
+      const newCaseId = action.payload;
+      if (state.caseId !== newCaseId) {
+        state.caseId = newCaseId;
+        state.businessInformation = null;
+        state.businessAssetsInfo = null;
+        state.businessIncomeInfo = null;
+        state.businessExpenseInfo = null;
+        state.calculationInfo = null;
+        state.otherInfo = null;
+        state.signatureInfo = null;
+      }
+    },
     // Save entire business information data
     saveBusinessInformation: (
       state,
@@ -109,6 +123,7 @@ const form433bSlice = createSlice({
 
 // --- Export actions & reducer ---
 export const {
+  setCaseId,
   saveBusinessInformation,
   saveBusinessAssetInfo,
   saveBusinessIncomeInfo,

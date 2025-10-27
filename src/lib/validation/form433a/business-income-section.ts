@@ -13,7 +13,7 @@ export const businessIncomeInitialValues: BusinessIncomeFormSchema = {
   grossWagesSalaries: 0,
   rent: 0,
   supplies: 0,
-  utilities: 0,
+  utilitiesTelephones: 0,
   vehicleCosts: 0,
   businessInsurance: 0,
   currentBusinessTaxes: 0,
@@ -60,7 +60,7 @@ export const businessIncomeSchema = z
     supplies: z.coerce
       .number()
       .min(0, { message: "Business supplies must be 0 or greater" }),
-    utilities: z.coerce
+    utilitiesTelephones: z.coerce
       .number()
       .min(0, { message: "Utilities/telephones must be 0 or greater" }),
     vehicleCosts: z.coerce

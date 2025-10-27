@@ -6,11 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  useFieldArray,
-  FormProvider,
-  useForm,
-} from "react-hook-form";
+import { useFieldArray, FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -26,7 +22,7 @@ import { useAppSelector } from "@/lib/hooks";
 import useSelfEmployed from "@/hooks/433a-form-hooks/useSelfEmployed";
 
 interface SelfEmployedSectionProps {
-  onNext: () => void;
+  onNext: (employmentStatus?: string) => void;
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
@@ -67,7 +63,11 @@ export function SelfEmployedSection({
   const onSubmit = async (data: SelfEmployedFormSchema) => {
     try {
       await handleSaveSelfEmployedInfo(data, caseId);
-      onNext();
+      if (data.isSelfEmployed) {
+        onNext();
+      } else {
+        onNext("self");
+      }
     } catch (error: any) {
       console.error("Error saving self-employed info:", error);
       toast.error(error.message || "Failed to save self-employed info");

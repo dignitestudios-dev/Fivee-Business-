@@ -37,6 +37,15 @@ export function BusinessIncomeSection({
     (state) => state.form433a
   );
   const isSelfEmployed = selfEmployedInfo?.isSelfEmployed ?? false;
+
+  useEffect(() => {
+    console.log("selfEmployedInfo: ", selfEmployedInfo);
+    console.log("isSelfEmployed: ", isSelfEmployed);
+    if (selfEmployedInfo && !isSelfEmployed) {
+      onNext();
+    }
+  }, [selfEmployedInfo]);
+
   const {
     loading,
     loadingFormData,
@@ -114,8 +123,7 @@ export function BusinessIncomeSection({
     useWatch({ control, name: "grossWagesSalaries" }) || 0;
   const rent = useWatch({ control, name: "rent" }) || 0;
   const supplies = useWatch({ control, name: "supplies" }) || 0;
-  const utilities =
-    useWatch({ control, name: "utilities" }) || 0;
+  const utilitiesTelephones = useWatch({ control, name: "utilitiesTelephones" }) || 0;
   const vehicleCosts = useWatch({ control, name: "vehicleCosts" }) || 0;
   const businessInsurance =
     useWatch({ control, name: "businessInsurance" }) || 0;
@@ -132,7 +140,7 @@ export function BusinessIncomeSection({
       grossWagesSalaries +
       rent +
       supplies +
-      utilities +
+      utilitiesTelephones +
       vehicleCosts +
       businessInsurance +
       currentBusinessTaxes +
@@ -144,7 +152,7 @@ export function BusinessIncomeSection({
       grossWagesSalaries,
       rent,
       supplies,
-      utilities,
+      utilitiesTelephones,
       vehicleCosts,
       businessInsurance,
       currentBusinessTaxes,
@@ -394,12 +402,12 @@ export function BusinessIncomeSection({
               </div>
               <FormInput
                 label="Utilities/Telephones ($) *"
-                id="utilities"
+                id="utilitiesTelephones"
                 type="number"
                 min="0"
                 required
-                {...register("utilities", { valueAsNumber: true })}
-                error={errors.utilities?.message}
+                {...register("utilitiesTelephones", { valueAsNumber: true })}
+                error={errors.utilitiesTelephones?.message}
               />
             </div>
 

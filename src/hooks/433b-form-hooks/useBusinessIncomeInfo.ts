@@ -17,7 +17,11 @@ const useBusinessIncomeInfo = () => {
     setLoading(true);
 
     try {
-      await api.saveBusinessIncomeInfoFormB(info, caseId);
+      const data = { ...info };
+
+      delete data.BoxB;
+
+      await api.saveBusinessIncomeInfoFormB(data, caseId);
       dispatch(saveBusinessIncomeInfo(info));
     } catch (error: any) {
       toast.error(error?.message || "Failed to save business income info");

@@ -239,6 +239,14 @@ const deletePaymentMethod = (paymentMethodId: string) =>
 const getAllPaymentMethods = () =>
   apiHandler(() => API.get(`/payment/list-cards`));
 
+// Create a payment intent for a pre-saved payment method
+const createPaymentIntent = (payload: {
+  paymentMethodId: string;
+  amount: number;
+  formId: string;
+  formModel: string;
+}) => apiHandler(() => API.post(`/payment/create-intent`, payload));
+
 const api = {
   savePersonalInfo,
   saveEmploymentInfo,
@@ -267,6 +275,7 @@ const api = {
   addPaymentMethod,
   deletePaymentMethod,
   getAllPaymentMethods,
+  createPaymentIntent,
   getUserForm433ACases,
   getUserForm433BCases,
   startForm433a,

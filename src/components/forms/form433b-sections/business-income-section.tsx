@@ -55,11 +55,12 @@ export function BusinessIncomeSection({
 
   const onSubmit = async (data: BusinessIncomeFormBSchema) => {
     try {
-      await handleSaveBusinessIncomeInfo(data, caseId);
+      const payload = { ...data, BoxB: totalIncome };
+      await handleSaveBusinessIncomeInfo(payload, caseId);
       onNext();
     } catch (error: any) {
       console.log("Error saving business income info:", error);
-      console.log("Error save: ", error)
+      console.log("Error save: ", error);
       toast.error(
         error?.response?.data?.message ||
           error.message ||

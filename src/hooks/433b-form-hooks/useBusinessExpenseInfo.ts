@@ -17,7 +17,12 @@ const useBusinessExpenseInfo = () => {
     setLoading(true);
 
     try {
-      await api.saveBusinessExpenseInfoFormB(info, caseId);
+      const data = { ...info };
+
+      delete data.BoxC;
+      delete data.BoxD;
+
+      await api.saveBusinessExpenseInfoFormB(data, caseId);
       dispatch(saveBusinessExpenseInfo(info));
     } catch (error: any) {
       toast.error(error?.message || "Failed to save business expense info");

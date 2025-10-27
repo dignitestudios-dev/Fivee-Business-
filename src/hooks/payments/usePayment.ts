@@ -63,10 +63,13 @@ const usePayment = () => {
         throw new Error(msg);
       }
 
-      await api.addPaymentMethod({ paymentMethodId: paymentMethod.id });
+      const resp = await api.addPaymentMethod({ paymentMethodId: paymentMethod.id });
 
+      // clear cached cards so fresh list will be fetched when requested
       dispatch(emptyCards());
-      router.push("/dashboard/manage-payment-methods");
+
+      // return the response to the caller so they can decide what to do
+      return resp;
     } catch (error: any) {
       const err = getError(error);
       toast.error(err);

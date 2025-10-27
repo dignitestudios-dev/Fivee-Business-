@@ -3,6 +3,7 @@ import { formatDateForInput } from "@/utils/helper";
 
 // --- Types ---
 interface FormData433AState {
+  caseId: string | null;
   personalInfo: PersonalInfoFromSchema | null;
   employmentInfo: EmploymentFromSchema | null;
   assetsInfo: PersonalAssetsFormSchema | null;
@@ -17,6 +18,7 @@ interface FormData433AState {
 
 // --- Initial State ---
 const initialState: FormData433AState = {
+  caseId: null,
   personalInfo: null,
   employmentInfo: null,
   assetsInfo: null,
@@ -34,6 +36,24 @@ const form433aSlice = createSlice({
   name: "form433a",
   initialState,
   reducers: {
+    setCaseId: (state, action: PayloadAction<string | null>) => {
+      const newCaseId = action.payload;
+      // If caseId changed, clear any previously stored form data so stale
+      // values from another case are not reused.
+      if (state.caseId !== newCaseId) {
+        state.caseId = newCaseId;
+        state.personalInfo = null;
+        state.employmentInfo = null;
+        state.assetsInfo = null;
+        state.selfEmployedInfo = null;
+        state.businessAssetsInfo = null;
+        state.businessIncomeInfo = null;
+        state.householdIncomeInfo = null;
+        state.calculationInfo = null;
+        state.otherInfo = null;
+        state.signatureInfo = null;
+      }
+    },
     // Save entire personal info data
     savePersonalInfo: (
       state,
@@ -193,6 +213,7 @@ const form433aSlice = createSlice({
 
 // --- Export actions & reducer ---
 export const {
+  setCaseId,
   savePersonalInfo,
   saveEmploymentInfo,
   savePersonalAssetsInfo,

@@ -75,12 +75,48 @@ const PaymentForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    handleAddPaymentMethod(
-      stripe,
-      elements,
-      cardComplete,
-      CardNumberElement
-    );
+    try {
+      const resp = await handleAddPaymentMethod(
+        stripe,
+        elements,
+        cardComplete,
+        CardNumberElement
+      );
+
+      // Clear inputs and Stripe Elements so the form is reset for further use
+      setCardComplete({
+        cardNumber: false,
+        cardExpiry: false,
+        cardCvc: false,
+        zipCode: "",
+        cardHolderName: "",
+      });
+
+      try {
+        const cardEl = elements?.getElement(CardNumberElement);
+        const expiryEl = elements?.getElement(CardExpiryElement);
+        const cvcEl = elements?.getElement(CardCvcElement);
+        cardEl?.clear?.();
+        expiryEl?.clear?.();
+        cvcEl?.clear?.();
+      } catch (err) {
+        // ignore element clear errors
+      }
+
+      // If the hook returned a response and the parent provided a callback,
+      // call it so the parent can refresh the card list (or do something else).
+      if (resp && onPaymentSuccess) {
+        onPaymentSuccess(resp);
+        return;
+      }
+
+      // Backwards-compatible behavior: if no onPaymentSuccess provided,
+      // navigate to the manage payment methods page.
+      router.push("/dashboard/manage-payment-methods");
+    } catch (err: any) {
+      const message = (err && err.message) || "Failed to save card";
+      if (onPaymentError) onPaymentError(message);
+    }
   };
 
   return (

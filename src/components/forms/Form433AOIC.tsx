@@ -13,6 +13,10 @@ import { CalculationSection } from "@/components/forms/form433a-sections/calcula
 import { OtherInfoSection } from "@/components/forms/form433a-sections/other-info-section";
 import { SignatureSection } from "@/components/forms/form433a-sections/signature-section";
 import { storage } from "@/utils/helper";
+import api from "@/lib/services";
+import FormLoader from "@/components/global/FormLoader";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { setCaseId } from "@/lib/features/form433aSlice";
 import { useSearchParams } from "next/navigation";
 
 const steps = [
@@ -72,40 +76,157 @@ export default function Form433AOIC() {
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
 
-  useEffect(() => {
-    if (!caseId) {
-      clearSavedData();
-    }
-  }, [caseId]);
-
-  const [currentStep, setCurrentStep] = useState<number>(2);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-
+  // hydrated indicates we've determined the correct step (from local or server)
+  // and it's safe to render the section UI. When false we show a loader so
+  // the UI doesn't render step 1 then jump to another step.
+  const [hydrated, setHydrated] = useState<boolean>(false);
+  console.log(
+    `Current step is: ${currentStep} and Completed are: ${completedSteps}`
+  );
   // Load saved progress from localStorage
   const getSavedProgress = () => {
     const savedProgress = storage.get<{
+      caseId: string | null;
       currentStep: number;
       completedSteps: number[];
     }>("433a_progress");
-    return savedProgress || { currentStep: 1, completedSteps: [] };
+    return (
+      savedProgress || { caseId: null, currentStep: 1, completedSteps: [] }
+    );
   };
 
-  // Load saved progress on component mount
+  // When a caseId becomes available, try to hydrate progress from server
+  // and fall back to localStorage. Do NOT clear localStorage when caseId
+  // is temporarily undefined (first render).
+  useEffect(() => {
+    if (!caseId) return; // wait until a real caseId is available
+
+    const savedProgress = getSavedProgress();
+
+    // If user has local saved progress for this case, use it optimistically
+    if (savedProgress.caseId === caseId) {
+      setCurrentStep(savedProgress.currentStep);
+      setCompletedSteps(new Set(savedProgress.completedSteps));
+    }
+
+    // Now ask server for authoritative section completion status
+    (async () => {
+      try {
+        const resp = await api.get433aSectionInfo(caseId, "sectionStatus");
+        const sections = resp?.data || {};
+
+        // Map the API keys to form step numbers in the same order as `steps`
+        const sectionOrder: Array<keyof typeof sections | string> = [
+          "personalInfo",
+          "employmentInfo",
+          "assetsInfo",
+          "selfEmployedInfo",
+          "businessInfo",
+          "businessIncomeExpenseInfo",
+          "householdIncomeExpenseInfo",
+          "offerCalculationInfo",
+          "otherInfo",
+          "signaturesAndAttachmentsInfo",
+        ];
+
+        const newCompleted: number[] = [];
+        for (let i = 0; i < sectionOrder.length; i++) {
+          const key = sectionOrder[i];
+          if (sections && sections[key]) {
+            newCompleted.push(i + 1);
+          }
+        }
+
+        const firstIncompleteIndex = sectionOrder.findIndex(
+          (k) => !(sections && sections[k])
+        );
+
+        const computedCurrentStep =
+          firstIncompleteIndex === -1
+            ? sectionOrder.length
+            : firstIncompleteIndex + 1;
+
+        setCompletedSteps(new Set(newCompleted));
+        setCurrentStep(computedCurrentStep);
+
+        // mark hydrated after applying server state
+        setHydrated(true);
+
+        // persist authoritative progress (include caseId)
+        storage.set("433a_progress", {
+          caseId,
+          currentStep: computedCurrentStep,
+          completedSteps: newCompleted,
+        });
+      } catch (error) {
+        // If API fails, we already applied optimistic local progress above.
+        console.error("Failed to fetch section status:", error);
+        // still mark hydrated so UI can render using optimistic/local state
+        setHydrated(true);
+      }
+    })();
+  }, [caseId]);
+
+  // On mount, try to apply local saved progress synchronously so we avoid
+  // briefly rendering step 1 and then switching. If there's no local
+  // progress for a caseId we will wait for the server (hydrated stays false
+  // until the [caseId] effect completes).
   useEffect(() => {
     const savedProgress = getSavedProgress();
-    setCurrentStep(savedProgress.currentStep);
-    setCompletedSteps(new Set(savedProgress.completedSteps));
+
+    // If no caseId in URL, apply any saved progress whose caseId is null
+    if (!caseId) {
+      if (savedProgress.caseId === null) {
+        setCurrentStep(savedProgress.currentStep);
+        setCompletedSteps(new Set(savedProgress.completedSteps));
+      }
+      setHydrated(true);
+      return;
+    }
+
+    // If there's local progress for this caseId, apply it optimistically and
+    // show the UI while we fetch authoritative state in the [caseId] effect.
+    if (savedProgress.caseId === caseId) {
+      setCurrentStep(savedProgress.currentStep);
+      setCompletedSteps(new Set(savedProgress.completedSteps));
+      setHydrated(true);
+    }
+    // Otherwise we intentionally wait for the server before rendering
+    // (hydrated remains false until the server response resolves).
   }, []);
 
-  // Save progress to localStorage
-  const saveProgress = (step: number, completed: Set<number>) => {
+  // Keep redux slice in sync: if the URL caseId differs from the stored
+  // caseId in the slice, update it. The reducer for `setCaseId` will clear
+  // stale form data when a new caseId is set.
+  const dispatch = useAppDispatch();
+  const storedCaseId = useAppSelector((s) => s.form433a.caseId);
+
+  useEffect(() => {
+    // Only act when we have a concrete caseId (string) from params
+    if (caseId && caseId !== storedCaseId) {
+      dispatch(setCaseId(caseId));
+    }
+    // If there's no caseId in the URL but the store has one, we don't
+    // automatically clear the store here — leave that behavior to
+    // explicit navigation actions. Adjust if you'd like a different UX.
+  }, [caseId, storedCaseId, dispatch]);
+
+  // Save progress to localStorage (include caseId so progress is tied to a case)
+  const saveProgress = (
+    step: number,
+    completed: Set<number>,
+    caseIdToSave?: string | null
+  ) => {
     try {
       const progressData = {
+        caseId: caseIdToSave || caseId || null,
         currentStep: step,
         completedSteps: Array.from(completed),
       };
       storage.set("433a_progress", progressData);
-      console.log("Progress saved to localStorage");
+      console.log("Progress saved to localStorage", progressData);
     } catch (error) {
       console.error("Error saving progress:", error);
     }
@@ -121,18 +242,29 @@ export default function Form433AOIC() {
     }
   };
 
-  const handleNext = async () => {
+  const handleNext = async (employmentStatus: string = "") => {
     console.log("Next runs");
 
     if (currentStep < 10) {
-      // Mark current step as completed
-      const newCompletedSteps = new Set([...completedSteps, currentStep]);
-      setCompletedSteps(newCompletedSteps);
-      const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
+      if (employmentStatus === "self") {
+        // Mark current step as completed
+        const newCompletedSteps = new Set([...completedSteps, 5, 6, 7]);
+        setCompletedSteps(newCompletedSteps);
+        const nextStep = currentStep + 3;
+        setCurrentStep(nextStep);
 
-      // Save progress to localStorage
-      saveProgress(nextStep, newCompletedSteps);
+        // Save progress to localStorage
+        saveProgress(nextStep, newCompletedSteps, caseId);
+      } else {
+        // Mark current step as completed
+        const newCompletedSteps = new Set([...completedSteps, currentStep]);
+        setCompletedSteps(newCompletedSteps);
+        const nextStep = currentStep + 1;
+        setCurrentStep(nextStep);
+
+        // Save progress to localStorage
+        saveProgress(nextStep, newCompletedSteps, caseId);
+      }
     }
   };
 
@@ -142,7 +274,7 @@ export default function Form433AOIC() {
       setCurrentStep(prevStep);
 
       // Save progress to localStorage
-      saveProgress(prevStep, completedSteps);
+      saveProgress(prevStep, completedSteps, caseId);
     }
   };
 
@@ -152,7 +284,7 @@ export default function Form433AOIC() {
       setCurrentStep(stepNumber);
 
       // update progress
-      saveProgress(stepNumber, completedSteps);
+      saveProgress(stepNumber, completedSteps, caseId);
     }
   };
 
@@ -209,18 +341,24 @@ export default function Form433AOIC() {
         <div className="flex flex-col lg:flex-row gap-8 min-h-[60vh]">
           {/* Stepper Navigation */}
           <div className="lg:w-1/4">
-            <FormStepper
-              steps={steps}
-              currentStep={currentStep}
-              completedSteps={completedSteps}
-              onStepClick={handleStepClick}
-            />
+            {hydrated ? (
+              <FormStepper
+                steps={steps}
+                currentStep={currentStep}
+                completedSteps={completedSteps}
+                onStepClick={handleStepClick}
+              />
+            ) : (
+              <div className="p-4">
+                <FormLoader />
+              </div>
+            )}
           </div>
 
           {/* Form Content */}
           <div className="lg:w-3/4 h-full">
             <div className="bg-white h-full rounded-lg shadow-sm border border-gray-200 p-6">
-              {renderCurrentSection()}
+              {hydrated ? renderCurrentSection() : <FormLoader />}
             </div>
           </div>
         </div>

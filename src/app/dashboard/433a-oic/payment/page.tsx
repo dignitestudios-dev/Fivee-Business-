@@ -8,7 +8,7 @@ import { FaCcMastercard } from "react-icons/fa";
 import { SiVisa } from "react-icons/si";
 import { useAppSelector } from "@/lib/hooks";
 import usePayment from "@/hooks/payments/usePayment";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/services";
 import toast from "react-hot-toast";
 import FormLoader from "@/components/global/FormLoader";
@@ -18,6 +18,7 @@ const stripePromise = loadStripe(
 );
 
 const Form433BOICPayment = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
 
@@ -70,6 +71,20 @@ const Form433BOICPayment = () => {
         payment_method: selectedCard,
       } as any);
 
+      // Check if the error is due to payment already being successful
+      if (
+        result.error &&
+        result.error.type === "invalid_request_error" &&
+        result.error.code === "payment_intent_unexpected_state" &&
+        result.error.payment_intent?.status === "succeeded"
+      ) {
+        // Payment was already successful, treat this as a success case
+        toast.success("Payment successful");
+        router.push("/dashboard"); // Redirect to dashboard
+        return;
+      }
+
+      // Handle other errors
       if (result.error) {
         throw new Error(result.error.message || "Payment failed");
       }
@@ -77,12 +92,17 @@ const Form433BOICPayment = () => {
       if (result.paymentIntent && result.paymentIntent.status === "succeeded") {
         toast.success("Payment successful");
         // refresh cards list in case server updated something
-        handleGetPaymentMethods();
+        await handleGetPaymentMethods();
+        // Redirect to dashboard after successful payment
+        router.push("/dashboard");
       } else {
         toast.error("Payment did not succeed");
       }
     } catch (error: any) {
-      toast.error(error?.message || "Payment failed");
+      // Only show error toast if it's not the "already succeeded" case
+      if (!error?.message?.includes("already succeeded")) {
+        toast.error(error?.message || "Payment failed");
+      }
     } finally {
       setProcessing(false);
     }

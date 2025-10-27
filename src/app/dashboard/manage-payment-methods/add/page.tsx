@@ -4,6 +4,8 @@ import { loadStripe } from "@stripe/stripe-js";
 import PaymentForm from "@/components/payment/PaymentForm";
 import Link from "next/link";
 import React from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { FaCreditCard } from "react-icons/fa";
 import { IoArrowBackOutline } from "react-icons/io5";
 
@@ -11,6 +13,8 @@ const AddPaymentMethod = () => {
   const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
   );
+
+  const router = useRouter();
 
   return (
     <>
@@ -36,8 +40,12 @@ const AddPaymentMethod = () => {
 
         <Elements stripe={stripePromise}>
           <PaymentForm
-            onPaymentError={() => console.log("payment error")}
-            onPaymentSuccess={() => console.log("payment success")}
+            onPaymentError={(err) => toast.error(err)}
+            onPaymentSuccess={() => {
+              toast.success("Card added successfully");
+              // navigate back to manage page so the user can see added card
+              router.push("/dashboard/manage-payment-methods");
+            }}
           />
         </Elements>
       </div>

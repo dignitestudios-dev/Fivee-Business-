@@ -17,7 +17,7 @@ import {
 import { useAppSelector } from "@/lib/hooks";
 import toast from "react-hot-toast";
 import FormLoader from "@/components/global/FormLoader";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FORM_433B_SECTIONS } from "@/lib/constants";
 import useBusinessInfo from "@/hooks/433b-form-hooks/useBusinessInfo";
 import useSignatures from "@/hooks/signatures/useSignatures";
@@ -85,6 +85,7 @@ export function SignatureSection({
   currentStep,
   totalSteps,
 }: SignatureSectionProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { signatureInfo } = useAppSelector((state) => state.form433b);
@@ -125,6 +126,7 @@ export function SignatureSection({
   const handleFormSubmit = async (data: SignatureFormSchema) => {
     try {
       await handleSaveSignatureInfo(data, caseId);
+      router.push(`/dashboard/433b-oic/payment?caseId=${caseId}`);
     } catch (error: any) {
       console.error("Error saving signature info:", error);
       toast.error(error.message || "Failed to save signature info");
