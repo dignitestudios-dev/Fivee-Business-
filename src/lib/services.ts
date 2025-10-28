@@ -29,14 +29,12 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.log("Code: ", error?.response);
-
     if (error?.response?.data?.statusCode === 401) {
       storage.remove("accessToken");
       storage.remove("user");
       // window.location.href = "/auth/login";
     }
-    console.log(error);
+    console.log("Complete Error: ", error);
     console.log("API Error:", error.response?.data || error);
     return Promise.reject(error);
   }
