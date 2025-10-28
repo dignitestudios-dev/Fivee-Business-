@@ -16,6 +16,15 @@ import { businessExpenseSchema } from "@/lib/validation/form433b/business-expens
 import { calculationSchemaFormB } from "@/lib/validation/form433b/calculation-section";
 import { otherInfoSchemaFormB } from "@/lib/validation/form433b/other-info-section";
 import { signatureSchemaFormB } from "@/lib/validation/form433b/signature-section";
+import { individualInfoSchema } from "@/lib/validation/form656/individual-info-section";
+import { reasonForOfferSchema } from "@/lib/validation/form656/reason-for-offer-section";
+import { paymentTermsSchema } from "@/lib/validation/form656/payment-terms-section";
+import { businessInfoSchema656 } from "@/lib/validation/form656/business-info-section";
+import { designationEftpsSchema } from "@/lib/validation/form656/designation-eftps-section";
+import { sourceOfFundsSchema } from "@/lib/validation/form656/source-of-funds-section";
+import { signaturesSchema656 } from "@/lib/validation/form656/signatures-section";
+import { paidPreparerSchema } from "@/lib/validation/form656/paid-preparer-section";
+import { applicationChecklistSchema } from "@/lib/validation/form656/application-checklist-section";
 
 export {}; // makes this a module
 
@@ -120,6 +129,18 @@ declare global {
     | "offerCalculationInfo"
     | "otherInfo"
     | "signaturesAndAttachmentsInfo"
+    | "sectionStatus";
+
+  type Form656Section =
+    | "individualInfo"
+    | "businessInfo"
+    | "reasonForOfferInfo"
+    | "paymentTermsInfo"
+    | "designationAndEftpsInfo"
+    | "sourceOfFundsAndRequirementsInfo"
+    | "signaturesInfo"
+    | "applicationChecklistInfo"
+    | "paidPreparerUseOnlyInfo"
     | "sectionStatus";
 
   type FormData433A = z.infer<typeof completeFormSchema>;
@@ -227,6 +248,32 @@ declare global {
     calculationInfo: CalculationInfo | null;
     otherInfo: OtherInfoFormBSchema | null;
     signatureInfo: SignatureInfoFormB | null;
+  }
+
+  // Form 656 types
+  type IndividualInfoFormSchema = z.infer<typeof individualInfoSchema>;
+  type BusinessInfoFormSchema = z.infer<typeof businessInfoSchema656>;
+  type ReasonForOfferFormSchema = z.infer<typeof reasonForOfferSchema>;
+  type PaymentTermsFormSchema = z.infer<typeof paymentTermsSchema>;
+  type DesignationEftpsFormSchema = z.infer<typeof designationEftpsSchema>;
+  type SourceOfFundsFormSchema = z.infer<typeof sourceOfFundsSchema>;
+  type SignaturesFormSchema = z.infer<typeof signaturesSchema656>;
+  type PaidPreparerFormSchema = z.infer<typeof paidPreparerSchema>;
+  type ApplicationChecklistFormSchema = z.infer<
+    typeof applicationChecklistSchema
+  >;
+
+  interface FormData656State {
+    caseId: string | null;
+    individualInfo: IndividualInfoFormSchema | null;
+    businessInfo: BusinessInfoFormSchema | null;
+    reasonForOffer: string | null;
+    paymentTerms: PaymentTermsFormSchema | null;
+    designationEftps: DesignationEftpsFormSchema | null;
+    sourceOfFunds: SourceOfFundsFormSchema | null;
+    signaturesInfo: SignaturesFormSchema | null;
+    paidPreparer: PaidPreparerFormSchema | null;
+    applicationChecklist: ApplicationChecklistFormSchema | null;
   }
 
   // API Payload Types

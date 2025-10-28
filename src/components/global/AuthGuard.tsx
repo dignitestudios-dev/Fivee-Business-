@@ -33,19 +33,9 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     if (loading) return;
 
     if (pathname.includes("auth") && (isLoggedIn || user)) {
-      if (!user?.employmentType) {
-        router.replace("/dashboard/onboard");
-      } else {
-        router.replace("/dashboard");
-      }
+      router.replace("/dashboard");
     } else if (pathname.includes("dashboard") && (!isLoggedIn || !user)) {
       router.replace("/auth/login");
-    } else if (
-      pathname.includes("dashboard") &&
-      user &&
-      !user?.employmentType
-    ) {
-      router.replace("/dashboard/onboard");
     }
   }, [pathname, isLoggedIn, user, loading, router]);
 

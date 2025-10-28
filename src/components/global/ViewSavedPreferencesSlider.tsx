@@ -20,39 +20,19 @@ const ViewSavedPreferencesSlider: React.FC<
   console.log("formType: ", formType);
   const { form433a, form433b } = useAppSelector((state) => state.forms);
 
-  const { loading: loading433a } = useUser433aCases();
-  const { loading: loading433b } = useUser433bCases();
+  const {
+    loading: loading433a,
+    loadingMore: loadingMore433a,
+    loadMore: loadMore433a,
+    hasMore: hasMore433a,
+  } = useUser433aCases();
 
-  const savedPrefs = [
-    {
-      title: "Understanding Income Tax: A Guide",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
-    },
-    {
-      title: "Exploring Corporate Tax Obligations",
-      updatedAt: "2025-09-09T07:28:14.365+00:00",
-    },
-    {
-      title: "Navigating Sales Tax Regulations",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
-    },
-    {
-      title: "A Look at Property Tax Assessments",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
-    },
-    {
-      title: "What You Need to Know About Capital Gains Tax",
-      updatedAt: "2025-09-09T07:28:14.365+00:00",
-    },
-    {
-      title: "An Introduction to Inheritance Tax",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
-    },
-    {
-      title: "What is Estate Tax and How Does It Work?",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
-    },
-  ];
+  const {
+    loading: loading433b,
+    loadingMore: loadingMore433b,
+    loadMore: loadMore433b,
+    hasMore: hasMore433b,
+  } = useUser433bCases();
 
   return (
     <div
@@ -79,12 +59,23 @@ const ViewSavedPreferencesSlider: React.FC<
         {(loading433a || loading433b) && <FormLoader />}
 
         {formType === "individual" && (
-          <div className="h-full overflow-y-auto pb-10">
+          <div
+            className="h-full overflow-y-auto pb-10"
+            onScroll={(e) => {
+              const target = e.currentTarget as HTMLDivElement;
+              if (
+                target.scrollHeight - target.scrollTop - target.clientHeight < 120 &&
+                hasMore433a &&
+                !loadingMore433a
+              ) {
+                loadMore433a();
+              }
+            }}
+          >
             {form433a && form433a.length ? (
               form433a.map((savedPref, index) => (
-                <Link href={`/dashboard/433a-oic?caseId=${savedPref._id}`}>
+                <Link href={`/dashboard/433a-oic?caseId=${savedPref._id}`} key={savedPref._id || index}>
                   <div
-                    key={index}
                     className="mb-2 group p-3 rounded-lg border border-[#e3e3e3] cursor-pointer hover:bg-gray-50 transition-all"
                   >
                     <div className="flex gap-5 items-center">
@@ -109,31 +100,42 @@ const ViewSavedPreferencesSlider: React.FC<
                 </Link>
               ))
             ) : (
-              <p className="text-gray-400 text-center">
-                No record for Form 433A OIC
-              </p>
+              <p className="text-gray-400 text-center">No record for Form 433A OIC</p>
+            )}
+
+            {loadingMore433a && (
+              <div className="py-4 flex justify-center">
+                <FormLoader />
+              </div>
             )}
           </div>
         )}
 
         {formType === "business" && (
-          <div className="h-full overflow-y-auto pb-10">
+          <div
+            className="h-full overflow-y-auto pb-10"
+            onScroll={(e) => {
+              const target = e.currentTarget as HTMLDivElement;
+              if (
+                target.scrollHeight - target.scrollTop - target.clientHeight < 120 &&
+                hasMore433b &&
+                !loadingMore433b
+              ) {
+                loadMore433b();
+              }
+            }}
+          >
             {form433b && form433b.length ? (
               form433b.map((savedPref, index) => (
-                <Link href={`/dashboard/433b-oic/?caseId=${savedPref._id}`}>
-                  <div
-                    key={index}
-                    className="mb-2 group p-3 rounded-lg border border-[#e3e3e3] cursor-pointer hover:bg-gray-50 transition-all"
-                  >
+                <Link href={`/dashboard/433b-oic/?caseId=${savedPref._id}`} key={savedPref._id || index}>
+                  <div className="mb-2 group p-3 rounded-lg border border-[#e3e3e3] cursor-pointer hover:bg-gray-50 transition-all">
                     <div className="flex gap-5 items-center">
                       <div className="flex-1">
                         <div className="bg-[var(--primary)] h-7 w-7 rounded-md flex justify-center items-center">
                           <TaxReceipt />
                         </div>
 
-                        <p className="font-bold text-base mt-2">
-                          {savedPref.title}
-                        </p>
+                        <p className="font-bold text-base mt-2">{savedPref.title}</p>
 
                         <p className="text-desc">
                           Last edited {formatDateWithName(savedPref.updatedAt)}
@@ -147,9 +149,13 @@ const ViewSavedPreferencesSlider: React.FC<
                 </Link>
               ))
             ) : (
-              <p className="text-gray-400 text-center">
-                No record for Form 433A OIC
-              </p>
+              <p className="text-gray-400 text-center">No record for Form 433B OIC</p>
+            )}
+
+            {loadingMore433b && (
+              <div className="py-4 flex justify-center">
+                <FormLoader />
+              </div>
             )}
           </div>
         )}

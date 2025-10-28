@@ -6,25 +6,27 @@ import { FaEye } from "react-icons/fa";
 import { GoCheckCircleFill } from "react-icons/go";
 
 import FInput from "@/components/ui/FInput";
-import { DUMMY_TOKEN, DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
+import { SECURITY_CONFIG } from "@/lib/constants";
 import FButton from "../ui/FButton";
-import { useRouter } from "next/navigation";
-import { loginUser } from "@/lib/features/userSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import useAuth from "@/hooks/auth/useAuth";
 
 const SignupForm = () => {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
+  const { handleSignup, handleGoogleSignIn, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
-  } = useForm<SignupFormValues>();
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    defaultValues: {
+      employmentType: undefined,
+    },
+  });
 
   const watchNewPassword = watch("password");
+  const watchEmploymentType = watch("employmentType");
 
   const validatePassword = (password: string) => {
     const errors = [];
@@ -57,17 +59,17 @@ const SignupForm = () => {
       : `Password must contain: ${errors.join(", ")}`;
   };
 
-  const onSubmit = (data: SignupFormValues) => {
-    console.log(data);
-
-    dispatch(
-      loginUser({
-        user: DUMMY_USER,
-        accessToken: DUMMY_TOKEN,
-      })
-    );
-
-    router.push("/dashboard/onboard");
+  const onSubmit = async (data: SignupFormValues) => {
+    await handleSignup({
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      password: data.password,
+      employmentType: data.employmentType,
+      socialLogin: false,
+      provider: null,
+      role: "user",
+    });
   };
 
   return (
@@ -81,7 +83,13 @@ const SignupForm = () => {
         autoComplete="email"
         id="email"
         type="email"
-        {...register("email", { required: "Email is required" })}
+        {...register("email", { 
+          required: "Email is required",
+          pattern: {
+            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+            message: "Invalid email address"
+          }
+        })}
         error={errors.email?.message}
       />
 
@@ -101,7 +109,54 @@ const SignupForm = () => {
           id="lastName"
           {...register("lastName", { required: "Last name is required" })}
           error={errors.lastName?.message}
-        />{" "}
+        />
+      </div>
+
+      {/* Employment Type Selection */}
+      <div className="w-full">
+        <h3 className="font-semibold mb-2">What would best describe you?</h3>
+        <div className="space-y-3">
+          <label className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
+            watchEmploymentType === "self-employed" ? "border-[var(--primary)]" : "border-[#E3E3E3]"
+          }`}>
+            <input
+              type="radio"
+              value="self-employed"
+              className="hidden"
+              {...register("employmentType", { required: "Please select your employment type" })}
+            />
+            <div className="flex gap-2 items-center py-2 px-4 h-full">
+              <div className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
+                watchEmploymentType === "self-employed" ? "bg-[var(--primary)]" : "bg-white"
+              }`}>
+                <div className="h-full w-full bg-white rounded-full" />
+              </div>
+              Self Employed
+            </div>
+          </label>
+
+          <label className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
+            watchEmploymentType === "business-owner" ? "border-[var(--primary)]" : "border-[#E3E3E3]"
+          }`}>
+            <input
+              type="radio"
+              value="business-owner"
+              className="hidden"
+              {...register("employmentType", { required: "Please select your employment type" })}
+            />
+            <div className="flex gap-2 items-center py-2 px-4 h-full">
+              <div className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
+                watchEmploymentType === "business-owner" ? "bg-[var(--primary)]" : "bg-white"
+              }`}>
+                <div className="h-full w-full bg-white rounded-full" />
+              </div>
+              Business Owner
+            </div>
+          </label>
+        </div>
+        {errors.employmentType && (
+          <p className="text-red-500 text-sm mt-1">{errors.employmentType.message}</p>
+        )}
       </div>
 
       {/* New Password */}
@@ -201,8 +256,14 @@ const SignupForm = () => {
         </div>
       )}
 
-      <FButton variant="primary" size="lg" className="w-full">
-        Sign Up
+      <FButton 
+        variant="primary" 
+        size="lg" 
+        className="w-full" 
+        type="submit"
+        disabled={loading || isSubmitting || !watchEmploymentType}
+      >
+        {loading ? "Signing up..." : "Sign Up"}
       </FButton>
     </form>
   );

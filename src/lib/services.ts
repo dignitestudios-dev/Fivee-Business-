@@ -88,10 +88,16 @@ const apiHandler = async <T>(apiCall: () => Promise<T>): Promise<T> => {
 const login = (payload: LoginPayload) =>
   apiHandler(() => API.post("/user/signin", payload));
 
+const signup = (payload: SignupPayload) =>
+  apiHandler(() => API.post("/user/signup", payload));
+
+const verifyEmail = (token: string) =>
+  apiHandler(() => API.post("/user/verify-email", { token }));
+
 // Form 433A OIC
 
-const getUserForm433ACases = () =>
-  apiHandler(() => API.get("/form433a/my-cases"));
+const getUserForm433ACases = (page: number = 1, limit: number = defaultLimit) =>
+  apiHandler(() => API.get(`/form433a/my-cases?page=${page}&limit=${limit}`));
 
 const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
   apiHandler<{ data: any; message: string }>(() =>
@@ -176,8 +182,10 @@ const deleteSignature = (id: string) =>
 
 // Form 433B OIC
 
-const getUserForm433BCases = () =>
-  apiHandler(() => API.get("/form433boic/my-cases"));
+const getUserForm433BCases = (page: number = 1, limit: number = defaultLimit) =>
+  apiHandler(() =>
+    API.get(`/form433boic/my-cases?page=${page}&limit=${limit}`)
+  );
 
 // Start Form APIs
 const startForm433a = (payload: { title: string }) =>
@@ -226,6 +234,58 @@ const saveOtherInfoFormB = (info: any, caseId: string) =>
 const saveSignaturesAndAttachmentsFormB = (info: any, caseId: string) =>
   apiHandler(() => API.post(`/form433boic/${caseId}/signatures`, info));
 
+// Form 656
+
+const get656SectionInfo = (caseId: string, section: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.get(`/form656b/${caseId}/section?section=${section}`)
+  );
+
+const saveIndividualInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/individual-info`, info)
+  );
+
+const saveReasonForOffer = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/reason-for-offer`, info)
+  );
+
+const saveBusinessInfo656 = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/business-info`, info)
+  );
+
+const savePaymentTerms = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/payment-terms`, info)
+  );
+
+const saveDesignationEftps = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/designation-and-eftps`, info)
+  );
+
+const saveSourceOfFunds = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/source-of-funds-requirements`, info)
+  );
+
+const saveSignatures = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/signatures`, info)
+  );
+
+const savePaidPreparer = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/paid-preparer-use-only`, info)
+  );
+
+const saveApplicationChecklist = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/form656b/${caseId}/application-checklist`, info)
+  );
+
 // Payment Method API's
 
 const addPaymentMethod = (payload: AddCardPayload) =>
@@ -262,6 +322,9 @@ const api = {
   updateSignature,
   deleteSignature,
   login,
+  signup,
+  verifyEmail,
+  signup,
   get433bSectionInfo,
   saveBusinessInfo,
   saveBusinessAssetInfo,
@@ -278,6 +341,16 @@ const api = {
   getUserForm433BCases,
   startForm433a,
   startForm433b,
+  get656SectionInfo,
+  saveIndividualInfo,
+  saveReasonForOffer,
+  saveBusinessInfo656,
+  savePaymentTerms,
+  saveDesignationEftps,
+  saveSourceOfFunds,
+  saveSignatures,
+  savePaidPreparer,
+  saveApplicationChecklist,
 };
 
 export default api;

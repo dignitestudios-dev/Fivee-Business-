@@ -58,16 +58,7 @@ const LoginForm = () => {
   };
 
   const onSubmit = (data: LoginFormValues) => {
-    // handleLogin(data);
-
-    dispatch(
-      loginUser({
-        user: { ...DUMMY_USER, employmentType: "self-employed" },
-        accessToken: DUMMY_TOKEN,
-      })
-    );
-
-    router.push("/dashboard");
+    handleLogin(data);
   };
 
   return (
