@@ -34,7 +34,7 @@ API.interceptors.response.use(
     if (error?.response?.data?.statusCode === 401) {
       storage.remove("accessToken");
       storage.remove("user");
-      // window.location.href = "/auth/login";
+      window.location.href = "/auth/login";
     }
     console.log("Complete Error: ", error);
     console.log("API Error:", error.response?.data || error);
