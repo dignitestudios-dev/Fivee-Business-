@@ -24,6 +24,7 @@ import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import Form656List from "@/components/forms/Form656List";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -278,71 +279,4 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-const Form656List = () => {
-  const cases = useAppSelector((s) => s.forms.form656) || [];
-  const pagination = useAppSelector((s) => s.forms.form656Pagination);
-  const { loading, loadingMore, loadMore, hasMore } = useUser656Cases();
 
-  // load more is triggered explicitly via button to avoid race conditions
-
-  return (
-    <div>
-      <div className="w-full flex flex-col gap-2">
-        {loading && cases.length === 0 ? (
-          // initial full loader
-          <div className="h-32">
-            <FormLoader />
-          </div>
-        ) : cases.length === 0 ? (
-          <p className="text-desc">No Form 656 cases found.</p>
-        ) : (
-          cases.map((c) => (
-            <div
-              key={c._id}
-              className="w-full flex justify-between gap-5 p-4 border-b border-[#E7E8E9] items-center"
-            >
-              <div>
-                <p className="font-semibold">{c.title}</p>
-                <p className="text-xs text-desc">{formatDate(c.createdAt)}</p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Link
-                  href={`/dashboard/form-656?caseId=${c._id}`}
-                  className="text-[var(--primary)] cursor-pointer group"
-                >
-                  View Details{" "}
-                  <GoArrowRight size={18} className="mb-1 ms-1 inline move-x" />
-                </Link>
-              </div>
-            </div>
-          ))
-        )}
-
-        {/* load more button */}
-        {!loading && hasMore ? (
-          <div className="w-full flex justify-center py-3">
-            <button
-              onClick={() => loadMore()}
-              disabled={loadingMore}
-              className="px-4 py-2 bg-black text-white rounded"
-            >
-              {loadingMore ? (
-                <Loader2 className="animate-spin h-5 w-5 text-white inline" />
-              ) : (
-                "Load more"
-              )}
-            </button>
-          </div>
-        ) : (
-          // when no more data
-          cases.length > 0 && (
-            <p className="text-xs text-center text-desc mt-2">
-              All data loaded
-            </p>
-          )
-        )}
-      </div>
-    </div>
-  );
-};

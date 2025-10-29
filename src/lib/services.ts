@@ -1,9 +1,11 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
+export const BASE_URL = "https://api.fiveebusiness.com/";
+
 // Create an Axios instance
 const API = axios.create({
-  baseURL: "http://18.117.169.39/",
+  baseURL: BASE_URL,
   timeout: 10000, // Set a timeout (optional)
   headers: {
     "Content-Type": "application/json",
@@ -180,6 +182,27 @@ const deleteSignature = (id: string) =>
     API.delete(`/media/image/${id}`)
   );
 
+// Video APIs
+const getVideoCategories = () =>
+  apiHandler<{ data: { categories: string[] }; message: string }>(() =>
+    API.get(`/media/video/categories`)
+  );
+
+const getVideos = (
+  page: number = 1,
+  limit: number = defaultLimit,
+  category?: string
+) =>
+  apiHandler<{
+    data: { video: any[]; page: number; limit: number; total: number; totalPages: number };
+    message: string;
+  }>(() =>
+    // Use axios params so serialization is handled correctly (avoids manual url-encoding issues)
+    API.get(`/media/video`, {
+      params: category ? { page, limit, category } : { page, limit },
+    })
+  );
+
 // Form 433B OIC
 
 const getUserForm433BCases = (page: number = 1, limit: number = defaultLimit) =>
@@ -333,6 +356,8 @@ const api = {
   createSignature,
   updateSignature,
   deleteSignature,
+  getVideoCategories,
+  getVideos,
   login,
   signup,
   verifyEmail,

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { apiHandler } from "@/lib/services";
+import { apiHandler, BASE_URL } from "@/lib/services";
 import VerificationStatus from "@/components/auth/VerificationStatus";
 import Image from "next/image";
 import { constants } from "@/lib/constants";
@@ -23,7 +23,7 @@ export default function VerifyEmail() {
     try {
       // Set the token in API headers
       const tempAPI = axios.create({
-        baseURL: "http://18.117.169.39/",
+        baseURL: BASE_URL,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

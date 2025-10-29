@@ -94,10 +94,19 @@ export function PaymentTermsSection({
   ]);
 
   // Reactive calculation for periodic final payment
-  const periodicOfferAmount = watch("periodic.totalOfferAmount") || 0;
-  const periodicFirstPayment = watch("periodic.firstMonthlyPayment") || 0;
-  const periodicSubsequent = watch("periodic.subsequentMonthlyPayment") || 0;
-  const periodicMonths = watch("periodic.monthsToPay") || 0;
+  const periodicOfferAmount = watch("periodic.totalOfferAmount");
+  const periodicFirstPayment = watch("periodic.firstMonthlyPayment");
+  const periodicSubsequent = watch("periodic.subsequentMonthlyPayment");
+  const periodicMonths = watch("periodic.monthsToPay");
+  
+  // Clear periodic fields when switching to lump sum
+  useEffect(() => {
+    if (paymentOption === "lump-sum") {
+      setValue("periodic", undefined);
+    } else if (paymentOption === "periodic") {
+      setValue("lumpSum", undefined);
+    }
+  }, [paymentOption, setValue]);
   useEffect(() => {
     setValue("periodic.finalPaymentMonth", periodicMonths);
     if (periodicMonths >= 6 && periodicMonths <= 24) {
@@ -154,15 +163,10 @@ export function PaymentTermsSection({
     }
   }, [paymentTerms, reset]);
   const addAdditionalPayment = () => {
-    if (fields.length < 5) {
-      // Max 5 additional for lump sum
-      append({
-        amount: 0,
-        payableWithinMonths: 0,
-      });
-    } else {
-      toast.error("Maximum of 5 additional payments for lump sum.");
-    }
+    append({
+      amount: 0,
+      payableWithinMonths: 1,
+    });
   };
   if (loadingFormData) {
     return <FormLoader />;
@@ -310,8 +314,7 @@ export function PaymentTermsSection({
                   variant="outline"
                   className="w-full"
                 >
-                  <Plus className="w-4 h-4 mr-2" /> Add Additional Payment (up
-                  to 5)
+                  <Plus className="w-4 h-4 mr-2" /> Add Additional Payment
                 </Button>
                 {errors.lumpSum?.additionalPayments?._errors && (
                   <p className="text-red-600 text-sm mt-2">

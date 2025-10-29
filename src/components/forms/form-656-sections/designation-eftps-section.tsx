@@ -18,6 +18,7 @@ import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_656_SECTIONS } from "@/lib/constants";
+import { Label } from "@/components/ui/label";
 
 interface DesignationEftpsSectionProps {
   onNext: () => void;
@@ -84,8 +85,8 @@ export function DesignationEftpsSection({
 
   const addEftpsPayment = () => {
     append({
-      paymentType: "",
-      date: "",
+      paymentType: "Offer application fee",
+      date: new Date().toISOString().split('T')[0],
       electronicFundsTransferNumber: "",
     });
   };
@@ -143,13 +144,21 @@ export function DesignationEftpsSection({
                   </Button>
                 </div>
 
-                <FormInput
-                  label="Payment Type (e.g., Offer application fee)"
-                  id={`eftpsPayments.${index}.paymentType`}
-                  required
-                  {...register(`eftpsPayments.${index}.paymentType`)}
-                  error={errors.eftpsPayments?.[index]?.paymentType?.message}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor={`eftpsPayments.${index}.paymentType`}>Payment Type</Label>
+                  <select
+                    id={`eftpsPayments.${index}.paymentType`}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    {...register(`eftpsPayments.${index}.paymentType`)}
+                  >
+                    <option value="">Select payment type</option>
+                    <option value="Offer application fee">Offer application fee</option>
+                    <option value="Offer payment">Offer payment</option>
+                  </select>
+                  {errors.eftpsPayments?.[index]?.paymentType?.message && (
+                    <p className="text-sm text-red-600">{errors.eftpsPayments[index].paymentType.message}</p>
+                  )}
+                </div>
                 <FormInput
                   label="Date"
                   id={`eftpsPayments.${index}.date`}
@@ -159,9 +168,18 @@ export function DesignationEftpsSection({
                   error={errors.eftpsPayments?.[index]?.date?.message}
                 />
                 <FormInput
-                  label="Electronic Funds Transfer Number"
+                  label="Electronic Funds Transfer Number (numbers only)"
                   id={`eftpsPayments.${index}.electronicFundsTransferNumber`}
                   required
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d*"
+                  // sanitize input in real-time to only digits
+                  onInput={(e) => {
+                    const input = e.currentTarget as HTMLInputElement;
+                    const digits = input.value.replace(/\D/g, "");
+                    if (input.value !== digits) input.value = digits;
+                  }}
                   {...register(`eftpsPayments.${index}.electronicFundsTransferNumber`)}
                   error={errors.eftpsPayments?.[index]?.electronicFundsTransferNumber?.message}
                 />

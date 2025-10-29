@@ -96,11 +96,11 @@ export function PaidPreparerSection({
 
   useEffect(() => {
     if (
-      paidPreparer?.preparerSignature?.signatureId &&
+      paidPreparer?.preparerSignature &&
       signatures?.length > 0
     ) {
       const sig = signatures?.find(
-        (s) => s._id === paidPreparer.preparerSignature.signatureId
+        (s) => s._id === paidPreparer.preparerSignature
       );
       if (sig) {
         setPreparerSignaturePreview(sig.url);
@@ -110,18 +110,18 @@ export function PaidPreparerSection({
 
   const handleSelectPreparerSignature = async (id: string, url: string) => {
     setPreparerSignaturePreview(url);
-    setValue("preparerSignature.signatureId", id, {
+    setValue("preparerSignature", id, {
       shouldValidate: true,
     });
-    await trigger("preparerSignature.signatureId");
+    await trigger("preparerSignature");
   };
 
   const removePreparerSignature = async () => {
     setPreparerSignaturePreview(null);
-    setValue("preparerSignature.signatureId", "", {
+    setValue("preparerSignature", "", {
       shouldValidate: true,
     });
-    await trigger("preparerSignature.signatureId");
+    await trigger("preparerSignature");
   };
 
   const handleReloadSignatures = () => {
@@ -152,7 +152,7 @@ export function PaidPreparerSection({
                   <Label className="mb-2">Signature of Preparer</Label>
                   <input
                     type="hidden"
-                    {...register("preparerSignature.signatureId")}
+                    {...register("preparerSignature")}
                   />
                   <div className="space-y-3 w-full">
                     {!preparerSignaturePreview ? (
@@ -244,9 +244,9 @@ export function PaidPreparerSection({
                         </div>
                       </div>
                     )}
-                    {errors.preparerSignature?.signatureId && (
+                    {errors.preparerSignature && (
                       <p className="text-red-600 text-sm">
-                        {errors.preparerSignature.signatureId.message}
+                        {errors.preparerSignature.message}
                       </p>
                     )}
                   </div>

@@ -55,6 +55,8 @@ export function SourceOfFundsSection({
     formState: { errors },
   } = methods;
 
+  console.log("sourceOfFunds errors:", errors);
+
   const onSubmit = async (data: SourceOfFundsFormSchema) => {
     try {
       await handleSaveSourceOfFunds(data, caseId);
@@ -148,6 +150,9 @@ export function SourceOfFundsSection({
                 I have made all required estimated tax payments for the current tax year.
               </Label>
             </div>
+            {errors.madeEstimatedTaxPayments && (
+              <p className="text-red-600 text-sm">{errors.madeEstimatedTaxPayments.message}</p>
+            )}
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="notRequiredEstimatedTaxPayments"
@@ -168,6 +173,9 @@ export function SourceOfFundsSection({
                 I have made all required federal tax deposits for the current quarter and the two preceding quarters.
               </Label>
             </div>
+            {errors.madeFederalTaxDeposits && (
+              <p className="text-red-600 text-sm">{errors.madeFederalTaxDeposits.message}</p>
+            )}
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="notRequiredFederalTaxDeposits"

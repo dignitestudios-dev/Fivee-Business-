@@ -75,7 +75,7 @@ const StartForm656 = () => {
           {/* 433A list */}
           <div>
             <h3 className="font-semibold mb-3">Form 433A — Individual</h3>
-            <div className="bg-white border rounded-lg shadow-sm h-72 overflow-auto p-2">
+            <div className="bg-white border border-gray-100 rounded-lg shadow-sm h-72 overflow-auto p-2">
               {aHook.loading && casesA.length === 0 ? (
                 <div className="flex h-64 items-center justify-center">
                   <FormLoader />
@@ -127,7 +127,7 @@ const StartForm656 = () => {
           {/* 433B list */}
           <div>
             <h3 className="font-semibold mb-3">Form 433B — Business</h3>
-            <div className="bg-white border rounded-lg shadow-sm h-72 overflow-auto p-2">
+            <div className="bg-white border border-gray-100 shadow-sm h-72 overflow-auto p-2">
               {bHook.loading && casesB.length === 0 ? (
                 <div className="flex h-64 items-center justify-center">
                   <FormLoader />
@@ -180,7 +180,7 @@ const StartForm656 = () => {
 
         {/* Details below on large screens */}
         <div className="mt-6">
-          <div className="bg-white border rounded-lg shadow-sm p-4">
+          <div className="bg-white border border-gray-100 shadow-sm p-4">
             <h3 className="font-semibold mb-3">Application Details</h3>
             <label className="block text-sm font-medium mb-1">Title</label>
             <FInput value={title} onChange={(e) => setTitle((e as any).target.value)} placeholder="Enter application title" />

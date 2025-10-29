@@ -211,7 +211,7 @@ export function IndividualInfoSection({
         data.lowIncomeCertification.householdMonthlyIncome = undefined;
       } else if (qualificationBasis === "adjusted_gross_income") {
         data.lowIncomeCertification.householdMonthlyIncome = undefined;
-      } else if (qualificationBasis === "monthly_income") {
+      } else if (qualificationBasis === "household_monthly_income") {
         data.lowIncomeCertification.adjustedGrossIncome = undefined;
       }
 
@@ -759,7 +759,7 @@ export function IndividualInfoSection({
                     onValueChange={(value) =>
                       setValue(
                         "lowIncomeCertification.qualificationBasis",
-                        value as "adjusted_gross_income" | "monthly_income"
+                        value as "adjusted_gross_income" | "household_monthly_income"
                       )
                     }
                     className="space-y-2 mt-2"
@@ -779,7 +779,7 @@ export function IndividualInfoSection({
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem
-                        value="monthly_income"
+                        value="household_monthly_income"
                         id="basis-monthly"
                         className="text-[#22b573]"
                       />
@@ -860,7 +860,7 @@ export function IndividualInfoSection({
                   />
                 )}
 
-                {qualificationBasis === "monthly_income" && (
+                {qualificationBasis === "household_monthly_income" && (
                   <FormInput
                     label="Household Gross Monthly Income"
                     id="lowIncomeCertification.householdMonthlyIncome"

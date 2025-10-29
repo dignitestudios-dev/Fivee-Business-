@@ -23,6 +23,7 @@ export const constants = {
 export const DUMMY_USER: User = {
   id: "123",
   firstName: "Siweh",
+  role: "user",
   lastName: "Harris",
   email: "siwehharris@example.com",
   employmentType: "business-owner",

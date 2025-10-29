@@ -122,13 +122,13 @@ export default function Form656() {
         const sectionOrder: Array<keyof typeof sections | string> = [
           "individualInfo",
           "businessInfo",
-          "reasonForOffer",
-          "paymentTerms",
-          "designationEftps",
-          "sourceOfFunds",
-          "offerTerms",
-          "signatures",
-          "paidPreparer",
+          "reasonForOfferInfo",
+          "paymentTermsInfo",
+          "designationAndEftpsInfo",
+          "sourceOfFundsAndRequirementsInfo",
+          "sourceOfFundsAndRequirementsInfo",
+          "signaturesInfo",
+          "paidPreparerUseOnlyInfo",
         ];
 
         const newCompleted: number[] = [];

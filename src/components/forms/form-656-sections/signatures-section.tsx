@@ -5,7 +5,7 @@ import { FormInput } from "@/components/ui/form-field";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Trash2, Edit, RefreshCw } from "lucide-react";
+import { Upload, Trash2, Edit, RefreshCw, ExternalLink } from "lucide-react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
@@ -22,6 +22,7 @@ import { FORM_656_SECTIONS } from "@/lib/constants";
 import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignatures656 from "@/hooks/656-form-hooks/useSignatures656";
 import DropdownPopup from "@/components/ui/DropdownPopup";
+import Link from "next/link";
 
 interface SignaturesSectionProps {
   onNext: () => void;
@@ -65,7 +66,7 @@ export function SignaturesSection({
     setValue,
     trigger,
   } = methods;
-console.log("errors: ", errors)
+  console.log("errors: ", errors);
   const [taxpayerSignaturePreview, setTaxpayerSignaturePreview] = useState<
     string | null
   >(null);
@@ -98,24 +99,14 @@ console.log("errors: ", errors)
   }, [signaturesInfo]);
 
   useEffect(() => {
-    if (
-      signaturesInfo?.taxpayerSignature?.signatureId &&
-      signatures?.length > 0
-    ) {
-      const sig = signatures?.find(
-        (s) => s._id === signaturesInfo.taxpayerSignature.signatureId
-      );
+    if (signaturesInfo?.taxpayerSignature && signatures?.length > 0) {
+      const sig = signatures?.find((s) => s._id === signaturesInfo.taxpayerSignature);
       if (sig) {
         setTaxpayerSignaturePreview(sig.url);
       }
     }
-    if (
-      signaturesInfo?.spouseOrOfficerSignature?.signatureId &&
-      signatures?.length > 0
-    ) {
-      const sig = signatures?.find(
-        (s) => s._id === signaturesInfo.spouseOrOfficerSignature.signatureId
-      );
+    if (signaturesInfo?.spouseOrOfficerSignature && signatures?.length > 0) {
+      const sig = signatures?.find((s) => s._id === signaturesInfo.spouseOrOfficerSignature);
       if (sig) {
         setSpouseSignaturePreview(sig.url);
       }
@@ -124,34 +115,34 @@ console.log("errors: ", errors)
 
   const handleSelectTaxpayerSignature = async (id: string, url: string) => {
     setTaxpayerSignaturePreview(url);
-    setValue("taxpayerSignature.signatureId", id, {
+    setValue("taxpayerSignature", id, {
       shouldValidate: true,
     });
-    await trigger("taxpayerSignature.signatureId");
+    await trigger("taxpayerSignature");
   };
 
   const removeTaxpayerSignature = async () => {
     setTaxpayerSignaturePreview(null);
-    setValue("taxpayerSignature.signatureId", "", {
+    setValue("taxpayerSignature", "", {
       shouldValidate: true,
     });
-    await trigger("taxpayerSignature.signatureId");
+    await trigger("taxpayerSignature");
   };
 
   const handleSelectSpouseSignature = async (id: string, url: string) => {
     setSpouseSignaturePreview(url);
-    setValue("spouseOrOfficerSignature.signatureId", id, {
+    setValue("spouseOrOfficerSignature", id, {
       shouldValidate: true,
     });
-    await trigger("spouseOrOfficerSignature.signatureId");
+    await trigger("spouseOrOfficerSignature");
   };
 
   const removeSpouseSignature = async () => {
     setSpouseSignaturePreview(null);
-    setValue("spouseOrOfficerSignature.signatureId", "", {
+    setValue("spouseOrOfficerSignature", "", {
       shouldValidate: true,
     });
-    await trigger("spouseOrOfficerSignature.signatureId");
+    await trigger("spouseOrOfficerSignature");
   };
 
   const handleReloadSignatures = () => {
@@ -194,6 +185,13 @@ console.log("errors: ", errors)
                 />
                 Reload Signatures
               </Button>
+
+              <Link href="/dashboard/signatures" target="_blank">
+                <Button type="button" variant="outline" size="sm">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Create New Signature
+                </Button>
+              </Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -206,7 +204,7 @@ console.log("errors: ", errors)
                   </Label>
                   <input
                     type="hidden"
-                    {...register("taxpayerSignature.signatureId")}
+                    {...register("taxpayerSignature")}
                   />
                   <div className="space-y-3 w-full">
                     {!taxpayerSignaturePreview ? (
@@ -298,9 +296,9 @@ console.log("errors: ", errors)
                         </div>
                       </div>
                     )}
-                    {errors.taxpayerSignature?.signatureId && (
+                    {errors.taxpayerSignature && (
                       <p className="text-red-600 text-sm">
-                        {errors.taxpayerSignature.signatureId.message}
+                        {errors.taxpayerSignature.message}
                       </p>
                     )}
                   </div>
@@ -348,7 +346,7 @@ console.log("errors: ", errors)
                   </Label>
                   <input
                     type="hidden"
-                    {...register("spouseOrOfficerSignature.signatureId")}
+                    {...register("spouseOrOfficerSignature")}
                   />
                   <div className="space-y-3 w-full">
                     {!spouseSignaturePreview ? (
@@ -437,9 +435,9 @@ console.log("errors: ", errors)
                         </div>
                       </div>
                     )}
-                    {errors.spouseOrOfficerSignature?.signatureId && (
+                    {errors.spouseOrOfficerSignature && (
                       <p className="text-red-600 text-sm">
-                        {errors.spouseOrOfficerSignature.signatureId.message}
+                        {errors.spouseOrOfficerSignature.message}
                       </p>
                     )}
                   </div>

@@ -118,6 +118,7 @@ export default function SignatureForm() {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
+    formData.append("category", "signature");
 
     let file: File | null = null;
     if (mode === "draw") {

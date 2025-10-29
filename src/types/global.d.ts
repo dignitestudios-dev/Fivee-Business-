@@ -104,6 +104,7 @@ declare global {
   interface FormCase {
     _id: string;
     title: string;
+    isCompleted: "incompleted" | "completed";
     createdAt: string;
     updatedAt: string;
   }

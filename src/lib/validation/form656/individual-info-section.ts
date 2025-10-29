@@ -45,7 +45,7 @@ const taxPeriodSchema = z.object({
 const lowIncomeSchema = z.object({
   qualifiesForLowIncome: z.boolean(),
   qualificationBasis: z
-    .enum(["adjusted_gross_income", "monthly_income"])
+    .enum(["adjusted_gross_income", "household_monthly_income"])
     .optional(),
   familySize: z.number().min(1, "Family size must be at least 1").optional(),
   residenceState: z.enum(["contiguous_states", "alaska", "hawaii"]).optional(),
@@ -124,7 +124,7 @@ export const individualInfoSchema = z
         });
       }
       if (
-        data.lowIncomeCertification.qualificationBasis === "monthly_income" &&
+        data.lowIncomeCertification.qualificationBasis === "household_monthly_income" &&
         data.lowIncomeCertification.householdMonthlyIncome == null
       ) {
         ctx.addIssue({
