@@ -5,7 +5,7 @@ import { FiEyeOff } from "react-icons/fi";
 import { FaEye } from "react-icons/fa";
 
 import FInput from "@/components/ui/FInput";
-import { DUMMY_TOKEN, DUMMY_USER, SECURITY_CONFIG } from "@/lib/constants";
+import { SECURITY_CONFIG } from "@/lib/constants";
 import Link from "next/link";
 import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";

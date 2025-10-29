@@ -72,7 +72,7 @@ const handleApiResponse = (response: any) => {
   return responseData; // Only return the response data {status, message, data}
 };
 
-const apiHandler = async <T>(apiCall: () => Promise<T>): Promise<T> => {
+export const apiHandler = async <T>(apiCall: () => Promise<T>): Promise<T> => {
   try {
     const response = await apiCall();
     return handleApiResponse(response);
@@ -286,6 +286,18 @@ const saveApplicationChecklist = (info: any, caseId: string) =>
     API.post(`/form656b/${caseId}/application-checklist`, info)
   );
 
+// Form 656 - list user's cases
+const getUserForm656Cases = (page: number = 1, limit: number = defaultLimit) =>
+  apiHandler(() => API.get(`/form656b/my-cases?page=${page}&limit=${limit}`));
+
+// Start Form 656
+const startForm656 = (payload: {
+  form433AId?: string;
+  form433BOICId?: string;
+  usedPreQualifierOrIOLACheck: boolean;
+  title: string;
+}) => apiHandler(() => API.post(`/form656b/start`, payload));
+
 // Payment Method API's
 
 const addPaymentMethod = (payload: AddCardPayload) =>
@@ -324,7 +336,6 @@ const api = {
   login,
   signup,
   verifyEmail,
-  signup,
   get433bSectionInfo,
   saveBusinessInfo,
   saveBusinessAssetInfo,
@@ -339,6 +350,8 @@ const api = {
   createPaymentIntent,
   getUserForm433ACases,
   getUserForm433BCases,
+  getUserForm656Cases,
+  startForm656,
   startForm433a,
   startForm433b,
   get656SectionInfo,

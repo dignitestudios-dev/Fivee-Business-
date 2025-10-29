@@ -3,11 +3,20 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface FormsState {
   form433a: FormCase[];
   form433b: FormCase[];
+  form656: FormCase[];
+  form656Pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  } | null;
 }
 
 const initialState: FormsState = {
   form433a: [],
   form433b: [],
+  form656: [],
+  form656Pagination: null,
 };
 
 const formsSlice = createSlice({
@@ -40,6 +49,26 @@ const formsSlice = createSlice({
     clear433bCases(state) {
       state.form433b = [];
     },
+    // Form 656 (cases + pagination)
+    set656Cases(state, action: PayloadAction<FormCase[]>) {
+      state.form656 = action.payload;
+    },
+    add656Case(state, action: PayloadAction<FormCase>) {
+      state.form656.unshift(action.payload);
+    },
+    remove656Case(state, action: PayloadAction<string>) {
+      state.form656 = state.form656.filter((c) => c._id !== action.payload);
+    },
+    clear656Cases(state) {
+      state.form656 = [];
+      state.form656Pagination = null;
+    },
+    set656Pagination(
+      state,
+      action: PayloadAction<{ page: number; limit: number; total: number; totalPages: number } | null>
+    ) {
+      state.form656Pagination = action.payload;
+    },
     clearAllForms(state) {
       state.form433a = [];
       state.form433b = [];
@@ -56,6 +85,11 @@ export const {
   add433bCase,
   remove433bCase,
   clear433bCases,
+  set656Cases,
+  add656Case,
+  remove656Case,
+  clear656Cases,
+  set656Pagination,
   clearAllForms,
 } = formsSlice.actions;
 

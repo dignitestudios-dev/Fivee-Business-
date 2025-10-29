@@ -31,11 +31,15 @@ const VerificationStatus = ({
       {status === "success" && (
         <>
           <HiCheckCircle className="w-16 h-16 text-green-500" />
-          <h2 className="text-2xl font-bold">Email Verified!</h2>
-          <p className="text-gray-600">
-            Your email has been successfully verified. Redirecting you to the
-            dashboard...
-          </p>
+          <h2 className="text-2xl font-bold text-green-700">Email Verified Successfully!</h2>
+          <div className="space-y-2">
+            <p className="text-green-600">
+              Your email address has been verified and your account is now active.
+            </p>
+            <p className="text-gray-600">
+              You will be redirected to your dashboard in a few moments...
+            </p>
+          </div>
         </>
       )}
 

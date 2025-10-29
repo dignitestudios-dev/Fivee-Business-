@@ -13,6 +13,7 @@ import useAuth from "@/hooks/auth/useAuth";
 const SignupForm = () => {
   const { handleSignup, handleGoogleSignIn, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const {
     register,
@@ -60,16 +61,21 @@ const SignupForm = () => {
   };
 
   const onSubmit = async (data: SignupFormValues) => {
-    await handleSignup({
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      password: data.password,
-      employmentType: data.employmentType,
-      socialLogin: false,
-      provider: null,
-      role: "user",
-    });
+    try {
+      await handleSignup({
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        password: data.password,
+        employmentType: data.employmentType,
+        socialLogin: false,
+        provider: null,
+        role: "user",
+      });
+      setSignupSuccess(true);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -77,194 +83,232 @@ const SignupForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-5 items-center mt-5 w-full"
     >
-      <FInput
-        label="Email"
-        placeholder="email@example.com"
-        autoComplete="email"
-        id="email"
-        type="email"
-        {...register("email", { 
-          required: "Email is required",
-          pattern: {
-            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: "Invalid email address"
-          }
-        })}
-        error={errors.email?.message}
-      />
-
-      <div className="w-full grid grid-cols-2 gap-5">
-        <FInput
-          label="First Name"
-          placeholder="Siweh"
-          type="text"
-          id="firstName"
-          {...register("firstName", { required: "First name is required" })}
-          error={errors.firstName?.message}
-        />
-        <FInput
-          label="Last Name"
-          placeholder="Harris"
-          type="text"
-          id="lastName"
-          {...register("lastName", { required: "Last name is required" })}
-          error={errors.lastName?.message}
-        />
-      </div>
-
-      {/* Employment Type Selection */}
-      <div className="w-full">
-        <h3 className="font-semibold mb-2">What would best describe you?</h3>
-        <div className="space-y-3">
-          <label className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
-            watchEmploymentType === "self-employed" ? "border-[var(--primary)]" : "border-[#E3E3E3]"
-          }`}>
-            <input
-              type="radio"
-              value="self-employed"
-              className="hidden"
-              {...register("employmentType", { required: "Please select your employment type" })}
-            />
-            <div className="flex gap-2 items-center py-2 px-4 h-full">
-              <div className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
-                watchEmploymentType === "self-employed" ? "bg-[var(--primary)]" : "bg-white"
-              }`}>
-                <div className="h-full w-full bg-white rounded-full" />
-              </div>
-              Self Employed
-            </div>
-          </label>
-
-          <label className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
-            watchEmploymentType === "business-owner" ? "border-[var(--primary)]" : "border-[#E3E3E3]"
-          }`}>
-            <input
-              type="radio"
-              value="business-owner"
-              className="hidden"
-              {...register("employmentType", { required: "Please select your employment type" })}
-            />
-            <div className="flex gap-2 items-center py-2 px-4 h-full">
-              <div className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
-                watchEmploymentType === "business-owner" ? "bg-[var(--primary)]" : "bg-white"
-              }`}>
-                <div className="h-full w-full bg-white rounded-full" />
-              </div>
-              Business Owner
-            </div>
-          </label>
+      {signupSuccess ? (
+        <div className="w-full text-center p-4 rounded-lg bg-green-50 border border-green-200">
+          <h3 className="text-lg font-medium text-green-800 mb-2">
+            Account Created Successfully!
+          </h3>
+          <p className="text-green-600">
+            A verification email has been sent to your email address. Please
+            check your inbox and verify your account to continue.
+          </p>
         </div>
-        {errors.employmentType && (
-          <p className="text-red-500 text-sm mt-1">{errors.employmentType.message}</p>
-        )}
-      </div>
+      ) : (
+        <>
+          <FInput
+            label="Email"
+            placeholder="email@example.com"
+            autoComplete="email"
+            id="email"
+            type="email"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
+            })}
+            error={errors.email?.message}
+          />
 
-      {/* New Password */}
-      <FInput
-        label="Password"
-        placeholder="Enter Password"
-        type={showPassword ? "text" : "password"}
-        autoComplete="off"
-        id="password"
-        {...register("password", {
-          required: "Password is required",
-          validate: validatePassword,
-        })}
-        error={errors.password?.message}
-        rightIcon={
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="text-gray-400 hover:text-gray-600 cursor-pointer"
-          >
-            {showPassword ? (
-              <FiEyeOff className="w-4 h-4" />
-            ) : (
-              <FaEye className="w-4 h-4" />
-            )}
-          </button>
-        }
-      />
+          <div className="w-full grid grid-cols-2 gap-5">
+            <FInput
+              label="First Name"
+              placeholder="Siweh"
+              type="text"
+              id="firstName"
+              {...register("firstName", { required: "First name is required" })}
+              error={errors.firstName?.message}
+            />
+            <FInput
+              label="Last Name"
+              placeholder="Harris"
+              type="text"
+              id="lastName"
+              {...register("lastName", { required: "Last name is required" })}
+              error={errors.lastName?.message}
+            />
+          </div>
 
-      {/* Password Requirements */}
-      {watchNewPassword && (
-        <div className="rounded-lg w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div
-              className={`flex items-center  ${
-                watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
-                  ? "text-[var(--primary)]"
-                  : "text-gray-400"
-              }`}
-            >
-              <GoCheckCircleFill className="w-5 h-5 mr-2" />
-              At least {SECURITY_CONFIG.passwordMinLength} characters
+          {/* Employment Type Selection */}
+          <div className="w-full">
+            <h3 className="font-semibold mb-2">
+              What would best describe you?
+            </h3>
+            <div className="space-y-3">
+              <label
+                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
+                  watchEmploymentType === "self-employed"
+                    ? "border-[var(--primary)]"
+                    : "border-[#E3E3E3]"
+                }`}
+              >
+                <input
+                  type="radio"
+                  value="self-employed"
+                  className="hidden"
+                  {...register("employmentType", {
+                    required: "Please select your employment type",
+                  })}
+                />
+                <div className="flex gap-2 items-center py-2 px-4 h-full">
+                  <div
+                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
+                      watchEmploymentType === "self-employed"
+                        ? "bg-[var(--primary)]"
+                        : "bg-white"
+                    }`}
+                  >
+                    <div className="h-full w-full bg-white rounded-full" />
+                  </div>
+                  Self Employed
+                </div>
+              </label>
+
+              <label
+                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
+                  watchEmploymentType === "business-owner"
+                    ? "border-[var(--primary)]"
+                    : "border-[#E3E3E3]"
+                }`}
+              >
+                <input
+                  type="radio"
+                  value="business-owner"
+                  className="hidden"
+                  {...register("employmentType", {
+                    required: "Please select your employment type",
+                  })}
+                />
+                <div className="flex gap-2 items-center py-2 px-4 h-full">
+                  <div
+                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
+                      watchEmploymentType === "business-owner"
+                        ? "bg-[var(--primary)]"
+                        : "bg-white"
+                    }`}
+                  >
+                    <div className="h-full w-full bg-white rounded-full" />
+                  </div>
+                  Business Owner
+                </div>
+              </label>
             </div>
-
-            {SECURITY_CONFIG.passwordRequireUppercase && (
-              <div
-                className={`flex items-center  ${
-                  /[A-Z]/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
-              >
-                <GoCheckCircleFill className="w-5 h-5 mr-2" />
-                One uppercase letter
-              </div>
-            )}
-
-            {SECURITY_CONFIG.passwordRequireLowercase && (
-              <div
-                className={`flex items-center  ${
-                  /[a-z]/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
-              >
-                <GoCheckCircleFill className="w-5 h-5 mr-2" />
-                One lowercase letter
-              </div>
-            )}
-
-            {SECURITY_CONFIG.passwordRequireNumbers && (
-              <div
-                className={`flex items-center  ${
-                  /\d/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
-              >
-                <GoCheckCircleFill className="w-5 h-5 mr-2" />
-                One number
-              </div>
-            )}
-
-            {SECURITY_CONFIG.passwordRequireSpecialChars && (
-              <div
-                className={`flex items-center  ${
-                  /[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
-              >
-                <GoCheckCircleFill className="w-5 h-5 mr-2" />
-                One special character
-              </div>
+            {errors.employmentType && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.employmentType.message}
+              </p>
             )}
           </div>
-        </div>
-      )}
 
-      <FButton 
-        variant="primary" 
-        size="lg" 
-        className="w-full" 
-        type="submit"
-        disabled={loading || isSubmitting || !watchEmploymentType}
-      >
-        {loading ? "Signing up..." : "Sign Up"}
-      </FButton>
+          {/* New Password */}
+          <FInput
+            label="Password"
+            placeholder="Enter Password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="off"
+            id="password"
+            {...register("password", {
+              required: "Password is required",
+              validate: validatePassword,
+            })}
+            error={errors.password?.message}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                {showPassword ? (
+                  <FiEyeOff className="w-4 h-4" />
+                ) : (
+                  <FaEye className="w-4 h-4" />
+                )}
+              </button>
+            }
+          />
+
+          {/* Password Requirements */}
+          {watchNewPassword && (
+            <div className="rounded-lg w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div
+                  className={`flex items-center  ${
+                    watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
+                      ? "text-[var(--primary)]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  <GoCheckCircleFill className="w-5 h-5 mr-2" />
+                  At least {SECURITY_CONFIG.passwordMinLength} characters
+                </div>
+
+                {SECURITY_CONFIG.passwordRequireUppercase && (
+                  <div
+                    className={`flex items-center  ${
+                      /[A-Z]/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    <GoCheckCircleFill className="w-5 h-5 mr-2" />
+                    One uppercase letter
+                  </div>
+                )}
+
+                {SECURITY_CONFIG.passwordRequireLowercase && (
+                  <div
+                    className={`flex items-center  ${
+                      /[a-z]/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    <GoCheckCircleFill className="w-5 h-5 mr-2" />
+                    One lowercase letter
+                  </div>
+                )}
+
+                {SECURITY_CONFIG.passwordRequireNumbers && (
+                  <div
+                    className={`flex items-center  ${
+                      /\d/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    <GoCheckCircleFill className="w-5 h-5 mr-2" />
+                    One number
+                  </div>
+                )}
+
+                {SECURITY_CONFIG.passwordRequireSpecialChars && (
+                  <div
+                    className={`flex items-center  ${
+                      /[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    <GoCheckCircleFill className="w-5 h-5 mr-2" />
+                    One special character
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <FButton
+            variant="primary"
+            size="lg"
+            className="w-full"
+            type="submit"
+            disabled={loading || isSubmitting || !watchEmploymentType}
+          >
+            {loading ? "Signing up..." : "Sign Up"}
+          </FButton>
+        </>
+      )}
     </form>
   );
 };

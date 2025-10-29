@@ -5,7 +5,12 @@ import toast from "react-hot-toast";
 import { loginUser } from "@/lib/features/userSlice";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  OAuthProvider,
+  UserCredential,
+} from "firebase/auth";
 
 const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -37,18 +42,94 @@ const useAuth = () => {
     setLoading(true);
     try {
       const response = await api.signup(payload);
-      if (response?.data?.token) {
-        dispatch(
-          loginUser({
-            user: response.data.user,
-            accessToken: response.data.token,
-          })
-        );
-        router.push("/dashboard");
-      }
+      // return the raw response so callers (social flow) can act on returned token/user
+      return response;
     } catch (error: any) {
       console.error("Error during signup:", error);
       toast.error(error?.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialAuth = async (
+    userCredential: UserCredential,
+    provider: SignInProvider,
+    employmentType: EmploymentType
+  ) => {
+    const { user } = userCredential;
+    const [firstName, ...lastNameParts] = user.displayName?.split(" ") || [
+      "",
+      "",
+    ];
+    const lastName = lastNameParts.join(" ");
+
+    const payload: SignupPayload = {
+      email: user.email || "",
+      firstName: firstName || "",
+      lastName: lastName || "",
+      socialLogin: true,
+      provider,
+      role: "user",
+      employmentType,
+    };
+
+    try {
+      const response = await handleSignup(payload);
+      console.log(response);
+      // If backend returned a token and user, treat this as a successful login
+      if (response?.data?.token) {
+        const userData = response.data.user;
+        const token = response.data.token;
+
+        // dispatch to redux store
+        dispatch(
+          loginUser({
+            user: userData,
+            accessToken: token,
+          })
+        );
+
+        // redirect to dashboard
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Error during social login");
+      throw error;
+    }
+  };
+
+  const handleGoogleSignIn = async (
+    employmentType: EmploymentType = "self-employed"
+  ) => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      await handleSocialAuth(result, "google", employmentType);
+    } catch (error: any) {
+      console.error("Google Sign In Error:", error);
+      toast.error(error?.message || "Error signing in with Google");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async (
+    employmentType: EmploymentType = "self-employed"
+  ) => {
+    setLoading(true);
+    try {
+      const provider = new OAuthProvider("apple.com");
+      provider.addScope("email");
+      provider.addScope("name");
+
+      const result = await signInWithPopup(auth, provider);
+      await handleSocialAuth(result, "apple", employmentType);
+    } catch (error: any) {
+      console.error("Apple Sign In Error:", error);
+      toast.error(error?.message || "Error signing in with Apple");
     } finally {
       setLoading(false);
     }
@@ -58,6 +139,8 @@ const useAuth = () => {
     loading,
     handleLogin,
     handleSignup,
+    handleGoogleSignIn,
+    handleAppleSignIn,
   };
 };
 

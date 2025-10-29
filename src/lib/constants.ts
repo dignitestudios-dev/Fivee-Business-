@@ -25,7 +25,7 @@ export const DUMMY_USER: User = {
   firstName: "Siweh",
   lastName: "Harris",
   email: "siwehharris@example.com",
-  employmentType: "",
+  employmentType: "business-owner",
 };
 
 export const FORM_433A_SECTIONS: Form433aSection[] = [

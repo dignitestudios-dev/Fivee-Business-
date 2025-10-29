@@ -12,12 +12,14 @@ interface SignupPayload {
   email: string;
   firstName: string;
   lastName: string;
-  password: string;
+  password?: string;
   employmentType: EmploymentType;
   socialLogin: boolean;
-  provider: "google" | "apple" | null;
+  provider: SignInProvider;
   role: "user" | "admin";
 }
+
+type SignInProvider = "google" | "apple" | null;
 
 interface LoginPayload {
   email: string;

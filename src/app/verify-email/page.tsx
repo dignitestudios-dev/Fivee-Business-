@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import api from "@/lib/services";
+import axios from "axios";
+import { apiHandler } from "@/lib/services";
 import VerificationStatus from "@/components/auth/VerificationStatus";
 import Image from "next/image";
 import { constants } from "@/lib/constants";
@@ -20,19 +21,32 @@ export default function VerifyEmail() {
 
   const verifyEmailToken = async (token: string) => {
     try {
-      const response = await api.verifyEmail(token);
+      // Set the token in API headers
+      const tempAPI = axios.create({
+        baseURL: "http://18.117.169.39/",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      // Auto login after verification
-      // dispatch(
-      //   loginUser({
-      //     user: response.data.user,
-      //     accessToken: response.data.token,
-      //   })
-      // );
+      const response = await apiHandler(() =>
+        tempAPI.post("/user/verify-email")
+      );
+
+      // if (response?.data?.token && response?.data?.user) {
+      // Store the new token and user data
+      dispatch(
+        loginUser({
+          user: response.data.user,
+          accessToken: response.data.token,
+        })
+      );
 
       setStatus("success");
-      // Redirect to dashboard
+      // Give users time to see the success message before redirecting
       router.push("/dashboard");
+      // }
     } catch (error: any) {
       setStatus("error");
       setError(error?.message || "Verification failed. Please try again.");
