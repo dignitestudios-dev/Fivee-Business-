@@ -45,16 +45,12 @@ const Dashboard = () => {
 
   const savedPref = [
     {
-      title: "Draft 1",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
+      title: "Form 433A OIC Drafts",
+      updatedAt: "",
     },
     {
-      title: "Draft 2",
-      updatedAt: "2025-09-09T07:28:14.365+00:00",
-    },
-    {
-      title: "Draft 3",
-      updatedAt: "2025-09-10T00:11:46.341+00:00",
+      title: "Form 433B OIC Drafts",
+      updatedAt: "",
     },
   ];
 
@@ -182,8 +178,13 @@ const Dashboard = () => {
                 {savedPref.map((pref, index) => (
                   <button
                     onClick={() => {
-                      setShowViewSavedPref("individual");
+                      // Only set the manage saved pref state, type will be determined by the title
                       setShowManageSavedPref(true);
+                      const type = pref.title.toLowerCase().includes("433b")
+                        ? "business"
+                        : "individual";
+                      // Pass the type to ManageSavedPreferencesSlider directly without showing ViewSavedPreferencesSlider
+                      setShowViewSavedPref(type);
                     }}
                     disabled={showManageSavedPref}
                     key={index}
@@ -201,9 +202,9 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              <button className=" flex items-center gap-1 group cursor-pointer">
+              {/* <button className=" flex items-center gap-1 group cursor-pointer">
                 View All <BiChevronRight className="text-xl move-x" />{" "}
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -230,14 +231,18 @@ const Dashboard = () => {
       </div>
 
       <ViewSavedPreferencesSlider
-        formType={showViewSavedPref}
-        isOpen={showViewSavedPref ? true : false}
+        formType={!showManageSavedPref ? showViewSavedPref : null}
+        isOpen={!showManageSavedPref && showViewSavedPref ? true : false}
         onClose={() => setShowViewSavedPref(null)}
       />
 
       <ManageSavedPreferencesSlider
         isOpen={showManageSavedPref}
-        onClose={() => setShowManageSavedPref(false)}
+        onClose={() => {
+          setShowManageSavedPref(false);
+          setShowViewSavedPref(null); // Clear the formType state when closing
+        }}
+        formType={showViewSavedPref}
       />
 
       {/* Start form: Title input popup */}
@@ -278,5 +283,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-

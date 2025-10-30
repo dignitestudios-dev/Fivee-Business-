@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { Label } from "./label";
-import { Input } from "./Input";
+import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { cn } from "../../utils/helper";
 import { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";

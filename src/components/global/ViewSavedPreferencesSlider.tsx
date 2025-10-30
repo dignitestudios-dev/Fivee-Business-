@@ -17,7 +17,6 @@ interface ManageSavedPreferencesSliderProps {
 const ViewSavedPreferencesSlider: React.FC<
   ManageSavedPreferencesSliderProps
 > = ({ isOpen, onClose, formType }) => {
-  console.log("formType: ", formType);
   const { form433a, form433b } = useAppSelector((state) => state.forms);
 
   const {

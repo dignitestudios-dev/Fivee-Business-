@@ -15,6 +15,7 @@ import { logoutUser } from "@/lib/features/userSlice";
 import ChatPopup from "../ChatPopup";
 import Popup from "@/components/ui/Popup";
 import LogoutIcon from "@/components/icons/LogoutIcon";
+import ChatPopupNew from "../ChatPopupNew";
 
 const Header = () => {
   const dispatch = useAppDispatch();
@@ -23,6 +24,9 @@ const Header = () => {
   const user = useAppSelector((state) => state.user.user);
   const [showChatSupport, setShowChatSupport] = useState<boolean>(false);
   const [showLogout, setShowLogout] = useState<boolean>(false);
+  const unreadCount = useAppSelector((state: any) =>
+    state.chat?.messages?.filter((msg: any) => msg.sender === "support" && !msg.read).length || 0
+  );
 
   const fullName = useMemo(
     () => `${user?.firstName} ${user?.lastName}`,
@@ -102,11 +106,16 @@ const Header = () => {
 
         <div className="flex items-center gap-10 text-white">
           <button
-            className="cursor-pointer flex gap-3 items-center"
+            className="cursor-pointer flex gap-3 items-center relative"
             onClick={() => handleToggleChatSupport("show")}
           >
             <Support />
             Customer Support
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           <DropdownPopup

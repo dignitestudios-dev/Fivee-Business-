@@ -52,19 +52,6 @@ declare global {
 
   type EmploymentType = "self-employed" | "business-owner";
 
-  interface User {
-    firstName: string;
-    lastName: string;
-    email: string;
-    employmentType: EmploymentType | "";
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    name?: string;
-  }
-
   interface Message {
     id: number;
     text: string;

@@ -221,6 +221,19 @@ const startForm433b = (payload: { title: string }) =>
     API.post(`/form433boic/start`, payload)
   );
 
+// Manage saved preferences - update / delete
+const updateForm433a = (caseId: string, payload: { title?: string }) =>
+  apiHandler(() => API.patch(`/form433a/${caseId}`, payload));
+
+const deleteForm433a = (caseId: string) =>
+  apiHandler(() => API.delete(`/form433a/${caseId}`));
+
+const updateForm433b = (caseId: string, payload: { title?: string }) =>
+  apiHandler(() => API.patch(`/form433boic/${caseId}`, payload));
+
+const deleteForm433b = (caseId: string) =>
+  apiHandler(() => API.delete(`/form433boic/${caseId}`));
+
 const get433bSectionInfo = (caseId: string, section: Form433bSection) =>
   apiHandler<{ data: any; message: string }>(() =>
     API.get(`/form433boic/${caseId}/section?section=${section}`)
@@ -358,6 +371,10 @@ const api = {
   deleteSignature,
   getVideoCategories,
   getVideos,
+  updateForm433a,
+  deleteForm433a,
+  updateForm433b,
+  deleteForm433b,
   login,
   signup,
   verifyEmail,

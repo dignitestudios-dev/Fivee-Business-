@@ -17,6 +17,9 @@ const useIndividualInfo = () => {
     setLoading(true);
 
     try {
+      delete info.usedIOLAEligibilityCheck;
+      delete info.usedPreQualifierTool;
+
       console.log("Individual Info: ", info, " caseId is ", caseId);
       await api.saveIndividualInfo(info, caseId);
       dispatch(saveIndividualInformation(info));

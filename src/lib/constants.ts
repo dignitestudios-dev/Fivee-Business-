@@ -21,7 +21,7 @@ export const constants = {
 };
 
 export const DUMMY_USER: User = {
-  id: "123",
+  _id: "123",
   firstName: "Siweh",
   role: "user",
   lastName: "Harris",
