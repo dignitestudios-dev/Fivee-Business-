@@ -23,14 +23,14 @@ const useDownload656Pdf = () => {
     try {
       let url: string;
 
-    //   if (downloadUrl) {
-    //     url = downloadUrl;
-    //   } else {
+      if (downloadUrl) {
+        url = downloadUrl;
+      } else {
         const response = await api.generate656Pdf(caseId);
         console.log("PDF Generation Response:", response);
         url = response.data.url; // Assuming the response structure has data.url
-    //   }
-    console.log("PDF URL:", url);
+      }
+      console.log("PDF URL:", url);
       if (url) {
         const link = document.createElement("a");
         link.href = url;
