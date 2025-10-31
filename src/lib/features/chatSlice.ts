@@ -26,6 +26,7 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     setMessages: (state, action: PayloadAction<Message[]>) => {
+      console.log("Setting messages:", action.payload);
       state.messages = action.payload;
       state.isLoaded = true;
     },

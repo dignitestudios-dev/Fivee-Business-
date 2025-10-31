@@ -6,6 +6,7 @@ import form656Slice from "./features/form656Slice";
 import signaturesSlice from "./features/signaturesSlice";
 import cardsSlice from "./features/cardsSlice";
 import formsSlice from "./features/formsSlice";
+import chatSlice from "./features/chatSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -17,6 +18,7 @@ export const makeStore = () => {
       signatures: signaturesSlice,
       cards: cardsSlice,
       forms: formsSlice,
+      chats: chatSlice,
     },
   });
 };

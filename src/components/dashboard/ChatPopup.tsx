@@ -34,8 +34,8 @@ interface ChatPopupProps {
 const ChatPopup: React.FC<ChatPopupProps> = ({
   isOpen,
   onClose,
-  supportName = "Siweh",
-  companyName = "siweh",
+  supportName = "Fivee Business",
+  companyName = "Fivee Business",
   companyLogo = APP_CONFIG.logo,
 }) => {
   const user = useAppSelector((state) => state.user.user);
@@ -45,7 +45,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   const [isConnecting, setIsConnecting] = useState(false);
   const ADMIN_ID = "68e8ff9582494fc2027a5b62";
   const dispatch = useAppDispatch();
-  const messages = useAppSelector((state: any) => state.chat?.messages || []);
+  const messages = useAppSelector((state) => state.chats.messages || []);
   const [inputValue, setInputValue] = useState<string>("");
   const [hasError, setHasError] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -56,6 +56,12 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   // Create ref for messages container
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  // Keep a ref to the latest messages to avoid stale closures inside socket handlers
+  const messagesRef = useRef<Message[]>(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Auto scroll to bottom function
   const scrollToBottom = () => {
@@ -65,16 +71,10 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   // Auto scroll when messages change
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isOpen, onClose]);
 
   // Debug: log messages from store when they update
-  useEffect(() => {
-    try {
-      console.log("ChatPopup - messages from store:", messages);
-    } catch (e) {
-      console.log("ChatPopup - messages logging error", e);
-    }
-  }, [messages]);
+  console.log("ChatPopup - messages from store:", messages);
 
   // normalize helper
   const normalize = (m: any): Message => {
@@ -116,6 +116,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
       const onChatHistory = (data: any) => {
         // server may send array directly or an object with history
+        console.log("received chat history:", data);
         const arr = Array.isArray(data) ? data : data?.history ?? data?.messages ?? [];
         if (arr && arr.length) {
           const normalized = arr.map(normalize);
@@ -128,20 +129,52 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
       const onReceiveMessage = (message: any) => {
         const normalized = normalize(message);
         console.log("ChatPopup - normalized receive_message:", normalized);
+
+        // If this message has a server id and we already have it, ignore (prevents duplicates)
+        if (normalized.id && messagesRef.current.some(m => String(m.id) === String(normalized.id))) {
+          // If the existing message is a temp message (has tempId) and server provided tempId, update it
+          if ((message as any).tempId) {
+            dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "received", serverMessage: normalized }));
+          }
+          return;
+        }
+
+        // If message has tempId and matches a local temp message, update that message instead of adding duplicate
+        if ((message as any).tempId) {
+          const existing = messagesRef.current.find(m => m.tempId === (message as any).tempId);
+          if (existing) {
+            dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "received", serverMessage: normalized }));
+            return;
+          }
+        }
+
+        // Otherwise add the incoming server message
         dispatch(addMessage(normalized));
-        if (audioRef.current && !isOpen) audioRef.current.play();
+        if (normalized.senderId !== user?._id && audioRef.current && !isOpen) {
+          audioRef.current.play();
+        }
         setTimeout(scrollToBottom, 100);
       };
 
       const onMessageSent = (message: any) => {
         const normalized = normalize(message);
         console.log("ChatPopup - normalized message_sent:", normalized);
+
+        // If server returned a tempId, update the temporary message
         if ((message as any).tempId) {
-          dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "sent", serverMessage: normalized }));
-        } else {
-          dispatch(addMessage(normalized));
+          const exists = messagesRef.current.find(m => m.tempId === (message as any).tempId);
+          if (exists) {
+            dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "sent", serverMessage: normalized }));
+            setTimeout(scrollToBottom, 100);
+            return;
+          }
         }
-        setTimeout(scrollToBottom, 100);
+
+        // If the message has a server id and we don't have it yet, add it
+        if (normalized.id && !messagesRef.current.some(m => String(m.id) === String(normalized.id))) {
+          dispatch(addMessage(normalized));
+          setTimeout(scrollToBottom, 100);
+        }
       };
 
       const onMessageError = (error: { code?: string; message?: string }) => {
@@ -187,39 +220,20 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   const sendMessage = () => {
     if (!inputValue.trim() || !user?._id) return;
 
-    const tempId = Date.now().toString();
-    const tempMessage: Message = {
-      id: Date.now().toString(),
-      senderId: user._id,
-      receiverId: ADMIN_ID,
-      message: inputValue.trim(),
-      timestamp: new Date().toISOString(),
-      status: "sending",
-      tempId,
-      isAdmin: false,
-    };
+    const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const messageText = inputValue.trim();
 
-    // Add message to redux immediately
-    dispatch(addMessage(tempMessage));
+    // Clear input before sending to allow for multiple messages
+    setInputValue("");
 
     // Send to server
     socketService.emit("send_message", {
       senderId: user._id,
       receiverId: ADMIN_ID,
-      message: inputValue.trim(),
-      tempId,
+        message: messageText,
+      tempId: clientId,
+        timestamp: new Date().toISOString()
     });
-
-    setInputValue("");
-
-    // Set error status if no response in 10 seconds
-    setTimeout(() => {
-      const currentMessage = messages.find((m: any) => m.tempId === tempId);
-      if (currentMessage?.status === "sending") {
-        dispatch(updateMessageStatus({ tempId, status: "error" }));
-        toast.error("Message failed to send");
-      }
-    }, 10000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -231,24 +245,21 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
   const resendMessage = (msg: Message) => {
     if (!msg.tempId || !user?._id) return;
-    const tId = msg.tempId;
-    // mark as sending
-    dispatch(updateMessageStatus({ tempId: tId, status: "sending" }));
+    
+      // Remove the failed message
+      dispatch(updateMessageStatus({ tempId: msg.tempId, status: "error" }));
+    
+      // Generate new tempId for retry
+      const newTempId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+      // Send to server with new tempId
     socketService.emit("send_message", {
       senderId: user._id,
       receiverId: ADMIN_ID,
       message: msg.message,
-      tempId: tId,
+        tempId: newTempId,
+        timestamp: new Date().toISOString()
     });
-
-    // set error if no confirmation
-    setTimeout(() => {
-      const currentMessage = messages.find((m: any) => m.tempId === tId);
-      if (currentMessage?.status === "sending") {
-        dispatch(updateMessageStatus({ tempId: tId, status: "error" }));
-        toast.error("Retry failed");
-      }
-    }, 10000);
   };
 
   return (
@@ -322,9 +333,6 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
                       >
                         <AlertCircle className="w-3 h-3 text-red-500" />
                       </button>
-                    )}
-                    {message.status === "sent" && (
-                      <Check className="w-3 h-3 text-green-500" />
                     )}
                   </div>
                 )}
