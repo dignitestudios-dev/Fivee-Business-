@@ -30,6 +30,7 @@ const useDownload656Pdf = () => {
         console.log("PDF Generation Response:", response);
         url = response.data.url; // Assuming the response structure has data.url
     //   }
+    console.log("PDF URL:", url);
       if (url) {
         const link = document.createElement("a");
         link.href = url;
