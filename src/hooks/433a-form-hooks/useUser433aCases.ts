@@ -4,7 +4,11 @@ import api from "@/lib/services";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { set433aCases } from "@/lib/features/formsSlice";
 
-const useUser433aCases = (initialPage = 1, limit = 5) => {
+const useUser433aCases = (
+  initialPage = 1,
+  limit = 5,
+  filter: FormsCasesFilter = "all"
+) => {
   const dispatch = useAppDispatch();
   const existingCases = useAppSelector((s) => s.forms.form433a) || [];
   const existingCasesRef = useRef<FormCase[]>(existingCases);
@@ -26,7 +30,7 @@ const useUser433aCases = (initialPage = 1, limit = 5) => {
         else setLoading(true);
 
         setError(null);
-        const res = await api.getUserForm433ACases(p, limit);
+        const res = await api.getUserForm433ACases(p, limit, filter);
 
         // response data may be either an array or an object with `cases` key
         const cases: FormCase[] = Array.isArray(res?.data)

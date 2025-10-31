@@ -39,3 +39,12 @@ interface User {
   employmentType: EmploymentType;
   role: "user" | "admin";
 }
+
+interface ForgotPasswordPayload {
+  email: string;
+}
+
+interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}

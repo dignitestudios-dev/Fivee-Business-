@@ -52,6 +52,11 @@ declare global {
 
   type EmploymentType = "self-employed" | "business-owner";
 
+  type FormsCasesFilter =
+    | "all"
+    | "completedAndPaymentSussessed"
+    | "inCompleted";
+
   interface Message {
     id: number;
     text: string;
@@ -94,6 +99,7 @@ declare global {
     isCompleted: "incompleted" | "completed";
     createdAt: string;
     updatedAt: string;
+    downloadUrl?: string;
   }
 
   type Form433aSection =

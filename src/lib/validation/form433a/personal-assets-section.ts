@@ -7,6 +7,9 @@ export const personalAssetsInitialValues: PersonalAssetsFormSchema = {
   digitalAssets: [],
   retirementAccounts: [],
   lifeInsurancePolicies: [],
+  isForSale: false,
+  anticipateSelling: false,
+  listingPrice: null,
   realProperties: [],
   vehicles: [],
   valuableItems: [],
@@ -124,6 +127,12 @@ export const personalAssetsSchema = z.object({
       })
     )
     .optional(),
+  isForSale: z.boolean().optional(),
+  anticipateSelling: z.boolean().optional(),
+  listingPrice: z.coerce
+    .number()
+    .min(0, "Listing price cannot be negative")
+    .optional(),
   realProperties: z
     .array(
       z.object({
@@ -145,12 +154,6 @@ export const personalAssetsSchema = z.object({
         loanBalance: z.coerce
           .number()
           .min(0, "Loan balance cannot be negative")
-          .optional(),
-        isForSale: z.boolean().optional(),
-        anticipateSelling: z.boolean().optional(),
-        listingPrice: z.coerce
-          .number()
-          .min(0, "Listing price cannot be negative")
           .optional(),
       })
     )

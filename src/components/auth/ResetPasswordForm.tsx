@@ -1,17 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FButton from "../../components/ui/FButton";
 import FInput from "../../components/ui/FInput";
 import { useForm } from "react-hook-form";
 import { SECURITY_CONFIG } from "@/lib/constants";
 import { BiCheckCircle } from "react-icons/bi";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FiEyeOff } from "react-icons/fi";
 import { FaEye } from "react-icons/fa";
 import { GoCheckCircleFill } from "react-icons/go";
+import useAuth from "@/hooks/auth/useAuth";
+import toast from "react-hot-toast";
 
 const ResetPasswordForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const { loading, handleResetPassword } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -56,21 +61,36 @@ const ResetPasswordForm = () => {
       : `Password must contain: ${errors.join(", ")}`;
   };
 
+  useEffect(() => {
+    if (!token) {
+      toast.error("Invalid or missing token, use the link from your email.");
+      router.push("/auth/forgot-password");
+    }
+  }, [token]);
+
   const onSubmit = async (data: ResetPasswordFormValues) => {
-    console.log(data);
-    router.push("/auth/login");
+    try {
+      await handleResetPassword({
+        token: token as string,
+        newPassword: data.password,
+      });
+      setIsSuccess(true);
+    } catch (error) {
+      toast.error("Failed to reset password. Please try again.");
+      console.log("Error resetting password:", error);
+    }
   };
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="p-8 border rounded-2xl">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900">
-                <BiCheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <BiCheckCircle className="h-6 w-6 text-green-600" />
               </div>
-              <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+              <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
                 Password reset successful
               </h2>
               <p className="mt-2  text-gray-600 dark:text-gray-400">
@@ -220,8 +240,13 @@ const ResetPasswordForm = () => {
         </div>
       )}
 
-      <FButton type="submit" className="w-full" loading={false} disabled={false}>
-        {false ? "Reseting..." : "Reset"}
+      <FButton
+        type="submit"
+        className="w-full"
+        loading={loading}
+        disabled={false}
+      >
+        {loading ? "Reseting..." : "Reset"}
       </FButton>
     </form>
   );

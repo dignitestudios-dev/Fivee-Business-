@@ -66,6 +66,7 @@ export function PersonalAssetsSection({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
   } = methods;
 
   const onSubmit = async (data: PersonalAssetsFormSchema) => {
@@ -80,6 +81,8 @@ export function PersonalAssetsSection({
       toast.error(error.message || "Failed to save assets info");
     }
   };
+
+  const isSelling = watch("isForSale") || watch("anticipateSelling");
 
   useEffect(() => {
     if (!assetsInfo) handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
@@ -1247,11 +1250,72 @@ export function PersonalAssetsSection({
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Property Sale Status Questions */}
+            <FormField
+              id="realProperties-sale-status"
+              label="Is this real property currently for sale or do you anticipate selling this real property to fund the offer amount?"
+            >
+              <div className="space-y-4 mt-2">
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    {...register(`isForSale`)}
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id={`isForSale`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Label htmlFor={`isForSale`}>
+                    Is this property currently for sale?
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    {...register(`anticipateSelling`)}
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id={`anticipateSelling`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Label htmlFor={`anticipateSelling`}>
+                    Do you anticipate selling this property to fund the offer
+                    amount?
+                  </Label>
+                </div>
+              </div>
+
+              {isSelling && (
+                <div className="mt-3">
+                  <FormInput
+                    label="Listing Price ($)"
+                    id={`listingPrice`}
+                    type="number"
+                    min="0"
+                    required
+                    placeholder="0"
+                    {...register(`listingPrice`, {
+                      valueAsNumber: true,
+                      min: {
+                        value: 0,
+                        message: "Listing price cannot be negative",
+                      },
+                    })}
+                    error={errors.listingPrice?.message}
+                    className="max-w-md"
+                  />
+                </div>
+              )}
+            </FormField>
+
             {realProperties.map((field, index) => {
               const prop = realPropertiesValue[index] || {};
-              const isForSale = prop.isForSale || false;
-              const anticipateSelling = prop.anticipateSelling || false;
-              const isSelling = isForSale || anticipateSelling;
 
               return (
                 <div
@@ -1272,75 +1336,6 @@ export function PersonalAssetsSection({
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-
-                  {/* Property Sale Status Questions */}
-                  <FormField
-                    id="realProperties-sale-status"
-                    label="Is this real property currently for sale or do you anticipate selling this real property to fund the offer amount?"
-                  >
-                    <div className="space-y-4 mt-2">
-                      <div className="flex items-center space-x-2">
-                        <Controller
-                          name={`realProperties.${index}.isForSale`}
-                          control={control}
-                          render={({ field }) => (
-                            <Checkbox
-                              id={`realProperties.${index}.isForSale`}
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          )}
-                        />
-                        <Label htmlFor={`realProperties.${index}.isForSale`}>
-                          Is this property currently for sale?
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Controller
-                          name={`realProperties.${index}.anticipateSelling`}
-                          control={control}
-                          render={({ field }) => (
-                            <Checkbox
-                              id={`realProperties.${index}.anticipateSelling`}
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          )}
-                        />
-                        <Label
-                          htmlFor={`realProperties.${index}.anticipateSelling`}
-                        >
-                          Do you anticipate selling this property to fund the
-                          offer amount?
-                        </Label>
-                      </div>
-                    </div>
-
-                    {isSelling && (
-                      <div className="mt-3">
-                        <FormInput
-                          label="Listing Price ($)"
-                          id={`realProperties.${index}.listingPrice`}
-                          type="number"
-                          min="0"
-                          required
-                          placeholder="0"
-                          {...register(`realProperties.${index}.listingPrice`, {
-                            valueAsNumber: true,
-                            min: {
-                              value: 0,
-                              message: "Listing price cannot be negative",
-                            },
-                          })}
-                          error={
-                            errors.realProperties?.[index]?.listingPrice
-                              ?.message
-                          }
-                          className="max-w-md"
-                        />
-                      </div>
-                    )}
-                  </FormField>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormInput

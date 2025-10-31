@@ -53,6 +53,30 @@ const useAuth = () => {
     }
   };
 
+  const handleForgotPassword = async (payload: ForgotPasswordPayload) => {
+    setLoading(true);
+    try {
+      await api.forgotPassword(payload);
+      toast.success("Password reset email sent");
+    } catch (error: any) {
+      console.error("Error during forgot password:", error);
+      toast.error(error?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (payload: ResetPasswordPayload) => {
+    setLoading(true);
+    try {
+      await api.resetPassword(payload);
+    } catch (error: any) {
+      throw new Error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSocialAuth = async (
     userCredential: UserCredential,
     provider: SignInProvider,
@@ -141,6 +165,8 @@ const useAuth = () => {
     handleSignup,
     handleGoogleSignIn,
     handleAppleSignIn,
+    handleForgotPassword,
+    handleResetPassword,
   };
 };
 

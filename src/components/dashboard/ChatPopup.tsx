@@ -9,7 +9,11 @@ import {
   Check,
 } from "lucide-react";
 import Modal from "../ui/Modal";
-import { formatRelativeTime } from "@/utils/helper";
+import {
+  formatDateTime,
+  formatRelativeTime,
+  formatTo12HourTime,
+} from "@/utils/helper";
 import { APP_CONFIG } from "@/lib/constants";
 import Image from "next/image";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
@@ -39,9 +43,13 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   companyLogo = APP_CONFIG.logo,
 }) => {
   const user = useAppSelector((state) => state.user.user);
-  const fullName = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user]);
+  const fullName = useMemo(
+    () => `${user?.firstName} ${user?.lastName}`,
+    [user]
+  );
 
-  const [connectionStatus, setConnectionStatus] = useState<Status>("disconnected");
+  const [connectionStatus, setConnectionStatus] =
+    useState<Status>("disconnected");
   const [isConnecting, setIsConnecting] = useState(false);
   const ADMIN_ID = "68e8ff9582494fc2027a5b62";
   const dispatch = useAppDispatch();
@@ -49,9 +57,6 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   const [inputValue, setInputValue] = useState<string>("");
   const [hasError, setHasError] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // derive token once (use as effect dependency)
-  const token = String(storage.get("accessToken") || "");
 
   // Create ref for messages container
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -100,6 +105,8 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
   // Connect socket when token (or user id) changes. Register handlers before connect so we don't miss events.
   useEffect(() => {
+    const token = String(storage.get("accessToken") || "");
+
     if (!token) return;
 
     setIsConnecting(true);
@@ -110,14 +117,22 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
       socketService.addStatusListener(setConnectionStatus);
 
       const onConnect = () => {
-        console.log("Socket connected, requesting chat history", { userId: user?._id, adminId: ADMIN_ID });
-        socketService.emit("get_chat_history", { userId: user?._id, adminId: ADMIN_ID });
+        console.log("Socket connected, requesting chat history", {
+          userId: user?._id,
+          adminId: ADMIN_ID,
+        });
+        socketService.emit("get_chat_history", {
+          userId: user?._id,
+          adminId: ADMIN_ID,
+        });
       };
 
       const onChatHistory = (data: any) => {
         // server may send array directly or an object with history
         console.log("received chat history:", data);
-        const arr = Array.isArray(data) ? data : data?.history ?? data?.messages ?? [];
+        const arr = Array.isArray(data)
+          ? data
+          : data?.history ?? data?.messages ?? [];
         if (arr && arr.length) {
           const normalized = arr.map(normalize);
           console.log("ChatPopup - normalized chat_history:", normalized);
@@ -131,19 +146,38 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
         console.log("ChatPopup - normalized receive_message:", normalized);
 
         // If this message has a server id and we already have it, ignore (prevents duplicates)
-        if (normalized.id && messagesRef.current.some(m => String(m.id) === String(normalized.id))) {
+        if (
+          normalized.id &&
+          messagesRef.current.some(
+            (m) => String(m.id) === String(normalized.id)
+          )
+        ) {
           // If the existing message is a temp message (has tempId) and server provided tempId, update it
           if ((message as any).tempId) {
-            dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "received", serverMessage: normalized }));
+            dispatch(
+              updateMessageStatus({
+                tempId: (message as any).tempId,
+                status: "received",
+                serverMessage: normalized,
+              })
+            );
           }
           return;
         }
 
         // If message has tempId and matches a local temp message, update that message instead of adding duplicate
         if ((message as any).tempId) {
-          const existing = messagesRef.current.find(m => m.tempId === (message as any).tempId);
+          const existing = messagesRef.current.find(
+            (m) => m.tempId === (message as any).tempId
+          );
           if (existing) {
-            dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "received", serverMessage: normalized }));
+            dispatch(
+              updateMessageStatus({
+                tempId: (message as any).tempId,
+                status: "received",
+                serverMessage: normalized,
+              })
+            );
             return;
           }
         }
@@ -162,16 +196,29 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
         // If server returned a tempId, update the temporary message
         if ((message as any).tempId) {
-          const exists = messagesRef.current.find(m => m.tempId === (message as any).tempId);
+          const exists = messagesRef.current.find(
+            (m) => m.tempId === (message as any).tempId
+          );
           if (exists) {
-            dispatch(updateMessageStatus({ tempId: (message as any).tempId, status: "sent", serverMessage: normalized }));
+            dispatch(
+              updateMessageStatus({
+                tempId: (message as any).tempId,
+                status: "sent",
+                serverMessage: normalized,
+              })
+            );
             setTimeout(scrollToBottom, 100);
             return;
           }
         }
 
         // If the message has a server id and we don't have it yet, add it
-        if (normalized.id && !messagesRef.current.some(m => String(m.id) === String(normalized.id))) {
+        if (
+          normalized.id &&
+          !messagesRef.current.some(
+            (m) => String(m.id) === String(normalized.id)
+          )
+        ) {
           dispatch(addMessage(normalized));
           setTimeout(scrollToBottom, 100);
         }
@@ -193,7 +240,10 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
       // if already connected, call onConnect immediately
       try {
-        if (socketService.getStatus && socketService.getStatus() === "connected") {
+        if (
+          socketService.getStatus &&
+          socketService.getStatus() === "connected"
+        ) {
           onConnect();
         }
       } catch (e) {
@@ -215,13 +265,13 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
       socketService.removeStatusListener(setConnectionStatus);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, user?._id, isOpen]);
+  }, [user?._id, isOpen]);
 
   const sendMessage = () => {
     if (!inputValue.trim() || !user?._id) return;
 
     const clientId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const messageText = inputValue.trim();
+    const messageText = inputValue.trim();
 
     // Clear input before sending to allow for multiple messages
     setInputValue("");
@@ -230,9 +280,9 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
     socketService.emit("send_message", {
       senderId: user._id,
       receiverId: ADMIN_ID,
-        message: messageText,
+      message: messageText,
       tempId: clientId,
-        timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -245,20 +295,22 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
   const resendMessage = (msg: Message) => {
     if (!msg.tempId || !user?._id) return;
-    
-      // Remove the failed message
-      dispatch(updateMessageStatus({ tempId: msg.tempId, status: "error" }));
-    
-      // Generate new tempId for retry
-      const newTempId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-      // Send to server with new tempId
+
+    // Remove the failed message
+    dispatch(updateMessageStatus({ tempId: msg.tempId, status: "error" }));
+
+    // Generate new tempId for retry
+    const newTempId = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    // Send to server with new tempId
     socketService.emit("send_message", {
       senderId: user._id,
       receiverId: ADMIN_ID,
       message: msg.message,
-        tempId: newTempId,
-        timestamp: new Date().toISOString()
+      tempId: newTempId,
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -271,30 +323,22 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
       showCloseButton={false}
       closeOnOverlayClick={false}
       className="max-w-[400px] h-[600px] max-h-full flex flex-col relative shadow-[0px_4px_19.4px_1px_#22B5731A]"
-  >
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 rounded-t-lg">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-600 shadow-[2px_2px_0_1px_black] rounded-lg flex items-center justify-center">
-            {companyLogo ? (
-              <Image
-                src={companyLogo}
-                alt={companyName}
-                width={24}
-                height={24}
-              />
-            ) : (
+          {companyLogo ? (
+            <Image
+              src={companyLogo}
+              alt={companyName}
+              width={60}
+              height={60}
+            />
+          ) : (
+            <div className="w-10 h-10 bg-green-600 shadow-[2px_2px_0_1px_black] rounded-lg flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-white" />
-            )}
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-green-500' : connectionStatus === 'connecting' ? 'bg-yellow-400' : 'bg-gray-300'}`}
-                title={`Socket: ${connectionStatus}`}
-              />
             </div>
-          </div>
+          )}
         </div>
         <button
           onClick={onClose}
@@ -344,7 +388,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
                   <span className="font-medium">{supportName}</span>
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   <span className="text-gray-400">
-                    {formatRelativeTime(message.timestamp.toString())}
+                    {formatTo12HourTime(message.timestamp.toString())}
                   </span>
                 </div>
               </div>
@@ -354,7 +398,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
                   <span className="font-medium">You</span>
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   <span className="text-gray-400">
-                    {formatRelativeTime(message.timestamp.toString())}
+                    {formatTo12HourTime(message.timestamp.toString())}
                   </span>
                 </div>
               </div>
@@ -374,9 +418,6 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
       {/* Input */}
       <div className="absolute bottom-0 left-0 w-full p-4 border-t border-gray-200 bg-white rounded-b-lg">
         <div className="flex items-end gap-2">
-          <button className="p-2 text-gray-400 hover:text-gray-600 rounded transition-colors">
-            <Paperclip className="w-5 h-5" />
-          </button>
           <div className="flex-1 relative">
             <textarea
               value={inputValue}

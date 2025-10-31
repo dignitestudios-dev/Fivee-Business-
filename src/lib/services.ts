@@ -2,6 +2,7 @@ import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
 export const BASE_URL = "https://api.fiveebusiness.com/";
+// export const BASE_URL = "http://localhost:3001/";
 
 // Create an Axios instance
 const API = axios.create({
@@ -34,7 +35,7 @@ API.interceptors.response.use(
     if (error?.response?.data?.statusCode === 401) {
       storage.remove("accessToken");
       storage.remove("user");
-      window.location.href = "/auth/login";
+      // window.location.href = "/auth/login";
     }
     console.log("Complete Error: ", error);
     console.log("API Error:", error.response?.data || error);
@@ -96,10 +97,22 @@ const signup = (payload: SignupPayload) =>
 const verifyEmail = (token: string) =>
   apiHandler(() => API.post("/user/verify-email", { token }));
 
+const forgotPassword = (payload: ForgotPasswordPayload) =>
+  apiHandler(() => API.post("/user/forgot-password", payload));
+
+const resetPassword = (payload: ResetPasswordPayload) =>
+  apiHandler(() => API.post("/user/reset-password", payload));
+
 // Form 433A OIC
 
-const getUserForm433ACases = (page: number = 1, limit: number = defaultLimit) =>
-  apiHandler(() => API.get(`/form433a/my-cases?page=${page}&limit=${limit}`));
+const getUserForm433ACases = (
+  page: number = 1,
+  limit: number = defaultLimit,
+  filter: FormsCasesFilter = "all"
+) =>
+  apiHandler(() =>
+    API.get(`/form433a/my-cases?page=${page}&limit=${limit}&filter${filter}`)
+  );
 
 const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
   apiHandler<{ data: any; message: string }>(() =>
@@ -194,7 +207,13 @@ const getVideos = (
   category?: string
 ) =>
   apiHandler<{
-    data: { video: any[]; page: number; limit: number; total: number; totalPages: number };
+    data: {
+      video: any[];
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
     message: string;
   }>(() =>
     // Use axios params so serialization is handled correctly (avoids manual url-encoding issues)
@@ -205,9 +224,15 @@ const getVideos = (
 
 // Form 433B OIC
 
-const getUserForm433BCases = (page: number = 1, limit: number = defaultLimit) =>
+const getUserForm433BCases = (
+  page: number = 1,
+  limit: number = defaultLimit,
+  filter: FormsCasesFilter = "all"
+) =>
   apiHandler(() =>
-    API.get(`/form433boic/my-cases?page=${page}&limit=${limit}`)
+    API.get(
+      `/form433boic/my-cases?page=${page}&limit=${limit}&filter=${filter}`
+    )
   );
 
 // Start Form APIs
@@ -326,6 +351,11 @@ const saveApplicationChecklist = (info: any, caseId: string) =>
 const getUserForm656Cases = (page: number = 1, limit: number = defaultLimit) =>
   apiHandler(() => API.get(`/form656b/my-cases?page=${page}&limit=${limit}`));
 
+const generate656Pdf = (caseId: string) =>
+  apiHandler<{ data: { url: string }; message: string }>(() =>
+    API.get(`/form656b/${caseId}/generate-pdf`)
+  );
+
 // Start Form 656
 const startForm656 = (payload: {
   form433AId?: string;
@@ -378,6 +408,8 @@ const api = {
   login,
   signup,
   verifyEmail,
+  forgotPassword,
+  resetPassword,
   get433bSectionInfo,
   saveBusinessInfo,
   saveBusinessAssetInfo,
@@ -406,6 +438,7 @@ const api = {
   saveSignatures,
   savePaidPreparer,
   saveApplicationChecklist,
+  generate656Pdf,
 };
 
 export default api;

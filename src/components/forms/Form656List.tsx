@@ -1,3 +1,5 @@
+// Updated Form656List component
+
 "use client";
 import { formatDate } from "@/utils/helper";
 import React from "react";
@@ -8,16 +10,14 @@ import FormLoader from "@/components/global/FormLoader";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/Button";
+import useDownload656Pdf from "@/hooks/656-form-hooks/useDownload656Pdf"; // Import the new hook
 
 const Form656List = () => {
   const cases = useAppSelector((s) => s.forms.form656) || [];
   const pagination = useAppSelector((s) => s.forms.form656Pagination);
   const { loading, loadingMore, loadMore, hasMore } = useUser656Cases();
+  const { downloadPdf, downloadingMap } = useDownload656Pdf(); // Use the hook
 
-  const handleDownloadForm = () => {
-    // implement download logic here
-    alert("Download functionality not implemented yet.");
-  };
   return (
     <div>
       <div className="w-full flex flex-col gap-2">
@@ -40,8 +40,16 @@ const Form656List = () => {
               </div>
 
               {c?.isCompleted === "completed" && (
-                <Button onClick={handleDownloadForm} variant={"outline"}>
-                  Download
+                <Button
+                  onClick={() => downloadPdf(c._id, c.title, c.downloadUrl)}
+                  variant={"outline"}
+                  disabled={downloadingMap[c._id]}
+                >
+                  {downloadingMap[c._id] ? (
+                    <Loader2 className="animate-spin h-5 w-5" />
+                  ) : (
+                    "Download"
+                  )}
                 </Button>
               )}
 

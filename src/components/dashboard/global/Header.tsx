@@ -15,7 +15,6 @@ import { logoutUser } from "@/lib/features/userSlice";
 import ChatPopup from "../ChatPopup";
 import Popup from "@/components/ui/Popup";
 import LogoutIcon from "@/components/icons/LogoutIcon";
-import ChatPopupNew from "../ChatPopupNew";
 
 const Header = () => {
   const dispatch = useAppDispatch();
@@ -85,8 +84,8 @@ const Header = () => {
             <Image
               src={constants.APP_CONFIG.logo}
               alt={constants.APP_CONFIG.name}
-              height={30}
-              width={30}
+              height={80}
+              width={80}
             />
           </Link>
 

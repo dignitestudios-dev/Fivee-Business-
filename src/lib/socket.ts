@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
+import { BASE_URL } from './services';
 
-const URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.fiveebusiness.com';
 
 type Status = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -15,7 +15,7 @@ class SocketService {
     if (this.socket) return this.socket;
 
     const auth = this.token ? { token: `Bearer ${this.token}` } : undefined;
-    this.socket = io(URL, {
+    this.socket = io(BASE_URL, {
       transports: ['websocket'],
       auth,
       autoConnect: false,

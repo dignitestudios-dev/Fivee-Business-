@@ -4,9 +4,10 @@ import { useForm } from "react-hook-form";
 import FInput from "@/components/ui/FInput";
 import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/auth/useAuth";
 
 const ForgotPasswordForm = () => {
-  const router = useRouter();
+  const { handleForgotPassword, loading } = useAuth();
 
   const {
     register,
@@ -15,9 +16,7 @@ const ForgotPasswordForm = () => {
   } = useForm<ForgotPasswordFormValues>();
 
   const onSubmit = (data: ForgotPasswordFormValues) => {
-    console.log(data);
-
-    router.push("/auth/verify");
+    handleForgotPassword({ email: data.email });
   };
   return (
     <form
@@ -34,7 +33,7 @@ const ForgotPasswordForm = () => {
         error={errors.email?.message}
       />
 
-      <FButton variant="primary" size="lg" className="w-full">
+      <FButton loading={loading} variant="primary" size="lg" className="w-full">
         Confirm
       </FButton>
     </form>

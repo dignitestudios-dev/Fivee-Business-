@@ -108,6 +108,21 @@ export const formatDateTime = (date: string) => {
   return d.toLocaleString("en-US");
 };
 
+export function formatTo12HourTime(isoString: string) {
+  if (!isoString) return "";
+
+  const date = new Date(isoString);
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // convert '0' to '12'
+  const formattedHours = String(hours).padStart(2, "0");
+
+  return `${formattedHours}:${minutes} ${ampm}`;
+}
+
 /**
  * Converts a date string (e.g. "2012-06-26T00:00:00.000Z")
  * into the format "YYYY-MM-DD" for <input type="date" /> fields.

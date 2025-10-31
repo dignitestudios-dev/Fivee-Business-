@@ -16,8 +16,8 @@ const StartForm656 = () => {
   const router = useRouter();
 
   // hooks provide pagination and loading; we show infinite scroll inside each list
-  const aHook = useUser433aCases(1, 10);
-  const bHook = useUser433bCases(1, 10);
+  const aHook = useUser433aCases(1, 10, "completedAndPaymentSussessed");
+  const bHook = useUser433bCases(1, 10, "completedAndPaymentSussessed");
 
   const casesA = useAppSelector((s) => s.forms.form433a) || [];
   const casesB = useAppSelector((s) => s.forms.form433b) || [];
@@ -25,7 +25,8 @@ const StartForm656 = () => {
   const [selectedA, setSelectedA] = useState<string | null>(null);
   const [selectedB, setSelectedB] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("");
-  const [usedPreQualifierOrIOLA, setUsedPreQualifierOrIOLA] = useState<boolean>(false);
+  const [usedPreQualifierOrIOLA, setUsedPreQualifierOrIOLA] =
+    useState<boolean>(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -66,7 +67,9 @@ const StartForm656 = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Start Form 656</h2>
-            <p className="text-sm text-desc">Create an Offer in Compromise by selecting your existing forms.</p>
+            <p className="text-sm text-desc">
+              Create an Offer in Compromise by selecting your existing forms.
+            </p>
           </div>
         </div>
 
@@ -87,7 +90,9 @@ const StartForm656 = () => {
                   {casesA.map((c) => (
                     <button
                       key={c._id}
-                      onClick={() => setSelectedA(selectedA === c._id ? null : c._id)}
+                      onClick={() =>
+                        setSelectedA(selectedA === c._id ? null : c._id)
+                      }
                       aria-pressed={selectedA === c._id}
                       className={`w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${
                         selectedA === c._id
@@ -97,7 +102,13 @@ const StartForm656 = () => {
                     >
                       <div>
                         <p className="font-medium">{c.title}</p>
-                        <p className={`text-xs ${selectedA === c._id ? "text-white/90" : "text-desc"}`}>{formatDate(c.createdAt)}</p>
+                        <p
+                          className={`text-xs ${
+                            selectedA === c._id ? "text-white/90" : "text-desc"
+                          }`}
+                        >
+                          {formatDate(c.createdAt)}
+                        </p>
                       </div>
                       <div className="text-sm">
                         {selectedA === c._id ? (
@@ -106,7 +117,9 @@ const StartForm656 = () => {
                             <span className="text-xs">Selected</span>
                           </div>
                         ) : (
-                          <span className="text-desc hover:text-[var(--primary)]">Click to select</span>
+                          <span className="text-desc hover:text-[var(--primary)]">
+                            Click to select
+                          </span>
                         )}
                       </div>
                     </button>
@@ -116,8 +129,16 @@ const StartForm656 = () => {
 
               {aHook.hasMore && (
                 <div className="w-full flex justify-center py-3">
-                  <FButton size="sm" onClick={() => aHook.loadMore()} disabled={aHook.loadingMore}>
-                    {aHook.loadingMore ? <Loader2 className="animate-spin h-4 w-4" /> : "Load more"}
+                  <FButton
+                    size="sm"
+                    onClick={() => aHook.loadMore()}
+                    disabled={aHook.loadingMore}
+                  >
+                    {aHook.loadingMore ? (
+                      <Loader2 className="animate-spin h-4 w-4" />
+                    ) : (
+                      "Load more"
+                    )}
                   </FButton>
                 </div>
               )}
@@ -139,7 +160,9 @@ const StartForm656 = () => {
                   {casesB.map((c) => (
                     <button
                       key={c._id}
-                      onClick={() => setSelectedB(selectedB === c._id ? null : c._id)}
+                      onClick={() =>
+                        setSelectedB(selectedB === c._id ? null : c._id)
+                      }
                       aria-pressed={selectedB === c._id}
                       className={`w-full text-left p-3 rounded-lg border transition-all hover:scale-[1.01] flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${
                         selectedB === c._id
@@ -149,7 +172,13 @@ const StartForm656 = () => {
                     >
                       <div>
                         <p className="font-medium">{c.title}</p>
-                        <p className={`text-xs ${selectedB === c._id ? "text-white/90" : "text-desc"}`}>{formatDate(c.createdAt)}</p>
+                        <p
+                          className={`text-xs ${
+                            selectedB === c._id ? "text-white/90" : "text-desc"
+                          }`}
+                        >
+                          {formatDate(c.createdAt)}
+                        </p>
                       </div>
                       <div className="text-sm">
                         {selectedB === c._id ? (
@@ -158,7 +187,9 @@ const StartForm656 = () => {
                             <span className="text-xs">Selected</span>
                           </div>
                         ) : (
-                          <span className="text-desc hover:text-[var(--primary)]">Click to select</span>
+                          <span className="text-desc hover:text-[var(--primary)]">
+                            Click to select
+                          </span>
                         )}
                       </div>
                     </button>
@@ -168,14 +199,21 @@ const StartForm656 = () => {
 
               {bHook.hasMore && (
                 <div className="w-full flex justify-center py-3">
-                  <FButton size="sm" onClick={() => bHook.loadMore()} disabled={bHook.loadingMore}>
-                    {bHook.loadingMore ? <Loader2 className="animate-spin h-4 w-4" /> : "Load more"}
+                  <FButton
+                    size="sm"
+                    onClick={() => bHook.loadMore()}
+                    disabled={bHook.loadingMore}
+                  >
+                    {bHook.loadingMore ? (
+                      <Loader2 className="animate-spin h-4 w-4" />
+                    ) : (
+                      "Load more"
+                    )}
                   </FButton>
                 </div>
               )}
             </div>
           </div>
-
         </div>
 
         {/* Details below on large screens */}
@@ -183,7 +221,11 @@ const StartForm656 = () => {
           <div className="bg-white border border-gray-100 shadow-sm p-4">
             <h3 className="font-semibold mb-3">Application Details</h3>
             <label className="block text-sm font-medium mb-1">Title</label>
-            <FInput value={title} onChange={(e) => setTitle((e as any).target.value)} placeholder="Enter application title" />
+            <FInput
+              value={title}
+              onChange={(e) => setTitle((e as any).target.value)}
+              placeholder="Enter application title"
+            />
 
             <div className="mt-4">
               <label className="inline-flex items-start">
@@ -194,13 +236,18 @@ const StartForm656 = () => {
                   onChange={(e) => setUsedPreQualifierOrIOLA(e.target.checked)}
                 />
                 <div className="text-sm text-desc">
-                  I used the Pre-Qualifier tool or the Individual Online Account eligibility (IOLA) check prior to filling out this form.
+                  I used the Pre-Qualifier tool or the Individual Online Account
+                  eligibility (IOLA) check prior to filling out this form.
                 </div>
               </label>
             </div>
 
             <div className="mt-6">
-              <FButton className="w-full" onClick={handleStart} disabled={!canSubmit || submitting}>
+              <FButton
+                className="w-full"
+                onClick={handleStart}
+                disabled={!canSubmit || submitting}
+              >
                 {submitting ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 className="animate-spin h-4 w-4" /> Creating...
@@ -209,7 +256,10 @@ const StartForm656 = () => {
                   "Start Form 656"
                 )}
               </FButton>
-              <p className="text-xs text-desc mt-3">You can select either an Individual (433A) or Business (433B) form or both.</p>
+              <p className="text-xs text-desc mt-3">
+                You can select either an Individual (433A) or Business (433B)
+                form or both.
+              </p>
             </div>
           </div>
         </div>
