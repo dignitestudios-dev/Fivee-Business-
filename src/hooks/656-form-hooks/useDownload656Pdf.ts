@@ -23,7 +23,7 @@ const useDownload656Pdf = () => {
     try {
       let url: string;
 
-      if (downloadUrl) {
+      if (false) {
         url = downloadUrl;
       } else {
         const response = await api.generate656Pdf(caseId);
