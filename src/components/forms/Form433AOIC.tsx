@@ -82,9 +82,7 @@ export default function Form433AOIC() {
   // and it's safe to render the section UI. When false we show a loader so
   // the UI doesn't render step 1 then jump to another step.
   const [hydrated, setHydrated] = useState<boolean>(false);
-  console.log(
-    `Current step is: ${currentStep} and Completed are: ${completedSteps}`
-  );
+
   // Load saved progress from localStorage
   const getSavedProgress = () => {
     const savedProgress = storage.get<{

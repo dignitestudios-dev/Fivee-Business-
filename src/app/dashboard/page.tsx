@@ -25,6 +25,7 @@ import FormLoader from "@/components/global/FormLoader";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import Form656List from "@/components/forms/Form656List";
+import { useFcmSubscription } from "@/hooks/notification/useFcmSubscription";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -38,6 +39,8 @@ const Dashboard = () => {
   >(null);
   const [showManageSavedPref, setShowManageSavedPref] =
     useState<boolean>(false);
+
+  useFcmSubscription();
 
   // Initialize hooks for starting forms (must be called at top-level)
   const init433a = useInitializeForm433A();
@@ -132,7 +135,9 @@ const Dashboard = () => {
             <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 p-4 sm:p-7 sm:pt-12 gap-6 sm:gap-10 border border-[#E7E8E9] rounded-xl">
               <div className="space-y-3">
                 <IndividualTaxIcon />
-                <p className="font-bold text-base sm:text-lg">File Individual Tax</p>
+                <p className="font-bold text-base sm:text-lg">
+                  File Individual Tax
+                </p>
                 <p className="text-desc text-sm sm:text-base">
                   Potenti feugiat sit libero leo id vitae. Sit euismod ac nulla
                   vitae magna sed quis.
@@ -152,7 +157,9 @@ const Dashboard = () => {
 
               <div className="space-y-3">
                 <BusinessTaxIcon />
-                <p className="font-bold text-base sm:text-lg">File Business Tax</p>
+                <p className="font-bold text-base sm:text-lg">
+                  File Business Tax
+                </p>
                 <p className="text-desc text-sm sm:text-base">
                   Potenti feugiat sit libero leo id vitae. Sit euismod ac nulla
                   vitae magna sed quis.
@@ -171,8 +178,12 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="text-white bg-[var(--primary)] rounded-xl p-4 sm:p-5 space-y-1">
-              <p className="font-semibold text-base sm:text-lg">Saved Preferences</p>
-              <p className="font-light text-sm sm:text-base">Get started from your saved forms.</p>
+              <p className="font-semibold text-base sm:text-lg">
+                Saved Preferences
+              </p>
+              <p className="font-light text-sm sm:text-base">
+                Get started from your saved forms.
+              </p>
 
               <div className="my-4 sm:my-6 space-y-3">
                 {savedPref.map((pref, index) => (
@@ -191,7 +202,9 @@ const Dashboard = () => {
                     className="w-full cursor-pointer group rounded-xl bg-black/10 py-3 px-2.5 flex items-center justify-between gap-2"
                   >
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-nowrap text-sm sm:text-base">{pref.title}</p>
+                      <p className="font-bold text-nowrap text-sm sm:text-base">
+                        {pref.title}
+                      </p>
 
                       <p className="text-xs">
                         Last edited {formatDateWithName(pref.updatedAt)}

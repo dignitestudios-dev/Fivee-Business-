@@ -14,13 +14,12 @@ const API = axios.create({
 });
 
 // Request Interceptor
-// Request Interceptor
 API.interceptors.request.use(
   (config) => {
     if (isBrowser) {
       const token = storage.get("accessToken");
 
-      // Define routes that do NOT require authentication
+      // Define routes that do not require authentication
       const publicEndpoints = [
         "/user/signin",
         "/user/signup",
