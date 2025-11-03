@@ -16,7 +16,9 @@ const Login = () => {
         />
       </div>
 
-      <h2 className="text-4xl font-bold text-center">Welcome Back</h2>
+      <h2 className="text-3xl sm:text-4xl font-bold text-center">
+        Welcome Back
+      </h2>
       <p className="text-[var(--desc)] text-center">
         Please enter your details to log in.
       </p>
