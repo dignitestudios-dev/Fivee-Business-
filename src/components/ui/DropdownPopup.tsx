@@ -162,7 +162,7 @@ const DropdownPopup = forwardRef<HTMLButtonElement, DropdownPopupProps>(
 
     const getDropdownPosition = (): string => {
       const baseClasses =
-        "absolute z-50 min-w-[200px] w-[300px] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden transition-all duration-200 ease-in-out origin-top";
+        "absolute z-50 w-[200px] sm:min-w-[200px] sm:w-[300px] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden transition-all duration-200 ease-in-out origin-top";
 
       switch (placement) {
         case "bottom-left":

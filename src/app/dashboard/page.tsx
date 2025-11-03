@@ -127,13 +127,13 @@ const Dashboard = () => {
   return (
     <>
       <div className="flex justify-center flex-1 overflow-y-auto">
-        <div className="shadow-brand space-y-5 p-5 rounded-lg m-10">
-          <div className="grid grid-cols-3 gap-5">
-            <div className="col-span-2 grid grid-cols-2 p-7 pt-12 gap-10 border border-[#E7E8E9] rounded-xl">
-              <div className="max-w-[280px] space-y-3">
+        <div className="shadow-brand space-y-5 p-4 sm:p-5 rounded-lg m-4 sm:m-6 md:m-10 w-full max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 p-4 sm:p-7 sm:pt-12 gap-6 sm:gap-10 border border-[#E7E8E9] rounded-xl">
+              <div className="space-y-3">
                 <IndividualTaxIcon />
-                <p className="font-bold text-lg">File Individual Tax</p>
-                <p className="text-desc ">
+                <p className="font-bold text-base sm:text-lg">File Individual Tax</p>
+                <p className="text-desc text-sm sm:text-base">
                   Potenti feugiat sit libero leo id vitae. Sit euismod ac nulla
                   vitae magna sed quis.
                 </p>
@@ -150,10 +150,10 @@ const Dashboard = () => {
                 />
               </div>
 
-              <div className="max-w-[280px] space-y-3">
+              <div className="space-y-3">
                 <BusinessTaxIcon />
-                <p className="font-bold text-lg">File Business Tax</p>
-                <p className="text-desc ">
+                <p className="font-bold text-base sm:text-lg">File Business Tax</p>
+                <p className="text-desc text-sm sm:text-base">
                   Potenti feugiat sit libero leo id vitae. Sit euismod ac nulla
                   vitae magna sed quis.
                 </p>
@@ -170,11 +170,11 @@ const Dashboard = () => {
                 />
               </div>
             </div>
-            <div className="w-96 text-white bg-[var(--primary)] rounded-xl p-5 space-y-1">
-              <p className="font-semibold text-lg">Saved Preferences</p>
-              <p className=" font-light">Get started from your saved forms.</p>
+            <div className="text-white bg-[var(--primary)] rounded-xl p-4 sm:p-5 space-y-1">
+              <p className="font-semibold text-base sm:text-lg">Saved Preferences</p>
+              <p className="font-light text-sm sm:text-base">Get started from your saved forms.</p>
 
-              <div className="my-6 space-y-3">
+              <div className="my-4 sm:my-6 space-y-3">
                 {savedPref.map((pref, index) => (
                   <button
                     onClick={() => {
@@ -188,16 +188,16 @@ const Dashboard = () => {
                     }}
                     disabled={showManageSavedPref}
                     key={index}
-                    className="w-full cursor-pointer group rounded-xl bg-black/10 py-3.5 px-2.5 flex items-center justify-between gap-2"
+                    className="w-full cursor-pointer group rounded-xl bg-black/10 py-3 px-2.5 flex items-center justify-between gap-2"
                   >
                     <div className="flex items-center gap-2">
-                      <p className="font-bold  text-nowrap">{pref.title}</p>
+                      <p className="font-bold text-nowrap text-sm sm:text-base">{pref.title}</p>
 
                       <p className="text-xs">
                         Last edited {formatDateWithName(pref.updatedAt)}
                       </p>
                     </div>
-                    <BiChevronRight className="text-2xl text-white move-x" />
+                    <BiChevronRight className="text-xl sm:text-2xl text-white move-x" />
                   </button>
                 ))}
               </div>
@@ -208,15 +208,18 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="border border-[#E7E8E9] rounded-xl p-5">
-            <div className="flex justify-between gap-5">
-              <p className="text-lg font-bold mb-5">Form 656 Review</p>
-
+          <div className="border border-[#E7E8E9] rounded-xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-5 mb-3 sm:mb-5">
+              <p className="text-base sm:text-lg font-bold">
+                Form 656 Review{" "}
+                <span className="text-gray-400 text-xs font-medium">
+                  (Only completed forms can be downloaded.)
+                </span>
+              </p>
               <Button
                 variant={"outline"}
                 onClick={() => router.push("/dashboard/form-656/start")}
               >
-                {" "}
                 + Create new
               </Button>
             </div>

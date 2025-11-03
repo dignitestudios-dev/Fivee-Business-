@@ -15,9 +15,9 @@ const VideoCategoryClient: React.FC<Props> = ({ category }) => {
   } catch (e) {
     // ignore
   }
-  
+
   const [videos, setVideos] = useState<any[]>([]);
-  console.log("videos: ",videos)
+  console.log("videos: ", videos);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -77,26 +77,42 @@ const VideoCategoryClient: React.FC<Props> = ({ category }) => {
 
   return (
     <div className="flex justify-center flex-1 overflow-y-auto">
-      <div className="max-w-[1280px] w-full h-fit m-10 space-y-5">
-        <div className="grid grid-cols-3 gap-5">
-          <div className="col-span-2 rounded-xl overflow-hidden bg-[var(--primary)]">
+      <div className="max-w-[1280px] w-full h-fit m-4 sm:m-6 md:m-10 space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="md:col-span-2 rounded-xl overflow-hidden bg-[var(--primary)]">
             {selected ? (
-              <video key={selected._id} className="w-full h-[440px] object-cover" controls poster={selected.poster}>
+              <video
+                key={selected._id}
+                className="w-full h-[300px] sm:h-[440px] object-cover"
+                controls
+                poster={selected.poster}
+              >
                 <source src={selected.url} type="video/mp4" />
               </video>
             ) : (
-              <div className="w-full h-[440px] bg-gray-200 animate-pulse" />
+              <div className="w-full h-[300px] sm:h-[440px] bg-gray-200 animate-pulse" />
             )}
 
-            <div className="text-xl p-3 text-white font-semibold">{selected?.title || category}</div>
+            <div className="text-lg sm:text-xl p-3 text-white font-semibold">
+              {selected?.title || category}
+            </div>
           </div>
 
-          <div className="col-span-1 rounded-xl bg-[#E7E8E9] h-fit p-3">
-            <p className="text-xl text-black mb-5 font-medium">{category}</p>
+          <div className="md:col-span-1 rounded-xl bg-[#E7E8E9] h-fit p-3">
+            <p className="text-lg sm:text-xl text-black mb-5 font-medium">
+              {category}
+            </p>
             <div className="space-y-3">
               {videos.map((v) => (
-                <div key={v._id} className="flex gap-3 items-center cursor-pointer" onClick={() => setSelected(v)}>
-                  <video className="w-[200px] h-[128px] rounded-xl" poster={v.poster}>
+                <div
+                  key={v._id}
+                  className="flex flex-col xl:flex-row xl:gap-3 xl:justify-start xl:items-center cursor-pointer"
+                  onClick={() => setSelected(v)}
+                >
+                  <video
+                    className="w-full sm:w-[200px] h-[200px] sm:h-[128px] rounded-xl"
+                    poster={v.poster}
+                  >
                     <source src={v.url} type="video/mp4" />
                   </video>
                   <p className="text-sm font-semibold text-black">{v.title}</p>
@@ -109,16 +125,27 @@ const VideoCategoryClient: React.FC<Props> = ({ category }) => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold">All {category} videos</h2>
-          <div className="grid grid-cols-3 gap-4 mt-4">
+          <h2 className="text-lg sm:text-xl font-semibold">
+            All {category} videos
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
             {videos.map((v) => (
-              <div key={v._id} className="bg-white rounded shadow p-3 cursor-pointer" onClick={() => setSelected(v)}>
-                <div className="w-full h-40 bg-gray-100 overflow-hidden rounded">
-                  <video className="w-full h-full object-cover" poster={v.poster}>
+              <div
+                key={v._id}
+                className="bg-white rounded shadow p-3 cursor-pointer"
+                onClick={() => setSelected(v)}
+              >
+                <div className="w-full h-32 sm:h-40 bg-gray-100 overflow-hidden rounded">
+                  <video
+                    className="w-full h-full object-cover"
+                    poster={v.poster}
+                  >
                     <source src={v.url} type="video/mp4" />
                   </video>
                 </div>
-                <div className="mt-2 font-semibold">{v.title}</div>
+                <div className="mt-2 font-semibold text-sm sm:text-base">
+                  {v.title}
+                </div>
               </div>
             ))}
           </div>

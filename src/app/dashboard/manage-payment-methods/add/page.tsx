@@ -18,7 +18,7 @@ const AddPaymentMethod = () => {
 
   return (
     <>
-      <div className="border-b border-[#E3E3E3] flex items-center gap-5 h-14">
+      <div className="border-b border-[#E3E3E3] flex items-center gap-3 sm:gap-5 h-14">
         <Link
           href={"/dashboard/manage-payment-methods"}
           className="px-3 h-full cursor-pointer bg-[var(--primary)]/10 text-[var(--primary)] font-semibold flex items-center gap-2"
@@ -31,11 +31,13 @@ const AddPaymentMethod = () => {
         </div>
       </div>
 
-      <div className="px-10 pb-18 h-full overflow-y-auto">
-        <div className="flex items-center gap-3">
-          <FaCreditCard size={26} />
+      <div className="px-4 sm:px-6 md:px-10 pb-10 md:pb-18 h-full overflow-y-auto">
+        <div className="flex items-center gap-3 mb-4">
+          <FaCreditCard size={20} />
 
-          <p className="font-medium">Credit or Debit Card</p>
+          <p className="font-medium text-sm sm:text-base">
+            Credit or Debit Card
+          </p>
         </div>
 
         <Elements stripe={stripePromise}>
@@ -46,6 +48,7 @@ const AddPaymentMethod = () => {
               // navigate back to manage page so the user can see added card
               router.push("/dashboard/manage-payment-methods");
             }}
+            navigateToManagePaymentMethods={true}
           />
         </Elements>
       </div>

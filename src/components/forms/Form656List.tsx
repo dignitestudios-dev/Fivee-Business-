@@ -1,5 +1,3 @@
-// Updated Form656List component
-
 "use client";
 import { formatDate } from "@/utils/helper";
 import React from "react";
@@ -11,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/Button";
 import useDownload656Pdf from "@/hooks/656-form-hooks/useDownload656Pdf"; // Import the new hook
+import { MdOutlineFileDownload } from "react-icons/md";
 
 const Form656List = () => {
   const cases = useAppSelector((s) => s.forms.form656) || [];
@@ -32,28 +31,28 @@ const Form656List = () => {
           cases.map((c) => (
             <div
               key={c._id}
-              className="w-full flex justify-between gap-5 p-4 border-b border-[#E7E8E9] items-center"
+              className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 border-b border-[#E7E8E9]"
             >
               <div>
-                <p className="font-semibold">{c.title}</p>
+                <p className="font-semibold text-base sm:text-lg">{c.title}</p>
                 <p className="text-xs text-desc">{formatDate(c.createdAt)}</p>
               </div>
 
-              {c?.isCompleted === "completed" && (
-                <Button
-                  onClick={() => downloadPdf(c._id, c.title, c.downloadUrl)}
-                  variant={"outline"}
-                  disabled={downloadingMap[c._id]}
-                >
-                  {downloadingMap[c._id] ? (
-                    <Loader2 className="animate-spin h-5 w-5" />
-                  ) : (
-                    "Download"
-                  )}
-                </Button>
-              )}
+              <div className="flex flex-row items-center gap-3">
+                {c?.isCompleted === "completed" && (
+                  <Button
+                    onClick={() => downloadPdf(c._id, c.title, c.downloadUrl)}
+                    variant={"outline"}
+                    disabled={downloadingMap[c._id]}
+                  >
+                    {downloadingMap[c._id] ? (
+                      <Loader2 className="animate-spin h-5 w-5" />
+                    ) : (
+                      <MdOutlineFileDownload />
+                    )}
+                  </Button>
+                )}
 
-              <div className="flex items-center gap-3">
                 <Link
                   href={`/dashboard/form-656?caseId=${c._id}`}
                   className="text-[var(--primary)] cursor-pointer group"

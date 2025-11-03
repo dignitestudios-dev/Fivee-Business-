@@ -80,7 +80,7 @@ const ManagePaymentMethods = () => {
 
   return (
     <>
-      <div className="border-b border-[#E3E3E3] flex items-center gap-5 h-14">
+      <div className="border-b border-[#E3E3E3] flex items-center gap-3 sm:gap-5 h-14">
         <Link
           href={"/dashboard"}
           className="px-3 h-full cursor-pointer bg-[var(--primary)]/10 text-[var(--primary)] font-semibold flex items-center gap-2"
@@ -99,7 +99,7 @@ const ManagePaymentMethods = () => {
           Add New
         </Link>
       </div>
-      <div className="px-10 pb-18 h-full overflow-y-auto">
+      <div className="px-4 sm:px-6 md:px-10 pb-10 md:pb-18 h-full overflow-y-auto">
         {getting ? (
           <FormLoader />
         ) : !cards?.length ? (
@@ -112,7 +112,7 @@ const ManagePaymentMethods = () => {
                 index !== 0 && "border-t border-[#E3E3E3]"
               } py-4 flex items-center gap-2`}
             >
-              <div className="rounded-lg bg-[var(--primary)]/10 h-[50px] w-[50px] flex justify-center items-center text-[200%]">
+              <div className="rounded-lg bg-[var(--primary)]/10 h-[40px] w-[40px] sm:h-[50px] sm:w-[50px] flex justify-center items-center text-[150%] sm:text-[200%]">
                 {getCardIcon(card?.brand)}
               </div>
 
@@ -122,10 +122,14 @@ const ManagePaymentMethods = () => {
                     {card?.name || "_ _ _"}
                   </p>
                   {card?.isDefault && (
-                    <div className="w-fit px-3 py-[2px] text-[var(--primary)] bg-[var(--primary)]/20 rounded-full">default</div>
+                    <div className="w-fit px-3 py-[2px] text-[var(--primary)] bg-[var(--primary)]/20 rounded-full">
+                      default
+                    </div>
                   )}
                 </div>
-                <p className="font-medium">Card ending with {card?.last4}</p>
+                <p className="font-medium text-sm sm:text-base">
+                  Card ending with {card?.last4}
+                </p>
               </div>
 
               <RiDeleteBin6Fill

@@ -211,6 +211,13 @@ export function SignatureSection({
         setSpouseSignaturePreview(sig.url);
       }
     }
+
+    if (signatureInfo?.taxpayerSignature?.signature) {
+      setTaxpayerSignaturePreview(signatureInfo.taxpayerSignature.signature);
+    }
+    if (signatureInfo?.spouseSignature?.signature) {
+      setSpouseSignaturePreview(signatureInfo.spouseSignature.signature);
+    }
   }, [signatureInfo, signatures]);
 
   const handleSelectTaxpayerSignature = async (id: string, url: string) => {

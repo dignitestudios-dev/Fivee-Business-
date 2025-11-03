@@ -127,7 +127,7 @@ const StartForm656 = () => {
                 </div>
               )}
 
-              {aHook.hasMore && (
+              {!aHook.loading && aHook.hasMore && (
                 <div className="w-full flex justify-center py-3">
                   <FButton
                     size="sm"
@@ -197,7 +197,7 @@ const StartForm656 = () => {
                 </div>
               )}
 
-              {bHook.hasMore && (
+              {!bHook.loading && bHook.hasMore && (
                 <div className="w-full flex justify-center py-3">
                   <FButton
                     size="sm"

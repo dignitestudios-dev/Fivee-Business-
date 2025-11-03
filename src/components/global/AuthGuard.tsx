@@ -31,8 +31,13 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   // ✅ Run when pathname/user state changes: handle redirects
   useEffect(() => {
     if (loading) return;
+    console.log("AuthGuard:", { pathname, isLoggedIn, user, loading });
 
-    if (pathname.includes("auth") && (isLoggedIn || user)) {
+    if (pathname === "/" && (!isLoggedIn || !user)) {
+      router.replace("/auth/login");
+    } else if (pathname === "/" && isLoggedIn) {
+      router.replace("/dashboard");
+    } else if (pathname.includes("auth") && (isLoggedIn || user)) {
       router.replace("/dashboard");
     } else if (pathname.includes("dashboard") && (!isLoggedIn || !user)) {
       router.replace("/auth/login");

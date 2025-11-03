@@ -16,9 +16,11 @@ import usePayment from "@/hooks/payments/usePayment";
 const PaymentForm = ({
   onPaymentSuccess,
   onPaymentError,
+  navigateToManagePaymentMethods = false,
 }: {
   onPaymentSuccess: (paymentIntent: any) => void;
   onPaymentError: (error: string) => void;
+  navigateToManagePaymentMethods?: boolean;
 }) => {
   const router = useRouter();
   const stripe = useStripe();
@@ -112,7 +114,9 @@ const PaymentForm = ({
 
       // Backwards-compatible behavior: if no onPaymentSuccess provided,
       // navigate to the manage payment methods page.
-      router.push("/dashboard/manage-payment-methods");
+      if (navigateToManagePaymentMethods) {
+        router.push("/dashboard/manage-payment-methods");
+      }
     } catch (err: any) {
       const message = (err && err.message) || "Failed to save card";
       if (onPaymentError) onPaymentError(message);

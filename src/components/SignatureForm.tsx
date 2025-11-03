@@ -48,6 +48,8 @@ export default function SignatureForm() {
     description?: string;
     signature?: string;
   }>({});
+  const [canvasWidth, setCanvasWidth] = useState<number>(600);
+  const [canvasHeight, setCanvasHeight] = useState<number>(200);
 
   const sigCanvas = useRef<SignatureCanvas>(null);
 
@@ -59,6 +61,22 @@ export default function SignatureForm() {
     };
     loadSignatures();
   }, [signatures.length]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCanvasWidth(300);
+        setCanvasHeight(150);
+      } else {
+        setCanvasWidth(600);
+        setCanvasHeight(200);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Add new empty signature
   const handleAddSignature = () => {
@@ -240,9 +258,9 @@ export default function SignatureForm() {
   const isLoading = getting || creating || updating || deleting;
 
   return (
-    <div className="flex bg-gray-50 gap-10">
+    <div className="flex flex-col md:flex-row bg-gray-50 gap-6 md:gap-10">
       {/* Sidebar */}
-      <div className="w-64 border border-[#E3E3E3] rounded-lg">
+      <div className="w-full md:w-64 border border-[#E3E3E3] rounded-lg">
         <button
           onClick={handleAddSignature}
           disabled={isLoading}
@@ -280,7 +298,7 @@ export default function SignatureForm() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-white rounded-lg border border-[#E3E3E3]">
+      <div className="flex-1 p-4 sm:p-6 bg-white rounded-lg border border-[#E3E3E3]">
         {selectedId || isNew ? (
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -323,13 +341,13 @@ export default function SignatureForm() {
             )}
 
             {/* Signature Area */}
-            <div className="rounded-lg border border-[#E3E3E3] bg-white p-2 mb-4">
+            <div className="rounded-lg border border-[#E3E3E3] bg-white p-2 mb-4 w-full">
               {viewMode ? (
                 <>
                   <img
                     src={preview}
                     alt="Signature"
-                    className="w-[600px] h-[200px] object-contain"
+                    className="max-w-full h-auto object-contain mx-auto"
                   />
                   <button
                     onClick={handleClearExisting}
@@ -342,15 +360,17 @@ export default function SignatureForm() {
                 </>
               ) : mode === "draw" ? (
                 <>
-                  <SignatureCanvas
-                    ref={sigCanvas}
-                    penColor="black"
-                    canvasProps={{
-                      width: 600,
-                      height: 200,
-                      className: "bg-white",
-                    }}
-                  />
+                  <div className="max-w-[600px] mx-auto w-full">
+                    <SignatureCanvas
+                      ref={sigCanvas}
+                      penColor="black"
+                      canvasProps={{
+                        width: canvasWidth,
+                        height: canvasHeight,
+                        className: "bg-white w-full",
+                      }}
+                    />
+                  </div>
                   <button
                     onClick={() => sigCanvas.current?.clear()}
                     disabled={isLoading}
@@ -367,14 +387,14 @@ export default function SignatureForm() {
                     accept="image/*"
                     onChange={handleFileChange}
                     disabled={isLoading}
-                    className="mb-2"
+                    className="mb-2 w-full"
                   />
                   {preview && (
                     <div>
                       <img
                         src={preview}
                         alt="Preview"
-                        className="w-[600px] h-[200px] object-contain"
+                        className="max-w-full h-auto object-contain mx-auto"
                       />
                       <button
                         onClick={handleRemoveUpload}
@@ -394,7 +414,7 @@ export default function SignatureForm() {
             </div>
 
             {/* Title + Description */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="title" className="font-semibold">
                   Signature Title
@@ -435,7 +455,7 @@ export default function SignatureForm() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="rounded bg-[var(--primary)] px-12 cursor-pointer py-2 text-white hover:bg-green-600"
+                className="rounded bg-[var(--primary)] px-6 md:px-12 cursor-pointer py-2 text-white hover:bg-green-600"
               >
                 {creating || updating ? "Saving..." : "Save"}
               </button>

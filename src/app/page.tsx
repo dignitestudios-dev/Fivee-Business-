@@ -1,11 +1,7 @@
-"use client";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { BiLoaderAlt } from "react-icons/bi";
 
 const Dashboard = () => {
-  const router = useRouter();
-  router.push("/dashboard");
 
   return (
     <div className="h-screen w-full flex justify-center items-center">

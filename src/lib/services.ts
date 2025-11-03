@@ -1,8 +1,8 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
-// export const BASE_URL = "http://localhost:3001/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "http://localhost:3001/";
 
 // Create an Axios instance
 const API = axios.create({
@@ -14,15 +14,35 @@ const API = axios.create({
 });
 
 // Request Interceptor
+// Request Interceptor
 API.interceptors.request.use(
   (config) => {
     if (isBrowser) {
-      const token = storage.get("accessToken"); // Retrieve token from storage
+      const token = storage.get("accessToken");
 
-      if (token) {
-        config.headers.authorization = `Bearer ${token}`;
+      // Define routes that do NOT require authentication
+      const publicEndpoints = [
+        "/user/signin",
+        "/user/signup",
+        "/user/verify-email",
+        "/user/forgot-password",
+        "/user/reset-password",
+      ];
+
+      // Check if current request URL matches a public endpoint
+      const isPublic = publicEndpoints.some((endpoint) =>
+        config.url?.includes(endpoint)
+      );
+
+      if (!isPublic) {
+        if (token) {
+          config.headers.authorization = `Bearer ${token}`;
+        } else {
+          return Promise.reject("Session expired. Please log in again.");
+        }
       }
     }
+
     return config;
   },
   (error) => Promise.reject(error)
