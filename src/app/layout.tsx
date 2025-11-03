@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Fivee Business",
   description: "Fivee Business",
   icons: {
-    icon: "/images/logo.png",
+    icon: "/images/logo.svg",
   },
 };
 

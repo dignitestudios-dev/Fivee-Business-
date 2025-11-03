@@ -1,7 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import api from "@/lib/services";
-import VideosSlider from "@/components/videos/VideosSlider";
 
 interface Props {
   category: string;
