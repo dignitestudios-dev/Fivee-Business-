@@ -3,13 +3,13 @@
 import type React from "react";
 
 import { Label } from "./label";
-import { Input } from "./Input";
+import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { cn } from "../../utils/helper";
 import { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";
 
 interface FormFieldProps {
-  label: string;
+  label?: string;
   id: string;
   error?: string | FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
   required?: boolean;
@@ -27,13 +27,13 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cn("space-y-2", className)}>
-      <Label
+      {label && <Label
         htmlFor={id}
         className={cn("text-sm font-medium", error && "text-red-600")}
       >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
-      </Label>
+      </Label>}
       {children}
       {error && (
         <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
@@ -46,7 +46,7 @@ export function FormField({
 }
 
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label?: string;
   error?: string | FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
   required?: boolean;
 }

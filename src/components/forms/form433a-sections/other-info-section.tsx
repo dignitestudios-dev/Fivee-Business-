@@ -72,15 +72,6 @@ export function OtherInfoSection({
   });
 
   const {
-    fields: trustBeneficiaries,
-    append: addTrustBeneficiary,
-    remove: removeTrustBeneficiary,
-  } = useFieldArray({
-    control,
-    name: "trustBeneficiary.beneficiaries",
-  });
-
-  const {
     fields: safeDepositBoxes,
     append: addSafeDepositBox,
     remove: removeSafeDepositBox,
@@ -211,6 +202,119 @@ export function OtherInfoSection({
       trigger(); // Validate after reset to catch any issues
     }
   }, [otherInfo, reset, trigger]);
+
+  // Limit arrays to at most one item
+  useEffect(() => {
+    if (assetTransfers.length > 1) {
+      for (let i = assetTransfers.length - 1; i > 0; i--) {
+        removeAssetTransfer(i);
+      }
+    }
+    if (safeDepositBoxes.length > 1) {
+      for (let i = safeDepositBoxes.length - 1; i > 0; i--) {
+        removeSafeDepositBox(i);
+      }
+    }
+    if (foreignAssets.length > 1) {
+      for (let i = foreignAssets.length - 1; i > 0; i--) {
+        removeForeignAsset(i);
+      }
+    }
+    if (thirdPartyTrustFunds.length > 1) {
+      for (let i = thirdPartyTrustFunds.length - 1; i > 0; i--) {
+        removeThirdPartyTrustFund(i);
+      }
+    }
+  }, [
+    assetTransfers.length,
+    safeDepositBoxes.length,
+    foreignAssets.length,
+    thirdPartyTrustFunds.length,
+    removeAssetTransfer,
+    removeSafeDepositBox,
+    removeForeignAsset,
+    removeThirdPartyTrustFund,
+  ]);
+
+  // Manage assetTransfers array based on yes/no
+  useEffect(() => {
+    if (transferredAssets && assetTransfers.length === 0) {
+      addAssetTransfer({
+        assetDescription: "",
+        valueAtTransfer: 0,
+        dateTransferred: "",
+        transferredTo: "",
+      });
+    } else if (!transferredAssets && assetTransfers.length > 0) {
+      for (let i = assetTransfers.length - 1; i >= 0; i--) {
+        removeAssetTransfer(i);
+      }
+    }
+  }, [
+    transferredAssets,
+    assetTransfers.length,
+    addAssetTransfer,
+    removeAssetTransfer,
+  ]);
+
+  // Manage foreignAssets array based on yes/no
+  useEffect(() => {
+    if (hasForeignAssets && foreignAssets.length === 0) {
+      addForeignAsset({
+        description: "",
+        location: "",
+        value: 0,
+      });
+    } else if (!hasForeignAssets && foreignAssets.length > 0) {
+      for (let i = foreignAssets.length - 1; i >= 0; i--) {
+        removeForeignAsset(i);
+      }
+    }
+  }, [
+    hasForeignAssets,
+    foreignAssets.length,
+    addForeignAsset,
+    removeForeignAsset,
+  ]);
+
+  // Manage thirdPartyTrustFunds array based on yes/no
+  useEffect(() => {
+    if (hasThirdPartyTrustFunds && thirdPartyTrustFunds.length === 0) {
+      addThirdPartyTrustFund({
+        location: "",
+        amount: 0,
+      });
+    } else if (!hasThirdPartyTrustFunds && thirdPartyTrustFunds.length > 0) {
+      for (let i = thirdPartyTrustFunds.length - 1; i >= 0; i--) {
+        removeThirdPartyTrustFund(i);
+      }
+    }
+  }, [
+    hasThirdPartyTrustFunds,
+    thirdPartyTrustFunds.length,
+    addThirdPartyTrustFund,
+    removeThirdPartyTrustFund,
+  ]);
+
+  // Manage safeDepositBoxes array based on yes/no
+  useEffect(() => {
+    if (hasSafeDepositBox && safeDepositBoxes.length === 0) {
+      addSafeDepositBox({
+        location: "",
+        contents: "",
+        value: 0,
+      });
+    } else if (!hasSafeDepositBox && safeDepositBoxes.length > 0) {
+      for (let i = safeDepositBoxes.length - 1; i >= 0; i--) {
+        removeSafeDepositBox(i);
+      }
+    }
+  }, [
+    hasSafeDepositBox,
+    safeDepositBoxes.length,
+    addSafeDepositBox,
+    removeSafeDepositBox,
+  ]);
 
   if (loadingFormData) {
     return <FormLoader />;
@@ -584,96 +688,55 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {transferredAssets && (
+            {transferredAssets && assetTransfers.length > 0 && (
               <div className="space-y-4">
-                {assetTransfers.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-gray-900">
-                        Transferred Asset {index + 1}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeAssetTransfer(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <FormInput
-                      label="List asset(s)"
-                      id={`assetTransfers.transfers.${index}.assetDescription`}
-                      {...register(
-                        `assetTransfers.transfers.${index}.assetDescription`
-                      )}
-                      error={
-                        errors.assetTransfers?.transfers?.[index]
-                          ?.assetDescription?.message
-                      }
-                    />
-                    <FormInput
-                      label="Value at time of transfer"
-                      id={`assetTransfers.transfers.${index}.valueAtTransfer`}
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      {...register(
-                        `assetTransfers.transfers.${index}.valueAtTransfer`,
-                        {
-                          valueAsNumber: true,
-                        }
-                      )}
-                      error={
-                        errors.assetTransfers?.transfers?.[index]
-                          ?.valueAtTransfer?.message
-                      }
-                    />
-                    <FormInput
-                      label="Date transferred (mm/dd/yyyy)"
-                      id={`assetTransfers.transfers.${index}.dateTransferred`}
-                      type="date"
-                      {...register(
-                        `assetTransfers.transfers.${index}.dateTransferred`
-                      )}
-                      error={
-                        errors.assetTransfers?.transfers?.[index]
-                          ?.dateTransferred?.message
-                      }
-                    />
-                    <FormInput
-                      label="To whom or where it was transferred"
-                      id={`assetTransfers.transfers.${index}.transferredTo`}
-                      {...register(
-                        `assetTransfers.transfers.${index}.transferredTo`
-                      )}
-                      error={
-                        errors.assetTransfers?.transfers?.[index]?.transferredTo
-                          ?.message
-                      }
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    addAssetTransfer({
-                      assetDescription: "",
-                      valueAtTransfer: 0,
-                      dateTransferred: "",
-                      transferredTo: "",
-                    })
-                  }
-                  className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Transferred Asset
-                </Button>
+                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                  <h4 className="font-medium text-gray-900">
+                    Transferred Asset
+                  </h4>
+                  <FormInput
+                    label="List asset(s)"
+                    id={`assetTransfers.transfers.0.assetDescription`}
+                    {...register(`assetTransfers.transfers.0.assetDescription`)}
+                    error={
+                      errors.assetTransfers?.transfers?.[0]?.assetDescription
+                        ?.message
+                    }
+                  />
+                  <FormInput
+                    label="Value at time of transfer"
+                    id={`assetTransfers.transfers.0.valueAtTransfer`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register(`assetTransfers.transfers.0.valueAtTransfer`, {
+                      valueAsNumber: true,
+                    })}
+                    error={
+                      errors.assetTransfers?.transfers?.[0]?.valueAtTransfer
+                        ?.message
+                    }
+                  />
+                  <FormInput
+                    label="Date transferred (mm/dd/yyyy)"
+                    id={`assetTransfers.transfers.0.dateTransferred`}
+                    type="date"
+                    {...register(`assetTransfers.transfers.0.dateTransferred`)}
+                    error={
+                      errors.assetTransfers?.transfers?.[0]?.dateTransferred
+                        ?.message
+                    }
+                  />
+                  <FormInput
+                    label="To whom or where it was transferred"
+                    id={`assetTransfers.transfers.0.transferredTo`}
+                    {...register(`assetTransfers.transfers.0.transferredTo`)}
+                    error={
+                      errors.assetTransfers?.transfers?.[0]?.transferredTo
+                        ?.message
+                    }
+                  />
+                </div>
               </div>
             )}
           </CardContent>
@@ -718,74 +781,36 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {hasForeignAssets && (
+            {hasForeignAssets && foreignAssets.length > 0 && (
               <div className="space-y-4">
-                {foreignAssets.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-gray-900">
-                        Foreign Asset {index + 1}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeForeignAsset(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <FormInput
-                      label="Description"
-                      id={`foreignAssets.assets.${index}.description`}
-                      {...register(`foreignAssets.assets.${index}.description`)}
-                      error={
-                        errors.foreignAssets?.assets?.[index]?.description
-                          ?.message
-                      }
-                    />
-                    <FormInput
-                      label="Location"
-                      id={`foreignAssets.assets.${index}.location`}
-                      {...register(`foreignAssets.assets.${index}.location`)}
-                      error={
-                        errors.foreignAssets?.assets?.[index]?.location?.message
-                      }
-                    />
-                    <FormInput
-                      label="Value ($)"
-                      id={`foreignAssets.assets.${index}.value`}
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      {...register(`foreignAssets.assets.${index}.value`, {
-                        valueAsNumber: true,
-                      })}
-                      error={
-                        errors.foreignAssets?.assets?.[index]?.value?.message
-                      }
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    addForeignAsset({
-                      description: "",
-                      location: "",
-                      value: 0,
-                    })
-                  }
-                  className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Foreign Asset
-                </Button>
+                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                  <h4 className="font-medium text-gray-900">Foreign Asset</h4>
+                  <FormInput
+                    label="Description"
+                    id={`foreignAssets.assets.0.description`}
+                    {...register(`foreignAssets.assets.0.description`)}
+                    error={
+                      errors.foreignAssets?.assets?.[0]?.description?.message
+                    }
+                  />
+                  <FormInput
+                    label="Location"
+                    id={`foreignAssets.assets.0.location`}
+                    {...register(`foreignAssets.assets.0.location`)}
+                    error={errors.foreignAssets?.assets?.[0]?.location?.message}
+                  />
+                  <FormInput
+                    label="Value ($)"
+                    id={`foreignAssets.assets.0.value`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register(`foreignAssets.assets.0.value`, {
+                      valueAsNumber: true,
+                    })}
+                    error={errors.foreignAssets?.assets?.[0]?.value?.message}
+                  />
+                </div>
               </div>
             )}
           </CardContent>
@@ -832,65 +857,30 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {hasThirdPartyTrustFunds && (
+            {hasThirdPartyTrustFunds && thirdPartyTrustFunds.length > 0 && (
               <div className="space-y-4">
-                {thirdPartyTrustFunds.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-gray-900">
-                        Trust Fund {index + 1}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeThirdPartyTrustFund(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <FormInput
-                      label="Location"
-                      id={`thirdPartyTrusts.funds.${index}.location`}
-                      {...register(`thirdPartyTrusts.funds.${index}.location`)}
-                      error={
-                        errors.thirdPartyTrusts?.funds?.[index]?.location
-                          ?.message
-                      }
-                    />
-                    <FormInput
-                      label="Amount ($)"
-                      id={`thirdPartyTrusts.funds.${index}.amount`}
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      {...register(`thirdPartyTrusts.funds.${index}.amount`, {
-                        valueAsNumber: true,
-                      })}
-                      error={
-                        errors.thirdPartyTrusts?.funds?.[index]?.amount?.message
-                      }
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    addThirdPartyTrustFund({
-                      location: "",
-                      amount: 0,
-                    })
-                  }
-                  className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Trust Fund
-                </Button>
+                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                  <h4 className="font-medium text-gray-900">Trust Fund</h4>
+                  <FormInput
+                    label="Location"
+                    id={`thirdPartyTrusts.funds.0.location`}
+                    {...register(`thirdPartyTrusts.funds.0.location`)}
+                    error={
+                      errors.thirdPartyTrusts?.funds?.[0]?.location?.message
+                    }
+                  />
+                  <FormInput
+                    label="Amount ($)"
+                    id={`thirdPartyTrusts.funds.0.amount`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register(`thirdPartyTrusts.funds.0.amount`, {
+                      valueAsNumber: true,
+                    })}
+                    error={errors.thirdPartyTrusts?.funds?.[0]?.amount?.message}
+                  />
+                </div>
               </div>
             )}
           </CardContent>
@@ -1091,73 +1081,36 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {hasSafeDepositBox && (
+            {hasSafeDepositBox && safeDepositBoxes.length > 0 && (
               <div className="space-y-4">
-                {safeDepositBoxes.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-gray-900">
-                        Safe Deposit Box {index + 1}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeSafeDepositBox(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <FormInput
-                      label="Location (name, address and box number(s))"
-                      id={`safeDepositBox.boxes.${index}.location`}
-                      {...register(`safeDepositBox.boxes.${index}.location`)}
-                      error={
-                        errors.safeDepositBox?.boxes?.[index]?.location?.message
-                      }
-                    />
-                    <FormInput
-                      label="Contents"
-                      id={`safeDepositBox.boxes.${index}.contents`}
-                      {...register(`safeDepositBox.boxes.${index}.contents`)}
-                      error={
-                        errors.safeDepositBox?.boxes?.[index]?.contents?.message
-                      }
-                    />
-                    <FormInput
-                      label="Value ($)"
-                      id={`safeDepositBox.boxes.${index}.value`}
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      {...register(`safeDepositBox.boxes.${index}.value`, {
-                        valueAsNumber: true,
-                      })}
-                      error={
-                        errors.safeDepositBox?.boxes?.[index]?.value?.message
-                      }
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    addSafeDepositBox({
-                      location: "",
-                      contents: "",
-                      value: 0,
-                    })
-                  }
-                  className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Safe Deposit Box
-                </Button>
+                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                  <h4 className="font-medium text-gray-900">
+                    Safe Deposit Box
+                  </h4>
+                  <FormInput
+                    label="Location (name, address and box number(s))"
+                    id={`safeDepositBox.boxes.0.location`}
+                    {...register(`safeDepositBox.boxes.0.location`)}
+                    error={errors.safeDepositBox?.boxes?.[0]?.location?.message}
+                  />
+                  <FormInput
+                    label="Contents"
+                    id={`safeDepositBox.boxes.0.contents`}
+                    {...register(`safeDepositBox.boxes.0.contents`)}
+                    error={errors.safeDepositBox?.boxes?.[0]?.contents?.message}
+                  />
+                  <FormInput
+                    label="Value ($)"
+                    id={`safeDepositBox.boxes.0.value`}
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    {...register(`safeDepositBox.boxes.0.value`, {
+                      valueAsNumber: true,
+                    })}
+                    error={errors.safeDepositBox?.boxes?.[0]?.value?.message}
+                  />
+                </div>
               </div>
             )}
           </CardContent>

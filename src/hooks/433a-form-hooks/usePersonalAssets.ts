@@ -13,6 +13,7 @@ const usePersonalAssets = () => {
     info: PersonalAssetsFormSchema,
     caseId: string | null
   ) => {
+    console.log("assets indo: ", info);
     if (!caseId) return;
     setLoading(true);
 
@@ -42,6 +43,8 @@ const usePersonalAssets = () => {
           }
         );
       }
+
+      delete parsedInfo.boxA;
 
       await api.savePersonalAssetsInfo(parsedInfo, caseId);
       dispatch(savePersonalAssetsInfo(info));

@@ -61,7 +61,7 @@ export function OtherInfoSection({
     control,
   } = methods;
 
-  console.log("errors: ", errors)
+  console.log("errors: ", errors);
 
   // Field arrays
   const {
@@ -109,6 +109,15 @@ export function OtherInfoSection({
     name: "foreignAssets",
   });
 
+  const {
+    fields: relatedPartyFields,
+    append: appendRelatedParty,
+    remove: removeRelatedParty,
+  } = useFieldArray({
+    control,
+    name: "relatedPartyDebts",
+  });
+
   // Watch conditionals
   const isCurrentlyInBankruptcy = watch("isCurrentlyInBankruptcy");
   const hasFiledBankruptcyInPast10Years = watch(
@@ -132,6 +141,194 @@ export function OtherInfoSection({
   const hasAssetsOutsideUS = watch("hasAssetsOutsideUS");
   const hasFundsHeldInTrust = watch("hasFundsHeldInTrust");
   const hasLinesOfCredit = watch("hasLinesOfCredit");
+
+  // Limit arrays to at most one item
+  useEffect(() => {
+    if (affiliationFields.length > 1) {
+      for (let i = affiliationFields.length - 1; i > 0; i--) {
+        removeAffiliation(i);
+      }
+    }
+    if (litigationFields.length > 1) {
+      for (let i = litigationFields.length - 1; i > 0; i--) {
+        removeLitigation(i);
+      }
+    }
+    if (assetTransferFields.length > 1) {
+      for (let i = assetTransferFields.length - 1; i > 0; i--) {
+        removeAssetTransfer(i);
+      }
+    }
+    if (realTransferFields.length > 1) {
+      for (let i = realTransferFields.length - 1; i > 0; i--) {
+        removeRealTransfer(i);
+      }
+    }
+    if (foreignAssetFields.length > 1) {
+      for (let i = foreignAssetFields.length - 1; i > 0; i--) {
+        removeForeignAsset(i);
+      }
+    }
+    if (relatedPartyFields.length > 1) {
+      for (let i = relatedPartyFields.length - 1; i > 0; i--) {
+        removeRelatedParty(i);
+      }
+    }
+  }, [
+    affiliationFields.length,
+    litigationFields.length,
+    assetTransferFields.length,
+    realTransferFields.length,
+    foreignAssetFields.length,
+    relatedPartyFields.length,
+    removeAffiliation,
+    removeLitigation,
+    removeAssetTransfer,
+    removeRealTransfer,
+    removeForeignAsset,
+    removeRelatedParty,
+  ]);
+
+  // Manage businessAffiliations array based on yes/no
+  useEffect(() => {
+    if (hasOtherBusinessAffiliations && affiliationFields.length === 0) {
+      appendAffiliation({
+        name: "",
+        employerIdentificationNumber: "",
+      });
+    } else if (!hasOtherBusinessAffiliations && affiliationFields.length > 0) {
+      for (let i = affiliationFields.length - 1; i >= 0; i--) {
+        removeAffiliation(i);
+      }
+    }
+  }, [
+    hasOtherBusinessAffiliations,
+    affiliationFields.length,
+    appendAffiliation,
+    removeAffiliation,
+  ]);
+
+  // Manage litigationHistory array based on yes/no
+  useEffect(() => {
+    if (isCurrentlyOrPastPartyToLitigation && litigationFields.length === 0) {
+      appendLitigation({
+        role: "Plaintiff",
+        locationOfFiling: "",
+        representedBy: "",
+        docketCaseNumber: "",
+        amountInDispute: 0,
+        possibleCompletionDate: "",
+        subjectOfLitigation: "",
+      });
+    } else if (
+      !isCurrentlyOrPastPartyToLitigation &&
+      litigationFields.length > 0
+    ) {
+      for (let i = litigationFields.length - 1; i >= 0; i--) {
+        removeLitigation(i);
+      }
+    }
+  }, [
+    isCurrentlyOrPastPartyToLitigation,
+    litigationFields.length,
+    appendLitigation,
+    removeLitigation,
+  ]);
+
+  // Manage assetTransfersOver10k array based on yes/no
+  useEffect(() => {
+    if (
+      hasTransferredAssetsOver10kInPast10Years &&
+      assetTransferFields.length === 0
+    ) {
+      appendAssetTransfer({
+        date: "",
+        value: 0,
+        typeOfAsset: "",
+        description: "",
+      });
+    } else if (
+      !hasTransferredAssetsOver10kInPast10Years &&
+      assetTransferFields.length > 0
+    ) {
+      for (let i = assetTransferFields.length - 1; i >= 0; i--) {
+        removeAssetTransfer(i);
+      }
+    }
+  }, [
+    hasTransferredAssetsOver10kInPast10Years,
+    assetTransferFields.length,
+    appendAssetTransfer,
+    removeAssetTransfer,
+  ]);
+
+  // Manage realPropertyTransfers array based on yes/no
+  useEffect(() => {
+    if (
+      hasTransferredRealPropertyInPast3Years &&
+      realTransferFields.length === 0
+    ) {
+      appendRealTransfer({
+        date: "",
+        value: 0,
+        typeOfAsset: "",
+        description: "",
+      });
+    } else if (
+      !hasTransferredRealPropertyInPast3Years &&
+      realTransferFields.length > 0
+    ) {
+      for (let i = realTransferFields.length - 1; i >= 0; i--) {
+        removeRealTransfer(i);
+      }
+    }
+  }, [
+    hasTransferredRealPropertyInPast3Years,
+    realTransferFields.length,
+    appendRealTransfer,
+    removeRealTransfer,
+  ]);
+
+  // Manage foreignAssets array based on yes/no
+  useEffect(() => {
+    if (hasAssetsOutsideUS && foreignAssetFields.length === 0) {
+      appendForeignAsset({
+        description: "",
+        location: "",
+        value: 0,
+      });
+    } else if (!hasAssetsOutsideUS && foreignAssetFields.length > 0) {
+      for (let i = foreignAssetFields.length - 1; i >= 0; i--) {
+        removeForeignAsset(i);
+      }
+    }
+  }, [
+    hasAssetsOutsideUS,
+    foreignAssetFields.length,
+    appendForeignAsset,
+    removeForeignAsset,
+  ]);
+
+  // Manage relatedPartyDebts array based on yes/no
+  useEffect(() => {
+    if (doRelatedPartiesOweMoney && relatedPartyFields.length === 0) {
+      appendRelatedParty({
+        nameAndAddress: "",
+        dateOfLoan: "",
+        currentBalance: 0,
+        paymentAmount: 0,
+      });
+    } else if (!doRelatedPartiesOweMoney && relatedPartyFields.length > 0) {
+      for (let i = relatedPartyFields.length - 1; i >= 0; i--) {
+        removeRelatedParty(i);
+      }
+    }
+  }, [
+    doRelatedPartiesOweMoney,
+    relatedPartyFields.length,
+    appendRelatedParty,
+    removeRelatedParty,
+  ]);
 
   // Clear conditional fields when switching to no
   useEffect(() => {
@@ -198,6 +395,12 @@ export function OtherInfoSection({
     }
   }, [hasLinesOfCredit, setValue]);
 
+  useEffect(() => {
+    if (!doRelatedPartiesOweMoney) {
+      setValue("relatedPartyDebts", []);
+    }
+  }, [doRelatedPartiesOweMoney, setValue]);
+
   const onSubmit = async (data: OtherInfoFormSchema) => {
     try {
       if (!data.hasFiledBankruptcyInPast10Years) {
@@ -228,6 +431,7 @@ export function OtherInfoSection({
           propertySecuring: "",
         };
       }
+      if (!data.doRelatedPartiesOweMoney) data.relatedPartyDebts = [];
 
       await handleSaveOtherInfo(data, caseId);
       onNext();
@@ -381,61 +585,32 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            <p className="text-red-600">{errors.businessAffiliations?.message}</p>
+            <p className="text-red-600">
+              {errors.businessAffiliations?.message}
+            </p>
 
-            {hasOtherBusinessAffiliations && (
+            {hasOtherBusinessAffiliations && affiliationFields.length > 0 && (
               <div className="space-y-4">
-                {affiliationFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between">
-                      <h4 className="font-medium">Affiliation {index + 1}</h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeAffiliation(index)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <FormInput
-                      label="Name"
-                      id={`businessAffiliations.${index}.name`}
-                      {...register(`businessAffiliations.${index}.name`)}
-                      error={
-                        errors.businessAffiliations?.[index]?.name?.message
-                      }
-                    />
-                    <FormInput
-                      label="Employer Identification Number"
-                      id={`businessAffiliations.${index}.employerIdentificationNumber`}
-                      {...register(
-                        `businessAffiliations.${index}.employerIdentificationNumber`
-                      )}
-                      error={
-                        errors.businessAffiliations?.[index]
-                          ?.employerIdentificationNumber?.message
-                      }
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    appendAffiliation({
-                      name: "",
-                      employerIdentificationNumber: "",
-                    })
-                  }
-                  className="w-full border-dashed text-[#22b573]"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Affiliation
-                </Button>
+                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                  <h4 className="font-medium">Affiliation</h4>
+                  <FormInput
+                    label="Name"
+                    id={`businessAffiliations.0.name`}
+                    {...register(`businessAffiliations.0.name`)}
+                    error={errors.businessAffiliations?.[0]?.name?.message}
+                  />
+                  <FormInput
+                    label="Employer Identification Number"
+                    id={`businessAffiliations.0.employerIdentificationNumber`}
+                    {...register(
+                      `businessAffiliations.0.employerIdentificationNumber`
+                    )}
+                    error={
+                      errors.businessAffiliations?.[0]
+                        ?.employerIdentificationNumber?.message
+                    }
+                  />
+                </div>
               </div>
             )}
           </CardContent>
@@ -446,7 +621,7 @@ export function OtherInfoSection({
           <CardHeader>
             <CardTitle>Related Parties</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <FormField
               label="Do any related parties (e.g., officers, partners, employees) owe the business money?"
               id="doRelatedPartiesOweMoney"
@@ -469,6 +644,51 @@ export function OtherInfoSection({
                 </div>
               </RadioGroup>
             </FormField>
+
+            {doRelatedPartiesOweMoney && relatedPartyFields.length > 0 && (
+              <div className="space-y-4">
+                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                  <h4 className="font-medium">Related Party Debt</h4>
+                  <FormInput
+                    label="Name and Address (Street, City, State, ZIP code)"
+                    id={`relatedPartyDebts.0.nameAndAddress`}
+                    {...register(`relatedPartyDebts.0.nameAndAddress`)}
+                    error={
+                      errors.relatedPartyDebts?.[0]?.nameAndAddress?.message
+                    }
+                  />
+                  <FormInput
+                    type="date"
+                    label="Date of Loan (mmddyyyy)"
+                    id={`relatedPartyDebts.0.dateOfLoan`}
+                    {...register(`relatedPartyDebts.0.dateOfLoan`)}
+                    error={errors.relatedPartyDebts?.[0]?.dateOfLoan?.message}
+                  />
+                  <FormInput
+                    type="number"
+                    label="Current Balance ($)"
+                    id={`relatedPartyDebts.0.currentBalance`}
+                    {...register(`relatedPartyDebts.0.currentBalance`, {
+                      valueAsNumber: true,
+                    })}
+                    error={
+                      errors.relatedPartyDebts?.[0]?.currentBalance?.message
+                    }
+                  />
+                  <FormInput
+                    type="number"
+                    label="Payment Amount ($)"
+                    id={`relatedPartyDebts.0.paymentAmount`}
+                    {...register(`relatedPartyDebts.0.paymentAmount`, {
+                      valueAsNumber: true,
+                    })}
+                    error={
+                      errors.relatedPartyDebts?.[0]?.paymentAmount?.message
+                    }
+                  />
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -504,146 +724,98 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {isCurrentlyOrPastPartyToLitigation && (
-              <div className="space-y-4">
-                {litigationFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between">
-                      <h4 className="font-medium">Litigation {index + 1}</h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeLitigation(index)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+            {isCurrentlyOrPastPartyToLitigation &&
+              litigationFields.length > 0 && (
+                <div className="space-y-4">
+                  <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                    <h4 className="font-medium">Litigation</h4>
                     <FormField
                       label="Role"
-                      id={`litigationHistory.${index}.role`}
-                      error={errors.litigationHistory?.[index]?.role?.message}
+                      id={`litigationHistory.0.role`}
+                      error={errors.litigationHistory?.[0]?.role?.message}
                     >
                       <RadioGroup
-                        value={watch(`litigationHistory.${index}.role`)}
+                        value={watch(`litigationHistory.0.role`)}
                         onValueChange={(value) =>
-                          setValue(`litigationHistory.${index}.role`, value)
+                          setValue(`litigationHistory.0.role`, value)
                         }
                         className="flex gap-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem
                             value="Plaintiff"
-                            id={`role-plaintiff-${index}`}
+                            id={`role-plaintiff-0`}
                           />
-                          <Label htmlFor={`role-plaintiff-${index}`}>
-                            Plaintiff
-                          </Label>
+                          <Label htmlFor={`role-plaintiff-0`}>Plaintiff</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem
                             value="Defendant"
-                            id={`role-defendant-${index}`}
+                            id={`role-defendant-0`}
                           />
-                          <Label htmlFor={`role-defendant-${index}`}>
-                            Defendant
-                          </Label>
+                          <Label htmlFor={`role-defendant-0`}>Defendant</Label>
                         </div>
                       </RadioGroup>
                     </FormField>
                     <FormInput
                       label="Location of Filing"
-                      id={`litigationHistory.${index}.locationOfFiling`}
-                      {...register(
-                        `litigationHistory.${index}.locationOfFiling`
-                      )}
+                      id={`litigationHistory.0.locationOfFiling`}
+                      {...register(`litigationHistory.0.locationOfFiling`)}
                       error={
-                        errors.litigationHistory?.[index]?.locationOfFiling
-                          ?.message
+                        errors.litigationHistory?.[0]?.locationOfFiling?.message
                       }
                     />
                     <FormInput
                       label="Represented By"
-                      id={`litigationHistory.${index}.representedBy`}
-                      {...register(`litigationHistory.${index}.representedBy`)}
+                      id={`litigationHistory.0.representedBy`}
+                      {...register(`litigationHistory.0.representedBy`)}
                       error={
-                        errors.litigationHistory?.[index]?.representedBy
-                          ?.message
+                        errors.litigationHistory?.[0]?.representedBy?.message
                       }
                     />
                     <FormInput
                       label="Docket/Case Number"
-                      id={`litigationHistory.${index}.docketCaseNumber`}
-                      {...register(
-                        `litigationHistory.${index}.docketCaseNumber`
-                      )}
+                      id={`litigationHistory.0.docketCaseNumber`}
+                      {...register(`litigationHistory.0.docketCaseNumber`)}
                       error={
-                        errors.litigationHistory?.[index]?.docketCaseNumber
-                          ?.message
+                        errors.litigationHistory?.[0]?.docketCaseNumber?.message
                       }
                     />
                     <FormInput
                       type="number"
                       label="Amount in Dispute ($)"
-                      id={`litigationHistory.${index}.amountInDispute`}
-                      {...register(
-                        `litigationHistory.${index}.amountInDispute`,
-                        { valueAsNumber: true }
-                      )}
+                      id={`litigationHistory.0.amountInDispute`}
+                      {...register(`litigationHistory.0.amountInDispute`, {
+                        valueAsNumber: true,
+                      })}
                       error={
-                        errors.litigationHistory?.[index]?.amountInDispute
-                          ?.message
+                        errors.litigationHistory?.[0]?.amountInDispute?.message
                       }
                     />
                     <FormInput
                       type="date"
                       label="Possible Completion Date"
-                      id={`litigationHistory.${index}.possibleCompletionDate`}
+                      id={`litigationHistory.0.possibleCompletionDate`}
                       {...register(
-                        `litigationHistory.${index}.possibleCompletionDate`
+                        `litigationHistory.0.possibleCompletionDate`
                       )}
                       error={
-                        errors.litigationHistory?.[index]
-                          ?.possibleCompletionDate?.message
+                        errors.litigationHistory?.[0]?.possibleCompletionDate
+                          ?.message
                       }
                     />
                     <FormInput
                       label="Subject of Litigation"
-                      id={`litigationHistory.${index}.subjectOfLitigation`}
-                      {...register(
-                        `litigationHistory.${index}.subjectOfLitigation`
-                      )}
+                      id={`litigationHistory.0.subjectOfLitigation`}
+                      {...register(`litigationHistory.0.subjectOfLitigation`)}
                       error={
-                        errors.litigationHistory?.[index]?.subjectOfLitigation
+                        errors.litigationHistory?.[0]?.subjectOfLitigation
                           ?.message
                       }
                     />
                   </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    appendLitigation({
-                      role: "Plaintiff",
-                      locationOfFiling: "",
-                      representedBy: "",
-                      docketCaseNumber: "",
-                      amountInDispute: 0,
-                      possibleCompletionDate: "",
-                      subjectOfLitigation: "",
-                    })
-                  }
-                  className="w-full border-dashed text-[#22b573]"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Litigation
-                </Button>
-              </div>
-            )}
+                </div>
+              )}
 
             <FormField
               label="Have you been party to litigation with IRS?"
@@ -711,86 +883,46 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {hasTransferredAssetsOver10kInPast10Years && (
-              <div className="space-y-4">
-                {assetTransferFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200 rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between">
-                      <h4 className="font-medium">Transfer {index + 1}</h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeAssetTransfer(index)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+            {hasTransferredAssetsOver10kInPast10Years &&
+              assetTransferFields.length > 0 && (
+                <div className="space-y-4">
+                  <div className="p-4 border border-gray-200 rounded-lg space-y-4">
+                    <h4 className="font-medium">Transfer</h4>
                     <FormInput
                       type="date"
                       label="Date"
-                      id={`assetTransfersOver10k.${index}.date`}
-                      {...register(`assetTransfersOver10k.${index}.date`)}
-                      error={
-                        errors.assetTransfersOver10k?.[index]?.date?.message
-                      }
+                      id={`assetTransfersOver10k.0.date`}
+                      {...register(`assetTransfersOver10k.0.date`)}
+                      error={errors.assetTransfersOver10k?.[0]?.date?.message}
                     />
                     <FormInput
                       type="number"
                       label="Value ($)"
-                      id={`assetTransfersOver10k.${index}.value`}
-                      {...register(`assetTransfersOver10k.${index}.value`, {
+                      id={`assetTransfersOver10k.0.value`}
+                      {...register(`assetTransfersOver10k.0.value`, {
                         valueAsNumber: true,
                       })}
-                      error={
-                        errors.assetTransfersOver10k?.[index]?.value?.message
-                      }
+                      error={errors.assetTransfersOver10k?.[0]?.value?.message}
                     />
                     <FormInput
                       label="Type of Asset"
-                      id={`assetTransfersOver10k.${index}.typeOfAsset`}
-                      {...register(
-                        `assetTransfersOver10k.${index}.typeOfAsset`
-                      )}
+                      id={`assetTransfersOver10k.0.typeOfAsset`}
+                      {...register(`assetTransfersOver10k.0.typeOfAsset`)}
                       error={
-                        errors.assetTransfersOver10k?.[index]?.typeOfAsset
-                          ?.message
+                        errors.assetTransfersOver10k?.[0]?.typeOfAsset?.message
                       }
                     />
                     <FormInput
                       label="Description"
-                      id={`assetTransfersOver10k.${index}.description`}
-                      {...register(
-                        `assetTransfersOver10k.${index}.description`
-                      )}
+                      id={`assetTransfersOver10k.0.description`}
+                      {...register(`assetTransfersOver10k.0.description`)}
                       error={
-                        errors.assetTransfersOver10k?.[index]?.description
-                          ?.message
+                        errors.assetTransfersOver10k?.[0]?.description?.message
                       }
                     />
                   </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    appendAssetTransfer({
-                      date: "",
-                      value: 0,
-                      typeOfAsset: "",
-                      description: "",
-                    })
-                  }
-                  className="w-full border-dashed text-[#22b573]"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Asset Transfer
-                </Button>
-              </div>
-            )}
+                </div>
+              )}
 
             <FormField
               label="Have you transferred real property in past 3 years?"
@@ -818,88 +950,46 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {hasTransferredRealPropertyInPast3Years && (
-              <div className="space-y-4">
-                {realTransferFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200  rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between">
-                      <h4 className="font-medium">
-                        Real Property Transfer {index + 1}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeRealTransfer(index)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+            {hasTransferredRealPropertyInPast3Years &&
+              realTransferFields.length > 0 && (
+                <div className="space-y-4">
+                  <div className="p-4 border border-gray-200  rounded-lg space-y-4">
+                    <h4 className="font-medium">Real Property Transfer</h4>
                     <FormInput
                       type="date"
                       label="Date"
-                      id={`realPropertyTransfers.${index}.date`}
-                      {...register(`realPropertyTransfers.${index}.date`)}
-                      error={
-                        errors.realPropertyTransfers?.[index]?.date?.message
-                      }
+                      id={`realPropertyTransfers.0.date`}
+                      {...register(`realPropertyTransfers.0.date`)}
+                      error={errors.realPropertyTransfers?.[0]?.date?.message}
                     />
                     <FormInput
                       type="number"
                       label="Value ($)"
-                      id={`realPropertyTransfers.${index}.value`}
-                      {...register(`realPropertyTransfers.${index}.value`, {
+                      id={`realPropertyTransfers.0.value`}
+                      {...register(`realPropertyTransfers.0.value`, {
                         valueAsNumber: true,
                       })}
-                      error={
-                        errors.realPropertyTransfers?.[index]?.value?.message
-                      }
+                      error={errors.realPropertyTransfers?.[0]?.value?.message}
                     />
                     <FormInput
                       label="Type of Asset"
-                      id={`realPropertyTransfers.${index}.typeOfAsset`}
-                      {...register(
-                        `realPropertyTransfers.${index}.typeOfAsset`
-                      )}
+                      id={`realPropertyTransfers.0.typeOfAsset`}
+                      {...register(`realPropertyTransfers.0.typeOfAsset`)}
                       error={
-                        errors.realPropertyTransfers?.[index]?.typeOfAsset
-                          ?.message
+                        errors.realPropertyTransfers?.[0]?.typeOfAsset?.message
                       }
                     />
                     <FormInput
                       label="Description"
-                      id={`realPropertyTransfers.${index}.description`}
-                      {...register(
-                        `realPropertyTransfers.${index}.description`
-                      )}
+                      id={`realPropertyTransfers.0.description`}
+                      {...register(`realPropertyTransfers.0.description`)}
                       error={
-                        errors.realPropertyTransfers?.[index]?.description
-                          ?.message
+                        errors.realPropertyTransfers?.[0]?.description?.message
                       }
                     />
                   </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    appendRealTransfer({
-                      date: "",
-                      value: 0,
-                      typeOfAsset: "",
-                      description: "",
-                    })
-                  }
-                  className="w-full border-dashed text-[#22b573]"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Real Property Transfer
-                </Button>
-              </div>
-            )}
+                </div>
+              )}
           </CardContent>
         </Card>
 
@@ -955,64 +1045,32 @@ export function OtherInfoSection({
               </RadioGroup>
             </FormField>
 
-            {hasAssetsOutsideUS && (
+            {hasAssetsOutsideUS && foreignAssetFields.length > 0 && (
               <div className="space-y-4">
-                {foreignAssetFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="p-4 border border-gray-200  rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between">
-                      <h4 className="font-medium">Foreign Asset {index + 1}</h4>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeForeignAsset(index)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <FormInput
-                      label="Description"
-                      id={`foreignAssets.${index}.description`}
-                      {...register(`foreignAssets.${index}.description`)}
-                      error={
-                        errors.foreignAssets?.[index]?.description?.message
-                      }
-                    />
-                    <FormInput
-                      label="Location"
-                      id={`foreignAssets.${index}.location`}
-                      {...register(`foreignAssets.${index}.location`)}
-                      error={errors.foreignAssets?.[index]?.location?.message}
-                    />
-                    <FormInput
-                      type="number"
-                      label="Value ($)"
-                      id={`foreignAssets.${index}.value`}
-                      {...register(`foreignAssets.${index}.value`, {
-                        valueAsNumber: true,
-                      })}
-                      error={errors.foreignAssets?.[index]?.value?.message}
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    appendForeignAsset({
-                      description: "",
-                      location: "",
-                      value: 0,
-                    })
-                  }
-                  className="w-full border-dashed text-[#22b573]"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Foreign Asset
-                </Button>
+                <div className="p-4 border border-gray-200  rounded-lg space-y-4">
+                  <h4 className="font-medium">Foreign Asset</h4>
+                  <FormInput
+                    label="Description"
+                    id={`foreignAssets.0.description`}
+                    {...register(`foreignAssets.0.description`)}
+                    error={errors.foreignAssets?.[0]?.description?.message}
+                  />
+                  <FormInput
+                    label="Location"
+                    id={`foreignAssets.0.location`}
+                    {...register(`foreignAssets.0.location`)}
+                    error={errors.foreignAssets?.[0]?.location?.message}
+                  />
+                  <FormInput
+                    type="number"
+                    label="Value ($)"
+                    id={`foreignAssets.0.value`}
+                    {...register(`foreignAssets.0.value`, {
+                      valueAsNumber: true,
+                    })}
+                    error={errors.foreignAssets?.[0]?.value?.message}
+                  />
+                </div>
               </div>
             )}
           </CardContent>

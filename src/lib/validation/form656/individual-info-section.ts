@@ -34,20 +34,44 @@ const taxpayerSchema = z
     }
   );
 
-const taxPeriodSchema = z.object({
-  taxType: z.string().min(1, "Tax type is required"),
-  periodEnding: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), "Invalid date format"),
-  businessName: z.string().optional(),
-});
+const taxPeriodsSchema = z
+  .object({
+    isIndividualIncomeTax: z.boolean(),
+    individualTaxDescription: z.string().optional(),
+    isTrustFundRecoveryPenalty: z.boolean(),
+    trustFundBusinessName: z.string().optional(),
+    trustFundPeriodEnding: z.string().optional(),
+    isEmployerQuarterlyTax: z.boolean(),
+    quarterlyPeriods: z.string().optional(),
+    isEmployerAnnualFUTATax: z.boolean(),
+    annualYears: z.string().optional(),
+    isOtherFederalTax: z.boolean(),
+    otherTaxDescription: z.string().optional(),
+    attachmentToForm656Dated: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const hasSelection =
+        data.isIndividualIncomeTax ||
+        data.isTrustFundRecoveryPenalty ||
+        data.isEmployerQuarterlyTax ||
+        data.isEmployerAnnualFUTATax ||
+        data.isOtherFederalTax ||
+        !!data.attachmentToForm656Dated;
+      return hasSelection;
+    },
+    {
+      message:
+        "At least one tax period must be specified or an attachment provided.",
+    }
+  );
 
 const lowIncomeSchema = z.object({
   qualifiesForLowIncome: z.boolean(),
   qualificationBasis: z
     .enum(["adjusted_gross_income", "household_monthly_income"])
     .optional(),
-  familySize: z.number().min(1, "Family size must be at least 1").optional(),
+  familySize: z.number().optional(),
   residenceState: z.enum(["contiguous_states", "alaska", "hawaii"]).optional(),
   adjustedGrossIncome: z
     .number()
@@ -61,8 +85,6 @@ const lowIncomeSchema = z.object({
 
 export const individualInfoSchema = z
   .object({
-    usedPreQualifierTool: z.boolean(),
-    usedIOLAEligibilityCheck: z.boolean(),
     primaryTaxpayer: taxpayerSchema,
     spouseTaxpayer: taxpayerSchema.optional(),
     isJointOffer: z.boolean(),
@@ -76,9 +98,7 @@ export const individualInfoSchema = z
       .string()
       .regex(einRegex, "Invalid EIN format")
       .optional(),
-    taxPeriods: z
-      .array(taxPeriodSchema)
-      .min(1, "At least one tax period is required"),
+    taxPeriods: taxPeriodsSchema,
     lowIncomeCertification: lowIncomeSchema,
   })
   .superRefine((data, ctx) => {
@@ -90,6 +110,67 @@ export const individualInfoSchema = z
       });
     }
 
+    if (
+      data.taxPeriods.isIndividualIncomeTax &&
+      !data.taxPeriods.individualTaxDescription
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Individual tax description is required",
+        path: ["taxPeriods.individualTaxDescription"],
+      });
+    }
+
+    if (data.taxPeriods.isTrustFundRecoveryPenalty) {
+      if (!data.taxPeriods.trustFundBusinessName) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Trust fund business name is required",
+          path: ["taxPeriods.trustFundBusinessName"],
+        });
+      }
+      if (!data.taxPeriods.trustFundPeriodEnding) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Trust fund period ending is required",
+          path: ["taxPeriods.trustFundPeriodEnding"],
+        });
+      }
+    }
+
+    if (
+      data.taxPeriods.isEmployerQuarterlyTax &&
+      !data.taxPeriods.quarterlyPeriods
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Quarterly periods are required",
+        path: ["taxPeriods.quarterlyPeriods"],
+      });
+    }
+
+    if (
+      data.taxPeriods.isEmployerAnnualFUTATax &&
+      !data.taxPeriods.annualYears
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Annual years are required",
+        path: ["taxPeriods.annualYears"],
+      });
+    }
+
+    if (
+      data.taxPeriods.isOtherFederalTax &&
+      !data.taxPeriods.otherTaxDescription
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Other tax description is required",
+        path: ["taxPeriods.otherTaxDescription"],
+      });
+    }
+
     if (data.lowIncomeCertification.qualifiesForLowIncome) {
       if (!data.lowIncomeCertification.qualificationBasis) {
         ctx.addIssue({
@@ -98,10 +179,20 @@ export const individualInfoSchema = z
           path: ["lowIncomeCertification.qualificationBasis"],
         });
       }
-      if (!data.lowIncomeCertification.familySize) {
+      if (data.lowIncomeCertification.familySize == null) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Family size is required",
+          path: ["lowIncomeCertification.familySize"],
+        });
+      }
+      if (
+        data.lowIncomeCertification.familySize &&
+        data.lowIncomeCertification.familySize < 1
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Family size must be at least 1",
           path: ["lowIncomeCertification.familySize"],
         });
       }
@@ -124,7 +215,8 @@ export const individualInfoSchema = z
         });
       }
       if (
-        data.lowIncomeCertification.qualificationBasis === "household_monthly_income" &&
+        data.lowIncomeCertification.qualificationBasis ===
+          "household_monthly_income" &&
         data.lowIncomeCertification.householdMonthlyIncome == null
       ) {
         ctx.addIssue({
@@ -137,8 +229,6 @@ export const individualInfoSchema = z
   });
 
 export const individualInfoInitialValues: IndividualInfoFormSchema = {
-  usedPreQualifierTool: false,
-  usedIOLAEligibilityCheck: false,
   primaryTaxpayer: {
     firstName: "",
     middleInitial: "",
@@ -170,13 +260,26 @@ export const individualInfoInitialValues: IndividualInfoFormSchema = {
   isNewAddressSinceLastReturn: false,
   updateRecordsToThisAddress: false,
   employerIdentificationNumber: "",
-  taxPeriods: [],
+  taxPeriods: {
+    isIndividualIncomeTax: false,
+    individualTaxDescription: "",
+    isTrustFundRecoveryPenalty: false,
+    trustFundBusinessName: "",
+    trustFundPeriodEnding: "",
+    isEmployerQuarterlyTax: false,
+    quarterlyPeriods: "",
+    isEmployerAnnualFUTATax: false,
+    annualYears: "",
+    isOtherFederalTax: false,
+    otherTaxDescription: "",
+    attachmentToForm656Dated: "",
+  },
   lowIncomeCertification: {
     qualifiesForLowIncome: false,
     qualificationBasis: undefined,
-    familySize: 1,
-    residenceState: "contiguous_states",
-    adjustedGrossIncome: 0,
-    householdMonthlyIncome: 0,
+    familySize: undefined,
+    residenceState: undefined,
+    adjustedGrossIncome: undefined,
+    householdMonthlyIncome: undefined,
   },
 };

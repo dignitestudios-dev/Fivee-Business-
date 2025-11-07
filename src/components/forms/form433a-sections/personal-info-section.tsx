@@ -16,7 +16,7 @@ import {
   personalInfoSchema,
 } from "@/lib/validation/form433a/personal-info-section";
 import { useEffect, useMemo } from "react";
-import { setCaseId } from "@/utils/helper";
+import { formatPhone, setCaseId } from "@/utils/helper";
 import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
@@ -334,14 +334,20 @@ export function PersonalInfoSection({
                 id="primaryPhone"
                 placeholder="(123) 456-7890"
                 required
-                {...register("primaryPhone")}
+                {...register("primaryPhone", {
+                  onChange: (e) =>
+                    setValue("primaryPhone", formatPhone(e.target.value)),
+                })}
                 error={errors.primaryPhone?.message}
               />
               <FormInput
                 label="Secondary Phone"
                 id="secondaryPhone"
                 placeholder="(123) 456-7890"
-                {...register("secondaryPhone")}
+                {...register("secondaryPhone", {
+                  onChange: (e) =>
+                    setValue("secondaryPhone", formatPhone(e.target.value)),
+                })}
                 error={errors.secondaryPhone?.message}
               />
             </div>

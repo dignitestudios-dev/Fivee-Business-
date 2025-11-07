@@ -43,12 +43,12 @@ export function FormStepper({
             onClick={() => isAccessible && onStepClick(step.id)}
             disabled={!isAccessible}
             className={cn(
-              "w-full text-left p-4 rounded-lg border transition-all duration-200",
-              "focus:outline-none focus:ring-2 focus:ring-offset-2",
-              isAccessible && "hover:shadow-md cursor-pointer",
+              "w-full text-left p-4 shadow-md rounded-lg border transition-all duration-300",
+              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#22b573]/20",
+              isAccessible && "hover:shadow-xl cursor-pointer",
               !isAccessible && "cursor-not-allowed opacity-60",
               isCurrent &&
-                "border-[#22b573] bg-[#22b573]/5 ring-2 ring-[#22b573]/20",
+                "border-[#22b573] bg-[#22b573]/5 ring-2 !ring-[#22b573]/70",
               isCompleted && "border-green-200 bg-green-50",
               !isCurrent &&
                 !isCompleted &&

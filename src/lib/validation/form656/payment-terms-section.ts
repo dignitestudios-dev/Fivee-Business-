@@ -4,7 +4,8 @@ const additionalPaymentSchema = z.object({
   amount: z.number().min(0, "Amount must be non-negative"),
   payableWithinMonths: z
     .number()
-    .min(1, "Months must be at least 1"),
+    .min(1, "Months must be at least 1")
+    .max(5, "Months must be at most 5"),
 });
 
 const lumpSumSchema = z
@@ -12,7 +13,8 @@ const lumpSumSchema = z
     totalOfferAmount: z.number().min(0, "Offer amount required"),
     initialPayment: z.number().min(0, "Initial payment required"),
     additionalPayments: z
-      .array(additionalPaymentSchema),
+      .array(additionalPaymentSchema)
+      .max(5, "Maximum 5 additional payments"),
   })
   .refine(
     (data) => {
@@ -34,15 +36,16 @@ const periodicSchema = z
     firstMonthlyPayment: z.number().min(0, "First payment required"),
     subsequentMonthlyPayment: z.number().min(0, "Subsequent payment required"),
     paymentDayOfMonth: z.number().min(1).max(28),
-    monthsToPay: z.number().min(6).max(24),
+    subsequentMonths: z.number().min(4).max(22),
     finalPaymentAmount: z.number().min(0),
     finalPaymentDay: z.number().min(1).max(28),
     finalPaymentMonth: z.number().min(6).max(24),
+    monthsToPay: z.number().min(6).max(24),
   })
   .refine(
     (data) => {
-      const numSubPayments = Math.max(0, data.monthsToPay - 2);
-      const total = 
+      const numSubPayments = data.subsequentMonths;
+      const total =
         data.firstMonthlyPayment +
         numSubPayments * data.subsequentMonthlyPayment +
         data.finalPaymentAmount;
@@ -53,47 +56,62 @@ const periodicSchema = z
       message: "Payments must sum to total offer amount",
       path: ["finalPaymentAmount"],
     }
-  );
+  )
+  .refine((data) => data.monthsToPay === data.subsequentMonths + 2, {
+    message: "Total months must be subsequent months + 2",
+    path: ["monthsToPay"],
+  })
+  .refine((data) => data.finalPaymentMonth === data.monthsToPay, {
+    message: "Final payment month must equal total months",
+    path: ["finalPaymentMonth"],
+  });
 
-export const paymentTermsSchema = z.object({
-  paymentOption: z.enum(["lump-sum", "periodic"]),
-  lumpSum: z.union([
-    lumpSumSchema,
-    z.object({
-      totalOfferAmount: z.number().optional(),
-      initialPayment: z.number().optional(),
-      additionalPayments: z.array(additionalPaymentSchema).optional(),
-    })
-  ]).optional(),
-  periodic: z.union([
-    periodicSchema,
-    z.object({
-      totalOfferAmount: z.number().optional(),
-      firstMonthlyPayment: z.number().optional(),
-      subsequentMonthlyPayment: z.number().optional(),
-      paymentDayOfMonth: z.number().optional(),
-      monthsToPay: z.number().optional(),
-      finalPaymentAmount: z.number().optional(),
-      finalPaymentDay: z.number().optional(),
-      finalPaymentMonth: z.number().optional(),
-    })
-  ]).optional(),
-}).superRefine((data, ctx) => {
-  if (data.paymentOption === "lump-sum" && !data.lumpSum?.totalOfferAmount) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Total offer amount is required for lump sum payment",
-      path: ["lumpSum", "totalOfferAmount"],
-    });
-  }
-  if (data.paymentOption === "periodic" && !data.periodic?.totalOfferAmount) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Total offer amount is required for periodic payment",
-      path: ["periodic", "totalOfferAmount"],
-    });
-  }
-});
+export const paymentTermsSchema = z
+  .object({
+    paymentOption: z.enum(["lump-sum", "periodic"]),
+    lumpSum: z
+      .union([
+        lumpSumSchema,
+        z.object({
+          totalOfferAmount: z.number().optional(),
+          initialPayment: z.number().optional(),
+          additionalPayments: z.array(additionalPaymentSchema).optional(),
+        }),
+      ])
+      .optional(),
+    periodic: z
+      .union([
+        periodicSchema,
+        z.object({
+          totalOfferAmount: z.number().optional(),
+          firstMonthlyPayment: z.number().optional(),
+          subsequentMonthlyPayment: z.number().optional(),
+          paymentDayOfMonth: z.number().optional(),
+          subsequentMonths: z.number().optional(),
+          finalPaymentAmount: z.number().optional(),
+          finalPaymentDay: z.number().optional(),
+          finalPaymentMonth: z.number().optional(),
+          monthsToPay: z.number().optional(),
+        }),
+      ])
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.paymentOption === "lump-sum" && !data.lumpSum?.totalOfferAmount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Total offer amount is required for lump sum payment",
+        path: ["lumpSum", "totalOfferAmount"],
+      });
+    }
+    if (data.paymentOption === "periodic" && !data.periodic?.totalOfferAmount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Total offer amount is required for periodic payment",
+        path: ["periodic", "totalOfferAmount"],
+      });
+    }
+  });
 
 export const paymentTermsInitialValues: PaymentTermsFormSchema = {
   paymentOption: "lump-sum",
@@ -107,9 +125,10 @@ export const paymentTermsInitialValues: PaymentTermsFormSchema = {
     firstMonthlyPayment: 0,
     subsequentMonthlyPayment: 0,
     paymentDayOfMonth: 1,
-    monthsToPay: 6,
+    subsequentMonths: 4,
     finalPaymentAmount: 0,
     finalPaymentDay: 1,
     finalPaymentMonth: 6,
+    monthsToPay: 6,
   },
 };

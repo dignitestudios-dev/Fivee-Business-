@@ -51,7 +51,7 @@ export function PaymentTermsSection({
   const methods = useForm<PaymentTermsFormSchema>({
     resolver: zodResolver(paymentTermsSchema),
     defaultValues: paymentTermsInitialValues,
-    mode: "onSubmit",
+    mode: "onChange",
   });
   const {
     register,
@@ -97,8 +97,8 @@ export function PaymentTermsSection({
   const periodicOfferAmount = watch("periodic.totalOfferAmount");
   const periodicFirstPayment = watch("periodic.firstMonthlyPayment");
   const periodicSubsequent = watch("periodic.subsequentMonthlyPayment");
-  const periodicMonths = watch("periodic.monthsToPay");
-  
+  const subsequentMonths = watch("periodic.subsequentMonths");
+
   // Clear periodic fields when switching to lump sum
   useEffect(() => {
     if (paymentOption === "lump-sum") {
@@ -108,13 +108,14 @@ export function PaymentTermsSection({
     }
   }, [paymentOption, setValue]);
   useEffect(() => {
-    setValue("periodic.finalPaymentMonth", periodicMonths);
-    if (periodicMonths >= 6 && periodicMonths <= 24) {
+    const totalMonths = (subsequentMonths || 0) + 2;
+    setValue("periodic.monthsToPay", totalMonths);
+    setValue("periodic.finalPaymentMonth", totalMonths);
+    if (totalMonths >= 6 && totalMonths <= 24) {
       // Enforce 6-24 months for periodic
-      const numSubPayments = periodicMonths - 2;
+      const numSubPayments = subsequentMonths || 0;
       const totalPaidBeforeFinal =
-        periodicFirstPayment +
-        (numSubPayments >= 0 ? numSubPayments : 0) * periodicSubsequent;
+        periodicFirstPayment + numSubPayments * periodicSubsequent;
       const finalAmount = periodicOfferAmount - totalPaidBeforeFinal;
       setValue(
         "periodic.finalPaymentAmount",
@@ -127,13 +128,25 @@ export function PaymentTermsSection({
     periodicOfferAmount,
     periodicFirstPayment,
     periodicSubsequent,
-    periodicMonths,
+    subsequentMonths,
     setValue,
   ]);
 
   const onSubmit = async (data: PaymentTermsFormSchema) => {
     try {
       if (paymentOption === "lump-sum") {
+        const lumpSumData = data.lumpSum;
+        const totalAdditional = lumpSumData.additionalPayments.reduce(
+          (sum: number, p: { amount: number }) => sum + p.amount,
+          0
+        );
+        if (
+          lumpSumData.initialPayment + totalAdditional !==
+          lumpSumData.totalOfferAmount
+        ) {
+          toast.error("Payments must sum to total offer amount.");
+          return;
+        }
         data.periodic = undefined;
       } else {
         data.lumpSum = undefined;
@@ -159,14 +172,19 @@ export function PaymentTermsSection({
   }, [caseId]);
   useEffect(() => {
     if (paymentTerms) {
+      console.log("paymentTerms: ", paymentTerms);
       reset(paymentTerms);
     }
   }, [paymentTerms, reset]);
   const addAdditionalPayment = () => {
-    append({
-      amount: 0,
-      payableWithinMonths: 1,
-    });
+    if (fields.length < 5) {
+      append({
+        amount: 0,
+        payableWithinMonths: 1,
+      });
+    } else {
+      toast.error("Maximum of 5 additional payments allowed.");
+    }
   };
   if (loadingFormData) {
     return <FormLoader />;
@@ -265,6 +283,17 @@ export function PaymentTermsSection({
                 {...register("lumpSum.initialPayment", { valueAsNumber: true })}
                 error={errors.lumpSum?.initialPayment?.message}
               />
+              <div className="space-y-1">
+                <Label>Remaining Balance</Label>
+                <FormInput
+                  label=""
+                  value={
+                    (watch("lumpSum.totalOfferAmount") || 0) -
+                    (watch("lumpSum.initialPayment") || 0)
+                  }
+                  readOnly
+                />
+              </div>
               <div className="space-y-4">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex gap-4 items-end">
@@ -313,9 +342,36 @@ export function PaymentTermsSection({
                   onClick={addAdditionalPayment}
                   variant="outline"
                   className="w-full"
+                  disabled={fields.length >= 5}
                 >
                   <Plus className="w-4 h-4 mr-2" /> Add Additional Payment
                 </Button>
+                <p className="text-sm text-gray-600">
+                  Current Additional Payments Sum: $
+                  {fields.reduce(
+                    (sum, _, index) =>
+                      sum +
+                      (watch(`lumpSum.additionalPayments.${index}.amount`) ||
+                        0),
+                    0
+                  )}
+                </p>
+                {fields.reduce(
+                  (sum, _, index) =>
+                    sum +
+                    (watch(`lumpSum.additionalPayments.${index}.amount`) || 0),
+                  0
+                ) !==
+                  (watch("lumpSum.totalOfferAmount") || 0) -
+                    (watch("lumpSum.initialPayment") || 0) && (
+                  <p className="text-red-600 text-sm">
+                    The additional payments sum must equal the remaining balance
+                    ($
+                    {(watch("lumpSum.totalOfferAmount") || 0) -
+                      (watch("lumpSum.initialPayment") || 0)}
+                    ).
+                  </p>
+                )}
                 {errors.lumpSum?.additionalPayments?._errors && (
                   <p className="text-red-600 text-sm mt-2">
                     {errors.lumpSum.additionalPayments._errors[0]}
@@ -329,10 +385,21 @@ export function PaymentTermsSection({
           <Card>
             <CardHeader>
               <CardTitle>Periodic Payment Details</CardTitle>
+              <p className="text-gray-600 font-semibold">
+                Note: The total months may not exceed a total of 24. For
+                example, if you are requesting your payments extend for 24
+                months then your first payment is considered to be month 1 and
+                your last payment is considered month 24. There will be 22
+                payments between the first and last month.
+              </p>
+              <p className="text-gray-600">
+                Enclose a check for the first month's payment (waived if you met
+                the requirements for Low-Income Certification).
+              </p>
             </CardHeader>
             <CardContent className="space-y-6">
               <FormInput
-                label="Offer Amount (must be >= calculated minimum)"
+                label="Enter the amount of your offer"
                 id="periodic.totalOfferAmount"
                 type="number"
                 required
@@ -342,87 +409,118 @@ export function PaymentTermsSection({
                 })}
                 error={errors.periodic?.totalOfferAmount?.message}
               />
-              <FormInput
-                label="First Monthly Payment"
-                id="periodic.firstMonthlyPayment"
-                type="number"
-                required={!qualifiesForLowIncome}
-                {...register("periodic.firstMonthlyPayment", {
-                  valueAsNumber: true,
-                })}
-                error={errors.periodic?.firstMonthlyPayment?.message}
-              />
-              <FormInput
-                label="Subsequent Monthly Payment"
-                id="periodic.subsequentMonthlyPayment"
-                type="number"
-                required
-                {...register("periodic.subsequentMonthlyPayment", {
-                  valueAsNumber: true,
-                })}
-                error={errors.periodic?.subsequentMonthlyPayment?.message}
-              />
-              <FormInput
-                label="Payment Day of Month (1-28)"
-                id="periodic.paymentDayOfMonth"
-                type="number"
-                min={1}
-                max={28}
-                required
-                {...register("periodic.paymentDayOfMonth", {
-                  valueAsNumber: true,
-                })}
-                error={errors.periodic?.paymentDayOfMonth?.message}
-              />
-              <FormInput
-                label="Number of Months to Pay (6-24)"
-                id="periodic.monthsToPay"
-                type="number"
-                min={6}
-                max={24}
-                required
-                {...register("periodic.monthsToPay", { valueAsNumber: true })}
-                error={errors.periodic?.monthsToPay?.message}
-              />
-              <FormInput
-                label="Final Payment Amount (calculated)"
-                id="periodic.finalPaymentAmount"
-                type="number"
-                readOnly
-                {...register("periodic.finalPaymentAmount", {
-                  valueAsNumber: true,
-                })}
-                error={errors.periodic?.finalPaymentAmount?.message}
-              />
+              <div className="flex flex-wrap items-center gap-1 text-gray-800">
+                <span>The first monthly payment of $</span>
+                <FormInput
+                  label=""
+                  id="periodic.firstMonthlyPayment"
+                  type="number"
+                  required={!qualifiesForLowIncome}
+                  className="mx-1"
+                  {...register("periodic.firstMonthlyPayment", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.firstMonthlyPayment?.message}
+                />
+                <span>is included with this offer then $</span>
+                <FormInput
+                  label=""
+                  id="periodic.subsequentMonthlyPayment"
+                  type="number"
+                  required
+                  className="mx-1"
+                  {...register("periodic.subsequentMonthlyPayment", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.subsequentMonthlyPayment?.message}
+                />
+                <span>will be paid on the (pick number 1-28)</span>
+                <FormInput
+                  label=""
+                  id="periodic.paymentDayOfMonth"
+                  type="number"
+                  min={1}
+                  max={28}
+                  required
+                  className="mx-1"
+                  {...register("periodic.paymentDayOfMonth", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.paymentDayOfMonth?.message}
+                />
+                <span>day of each month thereafter for</span>
+                <FormInput
+                  label=""
+                  id="periodic.subsequentMonths"
+                  type="number"
+                  min={4}
+                  max={22}
+                  required
+                  className="mx-1"
+                  {...register("periodic.subsequentMonths", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.subsequentMonths?.message}
+                />
+                <span>months with a final payment of $</span>
+                <FormInput
+                  label=""
+                  id="periodic.finalPaymentAmount"
+                  type="number"
+                  readOnly
+                  className="mx-1"
+                  {...register("periodic.finalPaymentAmount", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.finalPaymentAmount?.message}
+                />
+                <span>to be paid on the</span>
+                <FormInput
+                  label=""
+                  id="periodic.finalPaymentDay"
+                  type="number"
+                  min={1}
+                  max={28}
+                  required
+                  className="mx-1"
+                  {...register("periodic.finalPaymentDay", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.finalPaymentDay?.message}
+                />
+                <span>day of the</span>
+                <FormInput
+                  label=""
+                  id="periodic.finalPaymentMonth"
+                  type="number"
+                  readOnly
+                  className="mx-1"
+                  {...register("periodic.finalPaymentMonth", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.periodic?.finalPaymentMonth?.message}
+                />
+                <span>month.</span>
+              </div>
               {errors.periodic?.finalPaymentAmount && (
                 <p className="text-red-600 text-sm">
                   {errors.periodic.finalPaymentAmount.message}
                 </p>
               )}
-              <FormInput
-                label="Final Payment Day (1-28)"
-                id="periodic.finalPaymentDay"
-                type="number"
-                min={1}
-                max={28}
-                required
-                {...register("periodic.finalPaymentDay", {
-                  valueAsNumber: true,
-                })}
-                error={errors.periodic?.finalPaymentDay?.message}
-              />
-              <FormInput
-                label="Final Payment Month (6-24)"
-                id="periodic.finalPaymentMonth"
-                type="number"
-                min={6}
-                max={24}
-                readOnly
-                {...register("periodic.finalPaymentMonth", {
-                  valueAsNumber: true,
-                })}
-                error={errors.periodic?.finalPaymentMonth?.message}
-              />
+              <div className="p-4 bg-yellow-50 rounded-lg text-yellow-800 text-sm">
+                <p>
+                  You must continue to make these monthly payments while the IRS
+                  is considering the offer (waived if you met the requirements
+                  for LowIncome Certification). Failure to make regular monthly
+                  payments until you have received a final decision letter will
+                  cause your offer to be returned with no appeal rights. If you
+                  qualified under the Low-Income Certification and are not
+                  required to submit payments while the offer is under
+                  consideration, your first payment will be due 30 calendar days
+                  after acceptance of the offer, unless another date is agreed
+                  to in an amended offer.
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}

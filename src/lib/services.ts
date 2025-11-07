@@ -1,8 +1,8 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
-// export const BASE_URL = "http://localhost:3001/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "http://localhost:3001/";
 
 // Create an Axios instance
 const API = axios.create({
@@ -13,26 +13,27 @@ const API = axios.create({
   },
 });
 
+// Define routes that do not require authentication
+const publicEndpoints = [
+  "/user/signin",
+  "/user/signup",
+  "/user/verify-email",
+  "/user/forgot-password",
+  "/user/reset-password",
+];
+
 // Request Interceptor
 API.interceptors.request.use(
   (config) => {
-    if (isBrowser) {
+    if (typeof window !== "undefined") {
       const token = storage.get("accessToken");
-
-      // Define routes that do not require authentication
-      const publicEndpoints = [
-        "/user/signin",
-        "/user/signup",
-        "/user/verify-email",
-        "/user/forgot-password",
-        "/user/reset-password",
-      ];
 
       // Check if current request URL matches a public endpoint
       const isPublic = publicEndpoints.some((endpoint) =>
         config.url?.includes(endpoint)
       );
 
+      // Attach token only for non-public endpoints
       if (!isPublic) {
         if (token) {
           config.headers.authorization = `Bearer ${token}`;
@@ -51,13 +52,21 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.data?.statusCode === 401) {
+    const requestUrl = error?.config?.url || "";
+    const isPublic = publicEndpoints.some((endpoint) =>
+      requestUrl.includes(endpoint)
+    );
+
+    // Only handle token removal & redirect for non-public endpoints
+    if (!isPublic && error?.response?.status === 401) {
       storage.remove("accessToken");
       storage.remove("user");
-      // window.location.href = "/auth/login";
+      window.location.href = "/auth/login";
     }
-    console.log("Complete Error: ", error);
+
+    console.log("Complete Error:", error);
     console.log("API Error:", error.response?.data || error);
+
     return Promise.reject(error);
   }
 );

@@ -25,8 +25,11 @@ import {
   personalAssetsSchema,
 } from "@/lib/validation/form433a/personal-assets-section";
 import { useSearchParams } from "next/navigation";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
+import useCalculation from "@/hooks/433a-form-hooks/useCalculation";
+import { storage } from "@/utils/helper";
+import { saveCalculationInfo } from "@/lib/features/form433aSlice";
 
 interface PersonalAssetsSectionProps {
   onNext: () => void;
@@ -41,15 +44,21 @@ export function PersonalAssetsSection({
   currentStep,
   totalSteps,
 }: PersonalAssetsSectionProps) {
+  const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
-  const { assetsInfo } = useAppSelector((state) => state.form433a);
+  const { assetsInfo, calculationInfo } = useAppSelector(
+    (state) => state.form433a
+  );
   const {
     loading,
     loadingFormData,
     handleSaveAssetsInfo,
     handleGetAssetsInfo,
   } = usePersonalAssets();
+
+  // const { handleSaveCalculationInfo, handleGetCalculationInfo } =
+  //   useCalculation();
 
   // Initialize form with zodResolver
   const methods = useForm<PersonalAssetsFormSchema>({
@@ -72,7 +81,21 @@ export function PersonalAssetsSection({
   const onSubmit = async (data: PersonalAssetsFormSchema) => {
     try {
       // Data is already validated by Zod through zodResolver
-      await handleSaveAssetsInfo(data, caseId);
+      const payload = { ...data, boxA: totalEquity };
+      await handleSaveAssetsInfo(payload, caseId);
+      // const form433aProgress: any = storage.get("433a_progress");
+      // if (form433aProgress) {
+      //   if (
+      //     form433aProgress?.completedSteps?.includes(8) &&
+      //     calculationInfo &&
+      //     calculationInfo.paymentTimeline
+      //   ) {
+      //     handleSaveCalculationInfo(
+      //       { paymentTimeline: calculationInfo.paymentTimeline },
+      //       caseId
+      //     );
+      //   }
+      // }
 
       // Only proceed to next step if successful
       onNext();
@@ -86,6 +109,9 @@ export function PersonalAssetsSection({
 
   useEffect(() => {
     if (!assetsInfo) handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
+    // const form433aProgress: any = storage.get("433a_progress");
+    // if (!calculationInfo && form433aProgress?.completedSteps?.includes(8))
+    //   handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7]);
   }, []);
 
   useEffect(() => {

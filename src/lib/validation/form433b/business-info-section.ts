@@ -108,7 +108,7 @@ export const businessInfoSchema = z
     doesOutsourcePayroll: z.boolean(),
     payrollProviderName: z.string().optional().nullable(),
     payrollProviderAddress: z.string().optional().nullable(),
-    partners: z.array(partnerSchema).min(1, "At least one partner is required"),
+    partners: z.array(partnerSchema).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.doesOutsourcePayroll) {

@@ -28,6 +28,8 @@ import toast from "react-hot-toast";
 import FormLoader from "@/components/global/FormLoader";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import useSelfEmployed from "@/hooks/433a-form-hooks/useSelfEmployed";
+import { storage } from "@/utils/helper";
+import useCalculation from "@/hooks/433a-form-hooks/useCalculation";
 
 interface BusinessAssetsSectionProps {
   onNext: () => void;
@@ -44,9 +46,8 @@ export function BusinessAssetsSection({
 }: BusinessAssetsSectionProps) {
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
-  const { businessAssetsInfo, selfEmployedInfo } = useAppSelector(
-    (state) => state.form433a
-  );
+  const { businessAssetsInfo, selfEmployedInfo, calculationInfo } =
+    useAppSelector((state) => state.form433a);
   const isSelfEmployed = selfEmployedInfo?.isSelfEmployed ?? false;
 
   useEffect(() => {
@@ -56,6 +57,9 @@ export function BusinessAssetsSection({
       onNext();
     }
   }, [selfEmployedInfo]);
+
+  // const { handleSaveCalculationInfo, handleGetCalculationInfo } =
+  //   useCalculation();
 
   const {
     loading,
@@ -85,8 +89,8 @@ export function BusinessAssetsSection({
 
   const onSubmit = async (data: BusinessAssetsFormSchema) => {
     try {
-      console.log("business assets data: ", data);
       await handleSaveBusinessAssetsInfo(data, caseId);
+
       onNext();
     } catch (error: any) {
       console.error("Error saving business assets info:", error);
@@ -100,6 +104,9 @@ export function BusinessAssetsSection({
     if (isSelfEmployed && !businessAssetsInfo) {
       handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
     }
+    // const form433aProgress: any = storage.get("433a_progress");
+    // if (!calculationInfo && form433aProgress?.completedSteps?.includes(8))
+    //   handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7]);
   }, [isSelfEmployed, businessAssetsInfo, caseId]);
 
   useEffect(() => {

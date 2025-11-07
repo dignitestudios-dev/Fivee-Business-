@@ -17,6 +17,8 @@ import FormLoader from "@/components/global/FormLoader";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import useSelfEmployed from "@/hooks/433a-form-hooks/useSelfEmployed";
 import useBusinessIncome from "@/hooks/433a-form-hooks/useBusinessIncome";
+import useHouseholdIncome from "@/hooks/433a-form-hooks/useHouseHoldIncome";
+import { storage } from "@/utils/helper";
 
 interface BusinessIncomeSectionProps {
   onNext: () => void;
@@ -33,14 +35,11 @@ export function BusinessIncomeSection({
 }: BusinessIncomeSectionProps) {
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
-  const { businessIncomeInfo, selfEmployedInfo } = useAppSelector(
-    (state) => state.form433a
-  );
+  const { businessIncomeInfo, selfEmployedInfo, householdIncomeInfo } =
+    useAppSelector((state) => state.form433a);
   const isSelfEmployed = selfEmployedInfo?.isSelfEmployed ?? false;
 
   useEffect(() => {
-    console.log("selfEmployedInfo: ", selfEmployedInfo);
-    console.log("isSelfEmployed: ", isSelfEmployed);
     if (selfEmployedInfo && !isSelfEmployed) {
       onNext();
     }
@@ -55,6 +54,9 @@ export function BusinessIncomeSection({
 
   const { loadingFormData: loadingSelfEmpFormData, handleGetSelfEmployedInfo } =
     useSelfEmployed();
+
+  // const { handleSaveHouseholdIncomeInfo, handleGetHouseholdIncomeInfo } =
+  //   useHouseholdIncome();
 
   const methods = useForm<BusinessIncomeFormSchema>({
     resolver: zodResolver(businessIncomeSchema),
@@ -89,6 +91,9 @@ export function BusinessIncomeSection({
     if (isSelfEmployed && !businessIncomeInfo) {
       handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5]);
     }
+    // const form433aProgress: any = storage.get("433a_progress");
+    // if (!householdIncomeInfo && form433aProgress?.completedSteps?.includes(8))
+    //   handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
   }, [isSelfEmployed, businessIncomeInfo, caseId]);
 
   useEffect(() => {
@@ -123,7 +128,8 @@ export function BusinessIncomeSection({
     useWatch({ control, name: "grossWagesSalaries" }) || 0;
   const rent = useWatch({ control, name: "rent" }) || 0;
   const supplies = useWatch({ control, name: "supplies" }) || 0;
-  const utilitiesTelephones = useWatch({ control, name: "utilitiesTelephones" }) || 0;
+  const utilitiesTelephones =
+    useWatch({ control, name: "utilitiesTelephones" }) || 0;
   const vehicleCosts = useWatch({ control, name: "vehicleCosts" }) || 0;
   const businessInsurance =
     useWatch({ control, name: "businessInsurance" }) || 0;

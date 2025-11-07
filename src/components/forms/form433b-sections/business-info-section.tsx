@@ -20,6 +20,7 @@ import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_433B_SECTIONS } from "@/lib/constants";
+import { formatPhone } from "@/utils/helper";
 
 interface BusinessInfoSectionProps {
   onNext: () => void;
@@ -224,14 +225,20 @@ export function BusinessInfoSection({
                 id="primaryPhone"
                 placeholder="(123) 456-7890"
                 required
-                {...register("primaryPhone")}
+                {...register("primaryPhone", {
+                  onChange: (e) =>
+                    setValue("primaryPhone", formatPhone(e.target.value)),
+                })}
                 error={errors.primaryPhone?.message}
               />
               <FormInput
                 label="Secondary Phone"
                 id="secondaryPhone"
                 placeholder="(123) 456-7890"
-                {...register("secondaryPhone")}
+                {...register("secondaryPhone", {
+                  onChange: (e) =>
+                    setValue("secondaryPhone", formatPhone(e.target.value)),
+                })}
                 error={errors.secondaryPhone?.message}
               />
               <FormInput
@@ -253,7 +260,10 @@ export function BusinessInfoSection({
               label="FAX Number"
               id="faxNumber"
               placeholder="(123) 456-7890"
-              {...register("faxNumber")}
+              {...register("faxNumber", {
+                onChange: (e) =>
+                  setValue("faxNumber", formatPhone(e.target.value)),
+              })}
               error={errors.faxNumber?.message}
             />
 

@@ -18,6 +18,7 @@ const useBusinessAssets = () => {
 
     try {
       let parsedInfo = { ...info };
+      console.log("Business Info: ", info);
 
       if (!parsedInfo.digitalAssetsInfo?.digitalAssets?.length) {
         delete parsedInfo.digitalAssetsInfo;
@@ -37,6 +38,8 @@ const useBusinessAssets = () => {
           }
         );
       }
+
+      delete parsedInfo.boxB;
 
       console.log("parsedInfo: ", parsedInfo);
 

@@ -181,3 +181,21 @@ export const getError = (error: any) => {
 
   return errorMessage || "Something went wrong, Please try again!";
 };
+
+export const formatEIN = (value: string) => {
+  const cleaned = value.replace(/[^0-9-]/g, "");
+  const numbersOnly = cleaned.replace(/-/g, "");
+  if (numbersOnly.length <= 2) return numbersOnly;
+  return `${numbersOnly.slice(0, 2)}-${numbersOnly.slice(2, 9)}`;
+};
+
+export const formatPhone = (value: string) => {
+  const cleaned = value.replace(/[^0-9]/g, "");
+  if (cleaned.length <= 3) return cleaned;
+  if (cleaned.length <= 6)
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+  return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(
+    6,
+    10
+  )}`;
+};

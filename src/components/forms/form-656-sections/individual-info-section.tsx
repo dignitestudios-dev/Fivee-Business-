@@ -5,14 +5,8 @@ import { FormInput } from "@/components/ui/form-field"; // Adjust if needed; ass
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  useForm,
-  useFieldArray,
-  FormProvider,
-  useWatch,
-} from "react-hook-form";
+import { useForm, FormProvider, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import useIndividualInfo from "@/hooks/656-form-hooks/useIndividualInfo"; // We'll create this
@@ -109,10 +103,15 @@ export function IndividualInfoSection({
     name: "lowIncomeCertification.householdMonthlyIncome",
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "taxPeriods",
-  });
+  useEffect(() => {
+    if (!qualifiesForLowIncome) {
+      setValue("lowIncomeCertification.qualificationBasis", undefined);
+      setValue("lowIncomeCertification.familySize", undefined);
+      setValue("lowIncomeCertification.residenceState", undefined);
+      setValue("lowIncomeCertification.adjustedGrossIncome", undefined);
+      setValue("lowIncomeCertification.householdMonthlyIncome", undefined);
+    }
+  }, [qualifiesForLowIncome, setValue]);
 
   // Format functions
   const formatSSNOrITIN = (value: string) => {
@@ -205,7 +204,7 @@ export function IndividualInfoSection({
       }
       if (!qualifiesForLowIncome) {
         data.lowIncomeCertification.qualificationBasis = undefined;
-        data.lowIncomeCertification.familySize = 0;
+        data.lowIncomeCertification.familySize = undefined;
         data.lowIncomeCertification.residenceState = undefined;
         data.lowIncomeCertification.adjustedGrossIncome = undefined;
         data.lowIncomeCertification.householdMonthlyIncome = undefined;
@@ -214,13 +213,6 @@ export function IndividualInfoSection({
       } else if (qualificationBasis === "household_monthly_income") {
         data.lowIncomeCertification.adjustedGrossIncome = undefined;
       }
-
-      // // Warn if calculation shows not qualify (but allow submit as self-cert)
-      // if (qualifiesForLowIncome && !doesQualify()) {
-      //   toast.error(
-      //     "Based on your inputs, you may not qualify for low-income certification. The IRS will verify."
-      //   );
-      // }
 
       console.log("Calling handleSaveIndividualInfo...");
       await handleSaveIndividualInfo(data, caseId);
@@ -246,14 +238,6 @@ export function IndividualInfoSection({
     }
   }, [individualInfo]);
 
-  const addTaxPeriod = () => {
-    append({
-      taxType: "",
-      periodEnding: "",
-      businessName: "",
-    });
-  };
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -276,86 +260,6 @@ export function IndividualInfoSection({
             or Section 2 below.
           </p>
         </div>
-
-        {/* Pre-Qualifier and IOLA Checkboxes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pre-Submission Checks</CardTitle>
-            <p className="text-sm text-gray-600">
-              Note: The Pre-Qualifier tool or IOLA eligibility check is not
-              mandatory before sending in your offer. However, it is
-              recommended.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label>
-                Did you use the Pre-Qualifier tool for the Individual Online
-                Account eligibility (IOLA) check prior to filling out this form?
-              </Label>
-              <RadioGroup
-                value={
-                  useWatch({ control, name: "usedPreQualifierTool" })
-                    ? "yes"
-                    : "no"
-                }
-                onValueChange={(value) =>
-                  setValue("usedPreQualifierTool", value === "yes")
-                }
-                className="flex gap-6 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="yes"
-                    id="pre-yes"
-                    className="text-[#22b573]"
-                  />
-                  <Label htmlFor="pre-yes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="no"
-                    id="pre-no"
-                    className="text-[#22b573]"
-                  />
-                  <Label htmlFor="pre-no">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div>
-              <Label>Did you use the IOLA eligibility check?</Label>
-              <RadioGroup
-                value={
-                  useWatch({ control, name: "usedIOLAEligibilityCheck" })
-                    ? "yes"
-                    : "no"
-                }
-                onValueChange={(value) =>
-                  setValue("usedIOLAEligibilityCheck", value === "yes")
-                }
-                className="flex gap-6 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="yes"
-                    id="iola-yes"
-                    className="text-[#22b573]"
-                  />
-                  <Label htmlFor="iola-yes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="no"
-                    id="iola-no"
-                    className="text-[#22b573]"
-                  />
-                  <Label htmlFor="iola-no">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Section 1: Individual Information */}
         <Card>
@@ -428,10 +332,17 @@ export function IndividualInfoSection({
 
             {/* Joint Offer Checkbox */}
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isJointOffer"
-                {...register("isJointOffer")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+              <Controller
+                name="isJointOffer"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="isJointOffer"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
               />
               <Label htmlFor="isJointOffer">
                 This is a joint offer (include spouse information)
@@ -608,20 +519,34 @@ export function IndividualInfoSection({
 
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="isNewAddressSinceLastReturn"
-                  {...register("isNewAddressSinceLastReturn")}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                <Controller
+                  name="isNewAddressSinceLastReturn"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isNewAddressSinceLastReturn"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                    />
+                  )}
                 />
                 <Label htmlFor="isNewAddressSinceLastReturn">
                   Is this a new address since your last filed tax return?
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="updateRecordsToThisAddress"
-                  {...register("updateRecordsToThisAddress")}
-                  className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                <Controller
+                  name="updateRecordsToThisAddress"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="updateRecordsToThisAddress"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                    />
+                  )}
                 />
                 <Label htmlFor="updateRecordsToThisAddress">
                   Would you like us to update our records to this address?
@@ -657,64 +582,213 @@ export function IndividualInfoSection({
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 border border-gray-200 rounded-lg space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">
-                    Tax Period {index + 1}
-                  </h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => remove(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Controller
+                name="taxPeriods.isIndividualIncomeTax"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="taxPeriods.isIndividualIncomeTax"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
+              />
+              <Label htmlFor="taxPeriods.isIndividualIncomeTax">
+                Form 1040 U.S. Individual Income Tax Return (e.g.,
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.individualTaxDescription"
+                placeholder="12-31-2021"
+                className="w-32 inline-block"
+                {...register("taxPeriods.individualTaxDescription")}
+                error={errors.taxPeriods?.individualTaxDescription?.message}
+              />
+              <Label htmlFor="taxPeriods.isIndividualIncomeTax">)</Label>
+            </div>
+            {errors.taxPeriods?.isIndividualIncomeTax && (
+              <p className="text-red-600 text-sm">
+                {errors.taxPeriods.isIndividualIncomeTax.message}
+              </p>
+            )}
 
-                <FormInput
-                  label="Tax Type (e.g., Form 1040, Trust Fund Recovery Penalty, Form 941, Form 940, Other)"
-                  id={`taxPeriods.${index}.taxType`}
-                  required
-                  {...register(`taxPeriods.${index}.taxType`)}
-                  error={errors.taxPeriods?.[index]?.taxType?.message}
-                />
-                <FormInput
-                  label="Period Ending (YYYY-MM-DD)"
-                  id={`taxPeriods.${index}.periodEnding`}
-                  type="date"
-                  required
-                  {...register(`taxPeriods.${index}.periodEnding`)}
-                  error={errors.taxPeriods?.[index]?.periodEnding?.message}
-                />
-                <FormInput
-                  label="Business Name (if applicable)"
-                  id={`taxPeriods.${index}.businessName`}
-                  {...register(`taxPeriods.${index}.businessName`)}
-                  error={errors.taxPeriods?.[index]?.businessName?.message}
-                />
-              </div>
-            ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <Controller
+                name="taxPeriods.isTrustFundRecoveryPenalty"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="taxPeriods.isTrustFundRecoveryPenalty"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
+              />
+              <Label htmlFor="taxPeriods.isTrustFundRecoveryPenalty">
+                Trust Fund Recovery Penalty as a responsible person of
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.trustFundBusinessName"
+                placeholder="business name"
+                className="w-48 inline-block"
+                {...register("taxPeriods.trustFundBusinessName")}
+                error={errors.taxPeriods?.trustFundBusinessName?.message}
+              />
+              <Label htmlFor="taxPeriods.isTrustFundRecoveryPenalty">
+                for failure to pay withholding and Federal Insurance
+                Contributions Act taxes (Social Security taxes), for period(s)
+                ending
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.trustFundPeriodEnding"
+                placeholder="03-31-2021"
+                className="w-32 inline-block"
+                {...register("taxPeriods.trustFundPeriodEnding")}
+                error={errors.taxPeriods?.trustFundPeriodEnding?.message}
+              />
+            </div>
+            {errors.taxPeriods?.isTrustFundRecoveryPenalty && (
+              <p className="text-red-600 text-sm">
+                {errors.taxPeriods.isTrustFundRecoveryPenalty.message}
+              </p>
+            )}
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addTaxPeriod}
-              className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Tax Period
-            </Button>
-            {errors.taxPeriods && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Controller
+                name="taxPeriods.isEmployerQuarterlyTax"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="taxPeriods.isEmployerQuarterlyTax"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
+              />
+              <Label htmlFor="taxPeriods.isEmployerQuarterlyTax">
+                Form 941 Employer’s Quarterly Federal Tax Return – Quarterly
+                period(s)
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.quarterlyPeriods"
+                placeholder="Enter quarterly periods"
+                className="w-64 inline-block"
+                {...register("taxPeriods.quarterlyPeriods")}
+                error={errors.taxPeriods?.quarterlyPeriods?.message}
+              />
+            </div>
+            {errors.taxPeriods?.isEmployerQuarterlyTax && (
+              <p className="text-red-600 text-sm">
+                {errors.taxPeriods.isEmployerQuarterlyTax.message}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Controller
+                name="taxPeriods.isEmployerAnnualFUTATax"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="taxPeriods.isEmployerAnnualFUTATax"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
+              />
+              <Label htmlFor="taxPeriods.isEmployerAnnualFUTATax">
+                Form 940 Employer’s Annual Federal Unemployment (FUTA) Tax
+                Return – Year(s)
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.annualYears"
+                placeholder="12-31-2021"
+                className="w-32 inline-block"
+                {...register("taxPeriods.annualYears")}
+                error={errors.taxPeriods?.annualYears?.message}
+              />
+            </div>
+            {errors.taxPeriods?.isEmployerAnnualFUTATax && (
+              <p className="text-red-600 text-sm">
+                {errors.taxPeriods.isEmployerAnnualFUTATax.message}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Controller
+                name="taxPeriods.isOtherFederalTax"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="taxPeriods.isOtherFederalTax"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
+              />
+              <Label htmlFor="taxPeriods.isOtherFederalTax">
+                Other Federal Tax(es) [specify type(s) and period(s)]
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.otherTaxDescription"
+                placeholder="Specify type(s) and period(s)"
+                className="w-64 inline-block"
+                {...register("taxPeriods.otherTaxDescription")}
+                error={errors.taxPeriods?.otherTaxDescription?.message}
+              />
+            </div>
+            {errors.taxPeriods?.isOtherFederalTax && (
+              <p className="text-red-600 text-sm">
+                {errors.taxPeriods.isOtherFederalTax.message}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Label>
+                Note: If you need more space, use attachment and title it
+                &quot;Attachment to Form 656 dated&quot;
+              </Label>
+              <FormInput
+                label=""
+                id="taxPeriods.attachmentToForm656Dated"
+                placeholder=""
+                className="w-32 inline-block"
+                {...register("taxPeriods.attachmentToForm656Dated")}
+                error={errors.taxPeriods?.attachmentToForm656Dated?.message}
+              />
+              <Label>. Make sure to sign and date the attachment.</Label>
+            </div>
+
+            {errors.taxPeriods?.message && (
               <p className="text-red-600 text-sm">
                 {errors.taxPeriods.message}
               </p>
             )}
+
+            <div className="p-4 bg-yellow-50 rounded-lg text-yellow-800 text-sm">
+              <p>
+                <strong>Warning:</strong> The IRS will not compromise any
+                amounts of restitution assessed by the IRS or any tax periods
+                for which the IRS has referred to the DOJ. Any liability arising
+                from restitution is excluded from this offer. Also, the IRS will
+                not compromise any liability for which an election under IRC §
+                965(i) is made; such liabilities are excluded from this offer.
+                Any offer containing a liability for which payment is being
+                deferred under IRC § 965(h)(1) can only be processed if no
+                portion of the liability to be compromised resulted from
+                entering into a transfer agreement under section 965(h)(3).
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -740,10 +814,17 @@ export function IndividualInfoSection({
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="lowIncomeCertification.qualifiesForLowIncome"
-                {...register("lowIncomeCertification.qualifiesForLowIncome")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+              <Controller
+                name="lowIncomeCertification.qualifiesForLowIncome"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="lowIncomeCertification.qualifiesForLowIncome"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
               />
               <Label htmlFor="lowIncomeCertification.qualifiesForLowIncome">
                 I qualify for the Low-Income Certification
@@ -759,7 +840,9 @@ export function IndividualInfoSection({
                     onValueChange={(value) =>
                       setValue(
                         "lowIncomeCertification.qualificationBasis",
-                        value as "adjusted_gross_income" | "household_monthly_income"
+                        value as
+                          | "adjusted_gross_income"
+                          | "household_monthly_income"
                       )
                     }
                     className="space-y-2 mt-2"

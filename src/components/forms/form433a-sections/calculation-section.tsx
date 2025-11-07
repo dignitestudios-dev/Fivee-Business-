@@ -96,14 +96,13 @@ export function CalculationSection({
   };
 
   useEffect(() => {
-    if (!calculationInfo) {
+    if (!calculationInfo)
       handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7]);
-      if (!assetsInfo) handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
-      if (!businessAssetsInfo)
-        handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
-      if (!householdIncomeInfo)
-        handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
-    }
+    if (!assetsInfo) handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
+    if (!businessAssetsInfo)
+      handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
+    if (!householdIncomeInfo)
+      handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
   }, [calculationInfo, caseId]);
 
   useEffect(() => {

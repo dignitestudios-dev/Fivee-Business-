@@ -34,27 +34,12 @@ const form656Slice = createSlice({
       state,
       action: PayloadAction<IndividualInfoFormSchema | null>
     ) => {
-      if (action.payload) {
-        action.payload.taxPeriods = action.payload.taxPeriods?.map(
-          (t: any) => ({
-            ...t,
-            periodEnding: formatDateForInput(t.periodEnding),
-          })
-        );
-      }
       state.individualInfo = action.payload;
     },
     saveBusinessInformation: (
       state,
       action: PayloadAction<BusinessInfoFormSchema | null>
     ) => {
-      if (action.payload) {
-        action.payload.businessTaxPeriods =
-          action.payload.businessTaxPeriods?.map((t: any) => ({
-            ...t,
-            periodEnding: formatDateForInput(t.periodEnding),
-          }));
-      }
       state.businessInfo = action.payload;
     },
     saveReasonForOffer: (state, action: PayloadAction<string | null>) => {
