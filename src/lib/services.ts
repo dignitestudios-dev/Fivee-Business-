@@ -7,7 +7,7 @@ export const BASE_URL = "https://api.fiveebusiness.com/";
 // Create an Axios instance
 const API = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000, // Set a timeout (optional)
+  timeout: 1000000, // Set a timeout (optional)
   headers: {
     "Content-Type": "application/json",
   },
