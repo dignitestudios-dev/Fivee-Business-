@@ -138,7 +138,7 @@ const getUserForm433ACases = (
   filter: FormsCasesFilter = "all"
 ) =>
   apiHandler(() =>
-    API.get(`/form433a/my-cases?page=${page}&limit=${limit}&filter${filter}`)
+    API.get(`/form433a/my-cases?page=${page}&limit=${limit}&filter=${filter}`)
   );
 
 const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
