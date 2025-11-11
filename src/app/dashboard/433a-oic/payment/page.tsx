@@ -56,7 +56,7 @@ const Form433BOICPayment = () => {
         paymentMethodId: selectedCard,
         amount: 20,
         formId: caseId,
-        formModel: "Form433B-OIC",
+        formModel: "Form433A-OIC",
       });
 
       const clientSecret =
