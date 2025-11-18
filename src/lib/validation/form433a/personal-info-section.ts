@@ -52,7 +52,19 @@ const dateStringToDate = z.preprocess(
  * Household member schema
  */
 const householdMemberSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string()
+      .min(1, "Name is required")
+      .min(2, "Name must be at least 2 characters")
+      .max(20, "Name cannot exceed 20 characters")
+      .refine((value) => !/\d/.test(value), {
+        message: "Name cannot contain numbers"
+      })
+      .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
+        message: "Name cannot contain special characters"
+      })
+      .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
+        message: "Name must contain at least one letter"
+      }),
   // Some forms submit numbers as strings — coerce to number and validate
   age: z.preprocess((v) => {
     if (typeof v === "string" && v.trim() !== "") return Number(v);
@@ -68,8 +80,32 @@ const householdMemberSchema = z.object({
  */
 export const personalInfoSchema = z
   .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
+    firstName: z.string()
+      .min(1, "First name is required")
+      .min(2, "First name must be at least 2 characters")
+      .max(20, "First name cannot exceed 20 characters")
+      .refine((value) => !/\d/.test(value), {
+        message: "First name cannot contain numbers"
+      })
+      .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
+        message: "First name cannot contain special characters"
+      })
+      .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
+        message: "First name must contain at least one letter"
+      }),
+    lastName: z.string()
+      .min(1, "Last name is required")
+      .min(2, "Last name must be at least 2 characters")
+      .max(20, "Last name cannot exceed 20 characters")
+      .refine((value) => !/\d/.test(value), {
+        message: "Last name cannot contain numbers"
+      })
+      .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
+        message: "Last name cannot contain special characters"
+      })
+      .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
+        message: "Last name must contain at least one letter"
+      }),
     dob: dateStringToDate,
     ssnOrItin: z
       .string()
@@ -79,31 +115,79 @@ export const personalInfoSchema = z
     dateOfMarriage: z
       .union([dateStringToDate, z.string().optional()])
       .optional(),
-    homeAddress: z.string().min(1, "Home address is required"),
-    mailingAddress: z.string().optional().nullable(),
-    countyOfResidence: z.string().min(1, "County of residence is required"),
+    homeAddress: z
+      .string()
+      .min(1, "Home address is required")
+      .max(200, "Home address cannot exceed 200 characters"),
+    mailingAddress: z
+      .string()
+      .max(200, "Mailing address cannot exceed 200 characters")
+      .optional()
+      .nullable(),
+    countyOfResidence: z
+      .string()
+      .min(1, "County of residence is required")
+      .max(50, "County of residence cannot exceed 50 characters"),
     primaryPhone: z
       .string()
       .min(1, "Primary phone is required")
+      .max(25, "Primary phone cannot exceed 25 characters")
       .regex(phoneLooseRegex, "Invalid phone number"),
     secondaryPhone: z
       .string()
-      .regex(phoneLooseRegex, { message: "Invalid phone number" })
+      .max(25, "Secondary phone cannot exceed 25 characters")
       .optional()
       .nullable()
-      .or(z.literal(""))
-      .optional(),
-    faxNumber: z.string().optional().nullable(),
+      .refine((v) => !v || phoneLooseRegex.test(v), {
+        message: "Invalid phone number",
+      }),
+  faxNumber: z.string()
+  .optional()
+  .nullable()
+  .refine((val) => {
+    if (!val) return true; 
+    if (!/^[\+]?[0-9\s\-\(\)\.\/]{6,20}$/.test(val)) {
+      return false;
+    }
+    const digitCount = val.replace(/\D/g, '').length;
+    return digitCount >= 6 && digitCount <= 20;
+  }, {
+    message: "Fax number must contain only numbers, spaces, hyphens, parentheses, dots, slashes and have 6-20 digits"
+  }),
     housingStatus: z.enum(["own", "rent", "other"]),
     livedInCommunityPropertyStateInLast10Years: z
       .boolean()
       .optional()
       .default(false),
-    housingOtherDetails: z.string().optional().nullable(),
-    spouseFirstName: z.string().optional().nullable(),
-    spouseLastName: z.string().optional().nullable(),
+    housingOtherDetails: z
+      .string()
+      .max(500, "Housing details cannot exceed 500 characters")
+      .optional()
+      .nullable(),
+    spouseFirstName: z
+      .string()
+      .max(20, "Spouse first name cannot exceed 20 characters")
+      .optional()
+      .nullable()
+      .refine((v) => !v || (v.trim().length >= 2 && !/\d/.test(v) && !/[!@#$%^&*(),.?":{}|<>]/.test(v)), {
+        message: "Spouse first name must be 2-20 characters and cannot contain numbers or special characters",
+      }),
+    spouseLastName: z
+      .string()
+      .max(20, "Spouse last name cannot exceed 20 characters")
+      .optional()
+      .nullable()
+      .refine((v) => !v || (v.trim().length >= 2 && !/\d/.test(v) && !/[!@#$%^&*(),.?":{}|<>]/.test(v)), {
+        message: "Spouse last name must be 2-20 characters and cannot contain numbers or special characters",
+      }),
     spouseDOB: z.union([dateStringToDate, z.string().optional()]).optional(),
-    spouseSSN: z.string().optional().nullable(),
+    spouseSSN: z
+      .string()
+      .optional()
+      .nullable()
+      .refine((v) => !v || ssnRegex.test(String(v)), {
+        message: "Spouse SSN must be in the format XXX-XX-XXXX",
+      }),
     householdMembers: z.array(householdMemberSchema).optional().default([]),
   })
   .superRefine((data, ctx) => {

@@ -7,6 +7,7 @@ export const APP_CONFIG = {
 // Password Configuration
 export const SECURITY_CONFIG = {
   passwordMinLength: 8,
+  passwordMaxLength: 64,
   passwordRequireUppercase: true,
   passwordRequireLowercase: true,
   passwordRequireNumbers: true,

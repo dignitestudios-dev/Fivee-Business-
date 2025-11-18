@@ -1,5 +1,15 @@
 import { makeStore } from "@/lib/store";
 import z from "zod";
+import {
+  nameSchema,
+  accountNumberSchema,
+  moneySchema,
+  descriptionSchema,
+  shortTextSchema,
+  addressSchema,
+  phoneSchemaOptional,
+  dateSchema,
+} from "../../validation-schemas";
 
 export const personalAssetsInitialValues: PersonalAssetsFormSchema = {
   bankAccounts: [],
@@ -21,10 +31,10 @@ export const personalAssetsSchema = z.object({
     .array(
       z.object({
         accountType: z.string().min(1, "Account type is required"),
-        bankName: z.string().min(1, "Bank name is required"),
-        countryLocation: z.string().min(1, "Bank country location is required"),
-        accountNumber: z.string().min(1, "Account number is required"),
-        balance: z.coerce.number().min(0, "Balance cannot be negative"),
+        bankName: nameSchema,
+        countryLocation: shortTextSchema,
+        accountNumber: accountNumberSchema,
+        balance: moneySchema,
       })
     )
     .optional(),
@@ -33,20 +43,11 @@ export const personalAssetsSchema = z.object({
       z.object({
         investmentType: z.string().min(1, "Investment type is required"),
         investmentTypeText: z.string().optional(),
-        institutionName: z
-          .string()
-          .min(1, "Name of financial institution is required"),
-        countryLocation: z
-          .string()
-          .min(1, "Financial institution country location is required"),
-        accountNumber: z.string().min(1, "Account number is required"),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        institutionName: nameSchema,
+        countryLocation: shortTextSchema,
+        accountNumber: accountNumberSchema,
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),
@@ -54,18 +55,14 @@ export const personalAssetsSchema = z.object({
     .array(
       z
         .object({
-          description: z
-            .string()
-            .min(1, "Description of digital asset is required"),
+          description: descriptionSchema,
           numberOfUnits: z.coerce
             .number()
             .min(0, "Number of units cannot be negative"),
-          location: z.string().min(1, "Location of digital asset is required"),
-          accountNumber: z.string().optional(),
+          location: shortTextSchema,
+          accountNumber: accountNumberSchema.optional(),
           digitalAssetAddress: z.string().optional(),
-          usdEquivalent: z.coerce
-            .number()
-            .min(0, "US dollar equivalent cannot be negative"),
+          usdEquivalent: moneySchema,
         })
         .refine((data) => data.accountNumber || data.digitalAssetAddress, {
           message: "Either account number or digital asset address is required",
@@ -77,11 +74,9 @@ export const personalAssetsSchema = z.object({
     .array(
       z
         .object({
-          institutionName: z
-            .string()
-            .min(1, "Name of financial institution is required"),
-          countryLocation: z.string().min(1, "Country location is required"),
-          accountNumber: z.string().min(1, "Account number is required"),
+          institutionName: nameSchema,
+          countryLocation: shortTextSchema,
+          accountNumber: accountNumberSchema,
           retirementType: z.enum(["401k", "ira", "other"], {
             message: "Retirement account type is required",
           }),
@@ -115,15 +110,10 @@ export const personalAssetsSchema = z.object({
   lifeInsurancePolicies: z
     .array(
       z.object({
-        companyName: z.string().min(1, "Name of insurance company is required"),
+        companyName: nameSchema,
         policyNumber: z.string().min(1, "Policy number is required"),
-        currentCashValue: z.coerce
-          .number()
-          .min(0, "Current cash value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        currentCashValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),
@@ -136,53 +126,37 @@ export const personalAssetsSchema = z.object({
   realProperties: z
     .array(
       z.object({
-        description: z.string().min(1, "Property description is required"),
-        purchaseDate: z.string().min(1, "Purchase date is required"),
-        mortgagePayment: z.coerce
-          .number()
-          .min(0, "Mortgage payment cannot be negative")
-          .optional(),
+        description: descriptionSchema,
+        purchaseDate: dateSchema,
+        mortgagePayment: moneySchema.optional(),
         finalPaymentDate: z.string().optional(),
-        titleHeld: z.string().min(1, "How title is held is required"),
-        location: z.string().min(1, "Location is required"),
-        lenderName: z.string().optional(),
-        lenderAddress: z.string().optional(),
-        lenderPhone: z.string().optional(),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        titleHeld: shortTextSchema,
+        location: shortTextSchema,
+        lenderName: nameSchema.optional(),
+        lenderAddress: addressSchema.optional(),
+        lenderPhone: phoneSchemaOptional,
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),
   vehicles: z
     .array(
       z.object({
-        makeModel: z.string().min(1, "Vehicle make and model is required"),
+        makeModel: shortTextSchema,
         year: z.coerce
           .number()
           .min(1900)
           .max(new Date().getFullYear() + 1, "Invalid year"),
-        purchaseDate: z.string().min(1, "Date purchased is required"),
-        mileage: z.coerce.number().min(0, "Mileage cannot be negative"),
-        licenseTagNumber: z.string().min(1, "License/tag number is required"),
+        purchaseDate: dateSchema,
+        mileage: moneySchema,
+        licenseTagNumber: shortTextSchema,
         ownershipType: z.string().min(1, "Vehicle ownership type is required"),
-        creditorName: z.string().optional(),
+  creditorName: nameSchema.optional(),
         finalPaymentDate: z.string().optional(),
-        monthlyLeaseLoanAmount: z.coerce
-          .number()
-          .min(0, "Monthly payment cannot be negative")
-          .optional(),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        monthlyLeaseLoanAmount: moneySchema.optional(),
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
         isJointOffer: z.boolean().optional(),
       })
     )
@@ -190,28 +164,18 @@ export const personalAssetsSchema = z.object({
   valuableItems: z
     .array(
       z.object({
-        description: z.string().min(1, "Description of asset is required"),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        description: descriptionSchema,
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),
   furniturePersonalEffects: z
     .array(
       z.object({
-        description: z.string().min(1, "Description of asset is required"),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        description: descriptionSchema,
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),

@@ -148,26 +148,26 @@ export function BusinessAssetsSection({
       countryLocation: "",
       accountType: "",
       accountNumber: "",
-      value: 0,
+      value: "",
     });
   };
 
   const addDigitalAsset = () => {
     appendDigital({
       description: "",
-      numberOfUnits: 0,
+      numberOfUnits: "",
       location: "",
       accountNumber: "",
       digitalAssetAddress: "",
-      usdEquivalent: 0,
+      usdEquivalent: "",
     });
   };
 
   const addBusinessAssetItem = () => {
     appendAssetItem({
       description: "",
-      currentMarketValue: 0,
-      loanBalance: 0,
+      currentMarketValue: "",
+      loanBalance: "",
       isLeased: false,
       usedInProductionOfIncome: false,
     });
@@ -386,7 +386,8 @@ export function BusinessAssetsSection({
                 />
 
                 <FormInput
-                  label="Account number (optional)"
+                  label="Account number"
+                  required
                   id={`bankAccountsInfo.bankAccounts.${index}.accountNumber`}
                   {...register(
                     `bankAccountsInfo.bankAccounts.${index}.accountNumber`
@@ -400,12 +401,17 @@ export function BusinessAssetsSection({
                 <FormInput
                   label="Value ($)"
                   required
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9.]*"
                   min="0"
                   placeholder="0"
                   id={`bankAccountsInfo.bankAccounts.${index}.value`}
                   {...register(`bankAccountsInfo.bankAccounts.${index}.value`, {
                     valueAsNumber: true,
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                     min: { value: 0, message: "Value cannot be negative" },
                   })}
                   error={
@@ -461,7 +467,9 @@ export function BusinessAssetsSection({
 
                 <FormInput
                   label="Number of units (optional)"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="0"
                   placeholder="0"
                   id={`digitalAssetsInfo.digitalAssets.${index}.numberOfUnits`}
@@ -469,6 +477,9 @@ export function BusinessAssetsSection({
                     `digitalAssetsInfo.digitalAssets.${index}.numberOfUnits`,
                     {
                       valueAsNumber: true,
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                      },
                       min: {
                         value: 0,
                         message: "Number of units cannot be negative",
@@ -521,7 +532,9 @@ export function BusinessAssetsSection({
                 <FormInput
                   label="US dollar ($) equivalent of the digital asset as of today"
                   required
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9.]*"
                   min="0"
                   placeholder="0"
                   id={`digitalAssetsInfo.digitalAssets.${index}.usdEquivalent`}
@@ -529,6 +542,9 @@ export function BusinessAssetsSection({
                     `digitalAssetsInfo.digitalAssets.${index}.usdEquivalent`,
                     {
                       valueAsNumber: true,
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                       min: {
                         value: 0,
                         message: "USD equivalent cannot be negative",
@@ -604,7 +620,9 @@ export function BusinessAssetsSection({
                 <FormInput
                   label="Current market value ($)"
                   required
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9.]*"
                   min="0"
                   placeholder="0"
                   id={`assetItems.assets.${index}.currentMarketValue`}
@@ -612,6 +630,9 @@ export function BusinessAssetsSection({
                     `assetItems.assets.${index}.currentMarketValue`,
                     {
                       valueAsNumber: true,
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     }
                   )}
                   error={
@@ -632,12 +653,17 @@ export function BusinessAssetsSection({
 
                 <FormInput
                   label="Minus loan balance ($)"
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9.]*"
                   min="0"
                   placeholder="0"
                   id={`assetItems.assets.${index}.loanBalance`}
                   {...register(`assetItems.assets.${index}.loanBalance`, {
                     valueAsNumber: true,
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={
                     errors.assetItems?.assets?.[index]?.loanBalance?.message
@@ -727,12 +753,17 @@ export function BusinessAssetsSection({
 
             <FormInput
               label="IRS allowed deduction for professional books and tools of trade for individuals and sole-proprietors - (10) ($)"
-              type="number"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9.]*"
               min="0"
               placeholder="0"
               id="assetItems.irsAllowedDeduction"
               {...register("assetItems.irsAllowedDeduction", {
                 valueAsNumber: true,
+                onChange: (e: any) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                },
               })}
               error={errors.assetItems?.irsAllowedDeduction?.message}
             />

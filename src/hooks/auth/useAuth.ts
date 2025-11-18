@@ -16,6 +16,8 @@ const useAuth = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
 
   const handleLogin = async (payload: LoginPayload) => {
     setLoading(true);
@@ -42,7 +44,6 @@ const useAuth = () => {
     setLoading(true);
     try {
       const response = await api.signup(payload);
-      // return the raw response so callers (social flow) can act on returned token/user
       return response;
     } catch (error: any) {
       console.error("Error during signup:", error);
@@ -57,7 +58,7 @@ const useAuth = () => {
     setLoading(true);
     try {
       await api.forgotPassword(payload);
-      toast.success("Password reset email sent");
+      toast.success("If your email exists, you will receive a reset link.");
     } catch (error: any) {
       console.error("Error during forgot password:", error);
       toast.error(error?.message);
@@ -102,12 +103,10 @@ const useAuth = () => {
     try {
       const response = await handleSignup(payload);
       console.log(response);
-      // If backend returned a token and user, treat this as a successful login
       if (response?.data?.token) {
         const userData = response.data.user;
         const token = response.data.token;
 
-        // dispatch to redux store
         dispatch(
           loginUser({
             user: userData,
@@ -115,7 +114,6 @@ const useAuth = () => {
           })
         );
 
-        // redirect to dashboard
         router.push("/dashboard");
       }
     } catch (error: any) {
@@ -127,7 +125,7 @@ const useAuth = () => {
   const handleGoogleSignIn = async (
     employmentType: EmploymentType = "self-employed"
   ) => {
-    setLoading(true);
+    setGoogleLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
@@ -136,14 +134,14 @@ const useAuth = () => {
       console.error("Google Sign In Error:", error);
       toast.error(error?.message || "Error signing in with Google");
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
   const handleAppleSignIn = async (
     employmentType: EmploymentType = "self-employed"
   ) => {
-    setLoading(true);
+    setAppleLoading(true);
     try {
       const provider = new OAuthProvider("apple.com");
       provider.addScope("email");
@@ -155,12 +153,14 @@ const useAuth = () => {
       console.error("Apple Sign In Error:", error);
       toast.error(error?.message || "Error signing in with Apple");
     } finally {
-      setLoading(false);
+      setAppleLoading(false);
     }
   };
 
   return {
     loading,
+    googleLoading,
+    appleLoading,
     handleLogin,
     handleSignup,
     handleGoogleSignIn,

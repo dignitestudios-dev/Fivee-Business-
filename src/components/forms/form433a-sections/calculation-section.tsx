@@ -259,7 +259,7 @@ export function CalculationSection({
         </Card>
 
         {/* 5 Month Calculation */}
-        {(!paymentTimeline || paymentTimeline === "5_months_or_less") && (
+        {(paymentTimeline === "5_months_or_less") && (
           <Card>
             <CardHeader>
               <CardTitle>5 Month Payment Calculation</CardTitle>
@@ -306,7 +306,7 @@ export function CalculationSection({
         )}
 
         {/* 24 Month Calculation */}
-        {(!paymentTimeline || paymentTimeline === "6_to_24_months") && (
+        {(paymentTimeline === "6_to_24_months") && (
           <Card>
             <CardHeader>
               <CardTitle>24 Month Payment Calculation</CardTitle>

@@ -53,8 +53,8 @@ const Header = () => {
       path: "/dashboard",
     },
     {
-      title: "Signatues",
-      label: "signatues",
+      title: "Signatures",
+      label: "signatures",
       path: "/dashboard/signatures",
     },
     {

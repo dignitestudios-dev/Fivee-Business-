@@ -28,7 +28,7 @@ import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import useCalculation from "@/hooks/433a-form-hooks/useCalculation";
-import { storage } from "@/utils/helper";
+import { storage, formatPhone } from "@/utils/helper";
 import { saveCalculationInfo } from "@/lib/features/form433aSlice";
 
 interface PersonalAssetsSectionProps {
@@ -527,12 +527,19 @@ export function PersonalAssetsSection({
                   <FormInput
                     label="Balance ($)"
                     id={`bankAccounts.${index}.balance`}
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\\.?[0-9]*$"
                     min="0"
-                    placeholder="0"
+                    placeholder=""
                     required
                     {...register(`bankAccounts.${index}.balance`, {
-                      valueAsNumber: true,
+                      setValueAs: (v) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                      onChange: (e) => {
+                        // allow only numbers and decimal point
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                       min: { value: 0, message: "Balance cannot be negative" },
                     })}
                     error={errors.bankAccounts?.[index]?.balance?.message}
@@ -550,7 +557,7 @@ export function PersonalAssetsSection({
                   bankName: "",
                   countryLocation: "",
                   accountNumber: "",
-                  balance: 0,
+                  balance: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -699,14 +706,20 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Market Value ($)"
                       id={`investmentAccounts.${index}.currentMarketValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       required
                       {...register(
                         `investmentAccounts.${index}.currentMarketValue`,
                         {
-                          valueAsNumber: true,
+                          setValueAs: (v) =>
+                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                           min: {
                             value: 0,
                             message: "Value cannot be negative",
@@ -723,11 +736,17 @@ export function PersonalAssetsSection({
                   <FormInput
                     label="Minus Loan Balance ($)"
                     id={`investmentAccounts.${index}.loanBalance`}
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\\.?[0-9]*$"
                     min="0"
-                    placeholder="0"
+                    placeholder=""
                     {...register(`investmentAccounts.${index}.loanBalance`, {
-                      valueAsNumber: true,
+                      setValueAs: (v) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                      onChange: (e) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                       min: {
                         value: 0,
                         message: "Loan balance cannot be negative",
@@ -762,8 +781,8 @@ export function PersonalAssetsSection({
                   institutionName: "",
                   countryLocation: "",
                   accountNumber: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: "",
+                  loanBalance: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -812,13 +831,19 @@ export function PersonalAssetsSection({
                   <FormInput
                     label="Number of Units"
                     id={`digitalAssets.${index}.numberOfUnits`}
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\\.?[0-9]*$"
                     min="0"
                     step="any"
-                    placeholder="0"
+                    placeholder=""
                     required
                     {...register(`digitalAssets.${index}.numberOfUnits`, {
-                      valueAsNumber: true,
+                      setValueAs: (v) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                      onChange: (e) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                       min: { value: 0, message: "Units cannot be negative" },
                     })}
                     error={
@@ -860,12 +885,18 @@ export function PersonalAssetsSection({
                   <FormInput
                     label="US Dollar Equivalent as of Today ($)"
                     id={`digitalAssets.${index}.usdEquivalent`}
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\\.?[0-9]*$"
                     min="0"
-                    placeholder="0"
+                    placeholder=""
                     required
                     {...register(`digitalAssets.${index}.usdEquivalent`, {
-                      valueAsNumber: true,
+                      setValueAs: (v) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                      onChange: (e) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                       min: { value: 0, message: "Value cannot be negative" },
                     })}
                     error={
@@ -883,11 +914,11 @@ export function PersonalAssetsSection({
               onClick={() =>
                 addDigitalAsset({
                   description: "",
-                  numberOfUnits: null,
+                  numberOfUnits: "",
                   location: "",
                   accountNumber: "",
                   digitalAssetAddress: "",
-                  usdEquivalent: null,
+                  usdEquivalent: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -1042,13 +1073,19 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Market Value ($)"
                       id={`retirementAccounts.${index}.currentMarketValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(
                         `retirementAccounts.${index}.currentMarketValue`,
                         {
-                          valueAsNumber: true,
+                          setValueAs: (v) =>
+                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                           min: {
                             value: 0,
                             message: "Value cannot be negative",
@@ -1071,11 +1108,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Minus Loan Balance ($)"
                       id={`retirementAccounts.${index}.loanBalance`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(`retirementAccounts.${index}.loanBalance`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Loan balance cannot be negative",
@@ -1111,8 +1154,8 @@ export function PersonalAssetsSection({
                   institutionName: "",
                   countryLocation: "",
                   accountNumber: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: "",
+                  loanBalance: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -1189,14 +1232,20 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Cash Value ($)"
                       id={`lifeInsurancePolicies.${index}.currentCashValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       required
                       {...register(
                         `lifeInsurancePolicies.${index}.currentCashValue`,
                         {
-                          valueAsNumber: true,
+                          setValueAs: (v) =>
+                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                           min: {
                             value: 0,
                             message: "Cash value cannot be negative",
@@ -1212,19 +1261,22 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Minus Loan Balance ($)"
                       id={`lifeInsurancePolicies.${index}.loanBalance`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
-                      {...register(
-                        `lifeInsurancePolicies.${index}.loanBalance`,
-                        {
-                          valueAsNumber: true,
-                          min: {
-                            value: 0,
-                            message: "Loan balance cannot be negative",
-                          },
-                        }
-                      )}
+                      placeholder=""
+                      {...register(`lifeInsurancePolicies.${index}.loanBalance`, {
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
+                        min: {
+                          value: 0,
+                          message: "Loan balance cannot be negative",
+                        },
+                      })}
                       error={
                         errors.lifeInsurancePolicies?.[index]?.loanBalance
                           ?.message
@@ -1253,8 +1305,8 @@ export function PersonalAssetsSection({
                 addLifeInsurancePolicy({
                   companyName: "",
                   policyNumber: "",
-                  currentCashValue: 0,
-                  loanBalance: 0,
+                  currentCashValue: "",
+                  loanBalance: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -1284,35 +1336,35 @@ export function PersonalAssetsSection({
               <div className="space-y-4 mt-2">
                 <div className="flex items-center space-x-2">
                   <Controller
-                    {...register(`isForSale`)}
+                    name={"isForSale"}
                     control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        id={`isForSale`}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    )}
+                    render={({ field }) => {
+                      // If either field is true, show the combined checkbox as checked
+                      const anticipate = watch("anticipateSelling");
+                      const checked = !!field.value || !!anticipate;
+
+                      return (
+                        <Checkbox
+                          id={`isForSaleCombined`}
+                          checked={checked}
+                          onCheckedChange={(v) => {
+                            const bool = !!v;
+                            // update both form fields so they remain in sync
+                            field.onChange(bool);
+                            setValue("anticipateSelling", bool, {
+                              shouldDirty: true,
+                              shouldTouch: true,
+                              shouldValidate: true,
+                            });
+                          }}
+                        />
+                      );
+                    }}
                   />
-                  <Label htmlFor={`isForSale`}>
-                    Is this property currently for sale?
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Controller
-                    {...register(`anticipateSelling`)}
-                    control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        id={`anticipateSelling`}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    )}
-                  />
-                  <Label htmlFor={`anticipateSelling`}>
-                    Do you anticipate selling this property to fund the offer
-                    amount?
+
+                  <Label htmlFor={`isForSaleCombined`}>
+                    Is this property currently for sale? Do you anticipate
+                    selling this property to fund the offer amount?
                   </Label>
                 </div>
               </div>
@@ -1322,12 +1374,18 @@ export function PersonalAssetsSection({
                   <FormInput
                     label="Listing Price ($)"
                     id={`listingPrice`}
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\\.?[0-9]*$"
                     min="0"
                     required
-                    placeholder="0"
-                    {...register(`listingPrice`, {
-                      valueAsNumber: true,
+                    placeholder=""
+                      {...register(`listingPrice`, {
+                      setValueAs: (v) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                      onChange: (e) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                       min: {
                         value: 0,
                         message: "Listing price cannot be negative",
@@ -1390,11 +1448,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Amount of Mortgage Payment ($)"
                       id={`realProperties.${index}.mortgagePayment`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(`realProperties.${index}.mortgagePayment`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Payment cannot be negative",
@@ -1455,7 +1519,13 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Lender Phone"
                       id={`realProperties.${index}.lenderPhone`}
-                      {...register(`realProperties.${index}.lenderPhone`)}
+                      {...register(`realProperties.${index}.lenderPhone`, {
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                          setValue(
+                            `realProperties.${index}.lenderPhone`,
+                            formatPhone(e.target.value)
+                          ),
+                      })}
                       error={
                         errors.realProperties?.[index]?.lenderPhone?.message
                       }
@@ -1466,14 +1536,20 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Market Value ($)"
                       id={`realProperties.${index}.currentMarketValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       required
                       {...register(
                         `realProperties.${index}.currentMarketValue`,
                         {
-                          valueAsNumber: true,
+                          setValueAs: (v) =>
+                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                           min: {
                             value: 0,
                             message: "Value cannot be negative",
@@ -1498,11 +1574,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Minus Loan Balance (mortgages, etc.) ($)"
                       id={`realProperties.${index}.loanBalance`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(`realProperties.${index}.loanBalance`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Loan balance cannot be negative",
@@ -1536,15 +1618,15 @@ export function PersonalAssetsSection({
                 addRealProperty({
                   description: "",
                   purchaseDate: "",
-                  mortgagePayment: 0,
+                  mortgagePayment: "",
                   finalPaymentDate: "",
                   titleHeld: "",
                   location: "",
                   lenderName: "",
                   lenderAddress: "",
                   lenderPhone: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: "",
+                  loanBalance: "",
                   isForSale: false,
                   anticipateSelling: false,
                   listingPrice: undefined,
@@ -1628,12 +1710,19 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Year"
                       id={`vehicles.${index}.year`}
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="^[0-9]*$"
                       min="1900"
                       max={new Date().getFullYear() + 1}
                       required
                       {...register(`vehicles.${index}.year`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                        onChange: (e) => {
+                          // integers only for year
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        },
                         min: { value: 1900, message: "Invalid year" },
                         max: {
                           value: new Date().getFullYear() + 1,
@@ -1657,11 +1746,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Mileage"
                       id={`vehicles.${index}.mileage`}
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="^[0-9]*$"
                       min="0"
                       required
                       {...register(`vehicles.${index}.mileage`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Mileage cannot be negative",
@@ -1742,11 +1837,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Monthly Lease/Loan Amount ($)"
                       id={`vehicles.${index}.monthlyLeaseLoanAmount`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(`vehicles.${index}.monthlyLeaseLoanAmount`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Payment cannot be negative",
@@ -1763,12 +1864,18 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Market Value ($)"
                       id={`vehicles.${index}.currentMarketValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       required
                       {...register(`vehicles.${index}.currentMarketValue`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: { value: 0, message: "Value cannot be negative" },
                       })}
                       error={
@@ -1786,11 +1893,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Minus Loan Balance ($)"
                       id={`vehicles.${index}.loanBalance`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(`vehicles.${index}.loanBalance`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Loan balance cannot be negative",
@@ -1863,14 +1976,14 @@ export function PersonalAssetsSection({
                   makeModel: "",
                   year: new Date().getFullYear(),
                   purchaseDate: "",
-                  mileage: 0,
+                  mileage: "",
                   licenseTagNumber: "",
                   ownershipType: "",
                   creditorName: "",
                   finalPaymentDate: "",
-                  monthlyLeaseLoanAmount: 0,
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  monthlyLeaseLoanAmount: "",
+                  currentMarketValue: "",
+                  loanBalance: "",
                   isJointOffer: false,
                 })
               }
@@ -1927,14 +2040,20 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Market Value ($)"
                       id={`valuableItems.${index}.currentMarketValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       required
                       {...register(
                         `valuableItems.${index}.currentMarketValue`,
                         {
-                          valueAsNumber: true,
+                          setValueAs: (v) =>
+                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                           min: {
                             value: 0,
                             message: "Value cannot be negative",
@@ -1957,11 +2076,17 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Minus Loan Balance ($)"
                       id={`valuableItems.${index}.loanBalance`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       {...register(`valuableItems.${index}.loanBalance`, {
-                        valueAsNumber: true,
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
                         min: {
                           value: 0,
                           message: "Loan balance cannot be negative",
@@ -1994,8 +2119,8 @@ export function PersonalAssetsSection({
               onClick={() =>
                 addValuableItem({
                   description: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: "",
+                  loanBalance: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
@@ -2054,14 +2179,20 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Current Market Value ($)"
                       id={`furniturePersonalEffects.${index}.currentMarketValue`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
+                      placeholder=""
                       required
                       {...register(
                         `furniturePersonalEffects.${index}.currentMarketValue`,
                         {
-                          valueAsNumber: true,
+                          setValueAs: (v) =>
+                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                           min: {
                             value: 0,
                             message: "Value cannot be negative",
@@ -2086,19 +2217,22 @@ export function PersonalAssetsSection({
                     <FormInput
                       label="Minus Loan Balance ($)"
                       id={`furniturePersonalEffects.${index}.loanBalance`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
-                      placeholder="0"
-                      {...register(
-                        `furniturePersonalEffects.${index}.loanBalance`,
-                        {
-                          valueAsNumber: true,
-                          min: {
-                            value: 0,
-                            message: "Loan balance cannot be negative",
-                          },
-                        }
-                      )}
+                      placeholder=""
+                      {...register(`furniturePersonalEffects.${index}.loanBalance`, {
+                        setValueAs: (v) =>
+                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        onChange: (e) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        },
+                        min: {
+                          value: 0,
+                          message: "Loan balance cannot be negative",
+                        },
+                      })}
                       error={
                         errors.furniturePersonalEffects?.[index]?.loanBalance
                           ?.message
@@ -2127,8 +2261,8 @@ export function PersonalAssetsSection({
               onClick={() =>
                 addFurniturePersonalEffect({
                   description: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: "",
+                  loanBalance: "",
                 })
               }
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"

@@ -10,7 +10,13 @@ import { constants } from "@/lib/constants";
 import useAuth from "@/hooks/auth/useAuth";
 
 const SignUp = () => {
-  const { handleGoogleSignIn, handleAppleSignIn, loading } = useAuth();
+  const { 
+    handleGoogleSignIn, 
+    handleAppleSignIn, 
+    googleLoading, 
+    appleLoading 
+  } = useAuth();
+
   return (
     <div className="flex flex-col justify-center items-center gap-3">
       <div className="w-fit p-2 bg-[var(--primary)] rounded-xl mb-5">
@@ -38,9 +44,9 @@ const SignUp = () => {
         icon={<Google />}
         className="w-full"
         onClick={() => handleGoogleSignIn("self-employed")}
-        disabled={loading}
+        disabled={googleLoading}
       >
-        {loading ? "Please wait..." : "Continue with Google"}
+        {googleLoading ? "Please wait..." : "Continue with Google"}
       </FButton>
 
       <FButton
@@ -49,9 +55,9 @@ const SignUp = () => {
         icon={<Apple />}
         className="w-full"
         onClick={() => handleAppleSignIn("self-employed")}
-        disabled={loading}
+        disabled={appleLoading}
       >
-        {loading ? "Please wait..." : "Continue with Apple"}
+        {appleLoading ? "Please wait..." : "Continue with Apple"}
       </FButton>
 
       <p className=" mt-5">

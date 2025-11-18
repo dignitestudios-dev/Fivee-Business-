@@ -103,12 +103,13 @@ export function BusinessIncomeSection({
   }, [businessIncomeInfo, reset]);
 
   // Compute totals with useMemo
-  const grossReceipts = useWatch({ control, name: "grossReceipts" }) || 0;
-  const grossRentalIncome =
-    useWatch({ control, name: "grossRentalIncome" }) || 0;
-  const interestIncome = useWatch({ control, name: "interestIncome" }) || 0;
-  const dividends = useWatch({ control, name: "dividends" }) || 0;
-  const otherIncome = useWatch({ control, name: "otherIncome" }) || 0;
+  const grossReceipts = Number(useWatch({ control, name: "grossReceipts" }) || 0);
+  const grossRentalIncome = Number(
+    useWatch({ control, name: "grossRentalIncome" }) || 0
+  );
+  const interestIncome = Number(useWatch({ control, name: "interestIncome" }) || 0);
+  const dividends = Number(useWatch({ control, name: "dividends" }) || 0);
+  const otherIncome = Number(useWatch({ control, name: "otherIncome" }) || 0);
 
   const totalBusinessIncome = useMemo(
     () =>
@@ -120,24 +121,31 @@ export function BusinessIncomeSection({
     [grossReceipts, grossRentalIncome, interestIncome, dividends, otherIncome]
   );
 
-  const materialsPurchased =
-    useWatch({ control, name: "materialsPurchased" }) || 0;
-  const inventoryPurchased =
-    useWatch({ control, name: "inventoryPurchased" }) || 0;
-  const grossWagesSalaries =
-    useWatch({ control, name: "grossWagesSalaries" }) || 0;
-  const rent = useWatch({ control, name: "rent" }) || 0;
-  const supplies = useWatch({ control, name: "supplies" }) || 0;
-  const utilitiesTelephones =
-    useWatch({ control, name: "utilitiesTelephones" }) || 0;
-  const vehicleCosts = useWatch({ control, name: "vehicleCosts" }) || 0;
-  const businessInsurance =
-    useWatch({ control, name: "businessInsurance" }) || 0;
-  const currentBusinessTaxes =
-    useWatch({ control, name: "currentBusinessTaxes" }) || 0;
-  const securedDebts = useWatch({ control, name: "securedDebts" }) || 0;
-  const otherBusinessExpenses =
-    useWatch({ control, name: "otherBusinessExpenses" }) || 0;
+  const materialsPurchased = Number(
+    useWatch({ control, name: "materialsPurchased" }) || 0
+  );
+  const inventoryPurchased = Number(
+    useWatch({ control, name: "inventoryPurchased" }) || 0
+  );
+  const grossWagesSalaries = Number(
+    useWatch({ control, name: "grossWagesSalaries" }) || 0
+  );
+  const rent = Number(useWatch({ control, name: "rent" }) || 0);
+  const supplies = Number(useWatch({ control, name: "supplies" }) || 0);
+  const utilitiesTelephones = Number(
+    useWatch({ control, name: "utilitiesTelephones" }) || 0
+  );
+  const vehicleCosts = Number(useWatch({ control, name: "vehicleCosts" }) || 0);
+  const businessInsurance = Number(
+    useWatch({ control, name: "businessInsurance" }) || 0
+  );
+  const currentBusinessTaxes = Number(
+    useWatch({ control, name: "currentBusinessTaxes" }) || 0
+  );
+  const securedDebts = Number(useWatch({ control, name: "securedDebts" }) || 0);
+  const otherBusinessExpenses = Number(
+    useWatch({ control, name: "otherBusinessExpenses" }) || 0
+  );
 
   const totalBusinessExpenses = useMemo(
     () =>
@@ -269,19 +277,33 @@ export function BusinessIncomeSection({
               <FormInput
                 label="Gross Receipts ($) *"
                 id="grossReceipts"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("grossReceipts", { valueAsNumber: true })}
+                {...register("grossReceipts", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.grossReceipts?.message}
               />
               <FormInput
                 label="Gross Rental Income ($) *"
                 id="grossRentalIncome"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("grossRentalIncome", { valueAsNumber: true })}
+                {...register("grossRentalIncome", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.grossRentalIncome?.message}
               />
             </div>
@@ -290,19 +312,33 @@ export function BusinessIncomeSection({
               <FormInput
                 label="Interest Income ($) *"
                 id="interestIncome"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("interestIncome", { valueAsNumber: true })}
+                {...register("interestIncome", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.interestIncome?.message}
               />
               <FormInput
                 label="Dividends ($) *"
                 id="dividends"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("dividends", { valueAsNumber: true })}
+                {...register("dividends", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.dividends?.message}
               />
             </div>
@@ -311,10 +347,17 @@ export function BusinessIncomeSection({
               <FormInput
                 label="Other Income ($) *"
                 id="otherIncome"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("otherIncome", { valueAsNumber: true })}
+                {...register("otherIncome", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.otherIncome?.message}
               />
               <div className="bg-[#22b573]/5 p-4 rounded-lg">
@@ -345,10 +388,17 @@ export function BusinessIncomeSection({
                 <FormInput
                   label="Materials Purchased ($) *"
                   id="materialsPurchased"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
-                  {...register("materialsPurchased", { valueAsNumber: true })}
+                  {...register("materialsPurchased", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
                   error={errors.materialsPurchased?.message}
                 />
                 <p className="text-xs text-gray-500">
@@ -360,10 +410,17 @@ export function BusinessIncomeSection({
                 <FormInput
                   label="Inventory Purchased ($) *"
                   id="inventoryPurchased"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
-                  {...register("inventoryPurchased", { valueAsNumber: true })}
+                  {...register("inventoryPurchased", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
                   error={errors.inventoryPurchased?.message}
                 />
                 <p className="text-xs text-gray-500">Goods bought for resale</p>
@@ -374,19 +431,33 @@ export function BusinessIncomeSection({
               <FormInput
                 label="Gross Wages and Salaries ($) *"
                 id="grossWagesSalaries"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("grossWagesSalaries", { valueAsNumber: true })}
+                {...register("grossWagesSalaries", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.grossWagesSalaries?.message}
               />
               <FormInput
                 label="Rent ($) *"
                 id="rent"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("rent", { valueAsNumber: true })}
+                {...register("rent", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.rent?.message}
               />
             </div>
@@ -396,10 +467,17 @@ export function BusinessIncomeSection({
                 <FormInput
                   label="Supplies ($) *"
                   id="supplies"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
-                  {...register("supplies", { valueAsNumber: true })}
+                  {...register("supplies", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
                   error={errors.supplies?.message}
                 />
                 <p className="text-xs text-gray-500">
@@ -409,10 +487,17 @@ export function BusinessIncomeSection({
               <FormInput
                 label="Utilities/Telephones ($) *"
                 id="utilitiesTelephones"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("utilitiesTelephones", { valueAsNumber: true })}
+                {...register("utilitiesTelephones", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.utilitiesTelephones?.message}
               />
             </div>
@@ -422,10 +507,17 @@ export function BusinessIncomeSection({
                 <FormInput
                   label="Vehicle Costs ($) *"
                   id="vehicleCosts"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
-                  {...register("vehicleCosts", { valueAsNumber: true })}
+                  {...register("vehicleCosts", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
                   error={errors.vehicleCosts?.message}
                 />
                 <p className="text-xs text-gray-500">
@@ -435,10 +527,17 @@ export function BusinessIncomeSection({
               <FormInput
                 label="Business Insurance ($) *"
                 id="businessInsurance"
-                type="number"
-                min="0"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
                 required
-                {...register("businessInsurance", { valueAsNumber: true })}
+                {...register("businessInsurance", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  },
+                })}
                 error={errors.businessInsurance?.message}
               />
             </div>
@@ -448,10 +547,17 @@ export function BusinessIncomeSection({
                 <FormInput
                   label="Current Business Taxes ($) *"
                   id="currentBusinessTaxes"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
-                  {...register("currentBusinessTaxes", { valueAsNumber: true })}
+                  {...register("currentBusinessTaxes", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
                   error={errors.currentBusinessTaxes?.message}
                 />
                 <p className="text-xs text-gray-500">
@@ -459,15 +565,22 @@ export function BusinessIncomeSection({
                   property, sales and employer's portion of employment taxes
                 </p>
               </div>
-              <FormInput
-                label="Secured Debts (not credit cards) ($) *"
-                id="securedDebts"
-                type="number"
-                min="0"
-                required
-                {...register("securedDebts", { valueAsNumber: true })}
-                error={errors.securedDebts?.message}
-              />
+                <FormInput
+                  label="Secured Debts (not credit cards) ($) *"
+                  id="securedDebts"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
+                  required
+                  {...register("securedDebts", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
+                  error={errors.securedDebts?.message}
+                />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -475,11 +588,16 @@ export function BusinessIncomeSection({
                 <FormInput
                   label="Other Business Expenses ($) *"
                   id="otherBusinessExpenses"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("otherBusinessExpenses", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.otherBusinessExpenses?.message}
                 />

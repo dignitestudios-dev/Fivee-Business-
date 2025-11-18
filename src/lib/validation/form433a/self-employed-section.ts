@@ -1,4 +1,10 @@
 import z from "zod";
+import {
+  nameSchema,
+  phoneSchemaOptional,
+  moneySchema,
+  shortTextSchema,
+} from "@/lib/validation-schemas";
 
 export const selfEmployedInitialValues: SelfEmployedFormSchema = {
   isSelfEmployed: false,
@@ -10,9 +16,9 @@ export const selfEmployedInitialValues: SelfEmployedFormSchema = {
   businessWebsite: "",
   tradeName: "",
   businessDescription: "",
-  totalEmployees: 0,
+  totalEmployees: "",
   taxDepositFrequency: "",
-  averageGrossMonthlyPayroll: 0,
+  averageGrossMonthlyPayroll: "",
   hasOtherBusinessInterests: false,
   otherBusinessInterests: [],
 };
@@ -21,16 +27,24 @@ export const selfEmployedSchema = z
   .object({
     isSelfEmployed: z.boolean(),
     isSoleProprietorship: z.boolean().optional(),
-    businessName: z.string().optional(),
-    businessAddress: z.string().optional(),
-    businessTelephone: z.string().optional(),
-    employerIdentificationNumber: z.string().optional(),
-    businessWebsite: z.string().optional(),
-    tradeName: z.string().optional(),
-    businessDescription: z.string().optional(),
-    totalEmployees: z.coerce.number().optional(),
-    taxDepositFrequency: z.string().optional(),
-    averageGrossMonthlyPayroll: z.coerce.number().optional(),
+    businessName: nameSchema.optional(),
+    businessAddress: shortTextSchema.optional(),
+    businessTelephone: phoneSchemaOptional,
+    employerIdentificationNumber: z
+      .string()
+      .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
+      .optional()
+      .or(z.literal("")),
+    businessWebsite: z
+      .string()
+      .regex(/^(https?:\/\/).+/i, "Enter a valid URL beginning with http:// or https://")
+      .optional()
+      .or(z.literal("")),
+    tradeName: nameSchema.optional(),
+    businessDescription: z.string().min(1, "Business description is required").max(1000, "Business description must be at most 1000 characters").optional(),
+    totalEmployees: z.coerce.number().min(0, "Must be 0 or greater").max(1000000, "Total employees seems too large").optional(),
+    taxDepositFrequency: shortTextSchema.optional(),
+    averageGrossMonthlyPayroll: moneySchema.optional(),
     hasOtherBusinessInterests: z.boolean().optional(),
     otherBusinessInterests: z
       .array(
@@ -41,14 +55,14 @@ export const selfEmployedSchema = z
               .min(0, "Percentage cannot be less than 0")
               .max(100, "Percentage cannot exceed 100"),
             title: z.string().min(1, "Title is required"),
-            businessAddress: z.string().min(1, "Business address is required"),
-            businessName: z.string().min(1, "Business name is required"),
-            businessTelephone: z
-              .string()
-              .min(1, "Business telephone is required"),
+            businessAddress: shortTextSchema.min(1, "Business address is required"),
+            businessName: nameSchema.min(1, "Business name is required"),
+            businessTelephone: phoneSchemaOptional,
             employerIdentificationNumber: z
               .string()
-              .min(1, "Employer identification number is required"),
+              .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
+              .optional()
+              .or(z.literal("")),
             businessType: z.enum(
               ["partnership", "llc", "corporation", "other"],
               {

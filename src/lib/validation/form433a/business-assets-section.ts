@@ -1,4 +1,12 @@
 import z from "zod";
+import {
+  accountNumberSchema,
+  moneySchema,
+  descriptionSchema,
+  shortTextSchema,
+  nameSchema,
+  phoneSchemaOptional,
+} from "@/lib/validation-schemas";
 
 export const businessAssetsInitialValues: BusinessAssetsFormSchema = {
   bankAccountsInfo: {
@@ -9,11 +17,11 @@ export const businessAssetsInitialValues: BusinessAssetsFormSchema = {
   },
   assetItems: {
     assets: [],
-    irsAllowedDeduction: 0,
+    irsAllowedDeduction: "",
   },
   hasNotesReceivable: false,
   hasAccountsReceivable: false,
-  boxB: 0,
+  boxB: "",
 };
 
 export const businessAssetsSchema = z.object({
@@ -21,11 +29,12 @@ export const businessAssetsSchema = z.object({
     bankAccounts: z
       .array(
         z.object({
-          bankName: z.string().min(1, "Bank name is required"),
-          countryLocation: z.string().min(1, "Country location is required"),
+          bankName: nameSchema,
+          countryLocation: shortTextSchema,
           accountType: z.string().min(1, "Account type is required"),
-          accountNumber: z.string().optional(),
-          value: z.coerce.number().min(0, "Value cannot be negative"),
+          // accountNumber is required for bank accounts
+          accountNumber: accountNumberSchema,
+          value: moneySchema,
         })
       )
       .optional(),
@@ -35,14 +44,12 @@ export const businessAssetsSchema = z.object({
       .array(
         z
           .object({
-            description: z.string().min(1, "Description is required"),
-            numberOfUnits: z.coerce.number().min(0).optional(),
-            location: z.string().min(1, "Location is required"),
-            accountNumber: z.string().optional(),
+            description: descriptionSchema,
+            numberOfUnits: z.coerce.number().min(0, "Number of units cannot be negative").optional(),
+            location: shortTextSchema,
+            accountNumber: accountNumberSchema.optional(),
             digitalAssetAddress: z.string().optional(),
-            usdEquivalent: z.coerce
-              .number()
-              .min(0, "USD equivalent cannot be negative"),
+            usdEquivalent: moneySchema,
           })
           .refine((data) => data.accountNumber || data.digitalAssetAddress, {
             message:
@@ -56,24 +63,17 @@ export const businessAssetsSchema = z.object({
     assets: z
       .array(
         z.object({
-          description: z.string().min(1, "Description is required"),
-          currentMarketValue: z.coerce
-            .number()
-            .min(0, "Current market value cannot be negative"),
-          loanBalance: z.coerce
-            .number()
-            .min(0, "Loan balance cannot be negative")
-            .optional(),
+          description: descriptionSchema,
+          currentMarketValue: moneySchema,
+          loanBalance: moneySchema.optional(),
           isLeased: z.boolean(),
           usedInProductionOfIncome: z.boolean(),
-          quickSaleValue: z.coerce.number().optional(),
-          totalValue: z.coerce.number().optional(),
+          quickSaleValue: moneySchema.optional(),
+          totalValue: moneySchema.optional(),
         })
       )
       .optional(),
-    irsAllowedDeduction: z.coerce
-      .number()
-      .min(0, "IRS allowed deduction cannot be negative"),
+    irsAllowedDeduction: moneySchema,
   }),
   hasNotesReceivable: z.boolean(),
   hasAccountsReceivable: z.boolean(),

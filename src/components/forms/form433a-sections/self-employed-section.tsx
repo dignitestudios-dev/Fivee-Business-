@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks";
 import useSelfEmployed from "@/hooks/433a-form-hooks/useSelfEmployed";
+import { formatPhone, formatEIN } from "@/utils/helper";
 
 interface SelfEmployedSectionProps {
   onNext: (employmentStatus?: string) => void;
@@ -232,7 +233,10 @@ export function SelfEmployedSection({
                     label="Business Telephone Number"
                     required
                     id="businessTelephone"
-                    {...register("businessTelephone")}
+                    {...register("businessTelephone", {
+                      onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                        setValue("businessTelephone", formatPhone(e.target.value)),
+                    })}
                     error={errors.businessTelephone?.message}
                   />
                   <FormInput
@@ -240,19 +244,31 @@ export function SelfEmployedSection({
                     required
                     id="employerIdentificationNumber"
                     placeholder="XX-XXXXXXX"
-                    {...register("employerIdentificationNumber")}
+                    {...register("employerIdentificationNumber", {
+                      onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                        setValue(
+                          "employerIdentificationNumber",
+                          formatEIN(e.target.value)
+                        ),
+                    })}
                     error={errors.employerIdentificationNumber?.message}
                   />
                   <FormInput
                     label="Business Website Address"
                     id="businessWebsite"
                     placeholder="https://"
-                    {...register("businessWebsite")}
+                    {...register("businessWebsite", {
+                      pattern: {
+                        value: /^(https?:\/\/).+/i,
+                        message: "Enter a valid URL beginning with http:// or https://",
+                      },
+                    })}
                     error={errors.businessWebsite?.message}
                   />
                   <FormInput
                     label="Trade Name or DBA"
                     id="tradeName"
+                    required
                     {...register("tradeName")}
                     error={errors.tradeName?.message}
                   />
@@ -271,9 +287,16 @@ export function SelfEmployedSection({
                     label="Total Number of Employees"
                     required
                     id="totalEmployees"
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="^[0-9]*$"
                     placeholder="0"
-                    {...register("totalEmployees")}
+                    {...register("totalEmployees", {
+                      valueAsNumber: true,
+                      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                      },
+                    })}
                     error={errors.totalEmployees?.message}
                   />
                   <FormInput
@@ -288,9 +311,19 @@ export function SelfEmployedSection({
                     label="Average Gross Monthly Payroll ($)"
                     required
                     id="averageGrossMonthlyPayroll"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\\.?[0-9]*$"
                     placeholder="0"
-                    {...register("averageGrossMonthlyPayroll")}
+                    {...register("averageGrossMonthlyPayroll", {
+                      setValueAs: (v) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                      onChange: (e) => {
+                        // allow only numbers and decimal point
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
+                      min: { value: 0, message: "Gross cannot be negative" },
+                    })}
                     error={errors.averageGrossMonthlyPayroll?.message}
                   />
                 </div>
@@ -361,7 +394,9 @@ export function SelfEmployedSection({
                             label="Percentage of Ownership (%)"
                             required
                             id={`otherBusinessInterests.${index}.ownershipPercentage`}
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="^[0-9]*$"
                             max={100}
                             min={0}
                             {...register(
@@ -377,6 +412,9 @@ export function SelfEmployedSection({
                                   message: "Percentage cannot exceed 100",
                                 },
                                 valueAsNumber: true, // makes sure value is treated as a number
+                                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                                  e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                                },
                               }
                             )}
                             error={
@@ -430,7 +468,14 @@ export function SelfEmployedSection({
                             required
                             id={`otherBusinessInterests.${index}.businessTelephone`}
                             {...register(
-                              `otherBusinessInterests.${index}.businessTelephone`
+                              `otherBusinessInterests.${index}.businessTelephone`,
+                              {
+                                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                                  setValue(
+                                    `otherBusinessInterests.${index}.businessTelephone`,
+                                    formatPhone(e.target.value)
+                                  ),
+                              }
                             )}
                             error={
                               errors.otherBusinessInterests?.[index]
@@ -443,7 +488,14 @@ export function SelfEmployedSection({
                             id={`otherBusinessInterests.${index}.employerIdentificationNumber`}
                             placeholder="XX-XXXXXXX"
                             {...register(
-                              `otherBusinessInterests.${index}.employerIdentificationNumber`
+                              `otherBusinessInterests.${index}.employerIdentificationNumber`,
+                              {
+                                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                                  setValue(
+                                    `otherBusinessInterests.${index}.employerIdentificationNumber`,
+                                    formatEIN(e.target.value)
+                                  ),
+                              }
                             )}
                             error={
                               errors.otherBusinessInterests?.[index]

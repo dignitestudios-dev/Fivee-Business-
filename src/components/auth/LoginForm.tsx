@@ -24,13 +24,19 @@ const LoginForm = () => {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<LoginFormValues>();
+  } = useForm<LoginFormValues>({
+    mode: "onTouched",
+  });
 
   const validatePassword = (password: string) => {
     const errors = [];
 
     if (password.length < SECURITY_CONFIG.passwordMinLength) {
       errors.push(`At least ${SECURITY_CONFIG.passwordMinLength} characters`);
+    }
+
+    if (password.length > SECURITY_CONFIG.passwordMaxLength) {
+      errors.push('no more than 64 characters');
     }
 
     if (SECURITY_CONFIG.passwordRequireUppercase && !/[A-Z]/.test(password)) {
@@ -58,6 +64,7 @@ const LoginForm = () => {
   };
 
   const onSubmit = (data: LoginFormValues) => {
+    data.email = data.email.trim().toLowerCase();
     handleLogin(data);
   };
 
@@ -73,7 +80,13 @@ const LoginForm = () => {
         id="email"
         type="email"
         disabled={loading}
-        {...register("email", { required: "Email is required" })}
+        {...register("email", {
+          required: "Email is required",
+          pattern: {
+            value: /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
+            message: "Invalid email address",
+          }
+        })}
         error={errors.email?.message}
       />
 
@@ -95,7 +108,7 @@ const LoginForm = () => {
             onClick={() => setShowPassword(!showPassword)}
             className="text-gray-400 hover:text-gray-600 cursor-pointer"
           >
-            {showPassword ? (
+            {!showPassword ? (
               <FiEyeOff className="w-4 h-4" />
             ) : (
               <FaEye className="w-4 h-4" />

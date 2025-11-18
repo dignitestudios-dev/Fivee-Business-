@@ -12,7 +12,10 @@ import { GoCheckCircleFill } from "react-icons/go";
 import useAuth from "@/hooks/auth/useAuth";
 import toast from "react-hot-toast";
 
-const ResetPasswordForm = () => {
+interface ResetPasswordFormProps {
+  onSuccess: () => void;
+}
+const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -26,7 +29,9 @@ const ResetPasswordForm = () => {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<ResetPasswordFormValues>();
+  } = useForm<ResetPasswordFormValues>({
+    mode: "onTouched",
+  });
 
   const watchNewPassword = watch("password");
 
@@ -35,6 +40,10 @@ const ResetPasswordForm = () => {
 
     if (password.length < SECURITY_CONFIG.passwordMinLength) {
       errors.push(`At least ${SECURITY_CONFIG.passwordMinLength} characters`);
+    }
+
+    if (password.length > SECURITY_CONFIG.passwordMaxLength) {
+      errors.push('no more than 64 characters');
     }
 
     if (SECURITY_CONFIG.passwordRequireUppercase && !/[A-Z]/.test(password)) {
@@ -75,6 +84,7 @@ const ResetPasswordForm = () => {
         newPassword: data.password,
       });
       setIsSuccess(true);
+      onSuccess(); // Call the success callback instead of setting state
     } catch (error) {
       toast.error("Failed to reset password. Please try again.");
       console.log("Error resetting password:", error);
@@ -133,7 +143,7 @@ const ResetPasswordForm = () => {
             onClick={() => setShowPassword(!showPassword)}
             className="text-gray-400 hover:text-gray-600"
           >
-            {showPassword ? (
+            {!showPassword ? (
               <FiEyeOff className="w-4 h-4" />
             ) : (
               <FaEye className="w-4 h-4" />
@@ -148,6 +158,10 @@ const ResetPasswordForm = () => {
         autoComplete="new-password"
         {...register("confirmPassword", {
           required: "Please confirm your password",
+          maxLength: {
+            value: 64,
+            message: "Password cannot exceed 64 characters",
+          },
           validate: (value) =>
             value === watchNewPassword || "Passwords do not match",
           onChange: (e) => {
@@ -161,7 +175,7 @@ const ResetPasswordForm = () => {
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             className="text-gray-400 hover:text-gray-600"
           >
-            {showConfirmPassword ? (
+            {!showConfirmPassword ? (
               <FiEyeOff className="w-4 h-4" />
             ) : (
               <FaEye className="w-4 h-4" />
@@ -175,11 +189,10 @@ const ResetPasswordForm = () => {
         <div className="rounded-lg w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div
-              className={`flex items-center  ${
-                watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
-                  ? "text-[var(--primary)]"
-                  : "text-gray-400"
-              }`}
+              className={`flex items-center  ${watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
+                ? "text-[var(--primary)]"
+                : "text-gray-400"
+                }`}
             >
               <GoCheckCircleFill className="w-5 h-5 mr-2" />
               At least {SECURITY_CONFIG.passwordMinLength} characters
@@ -187,11 +200,10 @@ const ResetPasswordForm = () => {
 
             {SECURITY_CONFIG.passwordRequireUppercase && (
               <div
-                className={`flex items-center  ${
-                  /[A-Z]/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
+                className={`flex items-center  ${/[A-Z]/.test(watchNewPassword)
+                  ? "text-[var(--primary)]"
+                  : "text-gray-400"
+                  }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One uppercase letter
@@ -200,11 +212,10 @@ const ResetPasswordForm = () => {
 
             {SECURITY_CONFIG.passwordRequireLowercase && (
               <div
-                className={`flex items-center  ${
-                  /[a-z]/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
+                className={`flex items-center  ${/[a-z]/.test(watchNewPassword)
+                  ? "text-[var(--primary)]"
+                  : "text-gray-400"
+                  }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One lowercase letter
@@ -213,11 +224,10 @@ const ResetPasswordForm = () => {
 
             {SECURITY_CONFIG.passwordRequireNumbers && (
               <div
-                className={`flex items-center  ${
-                  /\d/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
+                className={`flex items-center  ${/\d/.test(watchNewPassword)
+                  ? "text-[var(--primary)]"
+                  : "text-gray-400"
+                  }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One number
@@ -226,11 +236,10 @@ const ResetPasswordForm = () => {
 
             {SECURITY_CONFIG.passwordRequireSpecialChars && (
               <div
-                className={`flex items-center  ${
-                  /[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                }`}
+                className={`flex items-center  ${/[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
+                  ? "text-[var(--primary)]"
+                  : "text-gray-400"
+                  }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One special character

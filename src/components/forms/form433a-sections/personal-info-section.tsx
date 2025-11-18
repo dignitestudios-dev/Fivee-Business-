@@ -185,6 +185,7 @@ export function PersonalInfoSection({
                 id="dob"
                 type="date"
                 required
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                 {...register("dob")}
                 error={errors.dob?.message}
               />
@@ -424,7 +425,7 @@ export function PersonalInfoSection({
             <CardTitle>Household Members and Dependents</CardTitle>
             <p className="text-sm text-gray-600">
               Provide information for all other persons in the household or
-              claimed as a dependent.
+              claimed as a dependent. <strong>Maximum of 4 members allowed.</strong>
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -459,9 +460,17 @@ export function PersonalInfoSection({
                   <FormInput
                     label="Age"
                     id={`householdMembers.${index}.age`}
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Age"
                     required
-                    {...register(`householdMembers.${index}.age`)}
+                    {...register(`householdMembers.${index}.age`, {
+                      setValueAs: (v: any) => (v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, ""))),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                      },
+                    })}
                     error={errors.householdMembers?.[index]?.age?.message}
                   />
                   <FormInput
@@ -514,11 +523,19 @@ export function PersonalInfoSection({
               type="button"
               variant="outline"
               onClick={addHouseholdMember}
-              className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
+              disabled={fields.length >= 4}
+              className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Household Member
+              {fields.length >= 4 ? 'Maximum 4 members reached' : 'Add Household Member'}
             </Button>
+
+            {/* Show count indicator */}
+            {fields.length > 0 && (
+              <div className="text-sm text-gray-500 text-center">
+                {fields.length} of 4 members added
+              </div>
+            )}
           </CardContent>
         </Card>
 

@@ -268,10 +268,22 @@ export function EmploymentSection({
                     <FormInput
                       label=""
                       placeholder="Years"
-                      type="number"
-                      min="0"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={2}
                       required
-                      {...register("yearsWithEmployer")}
+                      {...register("yearsWithEmployer", {
+                        // keep the stored value as a digits-only string so the input remains empty when blank;
+                        // schema preprocess will coerce to number for validation
+                        setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                        onChange: (e: any) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        },
+                      })}
+                      onInput={(e: any) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                      }}
                       error={errors.yearsWithEmployer?.message}
                     />
                     <Label className="text-xs text-gray-500 mt-1">Years</Label>
@@ -280,11 +292,20 @@ export function EmploymentSection({
                     <FormInput
                       label=""
                       placeholder="Months"
-                      type="number"
-                      min="0"
-                      max="11"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={2}
                       required
-                      {...register("monthsWithEmployer")}
+                      {...register("monthsWithEmployer", {
+                        setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                        onChange: (e: any) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        },
+                      })}
+                      onInput={(e: any) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                      }}
                       error={errors.monthsWithEmployer?.message}
                     />
                     <Label className="text-xs text-gray-500 mt-1">Months</Label>
@@ -434,10 +455,20 @@ export function EmploymentSection({
                       <FormInput
                         label=""
                         placeholder="Years"
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={4}
                         required
-                        {...register("spouseYearsWithEmployer")}
+                        {...register("spouseYearsWithEmployer", {
+                          setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                          onChange: (e: any) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                          },
+                        })}
+                        onInput={(e: any) => {
+                          e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                        }}
                         error={errors.spouseYearsWithEmployer?.message}
                       />
                       <Label className="text-xs text-gray-500 mt-1">
@@ -448,11 +479,20 @@ export function EmploymentSection({
                       <FormInput
                         label=""
                         placeholder="Months"
-                        type="number"
-                        min="0"
-                        max="11"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={2}
                         required
-                        {...register("spouseMonthsWithEmployer")}
+                        {...register("spouseMonthsWithEmployer", {
+                          setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                          onChange: (e: any) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                          },
+                        })}
+                        onInput={(e: any) => {
+                          e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                        }}
                         error={errors.spouseMonthsWithEmployer?.message}
                       />
                       <Label className="text-xs text-gray-500 mt-1">

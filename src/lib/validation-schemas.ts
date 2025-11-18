@@ -1,6 +1,21 @@
 import { z } from "zod";
 import { ZodType } from "zod";
 
+// Reusable name schema: used for first/last names, employer names, institution names, etc.
+export const nameSchema = z
+  .string()
+  .min(2, "Name must be at least 2 characters")
+  .max(50, "Name must be less than 50 characters")
+  .refine((value) => !/\d/.test(value), {
+    message: "Name cannot contain numbers",
+  })
+  .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
+    message: "Name cannot contain special characters",
+  })
+  .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
+    message: "Name must contain at least one letter",
+  });
+
 /**
  * @param schema - Zod created schema at src/schemas/
  * @param data - Data to validate
@@ -27,20 +42,61 @@ export const validate = <T extends ZodType>(
 const ssnRegex = /^\d{3}-\d{2}-\d{4}$/;
 
 // US Date format validation
-const dateSchema = z.string().refine((date) => {
+export const dateSchema = z.string().refine((date) => {
   if (!date) return false;
   const parsedDate = new Date(date);
   return !isNaN(parsedDate.getTime());
 }, "Please enter a valid date");
 
+// Reusable common schemas
+export const addressSchema = z
+  .string()
+  .min(1, "Address is required")
+  .max(200, "Address must be at most 200 characters");
+
+export const shortTextSchema = z
+  .string()
+  .min(1, "This field is required")
+  .max(100, "This field must be at most 100 characters");
+
+export const accountNumberSchema = z
+  .string()
+  .trim()
+  .min(1, "Account number is required")
+  .max(50, "Account number must be at most 50 characters");
+
+export const descriptionSchema = z
+  .string()
+  .min(1, "Description is required")
+  .max(255, "Description must be at most 255 characters");
+
+export const moneySchema = z
+  .coerce.number()
+  .min(0, "Value cannot be negative")
+  .max(1e12, "Value must be at most 1000000000000");
+
+export const yearsSchema = z
+  .coerce.number()
+  .min(0, "Years must be 0 or greater")
+  .max(200, "Years must be at most 200");
+
+export const ageSchema = z
+  .coerce.number()
+  .min(0, "Age must be 0 or greater")
+  .max(150, "Age must be at most 150");
+
+export const usPhoneRegex = /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/;
+export const phoneSchema = z.string().regex(usPhoneRegex, "Please enter a valid US phone number");
+export const phoneSchemaOptional = phoneSchema.optional().or(z.literal(""));
+
 // Employment Information Schema
 export const employmentSchema = z
   .object({
-    employerName: z.string().min(1, "Employer name is required"),
+    employerName: nameSchema,
     payPeriod: z.enum(["weekly", "bi-weekly", "monthly", "other"]),
-    employerAddress: z.string().min(1, "Employer address is required"),
-    jobTitle: z.string().min(1, "Occupation is required"),
-    yearsWithEmployer: z.coerce.number().min(0, "Years must be 0 or greater"),
+    employerAddress: addressSchema,
+    jobTitle: shortTextSchema,
+    yearsWithEmployer: yearsSchema,
     monthsWithEmployer: z.coerce
       .number()
       .min(0, "Months must be 0 or greater")
@@ -48,11 +104,11 @@ export const employmentSchema = z
     maritalStatus: z.enum(["unmarried", "married"]),
 
     // Spouse employment fields
-    spouseEmployerName: z.string().optional(),
+    spouseEmployerName: nameSchema.optional(),
     spousePayPeriod: z
       .enum(["weekly", "bi-weekly", "monthly", "other"])
       .optional(),
-    spouseEmployerAddress: z.string().optional(),
+    spouseEmployerAddress: addressSchema.optional(),
     spouseHasOwnershipInterest: z.boolean().optional(),
     spouseJobTitle: z.string().optional(),
     spouseYearsWithEmployer: z.coerce.number().optional(),
@@ -84,10 +140,10 @@ export const personalAssetsSchema = z.object({
     .array(
       z.object({
         accountType: z.string().min(1, "Account type is required"),
-        bankName: z.string().min(1, "Bank name is required"),
-        countryLocation: z.string().min(1, "Bank country location is required"),
-        accountNumber: z.string().min(1, "Account number is required"),
-        balance: z.coerce.number().min(0, "Balance cannot be negative"),
+        bankName: nameSchema,
+        countryLocation: shortTextSchema,
+        accountNumber: accountNumberSchema,
+        balance: moneySchema,
       })
     )
     .optional(),
@@ -96,20 +152,11 @@ export const personalAssetsSchema = z.object({
       z.object({
         investmentType: z.string().min(1, "Investment type is required"),
         investmentTypeText: z.string().optional(),
-        institutionName: z
-          .string()
-          .min(1, "Name of financial institution is required"),
-        countryLocation: z
-          .string()
-          .min(1, "Financial institution country location is required"),
-        accountNumber: z.string().min(1, "Account number is required"),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        institutionName: nameSchema,
+        countryLocation: shortTextSchema,
+        accountNumber: accountNumberSchema,
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
         // Whether this vehicle is part of a joint offer (default false)
         isJointOffer: z.boolean().optional(),
       })
@@ -119,18 +166,14 @@ export const personalAssetsSchema = z.object({
     .array(
       z
         .object({
-          description: z
-            .string()
-            .min(1, "Description of digital asset is required"),
+          description: descriptionSchema,
           numberOfUnits: z.coerce
             .number()
             .min(0, "Number of units cannot be negative"),
-          location: z.string().min(1, "Location of digital asset is required"),
-          accountNumber: z.string().optional(),
+          location: shortTextSchema,
+          accountNumber: accountNumberSchema.optional(),
           digitalAssetAddress: z.string().optional(),
-          usdEquivalent: z.coerce
-            .number()
-            .min(0, "US dollar equivalent cannot be negative"),
+          usdEquivalent: moneySchema,
         })
         .refine((data) => data.accountNumber || data.digitalAssetAddress, {
           message: "Either account number or digital asset address is required",
@@ -146,7 +189,7 @@ export const personalAssetsSchema = z.object({
             .string()
             .min(1, "Name of financial institution is required"),
           countryLocation: z.string().min(1, "Country location is required"),
-          accountNumber: z.string().min(1, "Account number is required"),
+          accountNumber: accountNumberSchema,
           retirementType: z.enum(["401k", "ira", "other"], {
             message: "Retirement account type is required",
           }),
@@ -180,15 +223,10 @@ export const personalAssetsSchema = z.object({
   lifeInsurancePolicies: z
     .array(
       z.object({
-        companyName: z.string().min(1, "Name of insurance company is required"),
+        companyName: nameSchema,
         policyNumber: z.string().min(1, "Policy number is required"),
-        currentCashValue: z.coerce
-          .number()
-          .min(0, "Current cash value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        currentCashValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),
@@ -204,16 +242,11 @@ export const personalAssetsSchema = z.object({
         finalPaymentDate: z.string().optional(),
         titleHeld: z.string().min(1, "How title is held is required"),
         location: z.string().min(1, "Location is required"),
-        lenderName: z.string().optional(),
-        lenderAddress: z.string().optional(),
-        lenderPhone: z.string().optional(),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        lenderName: nameSchema.optional(),
+        lenderAddress: addressSchema.optional(),
+        lenderPhone: phoneSchemaOptional,
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
         isForSale: z.boolean().optional(),
         anticipateSelling: z.boolean().optional(),
         listingPrice: z.coerce
@@ -226,28 +259,20 @@ export const personalAssetsSchema = z.object({
   vehicles: z
     .array(
       z.object({
-        makeModel: z.string().min(1, "Vehicle make and model is required"),
+        makeModel: shortTextSchema,
         year: z.coerce
           .number()
           .min(1900)
           .max(new Date().getFullYear() + 1, "Invalid year"),
-        purchaseDate: z.string().min(1, "Date purchased is required"),
-        mileage: z.coerce.number().min(0, "Mileage cannot be negative"),
-        licenseTagNumber: z.string().min(1, "License/tag number is required"),
+        purchaseDate: dateSchema,
+        mileage: moneySchema,
+        licenseTagNumber: shortTextSchema,
         ownershipType: z.string().min(1, "Vehicle ownership type is required"),
-        creditorName: z.string().optional(),
+        creditorName: nameSchema.optional(),
         finalPaymentDate: z.string().optional(),
-        monthlyLeaseLoanAmount: z.coerce
-          .number()
-          .min(0, "Monthly payment cannot be negative")
-          .optional(),
-        currentMarketValue: z.coerce
-          .number()
-          .min(0, "Current market value cannot be negative"),
-        loanBalance: z.coerce
-          .number()
-          .min(0, "Loan balance cannot be negative")
-          .optional(),
+        monthlyLeaseLoanAmount: moneySchema.optional(),
+        currentMarketValue: moneySchema,
+        loanBalance: moneySchema.optional(),
       })
     )
     .optional(),
@@ -286,16 +311,9 @@ export const selfEmployedSchema = z
   .object({
     isSelfEmployed: z.boolean(),
     isSoleProprietorship: z.boolean().optional(),
-    businessName: z.string().optional(),
+    businessName: nameSchema.optional(),
     businessAddress: z.string().optional(),
-    businessTelephone: z
-      .string()
-      .regex(
-        /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-        "Please enter a valid US phone number"
-      )
-      .optional()
-      .or(z.literal("")),
+    businessTelephone: phoneSchemaOptional,
     employerIdentificationNumber: z
       .string()
       .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
@@ -306,7 +324,7 @@ export const selfEmployedSchema = z
       .url("Please enter a valid URL")
       .optional()
       .or(z.literal("")),
-    tradeName: z.string().optional(),
+  tradeName: nameSchema.optional(),
     businessDescription: z.string().optional(),
     totalEmployees: z.coerce.number().min(0, "Must be 0 or greater").optional(),
     taxDepositFrequency: z.string().optional(),
@@ -325,15 +343,8 @@ export const selfEmployedSchema = z
             .optional(),
           title: z.string().optional(),
           businessAddress: z.string().optional(),
-          businessName: z.string().optional(),
-          businessTelephone: z
-            .string()
-            .regex(
-              /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-              "Please enter a valid US phone number"
-            )
-            .optional()
-            .or(z.literal("")),
+          businessName: nameSchema.optional(),
+          businessTelephone: phoneSchemaOptional,
           employerIdentificationNumber: z
             .string()
             .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
@@ -446,11 +457,7 @@ export const businessAssetsSchema = z
               message: "Bank name and country location is required",
             })
             .min(1, { message: "Bank name and country location is required" }),
-          accountNumber: z
-            .string({
-              message: "Account number is required",
-            })
-            .min(1, { message: "Account number is required" }),
+          accountNumber: accountNumberSchema,
           amount: z.coerce
             .number({
               message: "Amount must be a number",
@@ -967,14 +974,8 @@ export type SectionNumber = keyof FormSchemas;
 
 export const completeFormSchema = z.object({
   // Personal Information
-  firstName: z
-    .string()
-    .min(1, "First name is required")
-    .max(50, "First name must be less than 50 characters"),
-  lastName: z
-    .string()
-    .min(1, "Last name is required")
-    .max(50, "Last name must be less than 50 characters"),
+  firstName: nameSchema,
+  lastName: nameSchema,
   dob: dateSchema,
   ssnOrItin: z
     .string()
@@ -986,33 +987,14 @@ export const completeFormSchema = z.object({
   housingOtherDetails: z.string().optional(),
   livedInCommunityPropertyStateInLast10Years: z.boolean(),
   countyOfResidence: z.string().min(1, "County is required"),
-  primaryPhone: z
-    .string()
-    .regex(
-      /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-      "Please enter a valid US phone number"
-    ),
-  secondaryPhone: z
-    .string()
-    .regex(
-      /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-      "Please enter a valid US phone number"
-    )
-    .optional()
-    .or(z.literal("")),
-  faxNumber: z
-    .string()
-    .regex(
-      /^(?:\+1\s?|1\s?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
-      "Please enter a valid US fax number"
-    )
-    .optional()
-    .or(z.literal("")),
-  mailingAddress: z.string().optional(),
+  primaryPhone: phoneSchema,
+  secondaryPhone: phoneSchemaOptional,
+  faxNumber: phoneSchemaOptional,
+  mailingAddress: addressSchema.optional(),
 
   // Spouse fields
-  spouseFirstName: z.string().optional(),
-  spouseLastName: z.string().optional(),
+  spouseFirstName: nameSchema.optional(),
+  spouseLastName: nameSchema.optional(),
   spouseDOB: z.string().optional(),
   spouseSSN: z
     .string()
@@ -1031,7 +1013,7 @@ export const completeFormSchema = z.object({
   householdMembers: z
     .array(
       z.object({
-        name: z.string().min(1, "Name is required"),
+        name: nameSchema,
         age: z
           .string()
           .min(1, "Age is required")
@@ -1044,7 +1026,7 @@ export const completeFormSchema = z.object({
     .optional(),
 
   // Employment Information
-  employerName: z.string().min(1, "Employer name is required"),
+  employerName: nameSchema,
   payPeriod: z.enum(["weekly", "bi-weekly", "monthly", "other"]),
   employerAddress: z.string().min(1, "Employer address is required"),
   hasOwnershipInterest: z.boolean(),
@@ -1075,7 +1057,7 @@ export const completeFormSchema = z.object({
       z.object({
         accountType: z.string().optional(),
         bankNameCountry: z.string().optional(),
-        accountNumber: z.string().optional(),
+        accountNumber: accountNumberSchema.optional(),
         amount: z.coerce.number().optional(),
       })
     )

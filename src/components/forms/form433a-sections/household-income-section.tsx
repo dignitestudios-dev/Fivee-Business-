@@ -230,24 +230,32 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label="Gross wages ($)"
                   id="income.primaryTaxpayer.grossWages"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.primaryTaxpayer.grossWages", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.primaryTaxpayer?.grossWages?.message}
                 />
                 <FormInput
                   label="Social Security ($)"
                   id="income.primaryTaxpayer.socialSecurity"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.primaryTaxpayer.socialSecurity", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={
                     errors.income?.primaryTaxpayer?.socialSecurity?.message
@@ -256,24 +264,32 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label="Pension(s) ($)"
                   id="income.primaryTaxpayer.pension"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.primaryTaxpayer.pension", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.primaryTaxpayer?.pension?.message}
                 />
                 <FormInput
                   label="Other income (e.g. unemployment) ($)"
                   id="income.primaryTaxpayer.otherIncome"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.primaryTaxpayer.otherIncome", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.primaryTaxpayer?.otherIncome?.message}
                 />
@@ -298,48 +314,64 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label="Gross wages ($)"
                     id="income.spouse.grossWages"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("income.spouse.grossWages", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.income?.spouse?.grossWages?.message}
                   />
                   <FormInput
                     label="Social Security ($)"
                     id="income.spouse.socialSecurity"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("income.spouse.socialSecurity", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.income?.spouse?.socialSecurity?.message}
                   />
                   <FormInput
                     label="Pension(s) ($)"
                     id="income.spouse.pension"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("income.spouse.pension", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.income?.spouse?.pension?.message}
                   />
                   <FormInput
                     label="Other Income (e.g. unemployment) ($)"
                     id="income.spouse.otherIncome"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("income.spouse.otherIncome", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.income?.spouse?.otherIncome?.message}
                   />
@@ -372,12 +404,16 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.additionalSourcesIncome"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.additionalSourcesIncome", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.additionalSourcesIncome?.message}
                   className="w-32"
@@ -389,12 +425,16 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.interestDividendsRoyalties"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.interestDividendsRoyalties", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.interestDividendsRoyalties?.message}
                   className="w-32"
@@ -409,11 +449,17 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.distributions"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
-                  {...register("income.distributions", { valueAsNumber: true })}
+                  {...register("income.distributions", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
+                  })}
                   error={errors.income?.distributions?.message}
                   className="w-32"
                 />
@@ -424,12 +470,16 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.netRentalIncome"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.netRentalIncome", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.netRentalIncome?.message}
                   className="w-32"
@@ -446,14 +496,15 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.netBusinessIncomeFromBoxC"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   disabled
                   required
                   value={boxC}
                   {...register("income.netBusinessIncomeFromBoxC", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   })}
                   error={errors.income?.netBusinessIncomeFromBoxC?.message}
                   className="w-32"
@@ -465,12 +516,16 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.childSupportReceived"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.childSupportReceived", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.childSupportReceived?.message}
                   className="w-32"
@@ -482,12 +537,16 @@ export function HouseholdIncomeSection({
                 <FormInput
                   label=""
                   id="income.alimonyReceived"
-                  type="number"
-                  min="0"
-                  placeholder="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="^[0-9]*\.?[0-9]*$"
+                  placeholder=""
                   required
                   {...register("income.alimonyReceived", {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    },
                   })}
                   error={errors.income?.alimonyReceived?.message}
                   className="w-32"
@@ -549,12 +608,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.foodClothingMiscellaneous"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.foodClothingMiscellaneous", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.foodClothingMiscellaneous?.message}
                     className="w-32"
@@ -577,12 +640,16 @@ export function HouseholdIncomeSection({
                       <FormInput
                         label="Monthly rent payment"
                         id="expenses.monthlyRentalPayment"
-                        type="number"
-                        min="0"
-                        placeholder="0"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="^[0-9]*\.?[0-9]*$"
+                        placeholder=""
                         required
                         {...register("expenses.monthlyRentalPayment", {
-                          valueAsNumber: true,
+                          setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                          onChange: (e: any) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                         })}
                         error={errors.expenses?.monthlyRentalPayment?.message}
                         className="w-48"
@@ -592,12 +659,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.housingUtilities"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.housingUtilities", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.housingUtilities?.message}
                     className="w-32"
@@ -611,12 +682,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.vehicleLoanLeasePayments"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.vehicleLoanLeasePayments", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.vehicleLoanLeasePayments?.message}
                     className="w-32"
@@ -639,12 +714,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.vehicleOperatingCosts"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.vehicleOperatingCosts", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.vehicleOperatingCosts?.message}
                     className="w-32"
@@ -667,12 +746,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.publicTransportationCosts"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.publicTransportationCosts", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.publicTransportationCosts?.message}
                     className="w-32"
@@ -686,12 +769,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.healthInsurancePremiums"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.healthInsurancePremiums", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.healthInsurancePremiums?.message}
                     className="w-32"
@@ -711,12 +798,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.outOfPocketHealthCare"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.outOfPocketHealthCare", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.outOfPocketHealthCare?.message}
                     className="w-32"
@@ -733,12 +824,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.courtOrderedPayments"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.courtOrderedPayments", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.courtOrderedPayments?.message}
                     className="w-32"
@@ -754,12 +849,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.childDependentCare"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.childDependentCare", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expnenses?.childDependentCare?.message}
                     className="w-32"
@@ -775,12 +874,16 @@ export function HouseholdIncomeSection({
                       <FormInput
                         label="Life insurance policy amount"
                         id="expenses.lifeInsuranceAmount"
-                        type="number"
-                        min="0"
-                        placeholder="0"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="^[0-9]*\.?[0-9]*$"
+                        placeholder=""
                         required
                         {...register("expenses.lifeInsuranceAmount", {
-                          valueAsNumber: true,
+                          setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                          onChange: (e: any) => {
+                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
                         })}
                         error={errors.expenses?.lifeInsuranceAmount?.message}
                         className="w-48"
@@ -790,12 +893,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.lifeInsurancePremiums"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.lifeInsurancePremiums", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.lifeInsurancePremiums?.message}
                     className="w-32"
@@ -812,12 +919,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.currentMonthlyTaxes"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.currentMonthlyTaxes", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.currentMonthlyTaxes?.message}
                     className="w-32"
@@ -846,12 +957,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.securedDebts"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.securedDebts", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.securedDebts?.message}
                     className="w-32"
@@ -868,12 +983,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label=""
                     id="expenses.monthlyTaxPayments"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.monthlyTaxPayments", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.monthlyTaxPayments?.message}
                     className="w-32"
@@ -883,12 +1002,16 @@ export function HouseholdIncomeSection({
                   <FormInput
                     label="Total tax owed ($)"
                     id="expenses.totalTaxOwed"
-                    type="number"
-                    min="0"
-                    placeholder="0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
+                    placeholder=""
                     required
                     {...register("expenses.totalTaxOwed", {
-                      valueAsNumber: true,
+                      setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      },
                     })}
                     error={errors.expenses?.totalTaxOwed?.message}
                     className="w-48"

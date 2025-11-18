@@ -13,6 +13,7 @@ import useAuth from "@/hooks/auth/useAuth";
 const SignupForm = () => {
   const { handleSignup, handleGoogleSignIn, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   const {
@@ -21,6 +22,8 @@ const SignupForm = () => {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormValues>({
+    // validate fields as the user types so confirm password shows errors live
+    mode: "onTouched",
     defaultValues: {
       employmentType: undefined,
     },
@@ -34,6 +37,10 @@ const SignupForm = () => {
 
     if (password.length < SECURITY_CONFIG.passwordMinLength) {
       errors.push(`At least ${SECURITY_CONFIG.passwordMinLength} characters`);
+    }
+
+    if (password.length > SECURITY_CONFIG.passwordMaxLength) {
+      errors.push('no more than 64 characters');
     }
 
     if (SECURITY_CONFIG.passwordRequireUppercase && !/[A-Z]/.test(password)) {
@@ -63,7 +70,7 @@ const SignupForm = () => {
   const onSubmit = async (data: SignupFormValues) => {
     try {
       await handleSignup({
-        email: data.email,
+        email: data.email.trim().toLowerCase(),
         firstName: data.firstName,
         lastName: data.lastName,
         password: data.password,
@@ -104,7 +111,7 @@ const SignupForm = () => {
             {...register("email", {
               required: "Email is required",
               pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                value: /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
                 message: "Invalid email address",
               },
             })}
@@ -117,7 +124,19 @@ const SignupForm = () => {
               placeholder="Siweh"
               type="text"
               id="firstName"
-              {...register("firstName", { required: "First name is required" })}
+              {...register("firstName", {
+                required: "First name is required",
+                minLength: { value: 2, message: "First name must be at least 2 characters" },
+                maxLength: { value: 50, message: "First name must be at most 50 characters" },
+                pattern: {
+                  value: /^[A-Za-z\s'-]+$/,
+                  message: "First name can only contain letters, spaces, hyphens, and apostrophes"
+                },
+                onChange: (e) => {
+                  // Remove numbers and unwanted special characters in real-time
+                  e.target.value = e.target.value.replace(/[^A-Za-z\s'-]/g, '');
+                }
+              })}
               error={errors.firstName?.message}
             />
             <FInput
@@ -125,7 +144,19 @@ const SignupForm = () => {
               placeholder="Harris"
               type="text"
               id="lastName"
-              {...register("lastName", { required: "Last name is required" })}
+              {...register("lastName", {
+                required: "Last name is required",
+                minLength: { value: 2, message: "Last name must be at least 2 characters" },
+                maxLength: { value: 50, message: "Last name must be at most 50 characters" },
+                pattern: {
+                  value: /^[A-Za-z\s'-]+$/,
+                  message: "Last name can only contain letters, spaces, hyphens, and apostrophes"
+                },
+                onChange: (e) => {
+                  // Remove numbers and unwanted special characters in real-time
+                  e.target.value = e.target.value.replace(/[^A-Za-z\s'-]/g, '');
+                }
+              })}
               error={errors.lastName?.message}
             />
           </div>
@@ -137,11 +168,10 @@ const SignupForm = () => {
             </h3>
             <div className="space-y-3">
               <label
-                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
-                  watchEmploymentType === "self-employed"
-                    ? "border-[var(--primary)]"
-                    : "border-[#E3E3E3]"
-                }`}
+                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${watchEmploymentType === "self-employed"
+                  ? "border-[var(--primary)]"
+                  : "border-[#E3E3E3]"
+                  }`}
               >
                 <input
                   type="radio"
@@ -153,11 +183,10 @@ const SignupForm = () => {
                 />
                 <div className="flex gap-2 items-center py-2 px-4 h-full">
                   <div
-                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
-                      watchEmploymentType === "self-employed"
-                        ? "bg-[var(--primary)]"
-                        : "bg-white"
-                    }`}
+                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${watchEmploymentType === "self-employed"
+                      ? "bg-[var(--primary)]"
+                      : "bg-white"
+                      }`}
                   >
                     <div className="h-full w-full bg-white rounded-full" />
                   </div>
@@ -166,11 +195,10 @@ const SignupForm = () => {
               </label>
 
               <label
-                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
-                  watchEmploymentType === "business-owner"
-                    ? "border-[var(--primary)]"
-                    : "border-[#E3E3E3]"
-                }`}
+                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${watchEmploymentType === "business-owner"
+                  ? "border-[var(--primary)]"
+                  : "border-[#E3E3E3]"
+                  }`}
               >
                 <input
                   type="radio"
@@ -182,11 +210,10 @@ const SignupForm = () => {
                 />
                 <div className="flex gap-2 items-center py-2 px-4 h-full">
                   <div
-                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
-                      watchEmploymentType === "business-owner"
-                        ? "bg-[var(--primary)]"
-                        : "bg-white"
-                    }`}
+                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${watchEmploymentType === "business-owner"
+                      ? "bg-[var(--primary)]"
+                      : "bg-white"
+                      }`}
                   >
                     <div className="h-full w-full bg-white rounded-full" />
                   </div>
@@ -219,7 +246,39 @@ const SignupForm = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="text-gray-400 hover:text-gray-600 cursor-pointer"
               >
-                {showPassword ? (
+                {!showPassword ? (
+                  <FiEyeOff className="w-4 h-4" />
+                ) : (
+                  <FaEye className="w-4 h-4" />
+                )}
+              </button>
+            }
+          />
+
+          {/* Confirm Password */}
+          <FInput
+            label="Confirm Password"
+            placeholder="Confirm Password"
+            type={showConfirmPassword ? "text" : "password"}
+            autoComplete="off"
+            id="confirmPassword"
+            {...register("confirmPassword", {
+              required: "Confirm password is required",
+              maxLength: {
+                value: 64,
+                message: "Password cannot exceed 64 characters",
+              },
+              validate: (value) =>
+                value === watchNewPassword || "Passwords do not match",
+            })}
+            error={errors.confirmPassword?.message}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                {!showConfirmPassword ? (
                   <FiEyeOff className="w-4 h-4" />
                 ) : (
                   <FaEye className="w-4 h-4" />
@@ -233,11 +292,10 @@ const SignupForm = () => {
             <div className="rounded-lg w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div
-                  className={`flex items-center  ${
-                    watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
-                      ? "text-[var(--primary)]"
-                      : "text-gray-400"
-                  }`}
+                  className={`flex items-center  ${watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
+                    ? "text-[var(--primary)]"
+                    : "text-gray-400"
+                    }`}
                 >
                   <GoCheckCircleFill className="w-5 h-5 mr-2" />
                   At least {SECURITY_CONFIG.passwordMinLength} characters
@@ -245,11 +303,10 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireUppercase && (
                   <div
-                    className={`flex items-center  ${
-                      /[A-Z]/.test(watchNewPassword)
-                        ? "text-[var(--primary)]"
-                        : "text-gray-400"
-                    }`}
+                    className={`flex items-center  ${/[A-Z]/.test(watchNewPassword)
+                      ? "text-[var(--primary)]"
+                      : "text-gray-400"
+                      }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One uppercase letter
@@ -258,11 +315,10 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireLowercase && (
                   <div
-                    className={`flex items-center  ${
-                      /[a-z]/.test(watchNewPassword)
-                        ? "text-[var(--primary)]"
-                        : "text-gray-400"
-                    }`}
+                    className={`flex items-center  ${/[a-z]/.test(watchNewPassword)
+                      ? "text-[var(--primary)]"
+                      : "text-gray-400"
+                      }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One lowercase letter
@@ -271,11 +327,10 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireNumbers && (
                   <div
-                    className={`flex items-center  ${
-                      /\d/.test(watchNewPassword)
-                        ? "text-[var(--primary)]"
-                        : "text-gray-400"
-                    }`}
+                    className={`flex items-center  ${/\d/.test(watchNewPassword)
+                      ? "text-[var(--primary)]"
+                      : "text-gray-400"
+                      }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One number
@@ -284,11 +339,10 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireSpecialChars && (
                   <div
-                    className={`flex items-center  ${
-                      /[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
-                        ? "text-[var(--primary)]"
-                        : "text-gray-400"
-                    }`}
+                    className={`flex items-center  ${/[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
+                      ? "text-[var(--primary)]"
+                      : "text-gray-400"
+                      }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One special character

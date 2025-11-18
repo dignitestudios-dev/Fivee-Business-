@@ -13,10 +13,12 @@ const ForgotPasswordForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ForgotPasswordFormValues>();
+  } = useForm<ForgotPasswordFormValues>(
+    { mode: "onTouched" }
+  );
 
   const onSubmit = (data: ForgotPasswordFormValues) => {
-    handleForgotPassword({ email: data.email });
+    handleForgotPassword({ email: data.email.trim().toLowerCase() });
   };
   return (
     <form
@@ -29,7 +31,13 @@ const ForgotPasswordForm = () => {
         autoComplete="email"
         id="email"
         type="email"
-        {...register("email", { required: "Email is required" })}
+        {...register("email", {
+          required: "Email is required",
+          pattern: {
+            value: /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
+            message: "Invalid email address",
+          },
+        })}
         error={errors.email?.message}
       />
 

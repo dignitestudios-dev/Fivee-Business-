@@ -2,14 +2,14 @@ import z from "zod";
 
 export const calculationInitialValues: CalculationFormSchema = {
   paymentTimeline: "",
-  boxF5Month: 0,
-  boxF24Month: 0,
-  boxG: 0,
-  boxH: 0,
-  boxA: 0,
-  boxB: 0,
-  futureIncome: 0,
-  minimumOfferAmount: 0,
+  boxF5Month: "",
+  boxF24Month: "",
+  boxG: "",
+  boxH: "",
+  boxA: "",
+  boxB: "",
+  futureIncome: "",
+  minimumOfferAmount: "",
 };
 
 export const calculationSchema = z.object({

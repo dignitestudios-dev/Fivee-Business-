@@ -21,13 +21,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* Global toast provider */}
-      <ToastProvider />
-
       <body className={`antialiased`}>
+        {/* Global toast provider (must be inside <body> to avoid invalid HTML nesting) */}
+        <ToastProvider />
+
         <StoreProvider>
           <AuthGuard>{children}</AuthGuard>
         </StoreProvider>
+
         <RegisterSW />
       </body>
     </html>

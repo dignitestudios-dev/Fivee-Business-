@@ -6,7 +6,7 @@ export const otherInfoInitialValues: OtherInfoFormSchema = {
     locationOfFiling: "",
     representedBy: "",
     docketCaseNumber: "",
-    amountOfDispute: 0,
+      amountOfDispute: "",
     possibleCompletionDate: "",
     subjectOfLitigation: "",
   },
@@ -32,7 +32,7 @@ export const otherInfoInitialValues: OtherInfoFormSchema = {
     placeRecorded: "",
     ein: "",
     nameOfTrust: "",
-    anticipatedAmount: 0,
+      anticipatedAmount: "",
     whenAmountReceived: "",
   },
   trustFiduciary: {

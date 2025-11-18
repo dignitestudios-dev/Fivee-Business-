@@ -7,28 +7,43 @@ export const employmentInitialValues: EmploymentFromSchema = {
   employerAddress: "",
   hasOwnershipInterest: false,
   jobTitle: "",
-  yearsWithEmployer: 0,
-  monthsWithEmployer: 0,
+  yearsWithEmployer: "",
+  monthsWithEmployer: "",
   spouseEmployerName: "",
   spousePayPeriod: "weekly",
   spouseEmployerAddress: "",
   spouseHasOwnershipInterest: false,
   spouseJobTitle: "",
-  spouseYearsWithEmployer: 0,
-  spouseMonthsWithEmployer: 0,
+  spouseYearsWithEmployer: "",
+  spouseMonthsWithEmployer: "",
 };
 
 export const employmentSchema = (maritalStatus: MaritalStatus) =>
   z
     .object({
-      employerName: z.string().min(1, "Employer name is required"),
+      employerName: z.string()
+        .min(1, "Employer name is required")
+        .min(2, "Employer name must be at least 2 characters")
+        .max(20, "Employer name cannot exceed 20 characters")
+        .refine((value) => !/\d/.test(value), {
+          message: "Employer name cannot contain numbers"
+        })
+        .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
+          message: "Employer name cannot contain special characters"
+        })
+        .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
+          message: "Employer name must contain at least one letter"
+        }),
       payPeriod: z.enum(["weekly", "bi-weekly", "monthly", "other"]),
       employerAddress: z.string().min(1, "Employer address is required"),
       hasOwnershipInterest: z.boolean().default(false),
       jobTitle: z.string().min(1, "Occupation is required"),
       yearsWithEmployer: z.preprocess(
         (v) => (typeof v === "string" && v.trim() !== "" ? Number(v) : v),
-        z.number().int().min(0, "Years must be at least 0")
+        z.number()
+          .int("Must be a whole number")
+          .min(0, "Years must be at least 0")
+          .max(99, "Years cannot be 100 or more")
       ),
       monthsWithEmployer: z.preprocess(
         (v) => (typeof v === "string" && v.trim() !== "" ? Number(v) : v),
