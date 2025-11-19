@@ -73,6 +73,7 @@ export function PaidPreparerSection({
 
   const onSubmit = async (data: PaidPreparerFormSchema) => {
     try {
+      delete data.irsOfficialDate;
       await handleSavePaidPreparer(data, caseId);
       onNext();
     } catch (error: any) {
@@ -241,7 +242,7 @@ export function PaidPreparerSection({
                 Check if attaching Form 8821
               </Label>
             </div>
-            <FormInput
+            {/* <FormInput
               label="IRS Official Signature"
               id="irsOfficialSignature"
               {...register("irsOfficialSignature")}
@@ -259,7 +260,7 @@ export function PaidPreparerSection({
               id="irsOfficialDate"
               {...register("irsOfficialDate")}
               error={errors.irsOfficialDate?.message}
-            />
+            /> */}
           </CardContent>
         </Card>
 
