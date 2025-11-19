@@ -85,7 +85,7 @@ export function SignaturesSection({
   };
 
   useEffect(() => {
-    if (!signaturesInfo) handleGetSignatures656(caseId, FORM_656_SECTIONS[7]);
+    if (!signaturesInfo) handleGetSignatures656(caseId, FORM_656_SECTIONS[6]);
   }, []);
 
   useEffect(() => {

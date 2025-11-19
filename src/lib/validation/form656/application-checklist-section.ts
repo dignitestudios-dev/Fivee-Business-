@@ -1,36 +1,24 @@
 import * as z from "zod";
 
 export const applicationChecklistSchema = z.object({
-  completedAllFieldsAndSigned: z
-    .boolean()
-    .refine((val) => val === true, "Required"),
-  offerAmountMatchesCalculation: z
-    .boolean()
-    .refine((val) => val === true, "Required"),
-  filedAllRequiredReturns: z
-    .boolean()
-    .refine((val) => val === true, "Required"),
-  includedRecentTaxReturnCopy: z
-    .boolean()
-    .refine((val) => val === true, "Required"),
-  selectedPaymentOption: z.boolean().refine((val) => val === true, "Required"),
-  signedForm433A: z.boolean().refine((val) => val === true, "Required"),
-  signedForm433B: z.boolean().refine((val) => val === true, "Required"),
-  signedForm656: z.boolean().refine((val) => val === true, "Required"),
+  completedAllFieldsAndSigned: z.boolean().optional().default(false),
+  offerAmountMatchesCalculation: z.boolean().optional().default(false),
+  filedAllRequiredReturns: z.boolean().optional().default(false),
+  includedRecentTaxReturnCopy: z.boolean().optional().default(false),
+  selectedPaymentOption: z.boolean().optional().default(false),
+  signedForm433A: z.boolean().optional().default(false),
+  signedForm433B: z.boolean().optional().default(false),
+  signedForm656: z.boolean().optional().default(false),
   separatePackageForBusinessAndIndividual: z
     .boolean()
-    .refine((val) => val === true, "Required"),
-  includedSupportingDocumentation: z
-    .boolean()
-    .refine((val) => val === true, "Required"),
-  includedForm2848Or8821: z.boolean().refine((val) => val === true, "Required"),
-  providedAuthorizationDocumentation: z
-    .boolean()
-    .refine((val) => val === true, "Required"),
-  includedInitialPayment: z.boolean().refine((val) => val === true, "Required"),
-  includedApplicationFee: z.boolean().refine((val) => val === true, "Required"),
+    .optional()
+    .default(false),
+  includedSupportingDocumentation: z.boolean().optional().default(false),
+  includedForm2848Or8821: z.boolean().optional().default(false),
+  providedAuthorizationDocumentation: z.boolean().optional().default(false),
+  includedInitialPayment: z.boolean().optional().default(false),
+  includedApplicationFee: z.boolean().optional().default(false),
 });
-
 
 export const applicationChecklistInitialValues: ApplicationChecklistFormSchema =
   {

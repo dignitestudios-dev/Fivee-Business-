@@ -410,7 +410,21 @@ export function OtherInfoSection({
                       label="Possible completion date (mm/dd/yyyy)"
                       id="litigation.possibleCompletionDate"
                       type="date"
+                      min={new Date().toISOString().split("T")[0]}
                       {...register("litigation.possibleCompletionDate")}
+                      onBlur={(e) => {
+                        // Validate and correct on blur
+                        const value = e.target.value;
+                        if (value) {
+                          const selectedDate = new Date(value);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+
+                          if (selectedDate < today) {
+                            e.target.value = today.toISOString().split("T")[0];
+                          }
+                        }
+                      }}
                       error={errors.litigation?.possibleCompletionDate?.message}
                     />
                     <FormInput
@@ -721,6 +735,7 @@ export function OtherInfoSection({
                     label="Date transferred (mm/dd/yyyy)"
                     id={`assetTransfers.transfers.0.dateTransferred`}
                     type="date"
+                    max={new Date().toISOString().split("T")[0]}
                     {...register(`assetTransfers.transfers.0.dateTransferred`)}
                     error={
                       errors.assetTransfers?.transfers?.[0]?.dateTransferred
@@ -964,6 +979,7 @@ export function OtherInfoSection({
                   <FormInput
                     label="When will the amount be received"
                     id="trustBeneficiary.whenAmountReceived"
+                    type="date"
                     {...register("trustBeneficiary.whenAmountReceived")}
                     error={errors.trustBeneficiary?.whenAmountReceived?.message}
                   />

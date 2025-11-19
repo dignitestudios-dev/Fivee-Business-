@@ -36,7 +36,7 @@ const LoginForm = () => {
     }
 
     if (password.length > SECURITY_CONFIG.passwordMaxLength) {
-      errors.push('no more than 64 characters');
+      errors.push("no more than 64 characters");
     }
 
     if (SECURITY_CONFIG.passwordRequireUppercase && !/[A-Z]/.test(password)) {
@@ -64,7 +64,7 @@ const LoginForm = () => {
   };
 
   const onSubmit = (data: LoginFormValues) => {
-    data.email = data.email.trim().toLowerCase();
+    data.email = data.email?.trim().toLowerCase();
     handleLogin(data);
   };
 
@@ -82,10 +82,14 @@ const LoginForm = () => {
         disabled={loading}
         {...register("email", {
           required: "Email is required",
+          onChange: (e) => {
+            e.target.value = e.target.value.toLowerCase();
+          },
           pattern: {
-            value: /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
+            value:
+              /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
             message: "Invalid email address",
-          }
+          },
         })}
         error={errors.email?.message}
       />

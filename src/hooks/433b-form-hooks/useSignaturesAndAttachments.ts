@@ -17,9 +17,7 @@ const useSignaturesAndAttachments = () => {
       await api.saveSignaturesAndAttachmentsFormB(info, caseId);
       dispatch(saveSignatureInfo(info));
     } catch (error: any) {
-      toast.error(
-        error?.message || "Failed to save signatures and attachments"
-      );
+      throw error;
     } finally {
       setLoading(false);
     }

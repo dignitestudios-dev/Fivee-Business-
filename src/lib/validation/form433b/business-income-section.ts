@@ -10,14 +10,38 @@ export const businessIncomeFormBInitialValues = {
   otherIncome: 0,
 };
 
-export const businessIncomeSchemaFormB = z.object({
-  periodBeginning: z.string().min(1, "Period beginning is required"),
-  periodThrough: z.string().min(1, "Period through is required"),
-  grossReceipts: z.number().min(0, "Gross receipts must be non-negative"),
-  grossRentalIncome: z
-    .number()
-    .min(0, "Gross rental income must be non-negative"),
-  interestIncome: z.number().min(0, "Interest income must be non-negative"),
-  dividends: z.number().min(0, "Dividends must be non-negative"),
-  otherIncome: z.number().min(0, "Other income must be non-negative"),
-});
+export const businessIncomeSchemaFormB = z
+  .object({
+    periodBeginning: z.string().min(1, "Period beginning is required"),
+    periodThrough: z.string().min(1, "Period through is required"),
+
+    grossReceipts: z
+      .number({ message: "Must be a number" })
+      .min(0, "Gross receipts must be non-negative"),
+
+    grossRentalIncome: z
+      .number({ message: "Must be a number" })
+      .min(0, "Gross rental income must be non-negative"),
+
+    interestIncome: z
+      .number({ message: "Must be a number" })
+      .min(0, "Interest income must be non-negative"),
+
+    dividends: z
+      .number({ message: "Must be a number" })
+      .min(0, "Dividends must be non-negative"),
+
+    otherIncome: z
+      .number({ message: "Must be a number" })
+      .min(0, "Other income must be non-negative"),
+  })
+  .refine(
+    (data) => {
+      if (!data.periodBeginning || !data.periodThrough) return true;
+      return new Date(data.periodThrough) >= new Date(data.periodBeginning);
+    },
+    {
+      message: "Period Through cannot be earlier than Period Beginning",
+      path: ["periodThrough"],
+    }
+  );

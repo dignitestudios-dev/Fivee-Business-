@@ -21,7 +21,7 @@ const useSignatures656 = () => {
       dispatch(saveSignatures(info));
     } catch (error: any) {
       console.error("Error saving signatures:", error);
-      toast.error(error?.message || "Failed to save signatures");
+      throw error;
     } finally {
       setLoading(false);
     }

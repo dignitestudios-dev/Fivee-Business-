@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { Label } from "./label";
-import { Input } from "./Input";
+import { Input } from "./input";
 import { Textarea } from "./textarea";
 import { cn } from "../../utils/helper";
 import { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";
@@ -27,13 +27,15 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cn("space-y-2", className)}>
-      {label && <Label
-        htmlFor={id}
-        className={cn("text-sm font-medium", error && "text-red-600")}
-      >
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </Label>}
+      {label && (
+        <Label
+          htmlFor={id}
+          className={cn("text-sm font-medium", error && "text-red-600")}
+        >
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </Label>
+      )}
       {children}
       {error && (
         <p className="text-sm text-red-600 mt-1 flex items-center gap-1">

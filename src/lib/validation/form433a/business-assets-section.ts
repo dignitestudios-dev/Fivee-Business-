@@ -45,7 +45,7 @@ export const businessAssetsSchema = z.object({
         z
           .object({
             description: descriptionSchema,
-            numberOfUnits: z.coerce.number().min(0, "Number of units cannot be negative").optional(),
+            numberOfUnits: z.coerce.number({ message: "Must be a number" }).min(0, "Number of units cannot be negative").optional(),
             location: shortTextSchema,
             accountNumber: accountNumberSchema.optional(),
             digitalAssetAddress: z.string().optional(),

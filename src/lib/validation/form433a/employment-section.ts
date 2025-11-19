@@ -40,7 +40,7 @@ export const employmentSchema = (maritalStatus: MaritalStatus) =>
       jobTitle: z.string().min(1, "Occupation is required"),
       yearsWithEmployer: z.preprocess(
         (v) => (typeof v === "string" && v.trim() !== "" ? Number(v) : v),
-        z.number()
+        z.number({ message: "Must be a number" })
           .int("Must be a whole number")
           .min(0, "Years must be at least 0")
           .max(99, "Years cannot be 100 or more")
@@ -48,7 +48,7 @@ export const employmentSchema = (maritalStatus: MaritalStatus) =>
       monthsWithEmployer: z.preprocess(
         (v) => (typeof v === "string" && v.trim() !== "" ? Number(v) : v),
         z
-          .number()
+          .number({ message: "Must be a number" })
           .int()
           .min(0, "Months must be at least 0")
           .max(11, "Months must be 11 or less")
@@ -67,12 +67,12 @@ export const employmentSchema = (maritalStatus: MaritalStatus) =>
         if (v === "" || v === null || v === undefined) return undefined;
         if (typeof v === "string") return Number(v);
         return v;
-      }, z.number().int().min(0, "Years must be at least 0").optional().nullable()),
+      }, z.number({ message: "Must be a number" }).int().min(0, "Years must be at least 0").optional().nullable()),
       spouseMonthsWithEmployer: z.preprocess((v) => {
         if (v === "" || v === null || v === undefined) return undefined;
         if (typeof v === "string") return Number(v);
         return v;
-      }, z.number().int().min(0, "Months must be at least 0").max(11, "Months must be 11 or less").optional().nullable()),
+      }, z.number({ message: "Must be a number" }).int().min(0, "Months must be at least 0").max(11, "Months must be 11 or less").optional().nullable()),
     })
     .superRefine((data, ctx) => {
       if (maritalStatus === "married") {

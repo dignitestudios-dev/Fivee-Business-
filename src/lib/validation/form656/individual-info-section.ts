@@ -71,14 +71,14 @@ const lowIncomeSchema = z.object({
   qualificationBasis: z
     .enum(["adjusted_gross_income", "household_monthly_income"])
     .optional(),
-  familySize: z.number().optional(),
+  familySize: z.number({ message: "Must be a number" }).optional(),
   residenceState: z.enum(["contiguous_states", "alaska", "hawaii"]).optional(),
   adjustedGrossIncome: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Adjusted gross income must be non-negative")
     .optional(),
   householdMonthlyIncome: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Household monthly income must be non-negative")
     .optional(),
 });
@@ -277,7 +277,7 @@ export const individualInfoInitialValues: IndividualInfoFormSchema = {
   lowIncomeCertification: {
     qualifiesForLowIncome: false,
     qualificationBasis: undefined,
-    familySize: undefined,
+    familySize: null,
     residenceState: undefined,
     adjustedGrossIncome: undefined,
     householdMonthlyIncome: undefined,

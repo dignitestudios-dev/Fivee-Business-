@@ -27,7 +27,7 @@ const useOtherInfo = () => {
       await api.saveOtherInfoFormB(parsedData, caseId);
       dispatch(saveOtherInfo(info));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to save other info");
+      throw error;
     } finally {
       setLoading(false);
     }

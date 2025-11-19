@@ -22,6 +22,7 @@ import { FORM_656_SECTIONS } from "@/lib/constants";
 import useSignatures from "@/hooks/signatures/useSignatures";
 import usePaidPreparer from "@/hooks/656-form-hooks/usePaidPreparer";
 import DropdownPopup from "@/components/ui/DropdownPopup";
+import { formatPhone } from "@/utils/helper";
 
 interface PaidPreparerSectionProps {
   onNext: () => void;
@@ -81,7 +82,7 @@ export function PaidPreparerSection({
   };
 
   useEffect(() => {
-    if (!paidPreparer) handleGetPaidPreparer(caseId, FORM_656_SECTIONS[8]);
+    if (!paidPreparer) handleGetPaidPreparer(caseId, FORM_656_SECTIONS[7]);
   }, []);
 
   useEffect(() => {
@@ -95,10 +96,7 @@ export function PaidPreparerSection({
   }, [paidPreparer]);
 
   useEffect(() => {
-    if (
-      paidPreparer?.preparerSignature &&
-      signatures?.length > 0
-    ) {
+    if (paidPreparer?.preparerSignature && signatures?.length > 0) {
       const sig = signatures?.find(
         (s) => s._id === paidPreparer.preparerSignature
       );
@@ -148,120 +146,28 @@ export function PaidPreparerSection({
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label className="mb-2">Signature of Preparer</Label>
-                  <input
-                    type="hidden"
-                    {...register("preparerSignature")}
-                  />
-                  <div className="space-y-3 w-full">
-                    {!preparerSignaturePreview ? (
-                      <DropdownPopup
-                        trigger={
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full justify-between"
-                            disabled={loadingSignatures}
-                          >
-                            Select Signature
-                            <Upload className="w-4 h-4 ml-2" />
-                          </Button>
-                        }
-                        options={
-                          signatures?.map((sig) => ({
-                            key: sig._id,
-                            label: `${sig.title}${
-                              sig.description ? ` - ${sig.description}` : ""
-                            }`,
-                            icon: (
-                              <img
-                                src={sig.url}
-                                alt={sig.title}
-                                className="w-20 h-10 object-contain"
-                              />
-                            ),
-                            onClick: () =>
-                              handleSelectPreparerSignature(sig._id, sig.url),
-                          })) || []
-                        }
-                        dropdownClassName="w-80"
-                        placement="bottom-left"
-                      />
-                    ) : (
-                      <div className="border border-gray-300 rounded-lg p-4">
-                        <img
-                          src={preparerSignaturePreview}
-                          alt="Preparer Signature"
-                          className="max-h-24 mx-auto mb-3"
-                        />
-                        <div className="flex justify-center gap-2">
-                          <DropdownPopup
-                            trigger={
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="text-[#22b573] border-[#22b573] hover:bg-[#22b573]/5"
-                              >
-                                <Edit className="w-4 h-4 mr-1" />
-                                Change
-                              </Button>
-                            }
-                            options={
-                              signatures?.map((sig) => ({
-                                key: sig._id,
-                                label: `${sig.title}${
-                                  sig.description ? ` - ${sig.description}` : ""
-                                }`,
-                                icon: (
-                                  <img
-                                    src={sig.url}
-                                    alt={sig.title}
-                                    className="w-20 h-10 object-contain"
-                                  />
-                                ),
-                                onClick: () =>
-                                  handleSelectPreparerSignature(
-                                    sig._id,
-                                    sig.url
-                                  ),
-                              })) || []
-                            }
-                            dropdownClassName="w-80"
-                            placement="bottom-left"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={removePreparerSignature}
-                            className="text-red-600 border-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Remove
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {errors.preparerSignature && (
-                      <p className="text-red-600 text-sm">
-                        {errors.preparerSignature.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
                 <FormInput
                   type="date"
                   label="Today's date (mm/dd/yyyy)"
+                  min={new Date().toISOString().split("T")[0]}
                   id="preparerSignatureDate"
                   {...register("preparerSignatureDate")}
                   error={errors.preparerSignatureDate?.message}
                 />
                 <FormInput
                   label="Phone number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   id="preparerPhoneNumber"
-                  {...register("preparerPhoneNumber")}
+                  {...register("preparerPhoneNumber", {
+                    setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                    onChange: (e) =>
+                      setValue(
+                        "preparerPhoneNumber",
+                        formatPhone(e.target.value)
+                      ),
+                  })}
                   error={errors.preparerPhoneNumber?.message}
                 />
               </div>

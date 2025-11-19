@@ -1331,7 +1331,6 @@ export function PersonalAssetsSection({
             {/* Property Sale Status Questions */}
             <FormField
               id="realProperties-sale-status"
-              label="Is this real property currently for sale or do you anticipate selling this real property to fund the offer amount?"
             >
               <div className="space-y-4 mt-2">
                 <div className="flex items-center space-x-2">

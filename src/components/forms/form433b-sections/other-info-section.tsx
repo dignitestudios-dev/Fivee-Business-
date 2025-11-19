@@ -532,6 +532,7 @@ export function OtherInfoSection({
                 />
                 <FormInput
                   type="date"
+                  min={watch("bankruptcyHistory.dateFiled")}
                   label="Date Dismissed or Discharged"
                   id="bankruptcyHistory.dateDismissedOrDischarged"
                   {...register("bankruptcyHistory.dateDismissedOrDischarged")}

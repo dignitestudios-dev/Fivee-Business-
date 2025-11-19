@@ -21,7 +21,7 @@ const useBusinessInfo = () => {
       dispatch(saveBusinessInformation(info));
     } catch (error: any) {
       console.error("Error saving business info:", error);
-      toast.error(error?.message || "Failed to save business info");
+      throw error;
     } finally {
       setLoading(false);
     }

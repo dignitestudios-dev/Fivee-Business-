@@ -13,12 +13,10 @@ const ForgotPasswordForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ForgotPasswordFormValues>(
-    { mode: "onTouched" }
-  );
+  } = useForm<ForgotPasswordFormValues>({ mode: "onTouched" });
 
   const onSubmit = (data: ForgotPasswordFormValues) => {
-    handleForgotPassword({ email: data.email.trim().toLowerCase() });
+    handleForgotPassword({ email: data.email?.trim().toLowerCase() });
   };
   return (
     <form
@@ -33,8 +31,12 @@ const ForgotPasswordForm = () => {
         type="email"
         {...register("email", {
           required: "Email is required",
+          onChange: (e) => {
+            e.target.value = e.target.value.toLowerCase();
+          },
           pattern: {
-            value: /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
+            value:
+              /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
             message: "Invalid email address",
           },
         })}

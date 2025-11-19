@@ -81,6 +81,9 @@ const form656Slice = createSlice({
       state,
       action: PayloadAction<PaidPreparerFormSchema | null>
     ) => {
+      action.payload.preparerSignatureDate = formatDateForInput(
+        action.payload.preparerSignatureDate
+      );
       state.paidPreparer = action.payload;
     },
     saveApplicationChecklist: (

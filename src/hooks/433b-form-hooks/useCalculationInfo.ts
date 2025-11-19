@@ -20,7 +20,7 @@ const useCalculationInfo = () => {
       await api.saveCalculationInfoFormB(info, caseId);
       dispatch(saveCalculationInfo(info));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to save calculation info");
+      throw error;
     } finally {
       setLoading(false);
     }

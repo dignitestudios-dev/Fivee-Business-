@@ -20,6 +20,7 @@ import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
+import Required from "@/components/ui/Required";
 
 interface EmploymentSectionProps {
   onNext: () => void;
@@ -152,7 +153,7 @@ export function EmploymentSection({
               />
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700">
-                  Pay Period *
+                  Pay Period <Required />
                 </Label>
                 <RadioGroup
                   value={watch("payPeriod") || "weekly"}
@@ -213,7 +214,7 @@ export function EmploymentSection({
 
             <div className="space-y-3">
               <Label className="text-sm font-medium text-gray-700">
-                Do you have an ownership interest in this business? *
+                Do you have an ownership interest in this business? <Required />
               </Label>
               <RadioGroup
                 value={watch("hasOwnershipInterest") ? "yes" : "no"}
@@ -261,7 +262,7 @@ export function EmploymentSection({
               />
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700">
-                  How long with this employer *
+                  How long with this employer <Required />
                 </Label>
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -274,11 +275,13 @@ export function EmploymentSection({
                       maxLength={2}
                       required
                       {...register("yearsWithEmployer", {
-                        // keep the stored value as a digits-only string so the input remains empty when blank;
-                        // schema preprocess will coerce to number for validation
-                        setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                        setValueAs: (v: any) =>
+                          String(v).replace(/[^0-9]/g, ""),
                         onChange: (e: any) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
                         },
                       })}
                       onInput={(e: any) => {
@@ -298,9 +301,13 @@ export function EmploymentSection({
                       maxLength={2}
                       required
                       {...register("monthsWithEmployer", {
-                        setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                        setValueAs: (v: any) =>
+                          String(v).replace(/[^0-9]/g, ""),
                         onChange: (e: any) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
                         },
                       })}
                       onInput={(e: any) => {
@@ -334,7 +341,7 @@ export function EmploymentSection({
                 />
                 <div className="space-y-3">
                   <Label className="text-sm font-medium text-gray-700">
-                    Pay Period *
+                    Pay Period <Required />
                   </Label>
                   <RadioGroup
                     value={watch("spousePayPeriod") || "weekly"}
@@ -448,7 +455,7 @@ export function EmploymentSection({
                 />
                 <div className="space-y-3">
                   <Label className="text-sm font-medium text-gray-700">
-                    How long with this employer *
+                    How long with this employer <Required />
                   </Label>
                   <div className="flex gap-2">
                     <div className="flex-1">
@@ -461,13 +468,18 @@ export function EmploymentSection({
                         maxLength={4}
                         required
                         {...register("spouseYearsWithEmployer", {
-                          setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                          setValueAs: (v: any) =>
+                            String(v).replace(/[^0-9]/g, ""),
                           onChange: (e: any) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
                           },
                         })}
                         onInput={(e: any) => {
-                          e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                          e.target.value = e.target.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
                         }}
                         error={errors.spouseYearsWithEmployer?.message}
                       />
@@ -485,13 +497,18 @@ export function EmploymentSection({
                         maxLength={2}
                         required
                         {...register("spouseMonthsWithEmployer", {
-                          setValueAs: (v: any) => String(v).replace(/[^0-9]/g, ""),
+                          setValueAs: (v: any) =>
+                            String(v).replace(/[^0-9]/g, ""),
                           onChange: (e: any) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9]/g, "");
                           },
                         })}
                         onInput={(e: any) => {
-                          e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                          e.target.value = e.target.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
                         }}
                         error={errors.spouseMonthsWithEmployer?.message}
                       />

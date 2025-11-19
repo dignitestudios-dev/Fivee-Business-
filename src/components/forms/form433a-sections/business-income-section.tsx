@@ -103,11 +103,15 @@ export function BusinessIncomeSection({
   }, [businessIncomeInfo, reset]);
 
   // Compute totals with useMemo
-  const grossReceipts = Number(useWatch({ control, name: "grossReceipts" }) || 0);
+  const grossReceipts = Number(
+    useWatch({ control, name: "grossReceipts" }) || 0
+  );
   const grossRentalIncome = Number(
     useWatch({ control, name: "grossRentalIncome" }) || 0
   );
-  const interestIncome = Number(useWatch({ control, name: "interestIncome" }) || 0);
+  const interestIncome = Number(
+    useWatch({ control, name: "interestIncome" }) || 0
+  );
   const dividends = Number(useWatch({ control, name: "dividends" }) || 0);
   const otherIncome = Number(useWatch({ control, name: "otherIncome" }) || 0);
 
@@ -227,10 +231,7 @@ export function BusinessIncomeSection({
             information below, enter the total gross monthly income on line 17
             and your monthly expenses on line 29 below.
           </p>
-          <p className="text-gray-800 font-semibold">
-            Round to the nearest whole dollar. Do not enter a negative number.
-            If any line item is a negative number, enter "0".
-          </p>
+
           <p className="text-sm text-red-600 font-medium">
             * All fields are required
           </p>
@@ -244,7 +245,7 @@ export function BusinessIncomeSection({
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput
-                label="Period Provided Beginning *"
+                label="Period Provided Beginning"
                 id="periodStart"
                 type="date"
                 required
@@ -252,7 +253,7 @@ export function BusinessIncomeSection({
                 error={errors.periodStart?.message}
               />
               <FormInput
-                label="Through *"
+                label="Through"
                 id="periodEnd"
                 type="date"
                 required
@@ -275,7 +276,7 @@ export function BusinessIncomeSection({
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                label="Gross Receipts ($) *"
+                label="Gross Receipts ($)"
                 id="grossReceipts"
                 type="text"
                 inputMode="decimal"
@@ -285,13 +286,16 @@ export function BusinessIncomeSection({
                 {...register("grossReceipts", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.grossReceipts?.message}
               />
               <FormInput
-                label="Gross Rental Income ($) *"
+                label="Gross Rental Income ($)"
                 id="grossRentalIncome"
                 type="text"
                 inputMode="decimal"
@@ -301,7 +305,10 @@ export function BusinessIncomeSection({
                 {...register("grossRentalIncome", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.grossRentalIncome?.message}
@@ -310,7 +317,7 @@ export function BusinessIncomeSection({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                label="Interest Income ($) *"
+                label="Interest Income ($)"
                 id="interestIncome"
                 type="text"
                 inputMode="decimal"
@@ -320,13 +327,16 @@ export function BusinessIncomeSection({
                 {...register("interestIncome", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.interestIncome?.message}
               />
               <FormInput
-                label="Dividends ($) *"
+                label="Dividends ($)"
                 id="dividends"
                 type="text"
                 inputMode="decimal"
@@ -336,7 +346,10 @@ export function BusinessIncomeSection({
                 {...register("dividends", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.dividends?.message}
@@ -345,7 +358,7 @@ export function BusinessIncomeSection({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                label="Other Income ($) *"
+                label="Other Income ($)"
                 id="otherIncome"
                 type="text"
                 inputMode="decimal"
@@ -355,7 +368,10 @@ export function BusinessIncomeSection({
                 {...register("otherIncome", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.otherIncome?.message}
@@ -386,7 +402,7 @@ export function BusinessIncomeSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <FormInput
-                  label="Materials Purchased ($) *"
+                  label="Materials Purchased ($)"
                   id="materialsPurchased"
                   type="text"
                   inputMode="decimal"
@@ -396,7 +412,10 @@ export function BusinessIncomeSection({
                   {...register("materialsPurchased", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.materialsPurchased?.message}
@@ -408,7 +427,7 @@ export function BusinessIncomeSection({
               </div>
               <div className="space-y-2">
                 <FormInput
-                  label="Inventory Purchased ($) *"
+                  label="Inventory Purchased ($)"
                   id="inventoryPurchased"
                   type="text"
                   inputMode="decimal"
@@ -418,7 +437,10 @@ export function BusinessIncomeSection({
                   {...register("inventoryPurchased", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.inventoryPurchased?.message}
@@ -429,7 +451,7 @@ export function BusinessIncomeSection({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                label="Gross Wages and Salaries ($) *"
+                label="Gross Wages and Salaries ($)"
                 id="grossWagesSalaries"
                 type="text"
                 inputMode="decimal"
@@ -439,13 +461,16 @@ export function BusinessIncomeSection({
                 {...register("grossWagesSalaries", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.grossWagesSalaries?.message}
               />
               <FormInput
-                label="Rent ($) *"
+                label="Rent ($)"
                 id="rent"
                 type="text"
                 inputMode="decimal"
@@ -455,7 +480,10 @@ export function BusinessIncomeSection({
                 {...register("rent", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.rent?.message}
@@ -465,7 +493,7 @@ export function BusinessIncomeSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <FormInput
-                  label="Supplies ($) *"
+                  label="Supplies ($)"
                   id="supplies"
                   type="text"
                   inputMode="decimal"
@@ -475,7 +503,10 @@ export function BusinessIncomeSection({
                   {...register("supplies", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.supplies?.message}
@@ -485,7 +516,7 @@ export function BusinessIncomeSection({
                 </p>
               </div>
               <FormInput
-                label="Utilities/Telephones ($) *"
+                label="Utilities/Telephones ($)"
                 id="utilitiesTelephones"
                 type="text"
                 inputMode="decimal"
@@ -495,7 +526,10 @@ export function BusinessIncomeSection({
                 {...register("utilitiesTelephones", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.utilitiesTelephones?.message}
@@ -505,7 +539,7 @@ export function BusinessIncomeSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <FormInput
-                  label="Vehicle Costs ($) *"
+                  label="Vehicle Costs ($)"
                   id="vehicleCosts"
                   type="text"
                   inputMode="decimal"
@@ -515,7 +549,10 @@ export function BusinessIncomeSection({
                   {...register("vehicleCosts", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.vehicleCosts?.message}
@@ -525,7 +562,7 @@ export function BusinessIncomeSection({
                 </p>
               </div>
               <FormInput
-                label="Business Insurance ($) *"
+                label="Business Insurance ($)"
                 id="businessInsurance"
                 type="text"
                 inputMode="decimal"
@@ -535,7 +572,10 @@ export function BusinessIncomeSection({
                 {...register("businessInsurance", {
                   setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                   onChange: (e: any) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
                   },
                 })}
                 error={errors.businessInsurance?.message}
@@ -545,7 +585,7 @@ export function BusinessIncomeSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <FormInput
-                  label="Current Business Taxes ($) *"
+                  label="Current Business Taxes ($)"
                   id="currentBusinessTaxes"
                   type="text"
                   inputMode="decimal"
@@ -555,7 +595,10 @@ export function BusinessIncomeSection({
                   {...register("currentBusinessTaxes", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.currentBusinessTaxes?.message}
@@ -565,28 +608,31 @@ export function BusinessIncomeSection({
                   property, sales and employer's portion of employment taxes
                 </p>
               </div>
-                <FormInput
-                  label="Secured Debts (not credit cards) ($) *"
-                  id="securedDebts"
-                  type="text"
-                  inputMode="decimal"
-                  pattern="^[0-9]*\.?[0-9]*$"
-                  placeholder=""
-                  required
-                  {...register("securedDebts", {
-                    setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
-                    onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
-                    },
-                  })}
-                  error={errors.securedDebts?.message}
-                />
+              <FormInput
+                label="Secured Debts (not credit cards) ($)"
+                id="securedDebts"
+                type="text"
+                inputMode="decimal"
+                pattern="^[0-9]*\.?[0-9]*$"
+                placeholder=""
+                required
+                {...register("securedDebts", {
+                  setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
+                  },
+                })}
+                error={errors.securedDebts?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <FormInput
-                  label="Other Business Expenses ($) *"
+                  label="Other Business Expenses ($)"
                   id="otherBusinessExpenses"
                   type="text"
                   inputMode="decimal"
@@ -596,7 +642,10 @@ export function BusinessIncomeSection({
                   {...register("otherBusinessExpenses", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.otherBusinessExpenses?.message}
@@ -624,9 +673,6 @@ export function BusinessIncomeSection({
           <CardContent>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">
-                  Round to the nearest whole dollar
-                </p>
                 <p className="text-sm text-gray-600 mb-2">
                   Total Income minus Total Expenses
                 </p>

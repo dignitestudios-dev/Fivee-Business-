@@ -21,7 +21,7 @@ const usePaymentTerms = () => {
       dispatch(savePaymentTerms(info));
     } catch (error: any) {
       console.error("Error saving payment terms:", error);
-      toast.error(error?.message || "Failed to save payment terms");
+      throw error;
     } finally {
       setLoading(false);
     }

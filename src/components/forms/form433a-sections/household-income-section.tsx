@@ -202,10 +202,6 @@ export function HouseholdIncomeSection({
             household's income. This is necessary for the IRS to accurately
             evaluate your offer.
           </p>
-          <p className="text-gray-800 font-semibold">
-            Round to the nearest whole dollar. Do not enter a negative number.
-            If any line item is a negative number, enter "0".
-          </p>
           <p className="text-sm text-red-600 font-medium">
             * All fields are required (if not applicable, enter 0)
           </p>
@@ -555,11 +551,9 @@ export function HouseholdIncomeSection({
 
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Round to the nearest whole dollar
-                  </p>
+
                   <p className="font-bold text-lg">
-                    Add lines (30) through (38) and enter the amount in Box D =
+                    Box D =
                     ${totalHouseholdIncome.toFixed(0)}
                   </p>
                   <p className="text-sm font-medium mt-1">
@@ -1021,11 +1015,9 @@ export function HouseholdIncomeSection({
 
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Round to the nearest whole dollar
-                  </p>
+
                   <p className="font-bold text-lg">
-                    Add lines (39) through (51) and enter the amount in Box E =
+                    Box E =
                     ${totalHouseholdExpenses.toFixed(0)}
                   </p>
                   <p className="text-sm font-medium mt-1">
@@ -1045,11 +1037,9 @@ export function HouseholdIncomeSection({
           <CardContent>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">
-                  Round to the nearest whole dollar
-                </p>
+
                 <p className="font-bold text-lg">
-                  Subtract Box E from Box D and enter the amount in Box F = $
+                  Box F = $
                   {remainingMonthlyIncome.toFixed(0)}
                 </p>
                 <p className="text-sm font-medium mt-1">

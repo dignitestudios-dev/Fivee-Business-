@@ -166,11 +166,6 @@ const ManageSavedPreferencesSlider: React.FC<
                         size={18}
                         onClick={() => handleStartEdit(item._id, item.title)}
                       />
-                      <RiDeleteBin6Fill
-                        size={18}
-                        className="text-red-600"
-                        onClick={() => setDeleteId(item._id)}
-                      />
                     </div>
                   </div>
                 </div>

@@ -71,17 +71,17 @@ export const descriptionSchema = z
   .max(255, "Description must be at most 255 characters");
 
 export const moneySchema = z
-  .coerce.number()
+  .coerce.number({ message: "Must be a number" })
   .min(0, "Value cannot be negative")
   .max(1e12, "Value must be at most 1000000000000");
 
 export const yearsSchema = z
-  .coerce.number()
+  .coerce.number({ message: "Must be a number" })
   .min(0, "Years must be 0 or greater")
   .max(200, "Years must be at most 200");
 
 export const ageSchema = z
-  .coerce.number()
+  .coerce.number({ message: "Must be a number" })
   .min(0, "Age must be 0 or greater")
   .max(150, "Age must be at most 150");
 
@@ -98,7 +98,7 @@ export const employmentSchema = z
     jobTitle: shortTextSchema,
     yearsWithEmployer: yearsSchema,
     monthsWithEmployer: z.coerce
-      .number()
+      .number({ message: "Must be a number" })
       .min(0, "Months must be 0 or greater")
       .max(11, "Months must be 11 or less"),
     maritalStatus: z.enum(["unmarried", "married"]),
@@ -111,8 +111,8 @@ export const employmentSchema = z
     spouseEmployerAddress: addressSchema.optional(),
     spouseHasOwnershipInterest: z.boolean().optional(),
     spouseJobTitle: z.string().optional(),
-    spouseYearsWithEmployer: z.coerce.number().optional(),
-    spouseMonthsWithEmployer: z.coerce.number().optional(),
+    spouseYearsWithEmployer: z.coerce.number({ message: "Must be a number" }).optional(),
+    spouseMonthsWithEmployer: z.coerce.number({ message: "Must be a number" }).optional(),
   })
   .refine(
     (data) => {
@@ -168,7 +168,7 @@ export const personalAssetsSchema = z.object({
         .object({
           description: descriptionSchema,
           numberOfUnits: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Number of units cannot be negative"),
           location: shortTextSchema,
           accountNumber: accountNumberSchema.optional(),
@@ -195,11 +195,11 @@ export const personalAssetsSchema = z.object({
           }),
           retirementTypeText: z.string().optional(),
           currentMarketValue: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Current market value cannot be negative")
             .optional(),
           loanBalance: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Loan balance cannot be negative")
             .optional(),
         })
@@ -236,7 +236,7 @@ export const personalAssetsSchema = z.object({
         description: z.string().min(1, "Property description is required"),
         purchaseDate: z.string().min(1, "Purchase date is required"),
         mortgagePayment: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(0, "Mortgage payment cannot be negative")
           .optional(),
         finalPaymentDate: z.string().optional(),
@@ -250,7 +250,7 @@ export const personalAssetsSchema = z.object({
         isForSale: z.boolean().optional(),
         anticipateSelling: z.boolean().optional(),
         listingPrice: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(0, "Listing price cannot be negative")
           .optional(),
       })
@@ -261,7 +261,7 @@ export const personalAssetsSchema = z.object({
       z.object({
         makeModel: shortTextSchema,
         year: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(1900)
           .max(new Date().getFullYear() + 1, "Invalid year"),
         purchaseDate: dateSchema,
@@ -281,10 +281,10 @@ export const personalAssetsSchema = z.object({
       z.object({
         description: z.string().min(1, "Description of asset is required"),
         currentMarketValue: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(0, "Loan balance cannot be negative")
           .optional(),
       })
@@ -295,10 +295,10 @@ export const personalAssetsSchema = z.object({
       z.object({
         description: z.string().min(1, "Description of asset is required"),
         currentMarketValue: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(0, "Current market value cannot be negative"),
         loanBalance: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(0, "Loan balance cannot be negative")
           .optional(),
       })
@@ -326,10 +326,10 @@ export const selfEmployedSchema = z
       .or(z.literal("")),
   tradeName: nameSchema.optional(),
     businessDescription: z.string().optional(),
-    totalEmployees: z.coerce.number().min(0, "Must be 0 or greater").optional(),
+    totalEmployees: z.coerce.number({ message: "Must be a number" }).min(0, "Must be 0 or greater").optional(),
     taxDepositFrequency: z.string().optional(),
     averageGrossMonthlyPayroll: z.coerce
-      .number()
+      .number({ message: "Must be a number" })
       .min(0, "Must be 0 or greater")
       .optional(),
     hasOtherBusinessInterests: z.boolean().optional(),
@@ -337,7 +337,7 @@ export const selfEmployedSchema = z
       .array(
         z.object({
           ownershipPercentage: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Must be between 0 and 100")
             .max(100, "Must be between 0 and 100")
             .optional(),
@@ -711,149 +711,149 @@ export const businessIncomeSchema = z
 export const householdIncomeSchema = z.object({
   // Primary taxpayer income fields (Box 30)
   primaryGrossWages: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Primary gross wages must be 0 or greater")
     .optional()
     .or(z.literal("")),
   primarySocialSecurity: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Primary social security must be 0 or greater")
     .optional()
     .or(z.literal("")),
   primaryPensions: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Primary pensions must be 0 or greater")
     .optional()
     .or(z.literal("")),
   primaryOtherIncome: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Primary other income must be 0 or greater")
     .optional()
     .or(z.literal("")),
 
   // Spouse income fields (Box 31) - conditional
   spouseGrossWages: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Spouse gross wages must be 0 or greater")
     .optional()
     .or(z.literal("")),
   spouseSocialSecurity: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Spouse social security must be 0 or greater")
     .optional()
     .or(z.literal("")),
   spousePensions: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Spouse pensions must be 0 or greater")
     .optional()
     .or(z.literal("")),
   spouseOtherIncome: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Spouse other income must be 0 or greater")
     .optional()
     .or(z.literal("")),
 
   // Additional income sources (Boxes 32-38)
   additionalSources: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Additional sources must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 32
   interestDividendsRoyalties: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Interest/dividends/royalties must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 33
   distributions: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Distributions must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 34
   netRentalIncome: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Net rental income must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 35
   netBusinessIncomeFromBoxC: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Net business income must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 36
   childSupportReceived: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Child support received must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 37
   alimonyReceived: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Alimony received must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 38
 
   // Required expense fields (Boxes 39, 40, 49)
   foodClothingMisc: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Food, clothing, and miscellaneous must be 0 or greater"), // Box 39 - Required
   housingUtilities: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Housing and utilities must be 0 or greater"), // Box 40 - Required
   currentMonthlyTaxes: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Current monthly taxes must be 0 or greater"), // Box 49 - Required
 
   // Optional expense fields (Boxes 41-48, 50-51)
   vehicleLoanLease: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Vehicle loan/lease must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 41
   vehicleOperatingCosts: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Vehicle operating costs must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 42
   publicTransportation: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Public transportation must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 43
   healthInsurancePremiums: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Health insurance premiums must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 44
   outOfPocketHealthcare: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Out-of-pocket healthcare must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 45
   courtOrderedPayments: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Court-ordered payments must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 46
   childDependentCare: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Child/dependent care must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 47
   lifeInsurancePremiums: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Life insurance premiums must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 48
   lifeInsuranceAmount: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Life insurance policy amount must be 0 or greater")
     .optional()
     .or(z.literal("")),
   securedDebtsOther: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Secured debts/other must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 50
   monthlyDelinquentTaxPayments: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Monthly delinquent tax payments must be 0 or greater")
     .optional()
     .or(z.literal("")), // Box 51
@@ -861,7 +861,7 @@ export const householdIncomeSchema = z.object({
   // Text fields
   listDebtsExpenses: z.string().optional(),
   totalTaxOwed: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Total tax owed must be 0 or greater")
     .optional()
     .or(z.literal("")),
@@ -1006,8 +1006,8 @@ export const completeFormSchema = z.object({
   spouseEmployerAddress: z.string().optional(),
   spouseHasOwnershipInterest: z.boolean().optional(),
   spouseJobTitle: z.string().optional(),
-  spouseYearsWithEmployer: z.coerce.number().optional(),
-  spouseMonthsWithEmployer: z.coerce.number().optional(),
+  spouseYearsWithEmployer: z.coerce.number({ message: "Must be a number" }).optional(),
+  spouseMonthsWithEmployer: z.coerce.number({ message: "Must be a number" }).optional(),
 
   // Household members
   householdMembers: z
@@ -1031,9 +1031,9 @@ export const completeFormSchema = z.object({
   employerAddress: z.string().min(1, "Employer address is required"),
   hasOwnershipInterest: z.boolean(),
   jobTitle: z.string().min(1, "Occupation is required"),
-  yearsWithEmployer: z.coerce.number().min(0, "Years must be 0 or greater"),
+  yearsWithEmployer: z.coerce.number({ message: "Must be a number" }).min(0, "Years must be 0 or greater"),
   monthsWithEmployer: z.coerce
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Months must be 0 or greater")
     .max(11, "Months must be 11 or less"),
 
@@ -1058,7 +1058,7 @@ export const completeFormSchema = z.object({
         accountType: z.string().optional(),
         bankNameCountry: z.string().optional(),
         accountNumber: accountNumberSchema.optional(),
-        amount: z.coerce.number().optional(),
+        amount: z.coerce.number({ message: "Must be a number" }).optional(),
       })
     )
     .optional(),
@@ -1066,11 +1066,11 @@ export const completeFormSchema = z.object({
     .array(
       z.object({
         description: z.string().optional(),
-        units: z.coerce.number().optional(),
+        units: z.coerce.number({ message: "Must be a number" }).optional(),
         location: z.string().min(1, { message: "Location is required" }),
         custodianBroker: z.string().optional(),
         address: z.string().optional(),
-        value: z.coerce.number().optional(),
+        value: z.coerce.number({ message: "Must be a number" }).optional(),
       })
     )
     .optional(),
@@ -1078,14 +1078,14 @@ export const completeFormSchema = z.object({
     .array(
       z.object({
         description: z.string().optional(),
-        currentcurrentMarketValue: z.coerce.number().optional(),
-        quickSaleValue: z.coerce.number().optional(),
-        loanBalance: z.coerce.number().optional(),
-        totalValue: z.coerce.number().optional(),
+        currentcurrentMarketValue: z.coerce.number({ message: "Must be a number" }).optional(),
+        quickSaleValue: z.coerce.number({ message: "Must be a number" }).optional(),
+        loanBalance: z.coerce.number({ message: "Must be a number" }).optional(),
+        totalValue: z.coerce.number({ message: "Must be a number" }).optional(),
       })
     )
     .optional(),
-  businessIrsDeduction: z.coerce.number().optional(),
+  businessIrsDeduction: z.coerce.number({ message: "Must be a number" }).optional(),
   hasBusinessNotesReceivable: z.boolean().optional(),
   hasBusinessAccountsReceivable: z.boolean().optional(),
 });

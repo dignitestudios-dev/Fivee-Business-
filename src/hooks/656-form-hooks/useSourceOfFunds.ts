@@ -20,8 +20,8 @@ const useSourceOfFunds = () => {
       await api.saveSourceOfFunds(info, caseId);
       dispatch(saveSourceOfFunds(info));
     } catch (error: any) {
-      console.error("Error saving source of funds:", error);
-      toast.error(error?.message || "Failed to save source of funds");
+      console.error("Error saving source of funds from hook:", error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,13 @@ const useSourceOfFunds = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(saveSourceOfFunds(response.data || {}));
+      const payload = response.data;
+      payload.yearsNotRequiredToFileCheckbox =
+        payload?.yearsNotRequiredToFile &&
+        payload.yearsNotRequiredToFile !== "0"
+          ? true
+          : false;
+      dispatch(saveSourceOfFunds(payload || {}));
     } catch (error: any) {
       console.error("Error fetching source of funds:", error);
     } finally {

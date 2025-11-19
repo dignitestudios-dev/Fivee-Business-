@@ -126,7 +126,13 @@ export function BusinessExpenseSection({
             Section 4: Business Expense Information
           </h2>
           <p className="text-gray-600">
-            Enter the average monthly expenses of your business.
+            Enter the average gross monthly expenses for your business using
+            your most recent 6-12 months statements, bills, receipts, or other
+            documents showing monthly recurring expenses.{" "}
+            <span className="font-semibold">
+              Deductions for non-cash expenses (e.g., depreciation, depletion,
+              etc.) are not permitted as an expense for offer purposes.
+            </span>
           </p>
         </div>
 
@@ -146,6 +152,7 @@ export function BusinessExpenseSection({
               type="date"
               label="Period Through"
               id="periodThrough"
+              min={watch("periodBeginning")}
               {...register("periodThrough")}
               error={errors.periodThrough?.message}
             />
@@ -159,14 +166,14 @@ export function BusinessExpenseSection({
           <CardContent className="space-y-6">
             <FormInput
               type="number"
-              label="Materials Purchased ($)"
+              label="Materials purchased (e.g., items directly related to the production of a product or service) ($)"
               id="materialsPurchased"
               {...register("materialsPurchased", { valueAsNumber: true })}
               error={errors.materialsPurchased?.message}
             />
             <FormInput
               type="number"
-              label="Inventory Purchased ($)"
+              label="Inventory purchased (e.g., goods bought for resale) ($)"
               id="inventoryPurchased"
               {...register("inventoryPurchased", { valueAsNumber: true })}
               error={errors.inventoryPurchased?.message}
@@ -187,7 +194,7 @@ export function BusinessExpenseSection({
             />
             <FormInput
               type="number"
-              label="Supplies ($)"
+              label="Supplies (items used to conduct business and used up within one year, e.g., books, office supplies, professional equipment, etc.) ($)"
               id="supplies"
               {...register("supplies", { valueAsNumber: true })}
               error={errors.supplies?.message}
@@ -201,28 +208,28 @@ export function BusinessExpenseSection({
             />
             <FormInput
               type="number"
-              label="Vehicle Gasoline/Oil ($)"
+              label="Vehicle costs (gas, oil, repairs, maintenance) ($)"
               id="vehicleCosts"
               {...register("vehicleCosts", { valueAsNumber: true })}
               error={errors.vehicleCosts?.message}
             />
             <FormInput
               type="number"
-              label="Insurance ($)"
+              label="Insurance (other than life) ($)"
               id="insurance"
               {...register("insurance", { valueAsNumber: true })}
               error={errors.insurance?.message}
             />
             <FormInput
               type="number"
-              label="Current Taxes ($)"
+              label="Current taxes (e.g., real estate, state, and local income tax, excise franchise, occupational, personal property, sales and employer's portion of employment taxes, etc.) ($)"
               id="currentTaxes"
               {...register("currentTaxes", { valueAsNumber: true })}
               error={errors.currentTaxes?.message}
             />
             <FormInput
               type="number"
-              label="Other Expenses ($)"
+              label="Other expenses (e.g., secured debt payments. Specify on attachment. Do not include credit card payments) ($)"
               id="otherExpenses"
               {...register("otherExpenses", { valueAsNumber: true })}
               error={errors.otherExpenses?.message}

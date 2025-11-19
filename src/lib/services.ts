@@ -1,8 +1,8 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
-// export const BASE_URL = "http://localhost:3001/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "http://localhost:3001/";
 
 // Create an Axios instance
 const API = axios.create({
@@ -62,9 +62,6 @@ API.interceptors.response.use(
       storage.remove("user");
       window.location.href = "/auth/login";
     }
-
-    console.log("Complete Error:", error);
-    console.log("API Error:", error.response?.data || error);
 
     return Promise.reject(error);
   }
@@ -275,13 +272,13 @@ const startForm433b = (payload: { title: string }) =>
 
 // Manage saved preferences - update / delete
 const updateForm433a = (caseId: string, payload: { title?: string }) =>
-  apiHandler(() => API.patch(`/form433a/${caseId}`, payload));
+  apiHandler(() => API.post(`/form433a/start?caseId=${caseId}`, payload));
 
 const deleteForm433a = (caseId: string) =>
   apiHandler(() => API.delete(`/form433a/${caseId}`));
 
 const updateForm433b = (caseId: string, payload: { title?: string }) =>
-  apiHandler(() => API.patch(`/form433boic/${caseId}`, payload));
+  apiHandler(() => API.post(`/form433boic/start?caseId=${caseId}`, payload));
 
 const deleteForm433b = (caseId: string) =>
   apiHandler(() => API.delete(`/form433boic/${caseId}`));

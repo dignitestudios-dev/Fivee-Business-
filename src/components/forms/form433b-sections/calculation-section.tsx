@@ -85,19 +85,19 @@ export function CalculationSection({
     return <FormLoader />;
   }
 
-  const boxD = businessExpenseInfo?.BoxD || 0;
+  const boxD = Math.round(businessExpenseInfo?.BoxD) || 0;
   console.log(businessExpenseInfo);
   console.log("boxD: ", boxD);
 
   // Box A: Available Equity in Assets (calculate from businessAssetInfo)
-  const boxA = businessAssetsInfo?.BoxA || 0; // Reuse the function from asset section, assume it's exported or duplicated
+  const boxA = Math.round(businessAssetsInfo?.BoxA) || 0; // Reuse the function from asset section, assume it's exported or duplicated
   console.log("boxA: ", boxA);
   // Calculate Box E or F
   const multiplier = paymentTimeline === "5_months_or_less" ? 12 : 24;
-  const futureIncome = boxD * multiplier;
+  const futureIncome = Math.round(boxD * multiplier);
 
   // Minimum Offer
-  const minimumOffer = boxA + futureIncome;
+  const minimumOffer = Math.round(boxA + futureIncome);
 
   const onSubmit = async (data: CalculationFormSchema) => {
     try {
@@ -196,11 +196,6 @@ export function CalculationSection({
             </div>
             <p className="text-sm text-gray-600 mt-2">
               Future Remaining Income + Available Assets
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Your offer must be more than zero ($0). Do not leave blank. Use
-              whole dollars only. Place your offer amount on Form 656, Section
-              4, Payment Terms.
             </p>
           </CardContent>
         </Card>

@@ -21,7 +21,7 @@ const usePaidPreparer = () => {
       dispatch(savePaidPreparer(info));
     } catch (error: any) {
       console.error("Error saving paid preparer:", error);
-      toast.error(error?.message || "Failed to save paid preparer");
+      throw error;
     } finally {
       setLoading(false);
     }

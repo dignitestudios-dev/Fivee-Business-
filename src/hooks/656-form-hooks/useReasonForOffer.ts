@@ -21,7 +21,7 @@ const useReasonForOffer = () => {
       dispatch(saveReasonForOffer(info.reasonType));
     } catch (error: any) {
       console.error("Error saving reason for offer:", error);
-      toast.error(error?.message || "Failed to save reason for offer");
+      throw error;
     } finally {
       setLoading(false);
     }

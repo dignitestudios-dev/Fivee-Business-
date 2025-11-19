@@ -47,7 +47,7 @@ const useBusinessAssets = () => {
       dispatch(saveBusinessAssetsInfo(info));
     } catch (error: any) {
       console.error("Error saving business assets info:", error);
-      toast.error(error?.message || "Failed to save business assets info");
+      throw error;
     } finally {
       setLoading(false);
     }

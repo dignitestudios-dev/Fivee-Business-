@@ -17,15 +17,15 @@ export const calculationSchema = z.object({
     message: "Payment timeline is required",
   }),
   boxF5Month: z.coerce
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, { message: "Box F (5 month) must be 0 or greater" }),
   boxF24Month: z.coerce
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, { message: "Box F (24 month) must be 0 or greater" }),
-  boxG: z.coerce.number().min(0),
-  boxH: z.coerce.number().min(0),
-  boxA: z.coerce.number().min(0, { message: "Box A must be 0 or greater" }),
-  boxB: z.coerce.number().min(0, { message: "Box B must be 0 or greater" }),
-  futureIncome: z.coerce.number().min(0),
-  minimumOfferAmount: z.coerce.number().min(0),
+  boxG: z.coerce.number({ message: "Must be a number" }).min(0),
+  boxH: z.coerce.number({ message: "Must be a number" }).min(0),
+  boxA: z.coerce.number({ message: "Must be a number" }).min(0, { message: "Box A must be 0 or greater" }),
+  boxB: z.coerce.number({ message: "Must be a number" }).min(0, { message: "Box B must be 0 or greater" }),
+  futureIncome: z.coerce.number({ message: "Must be a number" }).min(0),
+  minimumOfferAmount: z.coerce.number({ message: "Must be a number" }).min(0),
 });

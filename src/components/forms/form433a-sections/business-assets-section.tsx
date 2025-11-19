@@ -285,10 +285,7 @@ export function BusinessAssetsSection({
             additional space is needed, attach a list of items. Do not include
             personal assets listed in Section 3.
           </p>
-          <p className="text-gray-800 font-semibold">
-            Round to the nearest whole dollar. Do not enter a negative number.
-            If any line item is a negative number, enter "0".
-          </p>
+
         </div>
 
         {/* Bank Accounts and Digital Assets */}

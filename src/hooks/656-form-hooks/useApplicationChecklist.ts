@@ -21,7 +21,7 @@ const useApplicationChecklist = () => {
       dispatch(saveApplicationChecklist(info));
     } catch (error: any) {
       console.error("Error saving application checklist:", error);
-      toast.error(error?.message || "Failed to save application checklist");
+      throw error;
     } finally {
       setLoading(false);
     }

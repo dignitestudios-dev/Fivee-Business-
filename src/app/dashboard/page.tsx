@@ -205,10 +205,6 @@ const Dashboard = () => {
                       <p className="font-bold text-nowrap text-sm sm:text-base">
                         {pref.title}
                       </p>
-
-                      <p className="text-xs">
-                        Last edited {formatDateWithName(pref.updatedAt)}
-                      </p>
                     </div>
                     <BiChevronRight className="text-xl sm:text-2xl text-white move-x" />
                   </button>

@@ -261,13 +261,12 @@ export function IndividualInfoSection({
           </p>
         </div>
 
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Section 1: Individual Information (Form 1040 Filers)
+        </h2>
+
         {/* Section 1: Individual Information */}
         <Card>
-          <CardHeader>
-            <CardTitle>
-              Section 1: Individual Information (Form 1040 Filers)
-            </CardTitle>
-          </CardHeader>
           <CardContent className="space-y-6">
             {/* Primary Taxpayer */}
             <div className="space-y-4">
@@ -959,7 +958,7 @@ export function IndividualInfoSection({
                   />
                 )}
 
-                {qualificationBasis && familySize && residenceState && (
+                {qualificationBasis && familySize && residenceState ? (
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-gray-700">
                       Income limit for your household: $
@@ -972,8 +971,8 @@ export function IndividualInfoSection({
                         : "annualized monthly income"}
                       : $
                       {qualificationBasis === "adjusted_gross_income"
-                        ? (adjustedGrossIncome ?? 0).toLocaleString()
-                        : ((householdMonthlyIncome ?? 0) * 12).toLocaleString()}
+                        ? (adjustedGrossIncome || 0).toLocaleString()
+                        : ((householdMonthlyIncome || 0) * 12).toLocaleString()}
                     </p>
                     <p
                       className={`mt-2 font-medium ${
@@ -985,6 +984,8 @@ export function IndividualInfoSection({
                         : "You may not qualify based on your inputs. IRS will verify."}
                     </p>
                   </div>
+                ) : (
+                  ""
                 )}
               </div>
             )}

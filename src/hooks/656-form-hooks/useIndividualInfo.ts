@@ -18,11 +18,14 @@ const useIndividualInfo = () => {
 
     try {
       console.log("Individual Info: ", info, " caseId is ", caseId);
+      if (!info?.lowIncomeCertification?.familySize) {
+        info.lowIncomeCertification.familySize = 0;
+      }
       await api.saveIndividualInfo(info, caseId);
       dispatch(saveIndividualInformation(info));
     } catch (error: any) {
       console.error("Error saving individual info:", error);
-      toast.error(error?.message || "Failed to save individual info");
+      throw error;
     } finally {
       setLoading(false);
     }

@@ -189,9 +189,6 @@ export function CalculationSection({
             your minimum offer amount. Paying over a shorter period of time will
             result in a smaller minimum offer amount.
           </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Round to the nearest whole dollar.
-          </p>
         </div>
 
         {/* Payment Timeline Selection */}
@@ -400,12 +397,8 @@ export function CalculationSection({
                   Your Minimum Offer Amount
                 </Label>
                 <div className="text-4xl font-bold text-[#22b573] mt-2">
-                  ${minimumOfferAmount.toFixed(2)}
+                  ${minimumOfferAmount.toFixed(0)}
                 </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  Your offer must be more than zero ($0). Use whole dollars
-                  only.
-                </p>
               </div>
             </div>
 

@@ -63,8 +63,8 @@ export const FORM_656_SECTIONS: Form656Section[] = [
   "designationAndEftpsInfo",
   "sourceOfFundsAndRequirementsInfo",
   "signaturesInfo",
-  "applicationChecklistInfo",
   "paidPreparerUseOnlyInfo",
+  "applicationChecklistInfo",
   "sectionStatus",
 ];
 

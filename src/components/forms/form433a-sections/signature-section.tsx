@@ -24,6 +24,7 @@ import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
 import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignatureAndAttachments from "@/hooks/433a-form-hooks/useSignatureAndAttachments";
 import DropdownPopup from "@/components/ui/DropdownPopup";
+import Required from "@/components/ui/Required";
 
 interface SignatureSectionProps {
   onNext: () => void;
@@ -293,7 +294,7 @@ export function SignatureSection({
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="mb-2">Signature of Taxpayer *</Label>
+                  <Label className="mb-2">Signature of Taxpayer <Required /></Label>
                   {/* Hidden input to register the field with react-hook-form */}
                   <input
                     type="hidden"
@@ -398,10 +399,11 @@ export function SignatureSection({
                 </div>
                 <div>
                   <Label htmlFor="taxpayerSignature.date">
-                    Date (mm/dd/yyyy) *
+                    Date (mm/dd/yyyy) <Required />
                   </Label>
                   <FormInput
                     label=""
+                    required
                     id="taxpayerSignature.date"
                     type="date"
                     {...register("taxpayerSignature.date")}
@@ -524,10 +526,11 @@ export function SignatureSection({
                   </div>
                   <div>
                     <Label htmlFor="spouseSignature.date">
-                      Date (mm/dd/yyyy) *
+                      Date (mm/dd/yyyy) <Required />
                     </Label>
                     <FormInput
                       label=""
+                      required
                       id="spouseSignature.date"
                       type="date"
                       {...register("spouseSignature.date")}

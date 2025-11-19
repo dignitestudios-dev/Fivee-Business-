@@ -21,7 +21,7 @@ const useSignatureAndAttachments = () => {
       dispatch(saveSignatureInfo(info));
     } catch (error: any) {
       console.error("Error saving signature info:", error);
-      toast.error(typeof error === "string" ? error : error.message);
+      throw error;
     } finally {
       setLoading(false);
     }

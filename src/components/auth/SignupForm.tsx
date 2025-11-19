@@ -40,7 +40,7 @@ const SignupForm = () => {
     }
 
     if (password.length > SECURITY_CONFIG.passwordMaxLength) {
-      errors.push('no more than 64 characters');
+      errors.push("no more than 64 characters");
     }
 
     if (SECURITY_CONFIG.passwordRequireUppercase && !/[A-Z]/.test(password)) {
@@ -110,8 +110,12 @@ const SignupForm = () => {
             type="email"
             {...register("email", {
               required: "Email is required",
+              onChange: (e) => {
+                e.target.value = e.target.value.toLowerCase();
+              },
               pattern: {
-                value: /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
+                value:
+                  /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$/,
                 message: "Invalid email address",
               },
             })}
@@ -124,18 +128,26 @@ const SignupForm = () => {
               placeholder="Siweh"
               type="text"
               id="firstName"
+              maxLength={20}
               {...register("firstName", {
                 required: "First name is required",
-                minLength: { value: 2, message: "First name must be at least 2 characters" },
-                maxLength: { value: 50, message: "First name must be at most 50 characters" },
+                minLength: {
+                  value: 2,
+                  message: "First name must be at least 2 characters",
+                },
+                maxLength: {
+                  value: 20,
+                  message: "First name must be at most 20 characters",
+                },
                 pattern: {
                   value: /^[A-Za-z\s'-]+$/,
-                  message: "First name can only contain letters, spaces, hyphens, and apostrophes"
+                  message:
+                    "First name can only contain letters, spaces, hyphens, and apostrophes",
                 },
                 onChange: (e) => {
                   // Remove numbers and unwanted special characters in real-time
-                  e.target.value = e.target.value.replace(/[^A-Za-z\s'-]/g, '');
-                }
+                  e.target.value = e.target.value.replace(/[^A-Za-z\s'-]/g, "");
+                },
               })}
               error={errors.firstName?.message}
             />
@@ -144,18 +156,26 @@ const SignupForm = () => {
               placeholder="Harris"
               type="text"
               id="lastName"
+              maxLength={20}
               {...register("lastName", {
                 required: "Last name is required",
-                minLength: { value: 2, message: "Last name must be at least 2 characters" },
-                maxLength: { value: 50, message: "Last name must be at most 50 characters" },
+                minLength: {
+                  value: 2,
+                  message: "Last name must be at least 2 characters",
+                },
+                maxLength: {
+                  value: 20,
+                  message: "Last name must be at most 20 characters",
+                },
                 pattern: {
                   value: /^[A-Za-z\s'-]+$/,
-                  message: "Last name can only contain letters, spaces, hyphens, and apostrophes"
+                  message:
+                    "Last name can only contain letters, spaces, hyphens, and apostrophes",
                 },
                 onChange: (e) => {
                   // Remove numbers and unwanted special characters in real-time
-                  e.target.value = e.target.value.replace(/[^A-Za-z\s'-]/g, '');
-                }
+                  e.target.value = e.target.value.replace(/[^A-Za-z\s'-]/g, "");
+                },
               })}
               error={errors.lastName?.message}
             />
@@ -168,10 +188,11 @@ const SignupForm = () => {
             </h3>
             <div className="space-y-3">
               <label
-                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${watchEmploymentType === "self-employed"
-                  ? "border-[var(--primary)]"
-                  : "border-[#E3E3E3]"
-                  }`}
+                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
+                  watchEmploymentType === "self-employed"
+                    ? "border-[var(--primary)]"
+                    : "border-[#E3E3E3]"
+                }`}
               >
                 <input
                   type="radio"
@@ -183,10 +204,11 @@ const SignupForm = () => {
                 />
                 <div className="flex gap-2 items-center py-2 px-4 h-full">
                   <div
-                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${watchEmploymentType === "self-employed"
-                      ? "bg-[var(--primary)]"
-                      : "bg-white"
-                      }`}
+                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
+                      watchEmploymentType === "self-employed"
+                        ? "bg-[var(--primary)]"
+                        : "bg-white"
+                    }`}
                   >
                     <div className="h-full w-full bg-white rounded-full" />
                   </div>
@@ -195,10 +217,11 @@ const SignupForm = () => {
               </label>
 
               <label
-                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${watchEmploymentType === "business-owner"
-                  ? "border-[var(--primary)]"
-                  : "border-[#E3E3E3]"
-                  }`}
+                className={`block h-[48px] w-full rounded-xl cursor-pointer border-2 relative ${
+                  watchEmploymentType === "business-owner"
+                    ? "border-[var(--primary)]"
+                    : "border-[#E3E3E3]"
+                }`}
               >
                 <input
                   type="radio"
@@ -210,10 +233,11 @@ const SignupForm = () => {
                 />
                 <div className="flex gap-2 items-center py-2 px-4 h-full">
                   <div
-                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${watchEmploymentType === "business-owner"
-                      ? "bg-[var(--primary)]"
-                      : "bg-white"
-                      }`}
+                    className={`p-1 w-5 h-5 rounded-full border border-gray-300 ${
+                      watchEmploymentType === "business-owner"
+                        ? "bg-[var(--primary)]"
+                        : "bg-white"
+                    }`}
                   >
                     <div className="h-full w-full bg-white rounded-full" />
                   </div>
@@ -233,6 +257,7 @@ const SignupForm = () => {
             label="Password"
             placeholder="Enter Password"
             type={showPassword ? "text" : "password"}
+            maxLength={20}
             autoComplete="off"
             id="password"
             {...register("password", {
@@ -260,6 +285,7 @@ const SignupForm = () => {
             label="Confirm Password"
             placeholder="Confirm Password"
             type={showConfirmPassword ? "text" : "password"}
+            maxLength={20}
             autoComplete="off"
             id="confirmPassword"
             {...register("confirmPassword", {
@@ -292,10 +318,11 @@ const SignupForm = () => {
             <div className="rounded-lg w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div
-                  className={`flex items-center  ${watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
-                    ? "text-[var(--primary)]"
-                    : "text-gray-400"
-                    }`}
+                  className={`flex items-center  ${
+                    watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
+                      ? "text-[var(--primary)]"
+                      : "text-gray-400"
+                  }`}
                 >
                   <GoCheckCircleFill className="w-5 h-5 mr-2" />
                   At least {SECURITY_CONFIG.passwordMinLength} characters
@@ -303,10 +330,11 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireUppercase && (
                   <div
-                    className={`flex items-center  ${/[A-Z]/.test(watchNewPassword)
-                      ? "text-[var(--primary)]"
-                      : "text-gray-400"
-                      }`}
+                    className={`flex items-center  ${
+                      /[A-Z]/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One uppercase letter
@@ -315,10 +343,11 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireLowercase && (
                   <div
-                    className={`flex items-center  ${/[a-z]/.test(watchNewPassword)
-                      ? "text-[var(--primary)]"
-                      : "text-gray-400"
-                      }`}
+                    className={`flex items-center  ${
+                      /[a-z]/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One lowercase letter
@@ -327,10 +356,11 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireNumbers && (
                   <div
-                    className={`flex items-center  ${/\d/.test(watchNewPassword)
-                      ? "text-[var(--primary)]"
-                      : "text-gray-400"
-                      }`}
+                    className={`flex items-center  ${
+                      /\d/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One number
@@ -339,10 +369,11 @@ const SignupForm = () => {
 
                 {SECURITY_CONFIG.passwordRequireSpecialChars && (
                   <div
-                    className={`flex items-center  ${/[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
-                      ? "text-[var(--primary)]"
-                      : "text-gray-400"
-                      }`}
+                    className={`flex items-center  ${
+                      /[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
+                        ? "text-[var(--primary)]"
+                        : "text-gray-400"
+                    }`}
                   >
                     <GoCheckCircleFill className="w-5 h-5 mr-2" />
                     One special character

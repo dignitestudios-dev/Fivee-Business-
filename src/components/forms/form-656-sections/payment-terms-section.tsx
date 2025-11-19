@@ -194,7 +194,7 @@ export function PaymentTermsSection({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Section 4: Offer Terms
+            Section 4: Payment Terms
           </h2>
           <p className="text-gray-600">
             I request that the offer be accepted and the total liability be
@@ -266,21 +266,41 @@ export function PaymentTermsSection({
               <FormInput
                 label="Offer Amount (must be >= calculated minimum)"
                 id="lumpSum.totalOfferAmount"
-                type="number"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9.]*"
                 required
                 min={minOfferAmount}
                 {...register("lumpSum.totalOfferAmount", {
                   valueAsNumber: true,
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
+                  },
+                  min: { value: 0, message: "Value cannot be negative" },
                 })}
                 error={errors.lumpSum?.totalOfferAmount?.message}
               />
               <FormInput
                 label="Initial Payment (20% unless low-income)"
                 id="lumpSum.initialPayment"
-                type="number"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9.]*"
                 required={!qualifiesForLowIncome}
                 readOnly // Make read-only since it's calculated
-                {...register("lumpSum.initialPayment", { valueAsNumber: true })}
+                {...register("lumpSum.initialPayment", {
+                  valueAsNumber: true,
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
+                  },
+                  min: { value: 0, message: "Value cannot be negative" },
+                })}
                 error={errors.lumpSum?.initialPayment?.message}
               />
               <div className="space-y-1">
@@ -300,11 +320,23 @@ export function PaymentTermsSection({
                     <FormInput
                       label={`Additional Payment ${index + 1} Amount`}
                       id={`lumpSum.additionalPayments.${index}.amount`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9.]*"
                       required
                       {...register(
                         `lumpSum.additionalPayments.${index}.amount`,
-                        { valueAsNumber: true }
+                        {
+                          valueAsNumber: true,
+                          onChange: (e: any) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
+                          min: {
+                            value: 0,
+                            message: "Value cannot be negative",
+                          },
+                        }
                       )}
                       error={
                         errors.lumpSum?.additionalPayments?.[index]?.amount
@@ -314,13 +346,25 @@ export function PaymentTermsSection({
                     <FormInput
                       label="Payable Within (1-5 months)"
                       id={`lumpSum.additionalPayments.${index}.payableWithinMonths`}
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9.]*"
                       min={1}
                       max={5}
                       required
                       {...register(
                         `lumpSum.additionalPayments.${index}.payableWithinMonths`,
-                        { valueAsNumber: true }
+                        {
+                          valueAsNumber: true,
+                          onChange: (e: any) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
+                          min: {
+                            value: 0,
+                            message: "Value cannot be negative",
+                          },
+                        }
                       )}
                       error={
                         errors.lumpSum?.additionalPayments?.[index]

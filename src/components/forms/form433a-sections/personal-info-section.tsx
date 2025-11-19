@@ -167,14 +167,32 @@ export function PersonalInfoSection({
                 label="Last Name"
                 id="lastName"
                 required
-                {...register("lastName")}
+                maxLength={20}
+                {...register("lastName", {
+                  onChange: (e) => {
+                    // Remove numbers and unwanted special characters in real-time
+                    e.target.value = e.target.value.replace(
+                      /[^A-Za-z\s'-]/g,
+                      ""
+                    );
+                  },
+                })}
                 error={errors.lastName?.message}
               />
               <FormInput
                 label="First Name"
                 id="firstName"
                 required
-                {...register("firstName")}
+                maxLength={20}
+                {...register("firstName", {
+                  onChange: (e) => {
+                    // Remove numbers and unwanted special characters in real-time
+                    e.target.value = e.target.value.replace(
+                      /[^A-Za-z\s'-]/g,
+                      ""
+                    );
+                  },
+                })}
                 error={errors.firstName?.message}
               />
             </div>
@@ -185,7 +203,13 @@ export function PersonalInfoSection({
                 id="dob"
                 type="date"
                 required
-                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                max={
+                  new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 18)
+                  )
+                    .toISOString()
+                    .split("T")[0]
+                }
                 {...register("dob")}
                 error={errors.dob?.message}
               />
@@ -358,7 +382,10 @@ export function PersonalInfoSection({
                 label="FAX Number"
                 id="faxNumber"
                 placeholder="(123) 456-7890"
-                {...register("faxNumber")}
+                {...register("faxNumber", {
+                  onChange: (e) =>
+                    setValue("faxNumber", formatPhone(e.target.value)),
+                })}
                 error={errors.faxNumber?.message}
               />
               <FormInput
@@ -383,14 +410,32 @@ export function PersonalInfoSection({
                   label="Spouse's Last Name"
                   id="spouseLastName"
                   required
-                  {...register("spouseLastName")}
+                  maxLength={20}
+                  {...register("spouseLastName", {
+                    onChange: (e) => {
+                      // Remove numbers and unwanted special characters in real-time
+                      e.target.value = e.target.value.replace(
+                        /[^A-Za-z\s'-]/g,
+                        ""
+                      );
+                    },
+                  })}
                   error={errors.spouseLastName?.message}
                 />
                 <FormInput
                   label="Spouse's First Name"
                   id="spouseFirstName"
                   required
-                  {...register("spouseFirstName")}
+                  maxLength={20}
+                  {...register("spouseFirstName", {
+                    onChange: (e) => {
+                      // Remove numbers and unwanted special characters in real-time
+                      e.target.value = e.target.value.replace(
+                        /[^A-Za-z\s'-]/g,
+                        ""
+                      );
+                    },
+                  })}
                   error={errors.spouseFirstName?.message}
                 />
               </div>
@@ -399,6 +444,13 @@ export function PersonalInfoSection({
                 <FormInput
                   label="Date of Birth (mm/dd/yyyy)"
                   id="spouseDOB"
+                  max={
+                    new Date(
+                      new Date().setFullYear(new Date().getFullYear() - 18)
+                    )
+                      .toISOString()
+                      .split("T")[0]
+                  }
                   type="date"
                   required
                   {...register("spouseDOB")}
@@ -425,7 +477,8 @@ export function PersonalInfoSection({
             <CardTitle>Household Members and Dependents</CardTitle>
             <p className="text-sm text-gray-600">
               Provide information for all other persons in the household or
-              claimed as a dependent. <strong>Maximum of 4 members allowed.</strong>
+              claimed as a dependent.{" "}
+              <strong>Maximum of 4 members allowed.</strong>
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -466,9 +519,13 @@ export function PersonalInfoSection({
                     placeholder="Age"
                     required
                     {...register(`householdMembers.${index}.age`, {
-                      setValueAs: (v: any) => (v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, ""))),
+                      setValueAs: (v: any) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.householdMembers?.[index]?.age?.message}
@@ -527,7 +584,9 @@ export function PersonalInfoSection({
               className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
               <Plus className="w-4 h-4 mr-2" />
-              {fields.length >= 4 ? 'Maximum 4 members reached' : 'Add Household Member'}
+              {fields.length >= 4
+                ? "Maximum 4 members reached"
+                : "Add Household Member"}
             </Button>
 
             {/* Show count indicator */}

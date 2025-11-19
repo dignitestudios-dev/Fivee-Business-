@@ -59,17 +59,20 @@ export function SourceOfFundsSection({
 
   const onSubmit = async (data: SourceOfFundsFormSchema) => {
     try {
+      delete data.yearsNotRequiredToFileCheckbox;
+      data.yearsNotRequiredToFile = data?.yearsNotRequiredToFile
+        ? data?.yearsNotRequiredToFile?.toString()
+        : "";
       await handleSaveSourceOfFunds(data, caseId);
       onNext();
     } catch (error: any) {
-      console.error("Error saving source of funds:", error);
+      console.error("Error saving source of funds from comp:", error);
       toast.error(error.message || "Failed to save source of funds");
     }
   };
 
   useEffect(() => {
-    if (!sourceOfFunds)
-      handleGetSourceOfFunds(caseId, FORM_656_SECTIONS[5]);
+    if (!sourceOfFunds) handleGetSourceOfFunds(caseId, FORM_656_SECTIONS[5]);
   }, []);
 
   useEffect(() => {
@@ -87,7 +90,8 @@ export function SourceOfFundsSection({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Section 6: Source of Funds, Filing Requirements, and Stay Out of Trouble
+            Section 6: Source of Funds, Filing Requirements, and Stay Out of
+            Trouble
           </h2>
         </div>
 
@@ -97,7 +101,11 @@ export function SourceOfFundsSection({
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-gray-600">
-              I will get the money to fund this offer from the following sources. If the money is coming from a loan, I understand that the IRS will not subordinate its interest in my assets to a lender. If the funds are coming from a third party, I understand that I may need to disclose additional information:
+              I will get the money to fund this offer from the following
+              sources. If the money is coming from a loan, I understand that the
+              IRS will not subordinate its interest in my assets to a lender. If
+              the funds are coming from a third party, I understand that I may
+              need to disclose additional information:
             </p>
             <FormInput
               label="Source of Funds"
@@ -114,30 +122,61 @@ export function SourceOfFundsSection({
             <CardTitle>Filing Requirements</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-start space-x-2">
               <Checkbox
                 id="allRequiredReturnsFiled"
                 {...register("allRequiredReturnsFiled")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-0.5"
               />
               <Label htmlFor="allRequiredReturnsFiled">
-                I have filed all required tax returns and returns that are due as of the date of this offer.
+                I have filed all required tax returns and have included a
+                complete copy of any tax return filed within 10 weeks of this
+                offer submission
               </Label>
             </div>
-            {errors.allRequiredReturnsFiled && <p className="text-red-600 text-sm">{errors.allRequiredReturnsFiled.message}</p>}
+            {errors.allRequiredReturnsFiled && (
+              <p className="text-red-600 text-sm">
+                {errors.allRequiredReturnsFiled.message}
+              </p>
+            )}
 
-            <FormInput
-              label="If you have not filed a required return, provide the years and explanation"
-              id="yearsNotRequiredToFile"
-              {...register("yearsNotRequiredToFile")}
-              error={errors.yearsNotRequiredToFile?.message}
-            />
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="yearsNotRequiredToFileCheckbox"
+                {...register("yearsNotRequiredToFileCheckbox")}
+                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-0.5"
+              />
+              <Label htmlFor="yearsNotRequiredToFileCheckbox">
+                I was not required to file a tax return for the following years
+              </Label>
+              <FormInput
+                id="yearsNotRequiredToFile"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9.]*"
+                maxLength={3}
+                className="-mt-2"
+                {...register("yearsNotRequiredToFile", {
+                  valueAsNumber: true,
+                  onChange: (e: any) => {
+                    e.currentTarget.value = e.currentTarget.value.replace(
+                      /[^0-9.]/g,
+                      ""
+                    );
+                  },
+                  min: { value: 0, message: "Value cannot be negative" },
+                })}
+                error={errors.yearsNotRequiredToFile?.message}
+              />
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Stay Out of Trouble</CardTitle>
+            <CardTitle>
+              Tax Payment Requirements (check all that apply)
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -147,11 +186,14 @@ export function SourceOfFundsSection({
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
               />
               <Label htmlFor="madeEstimatedTaxPayments">
-                I have made all required estimated tax payments for the current tax year.
+                I have made all required estimated tax payments for the current
+                tax year.
               </Label>
             </div>
             {errors.madeEstimatedTaxPayments && (
-              <p className="text-red-600 text-sm">{errors.madeEstimatedTaxPayments.message}</p>
+              <p className="text-red-600 text-sm">
+                {errors.madeEstimatedTaxPayments.message}
+              </p>
             )}
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -160,7 +202,8 @@ export function SourceOfFundsSection({
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
               />
               <Label htmlFor="notRequiredEstimatedTaxPayments">
-                I am not required to make any estimated tax payments for the current tax year.
+                I am not required to make any estimated tax payments for the
+                current tax year.
               </Label>
             </div>
             <div className="flex items-center space-x-2">
@@ -170,11 +213,14 @@ export function SourceOfFundsSection({
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
               />
               <Label htmlFor="madeFederalTaxDeposits">
-                I have made all required federal tax deposits for the current quarter and the two preceding quarters.
+                I have made all required federal tax deposits for the current
+                quarter and the two preceding quarters.
               </Label>
             </div>
             {errors.madeFederalTaxDeposits && (
-              <p className="text-red-600 text-sm">{errors.madeFederalTaxDeposits.message}</p>
+              <p className="text-red-600 text-sm">
+                {errors.madeFederalTaxDeposits.message}
+              </p>
             )}
             <div className="flex items-center space-x-2">
               <Checkbox

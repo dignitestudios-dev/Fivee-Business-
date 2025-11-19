@@ -27,7 +27,7 @@ const useBusinessIncome = () => {
       dispatch(saveBusinessIncomeInfo(info));
     } catch (error: any) {
       console.error("Error saving business income info:", error);
-      toast.error(error?.message || "Failed to save business income info");
+      throw error;
     } finally {
       setLoading(false);
     }

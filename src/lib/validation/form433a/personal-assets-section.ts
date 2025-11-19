@@ -57,7 +57,7 @@ export const personalAssetsSchema = z.object({
         .object({
           description: descriptionSchema,
           numberOfUnits: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Number of units cannot be negative"),
           location: shortTextSchema,
           accountNumber: accountNumberSchema.optional(),
@@ -82,11 +82,11 @@ export const personalAssetsSchema = z.object({
           }),
           retirementTypeText: z.string().optional(),
           currentMarketValue: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Current market value cannot be negative")
             .optional(),
           loanBalance: z.coerce
-            .number()
+            .number({ message: "Must be a number" })
             .min(0, "Loan balance cannot be negative")
             .optional(),
         })
@@ -120,7 +120,7 @@ export const personalAssetsSchema = z.object({
   isForSale: z.boolean().optional(),
   anticipateSelling: z.boolean().optional(),
   listingPrice: z.coerce
-    .number()
+    .number({ message: "Must be a number" })
     .min(0, "Listing price cannot be negative")
     .optional(),
   realProperties: z
@@ -145,7 +145,7 @@ export const personalAssetsSchema = z.object({
       z.object({
         makeModel: shortTextSchema,
         year: z.coerce
-          .number()
+          .number({ message: "Must be a number" })
           .min(1900)
           .max(new Date().getFullYear() + 1, "Invalid year"),
         purchaseDate: dateSchema,

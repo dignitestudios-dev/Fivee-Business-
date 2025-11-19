@@ -25,7 +25,7 @@ const useCalculation = () => {
       dispatch(saveCalculationInfo(info));
     } catch (error: any) {
       console.error("Error saving calculation info:", error);
-      toast.error(error?.message || "Failed to save calculation info");
+      throw error;
     } finally {
       setLoading(false);
     }

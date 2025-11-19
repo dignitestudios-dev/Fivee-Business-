@@ -1,12 +1,63 @@
 import { z } from "zod";
 
+// Helper function to check if a date is not in the past
+const isNotPastDate = (dateString: string): boolean => {
+  if (!dateString) return true;
+  const selectedDate = new Date(dateString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selectedDate >= today;
+};
+
+// Helper function to validate date format and not in past
+const validateNotPastDate = (dateString: string | undefined): boolean => {
+  if (!dateString) return true;
+  return isNotPastDate(dateString);
+};
+
+// Helper function to check if "to date" is greater than "from date"
+const isToDateAfterFromDate = (fromDate: string, toDate: string): boolean => {
+  if (!fromDate || !toDate) return true;
+  return new Date(toDate) > new Date(fromDate);
+};
+
+// Helper function to check if there's at least 6 months gap between dates
+const hasSixMonthsGap = (fromDate: string, toDate: string): boolean => {
+  if (!fromDate || !toDate) return true;
+
+  const from = new Date(fromDate);
+  const to = new Date(toDate);
+
+  // Calculate month difference
+  const monthsDifference =
+    (to.getFullYear() - from.getFullYear()) * 12 +
+    (to.getMonth() - from.getMonth());
+
+  return monthsDifference >= 6;
+};
+
+// Helper function to check if a date is not in the future (can be past or present)
+const isNotFutureDate = (dateString: string): boolean => {
+  if (!dateString) return true;
+  const selectedDate = new Date(dateString);
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // End of today to allow today's date
+  return selectedDate <= today;
+};
+
+// Helper function to validate date is not in future
+const validateNotFutureDate = (dateString: string | undefined): boolean => {
+  if (!dateString) return true;
+  return isNotFutureDate(dateString);
+};
+
 export const otherInfoInitialValues: OtherInfoFormSchema = {
   litigation: {
     isInvolvedInLitigation: false,
     locationOfFiling: "",
     representedBy: "",
     docketCaseNumber: "",
-      amountOfDispute: "",
+    amountOfDispute: "",
     possibleCompletionDate: "",
     subjectOfLitigation: "",
   },
@@ -32,7 +83,7 @@ export const otherInfoInitialValues: OtherInfoFormSchema = {
     placeRecorded: "",
     ein: "",
     nameOfTrust: "",
-      anticipatedAmount: "",
+    anticipatedAmount: "",
     whenAmountReceived: "",
   },
   trustFiduciary: {
@@ -66,10 +117,15 @@ export const otherInfoSchema = z
       representedBy: z.string().optional(),
       docketCaseNumber: z.string().optional(),
       amountOfDispute: z.coerce
-        .number()
+        .number({ message: "Must be a number" })
         .min(0, "Amount must be 0 or greater")
         .optional(),
-      possibleCompletionDate: z.string().optional(),
+      possibleCompletionDate: z
+        .string()
+        .optional()
+        .refine((val) => !val || validateNotPastDate(val), {
+          message: "Possible completion date cannot be in the past",
+        }),
       subjectOfLitigation: z.string().optional(),
     }),
     bankruptcy: z.object({
@@ -95,7 +151,7 @@ export const otherInfoSchema = z
       ein: z.string().optional(),
       nameOfTrust: z.string().optional(),
       anticipatedAmount: z.coerce
-        .number()
+        .number({ message: "Must be a number" })
         .min(0, "Amount must be 0 or greater")
         .optional(),
       whenAmountReceived: z.string().optional(),
@@ -112,7 +168,7 @@ export const otherInfoSchema = z
           z.object({
             location: z.string().min(1, "Location is required"),
             contents: z.string().min(1, "Contents are required"),
-            value: z.coerce.number().min(0, "Value must be 0 or greater"),
+            value: z.coerce.number({ message: "Must be a number" }).min(0, "Value must be 0 or greater"),
           })
         )
         .optional(),
@@ -126,7 +182,7 @@ export const otherInfoSchema = z
               .string()
               .min(1, "Asset description is required"),
             valueAtTransfer: z.coerce
-              .number()
+              .number({ message: "Must be a number" })
               .min(0, "Value must be 0 or greater"),
             dateTransferred: z.string().min(1, "Date is required"),
             transferredTo: z.string().min(1, "Recipient is required"),
@@ -141,7 +197,7 @@ export const otherInfoSchema = z
           z.object({
             description: z.string().min(1, "Description is required"),
             location: z.string().min(1, "Location is required"),
-            value: z.coerce.number().min(0, "Value must be 0 or greater"),
+            value: z.coerce.number({ message: "Must be a number" }).min(0, "Value must be 0 or greater"),
           })
         )
         .optional(),
@@ -152,7 +208,7 @@ export const otherInfoSchema = z
         .array(
           z.object({
             location: z.string().min(1, "Location is required"),
-            amount: z.coerce.number().min(0, "Amount must be 0 or greater"),
+            amount: z.coerce.number({ message: "Must be a number" }).min(0, "Amount must be 0 or greater"),
           })
         )
         .optional(),
@@ -195,6 +251,12 @@ export const otherInfoSchema = z
           path: ["litigation", "possibleCompletionDate"],
           message:
             "Possible completion date is required when involved in litigation",
+        });
+      } else if (!isNotPastDate(data.litigation.possibleCompletionDate)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["litigation", "possibleCompletionDate"],
+          message: "Possible completion date cannot be in the past",
         });
       }
       if (!data.litigation.subjectOfLitigation) {
@@ -261,6 +323,37 @@ export const otherInfoSchema = z
           path: ["foreignResidence", "dateTo"],
           message: "Date to is required when lived outside US",
         });
+      }
+
+      // Validate that "to date" is after "from date"
+      if (data.foreignResidence.dateFrom && data.foreignResidence.dateTo) {
+        if (
+          !isToDateAfterFromDate(
+            data.foreignResidence.dateFrom,
+            data.foreignResidence.dateTo
+          )
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["foreignResidence", "dateTo"],
+            message: "End date must be after start date",
+          });
+        }
+
+        // Validate 6 months gap
+        if (
+          !hasSixMonthsGap(
+            data.foreignResidence.dateFrom,
+            data.foreignResidence.dateTo
+          )
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["foreignResidence", "dateTo"],
+            message:
+              "Must have at least 6 months gap between start and end dates",
+          });
+        }
       }
     }
 
@@ -356,6 +449,25 @@ export const otherInfoSchema = z
         path: ["assetTransfers", "transfers"],
         message:
           "At least one asset transfer entry is required when transferredAssets is true",
+      });
+    }
+
+    // Additional validation for asset transfer dates
+    if (
+      data.assetTransfers.transferredAssets &&
+      data.assetTransfers.transfers
+    ) {
+      data.assetTransfers.transfers.forEach((transfer, index) => {
+        if (
+          transfer.dateTransferred &&
+          !validateNotFutureDate(transfer.dateTransferred)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["assetTransfers", "transfers", index, "dateTransferred"],
+            message: "Date transferred cannot be in the future",
+          });
+        }
       });
     }
 

@@ -34,13 +34,13 @@ const partnerSchema = z.object({
   percentOwnership: z.preprocess(
     (v) => Number(v),
     z
-      .number()
+      .number({ message: "Must be a number" })
       .min(0, "Percent ownership must be non-negative")
       .max(100, "Percent ownership cannot exceed 100")
   ),
   annualSalary: z.preprocess(
     (v) => Number(v),
-    z.number().min(0, "Annual salary must be non-negative")
+    z.number({ message: "Must be a number" }).min(0, "Annual salary must be non-negative")
   ),
   socialSecurityNumber: z
     .string()
@@ -94,16 +94,16 @@ export const businessInfoSchema = z
     federalContractor: z.boolean(),
     totalNumberOfEmployees: z.preprocess(
       (v) => Number(v),
-      z.number().min(1, "Total employees is required").int().nonnegative()
+      z.number({ message: "Must be a number" }).min(1, "Total employees is required").int().nonnegative()
     ),
     isSoleEmployee: z.boolean().optional().default(false),
     frequencyOfTaxDeposits: z.preprocess(
       (v) => Number(v),
-      z.number().min(0, "Frequency of tax deposits is required").nonnegative()
+      z.number({ message: "Must be a number" }).min(0, "Frequency of tax deposits is required").nonnegative()
     ),
     averageGrossMonthlyPayroll: z.preprocess(
       (v) => Number(v),
-      z.number().min(0, "Average monthly payroll is required").nonnegative()
+      z.number({ message: "Must be a number" }).min(0, "Average monthly payroll is required").nonnegative()
     ),
     doesOutsourcePayroll: z.boolean(),
     payrollProviderName: z.string().optional().nullable(),

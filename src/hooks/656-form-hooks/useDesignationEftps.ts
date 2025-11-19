@@ -21,7 +21,7 @@ const useDesignationEftps = () => {
       dispatch(saveDesignationEftps(info));
     } catch (error: any) {
       console.error("Error saving designation eftps:", error);
-      toast.error(error?.message || "Failed to save designation eftps");
+      throw error;
     } finally {
       setLoading(false);
     }

@@ -172,6 +172,7 @@ export function DesignationEftpsSection({
                   id={`eftpsPayments.${index}.electronicFundsTransferNumber`}
                   required
                   type="text"
+                  maxLength={15}
                   inputMode="numeric"
                   pattern="\d*"
                   // sanitize input in real-time to only digits

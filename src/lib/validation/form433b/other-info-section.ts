@@ -51,14 +51,14 @@ const litigationHistorySchema = z.object({
   locationOfFiling: z.string().min(1, "Location is required"),
   representedBy: z.string().min(1, "Represented by is required"),
   docketCaseNumber: z.string().min(1, "Docket/case number is required"),
-  amountInDispute: z.number().min(0),
+  amountInDispute: z.number({ message: "Must be a number" }).min(0),
   possibleCompletionDate: z.string(),
   subjectOfLitigation: z.string().min(1, "Subject is required"),
 });
 
 const assetTransferSchema = z.object({
   date: z.string(),
-  value: z.number().min(0),
+  value: z.number({ message: "Must be a number" }).min(0),
   typeOfAsset: z.string().min(1, "Type is required"),
   description: z.string().min(1, "Description is required"),
 });
@@ -66,12 +66,12 @@ const assetTransferSchema = z.object({
 const foreignAssetSchema = z.object({
   description: z.string().min(1, "Description is required"),
   location: z.string().min(1, "Location is required"),
-  value: z.number().min(0),
+  value: z.number({ message: "Must be a number" }).min(0),
 });
 
 const lineOfCreditSchema = z.object({
-  creditLimit: z.number().min(0),
-  amountOwed: z.number().min(0),
+  creditLimit: z.number({ message: "Must be a number" }).min(0),
+  amountOwed: z.number({ message: "Must be a number" }).min(0),
   propertySecuring: z.string(),
 });
 
@@ -95,7 +95,10 @@ export const otherInfoSchemaFormB = z
     hasAssetsOutsideUS: z.boolean(),
     foreignAssets: z.array(foreignAssetSchema),
     hasFundsHeldInTrust: z.boolean(),
-    fundsHeldInTrustAmount: z.number().min(0).optional(),
+    fundsHeldInTrustAmount: z
+      .number({ message: "Must be a number" })
+      .min(0)
+      .optional(),
     fundsHeldInTrustLocation: z.string().optional(),
     hasLinesOfCredit: z.boolean(),
     lineOfCredit: lineOfCreditSchema.optional(),
@@ -115,6 +118,22 @@ export const otherInfoSchemaFormB = z
           message: "Date dismissed or discharged is required",
           path: ["bankruptcyHistory.dateDismissedOrDischarged"],
         });
+      }
+      if (
+        data.bankruptcyHistory?.dateFiled &&
+        data.bankruptcyHistory?.dateDismissedOrDischarged
+      ) {
+        if (
+          new Date(data.bankruptcyHistory?.dateFiled) >=
+          new Date(data.bankruptcyHistory?.dateDismissedOrDischarged)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "Date dismissed or discharged can't be less than date filed",
+            path: ["bankruptcyHistory.dateDismissedOrDischarged"],
+          });
+        }
       }
       if (!data.bankruptcyHistory?.petitionNumber) {
         ctx.addIssue({

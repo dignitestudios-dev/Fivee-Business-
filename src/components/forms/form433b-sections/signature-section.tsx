@@ -338,6 +338,7 @@ export function SignatureSection({
                 </div>
                 <FormInput
                   label="Title"
+                  required
                   id="taxpayerSignature.title"
                   {...register("taxpayerSignature.title")}
                   error={errors.taxpayerSignature?.title?.message}
@@ -345,6 +346,7 @@ export function SignatureSection({
                 <FormInput
                   type="date"
                   label="Date (mm/dd/yyyy)"
+                  required
                   id="taxpayerSignature.date"
                   {...register("taxpayerSignature.date")}
                   error={errors.taxpayerSignature?.date?.message}

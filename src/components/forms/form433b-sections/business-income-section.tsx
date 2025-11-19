@@ -104,7 +104,14 @@ export function BusinessIncomeSection({
             Section 3: Business Income Information
           </h2>
           <p className="text-gray-600">
-            Enter the average gross monthly income of your business.
+            Enter the average gross monthly income of your business. To
+            determine your gross monthly income use the most recent 6-12 months
+            documentation of commissions, invoices, gross receipts from
+            sales/services, etc.; most recent 6-12 months earnings statements,
+            etc., from every other source of income (such as rental income,
+            interest and dividends, or subsidies); or you may use the most
+            recent 6-12 months Profit and Loss (P&L) to provide the information
+            of income and expenses.{" "}
           </p>
         </div>
 
@@ -124,6 +131,7 @@ export function BusinessIncomeSection({
               type="date"
               label="Period Through"
               id="periodThrough"
+              min={watch("periodBeginning")}
               {...register("periodThrough")}
               error={errors.periodThrough?.message}
             />
@@ -171,7 +179,7 @@ export function BusinessIncomeSection({
               error={errors.otherIncome?.message}
             />
             <div className="text-lg font-bold">
-              Total Income: ${totalIncome.toLocaleString()}
+              Total Business Income: ${totalIncome.toLocaleString()}
             </div>
           </CardContent>
         </Card>

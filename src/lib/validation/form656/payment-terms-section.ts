@@ -1,17 +1,17 @@
 import * as z from "zod";
 
 const additionalPaymentSchema = z.object({
-  amount: z.number().min(0, "Amount must be non-negative"),
+  amount: z.number({ message: "Must be a number" }).min(0, "Amount must be non-negative"),
   payableWithinMonths: z
-    .number()
+    .number({ message: "Must be a number" })
     .min(1, "Months must be at least 1")
     .max(5, "Months must be at most 5"),
 });
 
 const lumpSumSchema = z
   .object({
-    totalOfferAmount: z.number().min(0, "Offer amount required"),
-    initialPayment: z.number().min(0, "Initial payment required"),
+    totalOfferAmount: z.number({ message: "Must be a number" }).min(0, "Offer amount required"),
+    initialPayment: z.number({ message: "Must be a number" }).min(0, "Initial payment required"),
     additionalPayments: z
       .array(additionalPaymentSchema)
       .max(5, "Maximum 5 additional payments"),
@@ -32,15 +32,15 @@ const lumpSumSchema = z
 
 const periodicSchema = z
   .object({
-    totalOfferAmount: z.number().min(0, "Offer amount required"),
-    firstMonthlyPayment: z.number().min(0, "First payment required"),
-    subsequentMonthlyPayment: z.number().min(0, "Subsequent payment required"),
-    paymentDayOfMonth: z.number().min(1).max(28),
-    subsequentMonths: z.number().min(4).max(22),
-    finalPaymentAmount: z.number().min(0),
-    finalPaymentDay: z.number().min(1).max(28),
-    finalPaymentMonth: z.number().min(6).max(24),
-    monthsToPay: z.number().min(6).max(24),
+    totalOfferAmount: z.number({ message: "Must be a number" }).min(0, "Offer amount required"),
+    firstMonthlyPayment: z.number({ message: "Must be a number" }).min(0, "First payment required"),
+    subsequentMonthlyPayment: z.number({ message: "Must be a number" }).min(0, "Subsequent payment required"),
+    paymentDayOfMonth: z.number({ message: "Must be a number" }).min(1).max(28),
+    subsequentMonths: z.number({ message: "Must be a number" }).min(4).max(22),
+    finalPaymentAmount: z.number({ message: "Must be a number" }).min(0),
+    finalPaymentDay: z.number({ message: "Must be a number" }).min(1).max(28),
+    finalPaymentMonth: z.number({ message: "Must be a number" }).min(6).max(24),
+    monthsToPay: z.number({ message: "Must be a number" }).min(6).max(24),
   })
   .refine(
     (data) => {
@@ -73,8 +73,8 @@ export const paymentTermsSchema = z
       .union([
         lumpSumSchema,
         z.object({
-          totalOfferAmount: z.number().optional(),
-          initialPayment: z.number().optional(),
+          totalOfferAmount: z.number({ message: "Must be a number" }).optional(),
+          initialPayment: z.number({ message: "Must be a number" }).optional(),
           additionalPayments: z.array(additionalPaymentSchema).optional(),
         }),
       ])
@@ -83,15 +83,15 @@ export const paymentTermsSchema = z
       .union([
         periodicSchema,
         z.object({
-          totalOfferAmount: z.number().optional(),
-          firstMonthlyPayment: z.number().optional(),
-          subsequentMonthlyPayment: z.number().optional(),
-          paymentDayOfMonth: z.number().optional(),
-          subsequentMonths: z.number().optional(),
-          finalPaymentAmount: z.number().optional(),
-          finalPaymentDay: z.number().optional(),
-          finalPaymentMonth: z.number().optional(),
-          monthsToPay: z.number().optional(),
+          totalOfferAmount: z.number({ message: "Must be a number" }).optional(),
+          firstMonthlyPayment: z.number({ message: "Must be a number" }).optional(),
+          subsequentMonthlyPayment: z.number({ message: "Must be a number" }).optional(),
+          paymentDayOfMonth: z.number({ message: "Must be a number" }).optional(),
+          subsequentMonths: z.number({ message: "Must be a number" }).optional(),
+          finalPaymentAmount: z.number({ message: "Must be a number" }).optional(),
+          finalPaymentDay: z.number({ message: "Must be a number" }).optional(),
+          finalPaymentMonth: z.number({ message: "Must be a number" }).optional(),
+          monthsToPay: z.number({ message: "Must be a number" }).optional(),
         }),
       ])
       .optional(),

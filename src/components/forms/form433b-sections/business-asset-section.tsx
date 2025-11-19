@@ -269,7 +269,7 @@ export function BusinessAssetsSection({
         {/* Cash and Investments (Banks) */}
         <Card>
           <CardHeader>
-            <CardTitle>Cash and Bank Accounts</CardTitle>
+            <CardTitle>Cash Accounts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {bankFields.map((field, index) => (
@@ -356,7 +356,7 @@ export function BusinessAssetsSection({
                   type: "",
                   bankName: "",
                   accountNumber: "",
-                  balance: 0,
+                  balance: null,
                 })
               }
               className="w-full border-dashed text-[#22b573]"
@@ -487,8 +487,8 @@ export function BusinessAssetsSection({
                 appendInvest({
                   institutionName: "",
                   accountNumber: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: null,
+                  loanBalance: null,
                   type: "",
                   investmentTypeText: "",
                 })
@@ -545,20 +545,20 @@ export function BusinessAssetsSection({
                   error={errors.digitalAssets?.[index]?.location?.message}
                 />
                 <FormInput
-                  label="Account Number (for custodian)"
+                  label="Account number for assets held by a custodian or broke"
                   id={`digitalAssets.${index}.accountNumber`}
                   {...register(`digitalAssets.${index}.accountNumber`)}
                   error={errors.digitalAssets?.[index]?.accountNumber?.message}
                 />
                 <FormInput
-                  label="Digital Asset Address (for self-hosted)"
+                  label="Digital asset address for self-hosted digital assets"
                   id={`digitalAssets.${index}.address`}
                   {...register(`digitalAssets.${index}.address`)}
                   error={errors.digitalAssets?.[index]?.address?.message}
                 />
                 <FormInput
                   type="number"
-                  label="US Dollar Equivalent ($)"
+                  label="US dollar equivalent of the digital asset as of today ($)"
                   id={`digitalAssets.${index}.usdValue`}
                   {...register(`digitalAssets.${index}.usdValue`, {
                     valueAsNumber: true,
@@ -573,11 +573,11 @@ export function BusinessAssetsSection({
               onClick={() =>
                 appendDigital({
                   description: "",
-                  numberOfUnits: 0,
+                  numberOfUnits: null,
                   location: "",
                   accountNumber: "",
                   address: "",
-                  usdValue: 0,
+                  usdValue: null,
                 })
               }
               className="w-full border-dashed text-[#22b573]"
@@ -653,8 +653,23 @@ export function BusinessAssetsSection({
                     />
                     <FormInput
                       label="Age"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       id={`notesReceivable.${index}.age`}
-                      {...register(`notesReceivable.${index}.age`)}
+                      {...(register(`notesReceivable.${index}.age`),
+                      {
+                        setValueAs: (v: any) =>
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9]/g, "")),
+                        onChange: (e: any) => {
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
+                        },
+                      })}
                       error={errors.notesReceivable?.[index]?.age?.message}
                     />
                   </div>
@@ -663,7 +678,7 @@ export function BusinessAssetsSection({
                   type="button"
                   variant="outline"
                   onClick={() =>
-                    appendNotes({ noteHolder: "", amount: 0, age: "" })
+                    appendNotes({ noteHolder: "", amount: null, age: "" })
                   }
                   className="w-full border-dashed text-[#22b573]"
                 >
@@ -752,7 +767,7 @@ export function BusinessAssetsSection({
                   type="button"
                   variant="outline"
                   onClick={() =>
-                    appendAccounts({ company: "", amount: 0, age: "" })
+                    appendAccounts({ company: "", amount: null, age: "" })
                   }
                   className="w-full border-dashed text-[#22b573]"
                 >
@@ -806,11 +821,20 @@ export function BusinessAssetsSection({
                   error={errors.realEstate?.[index]?.datePurchased?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Monthly Mortgage Payment ($)"
                   id={`realEstate.${index}.monthlyPayment`}
                   {...register(`realEstate.${index}.monthlyPayment`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={errors.realEstate?.[index]?.monthlyPayment?.message}
                 />
@@ -828,25 +852,62 @@ export function BusinessAssetsSection({
                   error={errors.realEstate?.[index]?.lenderName?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Current Market Value ($)"
                   id={`realEstate.${index}.currentMarketValue`}
                   {...register(`realEstate.${index}.currentMarketValue`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={
                     errors.realEstate?.[index]?.currentMarketValue?.message
                   }
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Loan Balance ($)"
                   id={`realEstate.${index}.loanBalance`}
                   {...register(`realEstate.${index}.loanBalance`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={errors.realEstate?.[index]?.loanBalance?.message}
                 />
+
+                {/* Auto-calculated net value */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <Label className="text-sm font-medium">
+                    Net Value:{" "}
+                    <span className="text-gray-600">
+                      {watch(`realEstate.${index}.currentMarketValue`)} * 0.8 -{" "}
+                      {watch(`realEstate.${index}.loanBalance`)} ={" "}
+                    </span>
+                    $
+                    {Math.max(
+                      0,
+                      (watch(`realEstate.${index}.currentMarketValue`) || 0) *
+                        0.8 -
+                        (watch(`realEstate.${index}.loanBalance`) || 0)
+                    ).toLocaleString()}
+                  </Label>
+                </div>
+
                 <FormField
                   label="Is property for sale or anticipate selling?"
                   id={`realEstate.${index}.isForSaleOrAnticipateSelling`}
@@ -903,13 +964,13 @@ export function BusinessAssetsSection({
                   propertyAddress: "",
                   description: "",
                   datePurchased: "",
-                  monthlyPayment: 0,
+                  monthlyPayment: null,
                   finalPaymentDate: "",
                   lenderName: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: null,
+                  loanBalance: null,
                   isForSaleOrAnticipateSelling: false,
-                  listingPrice: 0,
+                  listingPrice: null,
                 })
               }
               className="w-full border-dashed text-[#22b573]"
@@ -922,7 +983,13 @@ export function BusinessAssetsSection({
         {/* Business Vehicles */}
         <Card>
           <CardHeader>
-            <CardTitle>Business Vehicles</CardTitle>
+            <CardTitle>
+              Business Vehicles{" "}
+              <span className="text-gray-600 font-normal">
+                (cars, boats, motorcycles, trailers, etc.). Include those
+                located in foreign countries or jurisdictions
+              </span>
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {vehicleFields.map((field, index) => (
@@ -950,8 +1017,21 @@ export function BusinessAssetsSection({
                 />
                 <FormInput
                   label="Year"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   id={`vehicles.${index}.year`}
-                  {...register(`vehicles.${index}.year`)}
+                  {...(register(`vehicles.${index}.year`),
+                  {
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
+                  })}
                   error={errors.vehicles?.[index]?.year?.message}
                 />
                 <FormInput
@@ -962,11 +1042,20 @@ export function BusinessAssetsSection({
                   error={errors.vehicles?.[index]?.datePurchased?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Mileage or Use Hours"
                   id={`vehicles.${index}.mileageOrHours`}
                   {...register(`vehicles.${index}.mileageOrHours`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={errors.vehicles?.[index]?.mileageOrHours?.message}
                 />
@@ -1012,32 +1101,77 @@ export function BusinessAssetsSection({
                   error={errors.vehicles?.[index]?.finalPaymentDate?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Monthly Lease/Loan Amount ($)"
                   id={`vehicles.${index}.monthlyLeaseAmount`}
                   {...register(`vehicles.${index}.monthlyLeaseAmount`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={errors.vehicles?.[index]?.monthlyLeaseAmount?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Current Market Value ($)"
                   id={`vehicles.${index}.currentMarketValue`}
                   {...register(`vehicles.${index}.currentMarketValue`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={errors.vehicles?.[index]?.currentMarketValue?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Loan Balance ($)"
                   id={`vehicles.${index}.loanBalance`}
                   {...register(`vehicles.${index}.loanBalance`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={errors.vehicles?.[index]?.loanBalance?.message}
                 />
+
+                {/* Auto-calculated net value */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <Label className="text-sm font-medium">
+                    Net Value:{" "}
+                    <span className="text-gray-600">
+                      {watch(`vehicles.${index}.currentMarketValue`)} * 0.8 -{" "}
+                      {watch(`vehicles.${index}.loanBalance`)} ={" "}
+                    </span>
+                    $
+                    {Math.max(
+                      0,
+                      (watch(`vehicles.${index}.currentMarketValue`) || 0) *
+                        0.8 -
+                        (watch(`vehicles.${index}.loanBalance`) || 0)
+                    ).toLocaleString()}
+                  </Label>
+                </div>
               </div>
             ))}
             <Button
@@ -1048,14 +1182,14 @@ export function BusinessAssetsSection({
                   vehicleMakeModel: "",
                   year: "",
                   datePurchased: "",
-                  mileageOrHours: 0,
+                  mileageOrHours: null,
                   licenseTag: "",
                   leaseOrOwn: "Own",
-                  monthlyLeaseAmount: 0,
+                  monthlyLeaseAmount: null,
                   creditor: "",
                   finalPaymentDate: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: null,
+                  loanBalance: null,
                 })
               }
               className="w-full border-dashed text-[#22b573]"
@@ -1095,12 +1229,23 @@ export function BusinessAssetsSection({
                   error={errors.businessEquipment?.[index]?.type?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Current Market Value ($)"
                   id={`businessEquipment.${index}.currentMarketValue`}
                   {...register(
                     `businessEquipment.${index}.currentMarketValue`,
-                    { valueAsNumber: true }
+                    {
+                      setValueAs: (v: any) =>
+                        v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                      onChange: (e: any) => {
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9]/g,
+                          ""
+                        );
+                      },
+                    }
                   )}
                   error={
                     errors.businessEquipment?.[index]?.currentMarketValue
@@ -1108,11 +1253,20 @@ export function BusinessAssetsSection({
                   }
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   label="Loan Balance ($)"
                   id={`businessEquipment.${index}.loanBalance`}
                   {...register(`businessEquipment.${index}.loanBalance`, {
-                    valueAsNumber: true,
+                    setValueAs: (v: any) =>
+                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                    onChange: (e: any) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    },
                   })}
                   error={
                     errors.businessEquipment?.[index]?.loanBalance?.message
@@ -1148,8 +1302,8 @@ export function BusinessAssetsSection({
               onClick={() =>
                 appendEquip({
                   type: "",
-                  currentMarketValue: 0,
-                  loanBalance: 0,
+                  currentMarketValue: null,
+                  loanBalance: null,
                   isLeased: false,
                   usedInProductionOfIncome: false,
                 })

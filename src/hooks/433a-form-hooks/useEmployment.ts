@@ -40,6 +40,7 @@ const useEmployment = () => {
       dispatch(saveEmploymentInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching employment info:", error);
+      throw error;
     } finally {
       setLoadingFormData(false);
     }

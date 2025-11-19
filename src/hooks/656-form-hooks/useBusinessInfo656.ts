@@ -21,7 +21,7 @@ const useBusinessInfo656 = () => {
       dispatch(saveBusinessInformation(info));
     } catch (error: any) {
       console.error("Error saving business info:", error);
-      toast.error(error?.message || "Failed to save business info");
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -54,5 +54,3 @@ const useBusinessInfo656 = () => {
 };
 
 export default useBusinessInfo656;
-
-

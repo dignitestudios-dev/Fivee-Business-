@@ -63,7 +63,8 @@ const ViewSavedPreferencesSlider: React.FC<
             onScroll={(e) => {
               const target = e.currentTarget as HTMLDivElement;
               if (
-                target.scrollHeight - target.scrollTop - target.clientHeight < 120 &&
+                target.scrollHeight - target.scrollTop - target.clientHeight <
+                  120 &&
                 hasMore433a &&
                 !loadingMore433a
               ) {
@@ -73,10 +74,11 @@ const ViewSavedPreferencesSlider: React.FC<
           >
             {form433a && form433a.length ? (
               form433a.map((savedPref, index) => (
-                <Link href={`/dashboard/433a-oic?caseId=${savedPref._id}`} key={savedPref._id || index}>
-                  <div
-                    className="mb-2 group p-3 rounded-lg border border-[#e3e3e3] cursor-pointer hover:bg-gray-50 transition-all"
-                  >
+                <Link
+                  href={`/dashboard/433a-oic?caseId=${savedPref._id}`}
+                  key={savedPref._id || index}
+                >
+                  <div className="mb-2 group p-3 rounded-lg border border-[#e3e3e3] cursor-pointer hover:bg-gray-50 transition-all">
                     <div className="flex gap-5 items-center">
                       <div className="flex-1">
                         <div className="bg-[var(--primary)] h-7 w-7 rounded-md flex justify-center items-center">
@@ -99,7 +101,9 @@ const ViewSavedPreferencesSlider: React.FC<
                 </Link>
               ))
             ) : (
-              <p className="text-gray-400 text-center">No record for Form 433A OIC</p>
+              <p className="text-gray-400 text-center">
+                No record for Form 433A OIC
+              </p>
             )}
 
             {loadingMore433a && (
@@ -116,7 +120,8 @@ const ViewSavedPreferencesSlider: React.FC<
             onScroll={(e) => {
               const target = e.currentTarget as HTMLDivElement;
               if (
-                target.scrollHeight - target.scrollTop - target.clientHeight < 120 &&
+                target.scrollHeight - target.scrollTop - target.clientHeight <
+                  120 &&
                 hasMore433b &&
                 !loadingMore433b
               ) {
@@ -126,7 +131,10 @@ const ViewSavedPreferencesSlider: React.FC<
           >
             {form433b && form433b.length ? (
               form433b.map((savedPref, index) => (
-                <Link href={`/dashboard/433b-oic/?caseId=${savedPref._id}`} key={savedPref._id || index}>
+                <Link
+                  href={`/dashboard/433b-oic/?caseId=${savedPref._id}`}
+                  key={savedPref._id || index}
+                >
                   <div className="mb-2 group p-3 rounded-lg border border-[#e3e3e3] cursor-pointer hover:bg-gray-50 transition-all">
                     <div className="flex gap-5 items-center">
                       <div className="flex-1">
@@ -134,7 +142,9 @@ const ViewSavedPreferencesSlider: React.FC<
                           <TaxReceipt />
                         </div>
 
-                        <p className="font-bold text-base mt-2">{savedPref.title}</p>
+                        <p className="font-bold text-base mt-2">
+                          {savedPref.title}
+                        </p>
 
                         <p className="text-desc">
                           Last edited {formatDateWithName(savedPref.updatedAt)}
@@ -148,7 +158,9 @@ const ViewSavedPreferencesSlider: React.FC<
                 </Link>
               ))
             ) : (
-              <p className="text-gray-400 text-center">No record for Form 433B OIC</p>
+              <p className="text-gray-400 text-center">
+                No record for Form 433B OIC
+              </p>
             )}
 
             {loadingMore433b && (

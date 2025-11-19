@@ -36,7 +36,7 @@ const bankAccountSchema = z.object({
   type: z.string().min(1, "Account type is required"),
   bankName: z.string().min(1, "Bank name and country is required"),
   accountNumber: z.string().min(1, "Account number is required"),
-  balance: z.number().min(0, "Balance must be non-negative"),
+  balance: z.number({ message: "Must be a number" }).min(0, "Balance must be non-negative"),
 });
 
 const investmentAccountSchema = z.object({
@@ -44,30 +44,30 @@ const investmentAccountSchema = z.object({
     .string()
     .min(1, "Institution name and country is required"),
   accountNumber: z.string().min(1, "Account number is required"),
-  currentMarketValue: z.number().min(0),
-  loanBalance: z.number().min(0),
+  currentMarketValue: z.number({ message: "Must be a number" }).min(0),
+  loanBalance: z.number({ message: "Must be a number" }).min(0),
   type: z.string().min(1, "Account type is required"),
   investmentTypeText: z.string().optional(),
 });
 
 const digitalAssetSchema = z.object({
   description: z.string().min(1, "Description is required"),
-  numberOfUnits: z.number().min(0),
+  numberOfUnits: z.number({ message: "Must be a number" }).min(0),
   location: z.string().min(1, "Location is required"),
   accountNumber: z.string().optional(),
   address: z.string().optional(),
-  usdValue: z.number().min(0),
+  usdValue: z.number({ message: "Must be a number" }).min(0),
 });
 
 const noteReceivableSchema = z.object({
   noteHolder: z.string().min(1, "Note holder name is required"),
-  amount: z.number().min(0),
+  amount: z.number({ message: "Must be a number" }).min(0),
   age: z.string().min(1, "Age is required"),
 });
 
 const accountReceivableSchema = z.object({
   company: z.string().min(1, "Company/name is required"),
-  amount: z.number().min(0),
+  amount: z.number({ message: "Must be a number" }).min(0),
   age: z.string().min(1, "Age is required"),
 });
 
@@ -75,33 +75,33 @@ const realEstateSchema = z.object({
   propertyAddress: z.string().min(1, "Property address is required"),
   description: z.string().min(1, "Description is required"),
   datePurchased: dateStringToDate,
-  monthlyPayment: z.number().min(0),
+  monthlyPayment: z.number({ message: "Must be a number" }).min(0),
   finalPaymentDate: dateStringToDate.optional(),
   lenderName: z.string().min(1, "Lender name is required"),
-  currentMarketValue: z.number().min(0),
-  loanBalance: z.number().min(0),
+  currentMarketValue: z.number({ message: "Must be a number" }).min(0),
+  loanBalance: z.number({ message: "Must be a number" }).min(0),
   isForSaleOrAnticipateSelling: z.boolean(),
-  listingPrice: z.number().min(0).optional(),
+  listingPrice: z.number({ message: "Must be a number" }).min(0).optional(),
 });
 
 const vehicleSchema = z.object({
   vehicleMakeModel: z.string().min(1, "Make & model is required"),
   year: z.string().min(1, "Year is required"),
   datePurchased: dateStringToDate,
-  mileageOrHours: z.number().min(0),
+  mileageOrHours: z.number({ message: "Must be a number" }).min(0),
   licenseTag: z.string().min(1, "License/tag is required"),
   leaseOrOwn: z.enum(["Lease", "Own"]),
-  monthlyLeaseAmount: z.number().min(0),
+  monthlyLeaseAmount: z.number({ message: "Must be a number" }).min(0),
   creditor: z.string().optional(),
   finalPaymentDate: dateStringToDate.optional(),
-  currentMarketValue: z.number().min(0),
-  loanBalance: z.number().min(0),
+  currentMarketValue: z.number({ message: "Must be a number" }).min(0),
+  loanBalance: z.number({ message: "Must be a number" }).min(0),
 });
 
 const businessEquipmentSchema = z.object({
   type: z.string().min(1, "Type is required"),
-  currentMarketValue: z.number().min(0),
-  loanBalance: z.number().min(0),
+  currentMarketValue: z.number({ message: "Must be a number" }).min(0),
+  loanBalance: z.number({ message: "Must be a number" }).min(0),
   isLeased: z.boolean(),
   usedInProductionOfIncome: z.boolean(),
 });

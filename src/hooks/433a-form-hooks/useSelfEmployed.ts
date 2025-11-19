@@ -46,7 +46,7 @@ const useSelfEmployed = () => {
       dispatch(saveSelfEmployedInfo(info));
     } catch (error: any) {
       console.error("Error saving self-employed info:", error);
-      toast.error(error?.message || "Failed to save self-employed info");
+      throw error;
     } finally {
       setLoading(false);
     }

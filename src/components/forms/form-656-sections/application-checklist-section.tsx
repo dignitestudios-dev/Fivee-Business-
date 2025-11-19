@@ -68,9 +68,11 @@ export function ApplicationChecklistSection({
     }
   };
 
+  console.log("applicationChecklist: ", applicationChecklist);
+
   useEffect(() => {
     if (!applicationChecklist)
-      handleGetApplicationChecklist(caseId, FORM_656_SECTIONS[9]);
+      handleGetApplicationChecklist(caseId, FORM_656_SECTIONS[8]);
   }, []);
 
   useEffect(() => {

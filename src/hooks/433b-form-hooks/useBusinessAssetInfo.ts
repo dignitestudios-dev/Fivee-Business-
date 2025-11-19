@@ -32,7 +32,7 @@ const useBusinessAssetInfo = () => {
       await api.saveBusinessAssetInfo(payload, caseId);
       dispatch(saveBusinessAssetInfo(info));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to save business asset info");
+      throw error;
     } finally {
       setLoading(false);
     }

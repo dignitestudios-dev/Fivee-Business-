@@ -42,6 +42,7 @@ const usePersonalInfo = () => {
       dispatch(savePersonalInfo(response.data || {}));
     } catch (error: any) {
       console.error("Error fetching personal info:", error);
+      throw error;
     } finally {
       setLoadingFormData(false);
     }

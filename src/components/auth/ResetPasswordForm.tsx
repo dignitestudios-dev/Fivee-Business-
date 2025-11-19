@@ -43,7 +43,7 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
     }
 
     if (password.length > SECURITY_CONFIG.passwordMaxLength) {
-      errors.push('no more than 64 characters');
+      errors.push("no more than 64 characters");
     }
 
     if (SECURITY_CONFIG.passwordRequireUppercase && !/[A-Z]/.test(password)) {
@@ -91,9 +91,9 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
     }
   };
 
-  if (isSuccess) {
+  if (false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="p-8 border rounded-2xl">
             <div className="text-center">
@@ -128,6 +128,7 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
         label="Password"
         type={showPassword ? "text" : "password"}
         autoComplete="new-password"
+        maxLength={20}
         autoFocus
         {...register("password", {
           required: "Password is required",
@@ -156,6 +157,7 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
         label="Confirm Password"
         type={showConfirmPassword ? "text" : "password"}
         autoComplete="new-password"
+        maxLength={20}
         {...register("confirmPassword", {
           required: "Please confirm your password",
           maxLength: {
@@ -189,10 +191,11 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
         <div className="rounded-lg w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div
-              className={`flex items-center  ${watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
-                ? "text-[var(--primary)]"
-                : "text-gray-400"
-                }`}
+              className={`flex items-center  ${
+                watchNewPassword.length >= SECURITY_CONFIG.passwordMinLength
+                  ? "text-[var(--primary)]"
+                  : "text-gray-400"
+              }`}
             >
               <GoCheckCircleFill className="w-5 h-5 mr-2" />
               At least {SECURITY_CONFIG.passwordMinLength} characters
@@ -200,10 +203,11 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
 
             {SECURITY_CONFIG.passwordRequireUppercase && (
               <div
-                className={`flex items-center  ${/[A-Z]/.test(watchNewPassword)
-                  ? "text-[var(--primary)]"
-                  : "text-gray-400"
-                  }`}
+                className={`flex items-center  ${
+                  /[A-Z]/.test(watchNewPassword)
+                    ? "text-[var(--primary)]"
+                    : "text-gray-400"
+                }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One uppercase letter
@@ -212,10 +216,11 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
 
             {SECURITY_CONFIG.passwordRequireLowercase && (
               <div
-                className={`flex items-center  ${/[a-z]/.test(watchNewPassword)
-                  ? "text-[var(--primary)]"
-                  : "text-gray-400"
-                  }`}
+                className={`flex items-center  ${
+                  /[a-z]/.test(watchNewPassword)
+                    ? "text-[var(--primary)]"
+                    : "text-gray-400"
+                }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One lowercase letter
@@ -224,10 +229,11 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
 
             {SECURITY_CONFIG.passwordRequireNumbers && (
               <div
-                className={`flex items-center  ${/\d/.test(watchNewPassword)
-                  ? "text-[var(--primary)]"
-                  : "text-gray-400"
-                  }`}
+                className={`flex items-center  ${
+                  /\d/.test(watchNewPassword)
+                    ? "text-[var(--primary)]"
+                    : "text-gray-400"
+                }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One number
@@ -236,10 +242,11 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
 
             {SECURITY_CONFIG.passwordRequireSpecialChars && (
               <div
-                className={`flex items-center  ${/[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
-                  ? "text-[var(--primary)]"
-                  : "text-gray-400"
-                  }`}
+                className={`flex items-center  ${
+                  /[!@#$%^&*(),.?":{}|<>]/.test(watchNewPassword)
+                    ? "text-[var(--primary)]"
+                    : "text-gray-400"
+                }`}
               >
                 <GoCheckCircleFill className="w-5 h-5 mr-2" />
                 One special character

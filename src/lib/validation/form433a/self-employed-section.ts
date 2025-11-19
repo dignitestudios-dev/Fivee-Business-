@@ -42,7 +42,7 @@ export const selfEmployedSchema = z
       .or(z.literal("")),
     tradeName: nameSchema.optional(),
     businessDescription: z.string().min(1, "Business description is required").max(1000, "Business description must be at most 1000 characters").optional(),
-    totalEmployees: z.coerce.number().min(0, "Must be 0 or greater").max(1000000, "Total employees seems too large").optional(),
+    totalEmployees: z.coerce.number({ message: "Must be a number" }).min(0, "Must be 0 or greater").max(1000000, "Total employees seems too large").optional(),
     taxDepositFrequency: shortTextSchema.optional(),
     averageGrossMonthlyPayroll: moneySchema.optional(),
     hasOtherBusinessInterests: z.boolean().optional(),
@@ -51,7 +51,7 @@ export const selfEmployedSchema = z
         z
           .object({
             ownershipPercentage: z.coerce
-              .number()
+              .number({ message: "Must be a number" })
               .min(0, "Percentage cannot be less than 0")
               .max(100, "Percentage cannot exceed 100"),
             title: z.string().min(1, "Title is required"),

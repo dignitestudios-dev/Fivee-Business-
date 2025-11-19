@@ -129,6 +129,7 @@ export default function Form656() {
           "sourceOfFundsAndRequirementsInfo",
           "signaturesInfo",
           "paidPreparerUseOnlyInfo",
+          "applicationChecklistInfo",
         ];
 
         const newCompleted: number[] = [];

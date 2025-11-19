@@ -27,6 +27,23 @@ export const personalInfoInitialValues: PersonalInfoFromSchema = {
 const ssnRegex = /^\d{3}-\d{2}-\d{4}$/;
 const phoneLooseRegex = /^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/; // permissive US-style phone
 
+// Helper function to calculate age from date string
+const calculateAge = (dateString: string): number => {
+  const birthDate = new Date(dateString);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  return age;
+};
+
 // Accepts a string date (like "2025-10-06" or "10/06/2025")
 // Converts to "YYYY-MM-DD" format. If invalid, returns original so zod can throw an error.
 const dateStringToDate = z.preprocess(
@@ -48,28 +65,70 @@ const dateStringToDate = z.preprocess(
   })
 );
 
+// Enhanced date validation with minimum age requirement
+const dateWithMinAge = (minAge: number = 18) =>
+  z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        const parsed = new Date(val);
+        if (isNaN(parsed.getTime())) return val;
+        return parsed.toISOString().split("T")[0];
+      }
+      if (val instanceof Date) {
+        return val.toISOString().split("T")[0];
+      }
+      return val;
+    },
+    z
+      .string()
+      .refine((date) => /^\d{4}-\d{2}-\d{2}$/.test(date), {
+        message: "Please enter a valid date in YYYY-MM-DD format",
+      })
+      .refine(
+        (date) => {
+          const age = calculateAge(date);
+          return age >= minAge;
+        },
+        {
+          message: `Must be at least ${minAge} years old`,
+        }
+      )
+      .refine(
+        (date) => {
+          // Additional check to ensure date is not in the future
+          const birthDate = new Date(date);
+          const today = new Date();
+          return birthDate <= today;
+        },
+        {
+          message: "Date of birth cannot be in the future",
+        }
+      )
+  );
+
 /**
  * Household member schema
  */
 const householdMemberSchema = z.object({
-  name: z.string()
-      .min(1, "Name is required")
-      .min(2, "Name must be at least 2 characters")
-      .max(20, "Name cannot exceed 20 characters")
-      .refine((value) => !/\d/.test(value), {
-        message: "Name cannot contain numbers"
-      })
-      .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
-        message: "Name cannot contain special characters"
-      })
-      .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
-        message: "Name must contain at least one letter"
-      }),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .max(20, "Name cannot exceed 20 characters")
+    .refine((value) => !/\d/.test(value), {
+      message: "Name cannot contain numbers",
+    })
+    .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
+      message: "Name cannot contain special characters",
+    })
+    .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
+      message: "Name must contain at least one letter",
+    }),
   // Some forms submit numbers as strings — coerce to number and validate
   age: z.preprocess((v) => {
     if (typeof v === "string" && v.trim() !== "") return Number(v);
     return v;
-  }, z.number().min(1, { message: "Age is required" }).int().nonnegative("Age must be >= 0")),
+  }, z.number({ message: "Must be a number" }).min(1, { message: "Age is required" }).int().nonnegative("Age must be >= 0")),
   relationship: z.string().min(1, "Relationship is required"),
   claimedAsDependent: z.boolean().optional().default(false),
   contributesToIncome: z.boolean().optional().default(false),
@@ -80,33 +139,35 @@ const householdMemberSchema = z.object({
  */
 export const personalInfoSchema = z
   .object({
-    firstName: z.string()
+    firstName: z
+      .string()
       .min(1, "First name is required")
       .min(2, "First name must be at least 2 characters")
       .max(20, "First name cannot exceed 20 characters")
       .refine((value) => !/\d/.test(value), {
-        message: "First name cannot contain numbers"
+        message: "First name cannot contain numbers",
       })
       .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
-        message: "First name cannot contain special characters"
+        message: "First name cannot contain special characters",
       })
       .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
-        message: "First name must contain at least one letter"
+        message: "First name must contain at least one letter",
       }),
-    lastName: z.string()
+    lastName: z
+      .string()
       .min(1, "Last name is required")
       .min(2, "Last name must be at least 2 characters")
       .max(20, "Last name cannot exceed 20 characters")
       .refine((value) => !/\d/.test(value), {
-        message: "Last name cannot contain numbers"
+        message: "Last name cannot contain numbers",
       })
       .refine((value) => !/[!@#$%^&*(),.?":{}|<>]/.test(value), {
-        message: "Last name cannot contain special characters"
+        message: "Last name cannot contain special characters",
       })
       .refine((value) => /[A-Za-zÀ-ÿ]/.test(value), {
-        message: "Last name must contain at least one letter"
+        message: "Last name must contain at least one letter",
       }),
-    dob: dateStringToDate,
+    dob: dateWithMinAge(18), // Updated to use the enhanced validator
     ssnOrItin: z
       .string()
       .min(1, "SSN/ITIN is required")
@@ -141,19 +202,24 @@ export const personalInfoSchema = z
       .refine((v) => !v || phoneLooseRegex.test(v), {
         message: "Invalid phone number",
       }),
-  faxNumber: z.string()
-  .optional()
-  .nullable()
-  .refine((val) => {
-    if (!val) return true; 
-    if (!/^[\+]?[0-9\s\-\(\)\.\/]{6,20}$/.test(val)) {
-      return false;
-    }
-    const digitCount = val.replace(/\D/g, '').length;
-    return digitCount >= 6 && digitCount <= 20;
-  }, {
-    message: "Fax number must contain only numbers, spaces, hyphens, parentheses, dots, slashes and have 6-20 digits"
-  }),
+    faxNumber: z
+      .string()
+      .optional()
+      .nullable()
+      .refine(
+        (val) => {
+          if (!val) return true;
+          if (!/^[\+]?[0-9\s\-\(\)\.\/]{6,20}$/.test(val)) {
+            return false;
+          }
+          const digitCount = val.replace(/\D/g, "").length;
+          return digitCount >= 6 && digitCount <= 20;
+        },
+        {
+          message:
+            "Fax number must contain only numbers, spaces, hyphens, parentheses, dots, slashes and have 6-20 digits",
+        }
+      ),
     housingStatus: z.enum(["own", "rent", "other"]),
     livedInCommunityPropertyStateInLast10Years: z
       .boolean()
@@ -169,18 +235,34 @@ export const personalInfoSchema = z
       .max(20, "Spouse first name cannot exceed 20 characters")
       .optional()
       .nullable()
-      .refine((v) => !v || (v.trim().length >= 2 && !/\d/.test(v) && !/[!@#$%^&*(),.?":{}|<>]/.test(v)), {
-        message: "Spouse first name must be 2-20 characters and cannot contain numbers or special characters",
-      }),
+      .refine(
+        (v) =>
+          !v ||
+          (v.trim().length >= 2 &&
+            !/\d/.test(v) &&
+            !/[!@#$%^&*(),.?":{}|<>]/.test(v)),
+        {
+          message:
+            "Spouse first name must be 2-20 characters and cannot contain numbers or special characters",
+        }
+      ),
     spouseLastName: z
       .string()
       .max(20, "Spouse last name cannot exceed 20 characters")
       .optional()
       .nullable()
-      .refine((v) => !v || (v.trim().length >= 2 && !/\d/.test(v) && !/[!@#$%^&*(),.?":{}|<>]/.test(v)), {
-        message: "Spouse last name must be 2-20 characters and cannot contain numbers or special characters",
-      }),
-    spouseDOB: z.union([dateStringToDate, z.string().optional()]).optional(),
+      .refine(
+        (v) =>
+          !v ||
+          (v.trim().length >= 2 &&
+            !/\d/.test(v) &&
+            !/[!@#$%^&*(),.?":{}|<>]/.test(v)),
+        {
+          message:
+            "Spouse last name must be 2-20 characters and cannot contain numbers or special characters",
+        }
+      ),
+    spouseDOB: z.union([dateWithMinAge(18), z.string().optional()]).optional(), // Updated to use the enhanced validator
     spouseSSN: z
       .string()
       .optional()
@@ -220,6 +302,16 @@ export const personalInfoSchema = z
           message: "Spouse date of birth is required",
           path: ["spouseDOB"],
         });
+      } else {
+        // Additional age validation for spouse in superRefine for more specific error handling
+        const spouseAge = calculateAge(data.spouseDOB);
+        if (spouseAge < 18) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Spouse must be at least 18 years old",
+            path: ["spouseDOB"],
+          });
+        }
       }
       if (!data.spouseSSN) {
         ctx.addIssue({
@@ -233,6 +325,41 @@ export const personalInfoSchema = z
           code: "custom",
           message: "Spouse SSN must be in the format XXX-XX-XXXX",
           path: ["spouseSSN"],
+        });
+      }
+
+      // Additional validation: Marriage date should be after both birthdays
+      if (data.dob && data.spouseDOB && data.dateOfMarriage) {
+        const userDOB = new Date(data.dob);
+        const spouseDOB = new Date(data.spouseDOB);
+        const marriageDate = new Date(data.dateOfMarriage);
+
+        if (marriageDate < userDOB) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Marriage date cannot be before your date of birth",
+            path: ["dateOfMarriage"],
+          });
+        }
+
+        if (marriageDate < spouseDOB) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Marriage date cannot be before spouse's date of birth",
+            path: ["dateOfMarriage"],
+          });
+        }
+      }
+    }
+
+    // Additional age validation for primary person in superRefine
+    if (data.dob) {
+      const userAge = calculateAge(data.dob);
+      if (userAge < 18) {
+        ctx.addIssue({
+          code: "custom",
+          message: "You must be at least 18 years old",
+          path: ["dob"],
         });
       }
     }
