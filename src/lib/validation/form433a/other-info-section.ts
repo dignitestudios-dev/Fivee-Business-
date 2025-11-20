@@ -113,6 +113,8 @@ export const otherInfoSchema = z
   .object({
     litigation: z.object({
       isInvolvedInLitigation: z.boolean(),
+      plaintiff: z.boolean(),
+      defendant: z.boolean(),
       locationOfFiling: z.string().optional(),
       representedBy: z.string().optional(),
       docketCaseNumber: z.string().optional(),
@@ -168,7 +170,9 @@ export const otherInfoSchema = z
           z.object({
             location: z.string().min(1, "Location is required"),
             contents: z.string().min(1, "Contents are required"),
-            value: z.coerce.number({ message: "Must be a number" }).min(0, "Value must be 0 or greater"),
+            value: z.coerce
+              .number({ message: "Must be a number" })
+              .min(0, "Value must be 0 or greater"),
           })
         )
         .optional(),
@@ -197,7 +201,9 @@ export const otherInfoSchema = z
           z.object({
             description: z.string().min(1, "Description is required"),
             location: z.string().min(1, "Location is required"),
-            value: z.coerce.number({ message: "Must be a number" }).min(0, "Value must be 0 or greater"),
+            value: z.coerce
+              .number({ message: "Must be a number" })
+              .min(0, "Value must be 0 or greater"),
           })
         )
         .optional(),
@@ -208,7 +214,9 @@ export const otherInfoSchema = z
         .array(
           z.object({
             location: z.string().min(1, "Location is required"),
-            amount: z.coerce.number({ message: "Must be a number" }).min(0, "Amount must be 0 or greater"),
+            amount: z.coerce
+              .number({ message: "Must be a number" })
+              .min(0, "Amount must be 0 or greater"),
           })
         )
         .optional(),
@@ -224,6 +232,23 @@ export const otherInfoSchema = z
           message: "Location of filing is required when involved in litigation",
         });
       }
+      // Require exactly one of plaintiff or defendant
+      if (!data.litigation.plaintiff && !data.litigation.defendant) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["litigation", "plaintiff"],
+          message: "You must select Plaintiff or Defendant",
+        });
+      }
+
+      if (data.litigation.plaintiff && data.litigation.defendant) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["litigation", "defendant"],
+          message: "You cannot select both Plaintiff and Defendant",
+        });
+      }
+
       if (!data.litigation.representedBy) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

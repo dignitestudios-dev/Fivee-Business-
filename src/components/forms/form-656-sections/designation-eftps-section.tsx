@@ -86,7 +86,7 @@ export function DesignationEftpsSection({
   const addEftpsPayment = () => {
     append({
       paymentType: "Offer application fee",
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       electronicFundsTransferNumber: "",
     });
   };
@@ -103,7 +103,10 @@ export function DesignationEftpsSection({
             Section 5: Designation for Application of Payment
           </h2>
           <p className="text-gray-600">
-            If you wish your payment be applied to a specific tax year/tax period and/or a specific IRS tax form, list in the space below. If you do not designate a preference, we will apply any money you send to the government's best interest.
+            If you wish your payment be applied to a specific tax year/tax
+            period and/or a specific IRS tax form, list in the space below. If
+            you do not designate a preference, we will apply any money you send
+            to the government's best interest.
           </p>
         </div>
 
@@ -125,77 +128,120 @@ export function DesignationEftpsSection({
           <CardHeader>
             <CardTitle>EFTPS Payments</CardTitle>
             <p className="text-sm text-gray-600">
-              If you paid your application fee and/or your offer payment(s) through the Electronic Federal Tax Payment System (EFTPS), complete this section.
+              List offer payments made through Electronic Federal Tax Payment
+              System (EFTPS) or Individual Online Account (IOLA) below.
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {fields.map((field, index) => (
-              <div key={field.id} className="p-4 border border-gray-200 rounded-lg space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">Payment {index + 1}</h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => remove(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor={`eftpsPayments.${index}.paymentType`}>Payment Type</Label>
-                  <select
-                    id={`eftpsPayments.${index}.paymentType`}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    {...register(`eftpsPayments.${index}.paymentType`)}
-                  >
-                    <option value="">Select payment type</option>
-                    <option value="Offer application fee">Offer application fee</option>
-                    <option value="Offer payment">Offer payment</option>
-                  </select>
-                  {errors.eftpsPayments?.[index]?.paymentType?.message && (
-                    <p className="text-sm text-red-600">{errors.eftpsPayments[index].paymentType.message}</p>
-                  )}
-                </div>
+          <CardContent className="space-y-8">
+            {/* Offer Application Fee Section */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-900">
+                Offer application fee
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Amount */}
+                <FormInput
+                  label="Amount"
+                  id="eftpsPayments.offerApplicationFee"
+                  type="number"
+                  step="0.01"
+                  {...register("eftpsPayments.offerApplicationFee", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.eftpsPayments?.offerApplicationFee?.message}
+                />
+
+                {/* Date */}
                 <FormInput
                   label="Date"
-                  id={`eftpsPayments.${index}.date`}
+                  id="eftpsPayments.offerApplicationFeeDate"
                   type="date"
-                  required
-                  {...register(`eftpsPayments.${index}.date`)}
-                  error={errors.eftpsPayments?.[index]?.date?.message}
+                  {...register("eftpsPayments.offerApplicationFeeDate")}
+                  error={errors.eftpsPayments?.offerApplicationFeeDate?.message}
                 />
+
+                {/* Transfer Number */}
                 <FormInput
-                  label="Electronic Funds Transfer Number (numbers only)"
-                  id={`eftpsPayments.${index}.electronicFundsTransferNumber`}
-                  required
+                  label="Electronic funds transfer number (15 digits)"
+                  id="eftpsPayments.offerApplicationFeeElectronicFundsTransferNumber"
                   type="text"
                   maxLength={15}
                   inputMode="numeric"
                   pattern="\d*"
-                  // sanitize input in real-time to only digits
                   onInput={(e) => {
                     const input = e.currentTarget as HTMLInputElement;
                     const digits = input.value.replace(/\D/g, "");
                     if (input.value !== digits) input.value = digits;
                   }}
-                  {...register(`eftpsPayments.${index}.electronicFundsTransferNumber`)}
-                  error={errors.eftpsPayments?.[index]?.electronicFundsTransferNumber?.message}
+                  {...register(
+                    "eftpsPayments.offerApplicationFeeElectronicFundsTransferNumber"
+                  )}
+                  error={
+                    errors.eftpsPayments
+                      ?.offerApplicationFeeElectronicFundsTransferNumber
+                      ?.message
+                  }
                 />
               </div>
-            ))}
+            </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addEftpsPayment}
-              className="w-full border-dashed border-[#22b573] text-[#22b573] hover:bg-[#22b573]/5 bg-transparent"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add EFTPS Payment
-            </Button>
+            {/* Offer Payment Section */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-900">Offer payment</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Amount */}
+                <FormInput
+                  label="Amount"
+                  id="eftpsPayments.offerPayment"
+                  type="number"
+                  step="0.01"
+                  {...register("eftpsPayments.offerPayment", {
+                    valueAsNumber: true,
+                  })}
+                  error={errors.eftpsPayments?.offerPayment?.message}
+                />
+
+                {/* Date */}
+                <FormInput
+                  label="Date"
+                  id="eftpsPayments.offerPaymentDate"
+                  type="date"
+                  {...register("eftpsPayments.offerPaymentDate")}
+                  error={errors.eftpsPayments?.offerPaymentDate?.message}
+                />
+
+                {/* Transfer Number */}
+                <FormInput
+                  label="Electronic funds transfer number (15 digits)"
+                  id="eftpsPayments.offerPaymentElectronicFundsTransferNumber"
+                  type="text"
+                  maxLength={15}
+                  inputMode="numeric"
+                  pattern="\d*"
+                  onInput={(e) => {
+                    const input = e.currentTarget as HTMLInputElement;
+                    const digits = input.value.replace(/\D/g, "");
+                    if (input.value !== digits) input.value = digits;
+                  }}
+                  {...register(
+                    "eftpsPayments.offerPaymentElectronicFundsTransferNumber"
+                  )}
+                  error={
+                    errors.eftpsPayments
+                      ?.offerPaymentElectronicFundsTransferNumber?.message
+                  }
+                />
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 mt-4">
+              <strong>Note:</strong> Any Offer Application Fee or initial
+              payment made electronically must be made the same date your offer
+              is mailed or filed through Individual Online Account.
+            </p>
           </CardContent>
         </Card>
 

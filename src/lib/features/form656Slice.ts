@@ -55,14 +55,18 @@ const form656Slice = createSlice({
       state,
       action: PayloadAction<DesignationEftpsFormSchema | null>
     ) => {
-      if (action.payload) {
-        action.payload.eftpsPayments = action.payload.eftpsPayments?.map(
-          (p: any) => ({
-            ...p,
-            date: formatDateForInput(p.date),
-          })
-        );
-      }
+      action.payload.eftpsPayments.offerApplicationFeeDate = action.payload
+        .eftpsPayments?.offerApplicationFeeDate
+        ? formatDateForInput(
+            action.payload.eftpsPayments.offerApplicationFeeDate
+          )
+        : action.payload.eftpsPayments.offerApplicationFeeDate;
+
+      action.payload.eftpsPayments.offerPaymentDate = action.payload
+        .eftpsPayments?.offerPaymentDate
+        ? formatDateForInput(action.payload.eftpsPayments.offerPaymentDate)
+        : action.payload.eftpsPayments.offerPaymentDate;
+
       state.designationEftps = action.payload;
     },
     saveSourceOfFunds: (

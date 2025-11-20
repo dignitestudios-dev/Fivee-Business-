@@ -4,11 +4,11 @@ type MaritalStatus = "married" | "unmarried";
 
 export interface SignatureFormSchema {
   taxpayerSignature: {
-    signatureId: string;
+    // signatureId: string;
     date: string;
   };
   spouseSignature: {
-    signatureId: string;
+    // signatureId: string;
     date: string;
   };
   attachments: {
@@ -31,11 +31,11 @@ export interface SignatureFormSchema {
 
 export const signatureInitialValues: SignatureFormSchema = {
   taxpayerSignature: {
-    signatureId: "",
+    // signatureId: "",
     date: "",
   },
   spouseSignature: {
-    signatureId: "",
+    // signatureId: "",
     date: "",
   },
   attachments: {
@@ -60,11 +60,11 @@ export const signatureSchema = (maritalStatus: MaritalStatus) =>
   z
     .object({
       taxpayerSignature: z.object({
-        signatureId: z.string().min(1, "Taxpayer signature is required"),
+        // signatureId: z.string().min(1, "Taxpayer signature is required"),
         date: z.string().min(1, "Taxpayer date is required"),
       }),
       spouseSignature: z.object({
-        signatureId: z.string().optional().default(""),
+        // signatureId: z.string().optional().default(""),
         date: z.string().optional().default(""),
       }),
       attachments: z.object({
@@ -114,16 +114,16 @@ export const signatureSchema = (maritalStatus: MaritalStatus) =>
     })
     .superRefine((data, ctx) => {
       if (maritalStatus === "married") {
-        if (
-          !data.spouseSignature.signatureId ||
-          data.spouseSignature.signatureId.trim() === ""
-        ) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Spouse signature is required",
-            path: ["spouseSignature", "signatureId"],
-          });
-        }
+        // if (
+        //   !data.spouseSignature.signatureId ||
+        //   data.spouseSignature.signatureId.trim() === ""
+        // ) {
+        //   ctx.addIssue({
+        //     code: z.ZodIssueCode.custom,
+        //     message: "Spouse signature is required",
+        //     path: ["spouseSignature", "signatureId"],
+        //   });
+        // }
         if (
           !data.spouseSignature.date ||
           data.spouseSignature.date.trim() === ""

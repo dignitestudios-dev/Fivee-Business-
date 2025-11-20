@@ -168,7 +168,9 @@ export function SignatureSection({
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
     try {
-      console.log("signature data:", data);
+      // delete data.taxpayerSignature.signatureId;
+      // delete data.spouseSignature.signatureId;
+
       await handleSaveSignatureInfo(data, caseId);
       router.push(`/dashboard/433a-oic/payment?caseId=${caseId}`);
     } catch (error: any) {
@@ -192,59 +194,59 @@ export function SignatureSection({
     }
   }, [signatureInfo, reset]);
 
-  useEffect(() => {
-    if (
-      signatureInfo?.taxpayerSignature?.signatureId &&
-      signatures?.length > 0
-    ) {
-      const sig = signatures?.find(
-        (s) => s._id === signatureInfo.taxpayerSignature.signatureId
-      );
-      if (sig) {
-        setTaxpayerSignaturePreview(sig.url);
-      }
-    }
-    if (signatureInfo?.spouseSignature?.signatureId && signatures?.length > 0) {
-      const sig = signatures?.find(
-        (s) => s._id === signatureInfo.spouseSignature.signatureId
-      );
-      if (sig) {
-        setSpouseSignaturePreview(sig.url);
-      }
-    }
+  // useEffect(() => {
+  //   if (
+  //     signatureInfo?.taxpayerSignature?.signatureId &&
+  //     signatures?.length > 0
+  //   ) {
+  //     const sig = signatures?.find(
+  //       (s) => s._id === signatureInfo.taxpayerSignature.signatureId
+  //     );
+  //     if (sig) {
+  //       setTaxpayerSignaturePreview(sig.url);
+  //     }
+  //   }
+  //   if (signatureInfo?.spouseSignature?.signatureId && signatures?.length > 0) {
+  //     const sig = signatures?.find(
+  //       (s) => s._id === signatureInfo.spouseSignature.signatureId
+  //     );
+  //     if (sig) {
+  //       setSpouseSignaturePreview(sig.url);
+  //     }
+  //   }
 
-    if (signatureInfo?.taxpayerSignature?.signature) {
-      setTaxpayerSignaturePreview(signatureInfo.taxpayerSignature.signature);
-    }
-    if (signatureInfo?.spouseSignature?.signature) {
-      setSpouseSignaturePreview(signatureInfo.spouseSignature.signature);
-    }
-  }, [signatureInfo, signatures]);
+  //   if (signatureInfo?.taxpayerSignature?.signature) {
+  //     setTaxpayerSignaturePreview(signatureInfo.taxpayerSignature.signature);
+  //   }
+  //   if (signatureInfo?.spouseSignature?.signature) {
+  //     setSpouseSignaturePreview(signatureInfo.spouseSignature.signature);
+  //   }
+  // }, [signatureInfo, signatures]);
 
-  const handleSelectTaxpayerSignature = async (id: string, url: string) => {
-    setTaxpayerSignaturePreview(url);
-    console.log("tax payer id: ", id);
-    setValue("taxpayerSignature.signatureId", id, { shouldValidate: true });
-    await trigger("taxpayerSignature.signatureId");
-  };
+  // const handleSelectTaxpayerSignature = async (id: string, url: string) => {
+  //   setTaxpayerSignaturePreview(url);
+  //   console.log("tax payer id: ", id);
+  //   setValue("taxpayerSignature.signatureId", id, { shouldValidate: true });
+  //   await trigger("taxpayerSignature.signatureId");
+  // };
 
-  const handleSelectSpouseSignature = async (id: string, url: string) => {
-    setSpouseSignaturePreview(url);
-    setValue("spouseSignature.signatureId", id, { shouldValidate: true });
-    await trigger("spouseSignature.signatureId");
-  };
+  // const handleSelectSpouseSignature = async (id: string, url: string) => {
+  //   setSpouseSignaturePreview(url);
+  //   setValue("spouseSignature.signatureId", id, { shouldValidate: true });
+  //   await trigger("spouseSignature.signatureId");
+  // };
 
-  const removeTaxpayerSignature = async () => {
-    setTaxpayerSignaturePreview(null);
-    setValue("taxpayerSignature.signatureId", "", { shouldValidate: true });
-    await trigger("taxpayerSignature.signatureId");
-  };
+  // const removeTaxpayerSignature = async () => {
+  //   setTaxpayerSignaturePreview(null);
+  //   setValue("taxpayerSignature.signatureId", "", { shouldValidate: true });
+  //   await trigger("taxpayerSignature.signatureId");
+  // };
 
-  const removeSpouseSignature = async () => {
-    setSpouseSignaturePreview(null);
-    setValue("spouseSignature.signatureId", "", { shouldValidate: true });
-    await trigger("spouseSignature.signatureId");
-  };
+  // const removeSpouseSignature = async () => {
+  //   setSpouseSignaturePreview(null);
+  //   setValue("spouseSignature.signatureId", "", { shouldValidate: true });
+  //   await trigger("spouseSignature.signatureId");
+  // };
 
   const handleReloadSignatures = () => {
     handleGetSignatures();
@@ -302,6 +304,7 @@ export function SignatureSection({
                     required
                     id="taxpayerSignature.date"
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     {...register("taxpayerSignature.date")}
                     error={errors.taxpayerSignature?.date?.message}
                     className="focus:ring-[#22b573] focus:border-[#22b573]"
@@ -323,6 +326,7 @@ export function SignatureSection({
                       required
                       id="spouseSignature.date"
                       type="date"
+                      min={new Date().toISOString().split("T")[0]}
                       {...register("spouseSignature.date")}
                       error={errors.spouseSignature?.date?.message}
                       className="focus:ring-[#22b573] focus:border-[#22b573]"

@@ -2,7 +2,7 @@ import z from "zod";
 
 export const signatureInitialValues = {
   taxpayerSignature: {
-    signatureId: "",
+    // signatureId: "",
     title: "",
     date: "",
   },
@@ -21,7 +21,7 @@ export const signatureInitialValues = {
 
 export const signatureSchemaFormB = z.object({
   taxpayerSignature: z.object({
-    signatureId: z.string().min(1, "Signature is required"),
+    // signatureId: z.string().min(1, "Signature is required"),
     title: z.string().min(1, "Title is required"),
     date: z.string().min(1, "Date is required"),
   }),

@@ -147,38 +147,38 @@ export function SignatureSection({
     }
   }, [signatureInfo, reset]);
 
-  useEffect(() => {
-    if (
-      signatureInfo?.taxpayerSignature?.signatureId &&
-      signatures?.length > 0
-    ) {
-      const sig = signatures?.find(
-        (s) => s._id === signatureInfo.taxpayerSignature.signatureId
-      );
-      if (sig) {
-        setRepresentativeSignaturePreview(sig.url);
-      }
-    }
-  }, [signatureInfo, signatures]);
+  // useEffect(() => {
+  //   if (
+  //     signatureInfo?.taxpayerSignature?.signatureId &&
+  //     signatures?.length > 0
+  //   ) {
+  //     const sig = signatures?.find(
+  //       (s) => s._id === signatureInfo.taxpayerSignature.signatureId
+  //     );
+  //     if (sig) {
+  //       setRepresentativeSignaturePreview(sig.url);
+  //     }
+  //   }
+  // }, [signatureInfo, signatures]);
 
-  const handleSelectRepresentativeSignature = async (
-    id: string,
-    url: string
-  ) => {
-    setRepresentativeSignaturePreview(url);
-    setValue("taxpayerSignature.signatureId", id, {
-      shouldValidate: true,
-    });
-    await trigger("taxpayerSignature.signatureId");
-  };
+  // const handleSelectRepresentativeSignature = async (
+  //   id: string,
+  //   url: string
+  // ) => {
+  //   setRepresentativeSignaturePreview(url);
+  //   setValue("taxpayerSignature.signatureId", id, {
+  //     shouldValidate: true,
+  //   });
+  //   await trigger("taxpayerSignature.signatureId");
+  // };
 
-  const removeRepresentativeSignature = async () => {
-    setRepresentativeSignaturePreview(null);
-    setValue("taxpayerSignature.signatureId", "", {
-      shouldValidate: true,
-    });
-    await trigger("taxpayerSignature.signatureId");
-  };
+  // const removeRepresentativeSignature = async () => {
+  //   setRepresentativeSignaturePreview(null);
+  //   setValue("taxpayerSignature.signatureId", "", {
+  //     shouldValidate: true,
+  //   });
+  //   await trigger("taxpayerSignature.signatureId");
+  // };
 
   const handleReloadSignatures = () => {
     handleGetSignatures();
@@ -204,7 +204,7 @@ export function SignatureSection({
 
         {/* Signatures */}
         <Card>
-          <CardHeader>
+          {/* <CardHeader>
             <CardTitle>Required Signatures</CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Button
@@ -222,120 +222,11 @@ export function SignatureSection({
                 Reload Signatures
               </Button>
             </div>
-          </CardHeader>
+          </CardHeader> */}
           <CardContent className="space-y-6">
             {/* Representative Signature */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label className="mb-2">
-                    Signature of Authorized Representative *
-                  </Label>
-                  {/* Hidden input to register the field with react-hook-form */}
-                  <input
-                    type="hidden"
-                    {...register("taxpayerSignature.signatureId")}
-                  />
-                  <div className="space-y-3 w-full">
-                    {!representativeSignaturePreview ? (
-                      <DropdownPopup
-                        trigger={
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full justify-between"
-                            disabled={loadingSignatures}
-                          >
-                            Select Signature
-                            <Upload className="w-4 h-4 ml-2" />
-                          </Button>
-                        }
-                        options={
-                          signatures?.map((sig) => ({
-                            key: sig._id,
-                            label: `${sig.title}${
-                              sig.description ? ` - ${sig.description}` : ""
-                            }`,
-                            icon: (
-                              <img
-                                src={sig.url}
-                                alt={sig.title}
-                                className="w-20 h-10 object-contain"
-                              />
-                            ),
-                            onClick: () =>
-                              handleSelectRepresentativeSignature(
-                                sig._id,
-                                sig.url
-                              ),
-                          })) || []
-                        }
-                        dropdownClassName="w-80"
-                        placement="bottom-left"
-                      />
-                    ) : (
-                      <div className="border border-gray-300 rounded-lg p-4">
-                        <img
-                          src={representativeSignaturePreview}
-                          alt="Representative Signature"
-                          className="max-h-24 mx-auto mb-3"
-                        />
-                        <div className="flex justify-center gap-2">
-                          <DropdownPopup
-                            trigger={
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="text-[#22b573] border-[#22b573] hover:bg-[#22b573]/5"
-                              >
-                                <Edit className="w-4 h-4 mr-1" />
-                                Change
-                              </Button>
-                            }
-                            options={
-                              signatures?.map((sig) => ({
-                                key: sig._id,
-                                label: `${sig.title}${
-                                  sig.description ? ` - ${sig.description}` : ""
-                                }`,
-                                icon: (
-                                  <img
-                                    src={sig.url}
-                                    alt={sig.title}
-                                    className="w-20 h-10 object-contain"
-                                  />
-                                ),
-                                onClick: () =>
-                                  handleSelectRepresentativeSignature(
-                                    sig._id,
-                                    sig.url
-                                  ),
-                              })) || []
-                            }
-                            dropdownClassName="w-80"
-                            placement="bottom-left"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={removeRepresentativeSignature}
-                            className="text-red-600 border-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Remove
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {errors.taxpayerSignature?.signatureId && (
-                      <p className="text-red-600 text-sm">
-                        {errors.taxpayerSignature.signatureId.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
                 <FormInput
                   label="Title"
                   required
@@ -474,3 +365,113 @@ export function SignatureSection({
     </FormProvider>
   );
 }
+
+// <div>
+//   <Label className="mb-2">
+//     Signature of Authorized Representative *
+//   </Label>
+//   {/* Hidden input to register the field with react-hook-form */}
+//   <input
+//     type="hidden"
+//     {...register("taxpayerSignature.signatureId")}
+//   />
+//   <div className="space-y-3 w-full">
+//     {!representativeSignaturePreview ? (
+//       <DropdownPopup
+//         trigger={
+//           <Button
+//             type="button"
+//             variant="outline"
+//             className="w-full justify-between"
+//             disabled={loadingSignatures}
+//           >
+//             Select Signature
+//             <Upload className="w-4 h-4 ml-2" />
+//           </Button>
+//         }
+//         options={
+//           signatures?.map((sig) => ({
+//             key: sig._id,
+//             label: `${sig.title}${
+//               sig.description ? ` - ${sig.description}` : ""
+//             }`,
+//             icon: (
+//               <img
+//                 src={sig.url}
+//                 alt={sig.title}
+//                 className="w-20 h-10 object-contain"
+//               />
+//             ),
+//             onClick: () =>
+//               handleSelectRepresentativeSignature(
+//                 sig._id,
+//                 sig.url
+//               ),
+//           })) || []
+//         }
+//         dropdownClassName="w-80"
+//         placement="bottom-left"
+//       />
+//     ) : (
+//       <div className="border border-gray-300 rounded-lg p-4">
+//         <img
+//           src={representativeSignaturePreview}
+//           alt="Representative Signature"
+//           className="max-h-24 mx-auto mb-3"
+//         />
+//         <div className="flex justify-center gap-2">
+//           <DropdownPopup
+//             trigger={
+//               <Button
+//                 type="button"
+//                 variant="outline"
+//                 size="sm"
+//                 className="text-[#22b573] border-[#22b573] hover:bg-[#22b573]/5"
+//               >
+//                 <Edit className="w-4 h-4 mr-1" />
+//                 Change
+//               </Button>
+//             }
+//             options={
+//               signatures?.map((sig) => ({
+//                 key: sig._id,
+//                 label: `${sig.title}${
+//                   sig.description ? ` - ${sig.description}` : ""
+//                 }`,
+//                 icon: (
+//                   <img
+//                     src={sig.url}
+//                     alt={sig.title}
+//                     className="w-20 h-10 object-contain"
+//                   />
+//                 ),
+//                 onClick: () =>
+//                   handleSelectRepresentativeSignature(
+//                     sig._id,
+//                     sig.url
+//                   ),
+//               })) || []
+//             }
+//             dropdownClassName="w-80"
+//             placement="bottom-left"
+//           />
+//           <Button
+//             type="button"
+//             variant="outline"
+//             size="sm"
+//             onClick={removeRepresentativeSignature}
+//             className="text-red-600 border-red-600 hover:bg-red-50"
+//           >
+//             <Trash2 className="w-4 h-4 mr-1" />
+//             Remove
+//           </Button>
+//         </div>
+//       </div>
+//     )}
+//     {errors.taxpayerSignature?.signatureId && (
+//       <p className="text-red-600 text-sm">
+//         {errors.taxpayerSignature.signatureId.message}
+//       </p>
+//     )}
+//   </div>
+// </div>

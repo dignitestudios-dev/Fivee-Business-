@@ -379,8 +379,36 @@ export function OtherInfoSection({
 
             {litigationInvolved && (
               <div className="space-y-6">
+                <FormField
+                  label="Role"
+                  id="litigation.role"
+                  error={
+                    errors.litigation?.plaintiff?.message ||
+                    errors.litigation?.defendant?.message
+                  }
+                >
+                  <RadioGroup
+                    value={watch("litigation.role")}
+                    onValueChange={(value) => {
+                      setValue("litigation.role", value);
+                      setValue("litigation.plaintiff", value === "Plaintiff");
+                      setValue("litigation.defendant", value === "Defendant");
+                    }}
+                    className="flex gap-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Plaintiff" id="role-plaintiff" />
+                      <Label htmlFor="role-plaintiff">Plaintiff</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Defendant" id="role-defendant" />
+                      <Label htmlFor="role-defendant">Defendant</Label>
+                    </div>
+                  </RadioGroup>
+                </FormField>
+
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Plaintiff</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormInput
                       label="Location of filing"
@@ -404,7 +432,6 @@ export function OtherInfoSection({
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Defendant</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormInput
                       label="Possible completion date (mm/dd/yyyy)"
