@@ -52,6 +52,7 @@ export default function SignatureForm() {
   const [canvasHeight, setCanvasHeight] = useState<number>(200);
 
   const sigCanvas = useRef<SignatureCanvas>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadSignatures = async () => {
@@ -107,14 +108,21 @@ export default function SignatureForm() {
     }
 
     let hasSignature = false;
+
     if (mode === "draw") {
-      const dataUrl = sigCanvas.current
-        ?.getTrimmedCanvas()
-        .toDataURL("image/png");
-      hasSignature =
-        !!dataUrl &&
-        dataUrl !==
-          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="; // Check if not empty canvas
+      const canvas = sigCanvas.current?.getCanvas();
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const pixelData = ctx.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          ).data;
+          hasSignature = Array.from(pixelData).some((value) => value !== 0); // check if any pixel is not empty
+        }
+      }
     } else if (mode === "upload") {
       hasSignature = !!uploadedFile;
     }
@@ -132,45 +140,48 @@ export default function SignatureForm() {
   // Save signature
   const handleSave = async () => {
     if (!validateForm()) return;
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("category", "signature");
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("category", "signature");
-
-    let file: File | null = null;
-    if (mode === "draw") {
-      const dataUrl = sigCanvas.current
-        ?.getTrimmedCanvas()
-        .toDataURL("image/png");
-      if (dataUrl) {
-        file = dataURLtoFile(dataUrl, `${title}.png`);
+      let file: File | null = null;
+      if (mode === "draw") {
+        const dataUrl = sigCanvas.current
+          ?.getTrimmedCanvas()
+          .toDataURL("image/png");
+        if (dataUrl) {
+          file = dataURLtoFile(dataUrl, `${title}.png`);
+        }
+      } else if (uploadedFile) {
+        file = uploadedFile;
       }
-    } else if (uploadedFile) {
-      file = uploadedFile;
+
+      if (file) {
+        formData.append("file", file);
+      }
+
+      if (isNew) {
+        await handleCreateSignature(formData);
+      } else if (selectedId) {
+        await handleUpdateSignature(selectedId, formData);
+      }
+
+      await handleGetSignatures();
+
+      setIsNew(false);
+      setSelectedId(null);
+      setTitle("");
+      setDescription("");
+      setPreview("");
+      setUploadedFile(null);
+      setViewMode(false);
+      setErrors({});
+      sigCanvas.current?.clear();
+    } catch (error) {
+      console.log(error);
     }
-
-    if (file) {
-      formData.append("file", file);
-    }
-
-    if (isNew) {
-      await handleCreateSignature(formData);
-    } else if (selectedId) {
-      await handleUpdateSignature(selectedId, formData);
-    }
-
-    await handleGetSignatures();
-
-    setIsNew(false);
-    setSelectedId(null);
-    setTitle("");
-    setDescription("");
-    setPreview("");
-    setUploadedFile(null);
-    setViewMode(false);
-    setErrors({});
-    sigCanvas.current?.clear();
   };
 
   // Delete signature
@@ -232,6 +243,9 @@ export default function SignatureForm() {
   const handleRemoveUpload = () => {
     setUploadedFile(null);
     setPreview("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // reset file input
+    }
   };
 
   const handleClearExisting = () => {
@@ -384,9 +398,10 @@ export default function SignatureForm() {
                 <>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleFileChange}
                     disabled={isLoading}
+                    ref={fileInputRef}
                     className="mb-2 w-full"
                   />
                   {preview && (
@@ -426,6 +441,7 @@ export default function SignatureForm() {
                   value={title}
                   onChange={handleTitleChange}
                   disabled={isLoading}
+                  maxLength={25}
                   className="w-full mt-2 rounded-lg border border-[#E3E3E3] px-2 py-3"
                 />
                 {errors.title && (
@@ -443,6 +459,7 @@ export default function SignatureForm() {
                   value={description}
                   onChange={handleDescriptionChange}
                   disabled={isLoading}
+                  maxLength={50}
                   className="w-full mt-2 rounded-lg border border-[#E3E3E3] px-2 py-3"
                 />
                 {errors.description && (

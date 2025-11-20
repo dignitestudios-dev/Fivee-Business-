@@ -56,6 +56,7 @@ const useSignatures = () => {
     } catch (error: any) {
       console.error("Error creating signature:", error);
       toast.error(error?.message || "Failed to create signature");
+      throw error;
     } finally {
       setCreating(false);
     }
@@ -75,6 +76,7 @@ const useSignatures = () => {
     } catch (error: any) {
       console.error("Error updating signature:", error);
       toast.error(error?.message || "Failed to update signature");
+      throw error;
     } finally {
       setUpdating(false);
     }
