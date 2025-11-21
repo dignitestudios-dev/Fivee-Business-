@@ -7,7 +7,7 @@ export interface SignatureFormSchema {
     // signatureId: string;
     date: string;
   };
-  spouseSignature: {
+  spouseSignature?: {
     // signatureId: string;
     date: string;
   };
