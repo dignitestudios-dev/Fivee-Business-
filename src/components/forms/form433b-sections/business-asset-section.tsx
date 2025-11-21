@@ -66,6 +66,8 @@ export function BusinessAssetsSection({
     control,
   } = methods;
 
+
+  console.log("errors in bus assets",errors)
   // Field arrays
   const {
     fields: bankFields,
@@ -657,18 +659,9 @@ export function BusinessAssetsSection({
                       inputMode="numeric"
                       pattern="[0-9]*"
                       id={`notesReceivable.${index}.age`}
-                      {...(register(`notesReceivable.${index}.age`),
-                      {
+                      {...register(`notesReceivable.${index}.age`, {
                         setValueAs: (v: any) =>
-                          v === ""
-                            ? 0
-                            : Number(String(v).replace(/[^0-9]/g, "")),
-                        onChange: (e: any) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(
-                            /[^0-9]/g,
-                            ""
-                          );
-                        },
+                          v === "" ? "" : String(v).replace(/[^0-9]/g, ""),
                       })}
                       error={errors.notesReceivable?.[index]?.age?.message}
                     />
@@ -757,8 +750,14 @@ export function BusinessAssetsSection({
                     />
                     <FormInput
                       label="Age"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       id={`accountsReceivable.${index}.age`}
-                      {...register(`accountsReceivable.${index}.age`)}
+                      {...register(`accountsReceivable.${index}.age`, {
+                        setValueAs: (v: any) =>
+                          v === "" ? "" : String(v).replace(/[^0-9]/g, ""),
+                      })}
                       error={errors.accountsReceivable?.[index]?.age?.message}
                     />
                   </div>
@@ -970,7 +969,7 @@ export function BusinessAssetsSection({
                   currentMarketValue: null,
                   loanBalance: null,
                   isForSaleOrAnticipateSelling: false,
-                  listingPrice: null,
+                  listingPrice: 0,
                 })
               }
               className="w-full border-dashed text-[#22b573]"
@@ -1021,16 +1020,9 @@ export function BusinessAssetsSection({
                   inputMode="numeric"
                   pattern="[0-9]*"
                   id={`vehicles.${index}.year`}
-                  {...(register(`vehicles.${index}.year`),
-                  {
+                  {...register(`vehicles.${index}.year`, {
                     setValueAs: (v: any) =>
-                      v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
-                    onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(
-                        /[^0-9]/g,
-                        ""
-                      );
-                    },
+                      v === "" ? "" : String(v).replace(/[^0-9]/g, ""),
                   })}
                   error={errors.vehicles?.[index]?.year?.message}
                 />

@@ -63,53 +63,27 @@ export const signatureSchema = (maritalStatus: MaritalStatus) =>
         // signatureId: z.string().min(1, "Taxpayer signature is required"),
         date: z.string().min(1, "Taxpayer date is required"),
       }),
-      spouseSignature: z.object({
-        // signatureId: z.string().optional().default(""),
-        date: z.string().optional().default(""),
-      }),
+      spouseSignature: z
+        .object({
+          // signatureId: z.string().optional().default(""),
+          date: z.string().optional().default(""),
+        })
+        .optional(),
       attachments: z.object({
-        payStubs: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        investmentStatements: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        digitalAssetsDocs: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        otherIncomeStatements: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        bankStatements: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        form433B: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        loanStatements: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        accountsReceivable: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        taxLiabilityVerification: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        courtOrders: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        trustDocuments: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        specialCircumstancesDocs: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        form2848: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
-        form656: z.literal(true, {
-          message: "You must confirm this attachment",
-        }),
+        payStubs: z.boolean().optional().default(false),
+        investmentStatements: z.boolean().optional().default(false),
+        digitalAssetsDocs: z.boolean().optional().default(false),
+        otherIncomeStatements: z.boolean().optional().default(false),
+        bankStatements: z.boolean().optional().default(false),
+        form433B: z.boolean().optional().default(false),
+        loanStatements: z.boolean().optional().default(false),
+        accountsReceivable: z.boolean().optional().default(false),
+        taxLiabilityVerification: z.boolean().optional().default(false),
+        courtOrders: z.boolean().optional().default(false),
+        trustDocuments: z.boolean().optional().default(false),
+        specialCircumstancesDocs: z.boolean().optional().default(false),
+        form2848: z.boolean().optional().default(false),
+        form656: z.boolean().optional().default(false),
       }),
     })
     .superRefine((data, ctx) => {
@@ -125,8 +99,8 @@ export const signatureSchema = (maritalStatus: MaritalStatus) =>
         //   });
         // }
         if (
-          !data.spouseSignature.date ||
-          data.spouseSignature.date.trim() === ""
+          !data.spouseSignature?.date ||
+          data.spouseSignature?.date.trim() === ""
         ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

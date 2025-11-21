@@ -144,42 +144,146 @@ export function BusinessIncomeSection({
           </CardHeader>
           <CardContent className="space-y-6">
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Gross Receipts ($)"
               id="grossReceipts"
-              {...register("grossReceipts", { valueAsNumber: true })}
+              {...register("grossReceipts", {
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.grossReceipts?.message}
+              onWheel={(e: any) => e.target.blur()}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Gross Rental Income ($)"
               id="grossRentalIncome"
-              {...register("grossRentalIncome", { valueAsNumber: true })}
+              {...register("grossRentalIncome", {
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.grossRentalIncome?.message}
+              onWheel={(e: any) => e.target.blur()}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Interest Income ($)"
               id="interestIncome"
-              {...register("interestIncome", { valueAsNumber: true })}
+              {...register("interestIncome", {
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.interestIncome?.message}
+              onWheel={(e: any) => e.target.blur()}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Dividends ($)"
               id="dividends"
-              {...register("dividends", { valueAsNumber: true })}
+              {...register("dividends", {
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.dividends?.message}
+              onWheel={(e: any) => e.target.blur()}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Other Income ($)"
               id="otherIncome"
-              {...register("otherIncome", { valueAsNumber: true })}
+              {...register("otherIncome", {
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.otherIncome?.message}
+              onWheel={(e: any) => e.target.blur()}
             />
             <div className="text-lg font-bold">
-              Total Business Income: ${totalIncome.toLocaleString()}
+              Total Business Income: $
+              {totalIncome.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
           </CardContent>
         </Card>

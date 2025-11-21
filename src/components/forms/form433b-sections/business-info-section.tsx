@@ -509,14 +509,26 @@ export function BusinessInfoSection({
                     id={`partners.${index}.primaryPhone`}
                     placeholder="(123) 456-7890"
                     required
-                    {...register(`partners.${index}.primaryPhone`)}
+                    {...register(`partners.${index}.primaryPhone`, {
+                      onChange: (e) =>
+                        setValue(
+                          `partners.${index}.primaryPhone`,
+                          formatPhone(e.target.value)
+                        ),
+                    })}
                     error={errors.partners?.[index]?.primaryPhone?.message}
                   />
                   <FormInput
                     label="Secondary Phone"
                     id={`partners.${index}.secondaryPhone`}
                     placeholder="(123) 456-7890"
-                    {...register(`partners.${index}.secondaryPhone`)}
+                    {...register(`partners.${index}.secondaryPhone`, {
+                      onChange: (e) =>
+                        setValue(
+                          `partners.${index}.secondaryPhone`,
+                          formatPhone(e.target.value)
+                        ),
+                    })}
                     error={errors.partners?.[index]?.secondaryPhone?.message}
                   />
                 </div>

@@ -165,73 +165,273 @@ export function BusinessExpenseSection({
           </CardHeader>
           <CardContent className="space-y-6">
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Materials purchased (e.g., items directly related to the production of a product or service) ($)"
               id="materialsPurchased"
-              {...register("materialsPurchased", { valueAsNumber: true })}
+              {...register("materialsPurchased", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.materialsPurchased?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Inventory purchased (e.g., goods bought for resale) ($)"
               id="inventoryPurchased"
-              {...register("inventoryPurchased", { valueAsNumber: true })}
+              {...register("inventoryPurchased", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.inventoryPurchased?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Gross Wages & Salaries ($)"
               id="grossWages"
-              {...register("grossWages", { valueAsNumber: true })}
+              {...register("grossWages", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.grossWages?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Rent ($)"
               id="rent"
-              {...register("rent", { valueAsNumber: true })}
+              {...register("rent", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.rent?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Supplies (items used to conduct business and used up within one year, e.g., books, office supplies, professional equipment, etc.) ($)"
               id="supplies"
-              {...register("supplies", { valueAsNumber: true })}
+              {...register("supplies", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.supplies?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Utilities/Telephone ($)"
               id="utilities"
-              {...register("utilities", { valueAsNumber: true })}
+              {...register("utilities", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.utilities?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Vehicle costs (gas, oil, repairs, maintenance) ($)"
               id="vehicleCosts"
-              {...register("vehicleCosts", { valueAsNumber: true })}
+              {...register("vehicleCosts", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.vehicleCosts?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Insurance (other than life) ($)"
               id="insurance"
-              {...register("insurance", { valueAsNumber: true })}
+              {...register("insurance", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.insurance?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Current taxes (e.g., real estate, state, and local income tax, excise franchise, occupational, personal property, sales and employer's portion of employment taxes, etc.) ($)"
               id="currentTaxes"
-              {...register("currentTaxes", { valueAsNumber: true })}
+              {...register("currentTaxes", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.currentTaxes?.message}
             />
             <FormInput
-              type="number"
+              type="text"
+              inputMode="decimal"
               label="Other expenses (e.g., secured debt payments. Specify on attachment. Do not include credit card payments) ($)"
               id="otherExpenses"
-              {...register("otherExpenses", { valueAsNumber: true })}
+              {...register("otherExpenses", {
+                valueAsNumber: true,
+                setValueAs: (v: any) => {
+                  if (v === "" || v === null || v === undefined) return 0;
+                  const cleaned = String(v).replace(/[^0-9.]/g, "");
+                  const parsed = parseFloat(cleaned);
+                  return isNaN(parsed) ? 0 : parsed;
+                },
+                onChange: (e: any) => {
+                  let value = e.target.value;
+                  // Remove all non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, "");
+                  // Ensure only one decimal point
+                  const parts = value.split(".");
+                  if (parts.length > 2) {
+                    value = parts[0] + "." + parts.slice(1).join("");
+                  }
+                  e.target.value = value;
+                },
+              })}
               error={errors.otherExpenses?.message}
             />
             <div className="text-lg font-bold">

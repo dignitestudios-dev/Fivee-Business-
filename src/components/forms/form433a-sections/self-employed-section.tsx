@@ -61,6 +61,7 @@ export function SelfEmployedSection({
     setValue,
   } = methods;
 
+  console.log("self employed errors: ", errors);
   const onSubmit = async (data: SelfEmployedFormSchema) => {
     try {
       await handleSaveSelfEmployedInfo(data, caseId);
@@ -235,7 +236,10 @@ export function SelfEmployedSection({
                     id="businessTelephone"
                     {...register("businessTelephone", {
                       onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                        setValue("businessTelephone", formatPhone(e.target.value)),
+                        setValue(
+                          "businessTelephone",
+                          formatPhone(e.target.value)
+                        ),
                     })}
                     error={errors.businessTelephone?.message}
                   />
@@ -260,7 +264,8 @@ export function SelfEmployedSection({
                     {...register("businessWebsite", {
                       pattern: {
                         value: /^(https?:\/\/).+/i,
-                        message: "Enter a valid URL beginning with http:// or https://",
+                        message:
+                          "Enter a valid URL beginning with http:// or https://",
                       },
                     })}
                     error={errors.businessWebsite?.message}
@@ -294,7 +299,10 @@ export function SelfEmployedSection({
                     {...register("totalEmployees", {
                       valueAsNumber: true,
                       onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.totalEmployees?.message}
@@ -317,10 +325,15 @@ export function SelfEmployedSection({
                     placeholder="0"
                     {...register("averageGrossMonthlyPayroll", {
                       setValueAs: (v) =>
-                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        v === ""
+                          ? 0
+                          : Number(String(v).replace(/[^0-9.]/g, "")),
                       onChange: (e) => {
                         // allow only numbers and decimal point
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: { value: 0, message: "Gross cannot be negative" },
                     })}
@@ -412,8 +425,14 @@ export function SelfEmployedSection({
                                   message: "Percentage cannot exceed 100",
                                 },
                                 valueAsNumber: true, // makes sure value is treated as a number
-                                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                                  e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                                onChange: (
+                                  e: React.ChangeEvent<HTMLInputElement>
+                                ) => {
+                                  e.currentTarget.value =
+                                    e.currentTarget.value.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    );
                                 },
                               }
                             )}
@@ -470,7 +489,9 @@ export function SelfEmployedSection({
                             {...register(
                               `otherBusinessInterests.${index}.businessTelephone`,
                               {
-                                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                                onChange: (
+                                  e: React.ChangeEvent<HTMLInputElement>
+                                ) =>
                                   setValue(
                                     `otherBusinessInterests.${index}.businessTelephone`,
                                     formatPhone(e.target.value)
@@ -490,7 +511,9 @@ export function SelfEmployedSection({
                             {...register(
                               `otherBusinessInterests.${index}.employerIdentificationNumber`,
                               {
-                                onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                                onChange: (
+                                  e: React.ChangeEvent<HTMLInputElement>
+                                ) =>
                                   setValue(
                                     `otherBusinessInterests.${index}.employerIdentificationNumber`,
                                     formatEIN(e.target.value)

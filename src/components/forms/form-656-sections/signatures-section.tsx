@@ -23,6 +23,7 @@ import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignatures656 from "@/hooks/656-form-hooks/useSignatures656";
 import DropdownPopup from "@/components/ui/DropdownPopup";
 import Link from "next/link";
+import { formatPhone } from "@/utils/helper";
 
 interface SignaturesSectionProps {
   onNext: () => void;
@@ -76,6 +77,8 @@ export function SignaturesSection({
 
   const onSubmit = async (data: SignaturesFormSchema) => {
     try {
+      delete data.taxpayerSignature;
+      delete data.spouseOrOfficerSignature;
       await handleSaveSignatures(data, caseId);
       onNext();
     } catch (error: any) {
@@ -98,52 +101,52 @@ export function SignaturesSection({
     }
   }, [signaturesInfo]);
 
-  useEffect(() => {
-    if (signaturesInfo?.taxpayerSignature && signatures?.length > 0) {
-      const sig = signatures?.find((s) => s._id === signaturesInfo.taxpayerSignature);
-      if (sig) {
-        setTaxpayerSignaturePreview(sig.url);
-      }
-    }
-    if (signaturesInfo?.spouseOrOfficerSignature && signatures?.length > 0) {
-      const sig = signatures?.find((s) => s._id === signaturesInfo.spouseOrOfficerSignature);
-      if (sig) {
-        setSpouseSignaturePreview(sig.url);
-      }
-    }
-  }, [signaturesInfo, signatures]);
+  // useEffect(() => {
+  //   if (signaturesInfo?.taxpayerSignature && signatures?.length > 0) {
+  //     const sig = signatures?.find((s) => s._id === signaturesInfo.taxpayerSignature);
+  //     if (sig) {
+  //       setTaxpayerSignaturePreview(sig.url);
+  //     }
+  //   }
+  //   if (signaturesInfo?.spouseOrOfficerSignature && signatures?.length > 0) {
+  //     const sig = signatures?.find((s) => s._id === signaturesInfo.spouseOrOfficerSignature);
+  //     if (sig) {
+  //       setSpouseSignaturePreview(sig.url);
+  //     }
+  //   }
+  // }, [signaturesInfo, signatures]);
 
-  const handleSelectTaxpayerSignature = async (id: string, url: string) => {
-    setTaxpayerSignaturePreview(url);
-    setValue("taxpayerSignature", id, {
-      shouldValidate: true,
-    });
-    await trigger("taxpayerSignature");
-  };
+  // const handleSelectTaxpayerSignature = async (id: string, url: string) => {
+  //   setTaxpayerSignaturePreview(url);
+  //   setValue("taxpayerSignature", id, {
+  //     shouldValidate: true,
+  //   });
+  //   await trigger("taxpayerSignature");
+  // };
 
-  const removeTaxpayerSignature = async () => {
-    setTaxpayerSignaturePreview(null);
-    setValue("taxpayerSignature", "", {
-      shouldValidate: true,
-    });
-    await trigger("taxpayerSignature");
-  };
+  // const removeTaxpayerSignature = async () => {
+  //   setTaxpayerSignaturePreview(null);
+  //   setValue("taxpayerSignature", "", {
+  //     shouldValidate: true,
+  //   });
+  //   await trigger("taxpayerSignature");
+  // };
 
-  const handleSelectSpouseSignature = async (id: string, url: string) => {
-    setSpouseSignaturePreview(url);
-    setValue("spouseOrOfficerSignature", id, {
-      shouldValidate: true,
-    });
-    await trigger("spouseOrOfficerSignature");
-  };
+  // const handleSelectSpouseSignature = async (id: string, url: string) => {
+  //   setSpouseSignaturePreview(url);
+  //   setValue("spouseOrOfficerSignature", id, {
+  //     shouldValidate: true,
+  //   });
+  //   await trigger("spouseOrOfficerSignature");
+  // };
 
-  const removeSpouseSignature = async () => {
-    setSpouseSignaturePreview(null);
-    setValue("spouseOrOfficerSignature", "", {
-      shouldValidate: true,
-    });
-    await trigger("spouseOrOfficerSignature");
-  };
+  // const removeSpouseSignature = async () => {
+  //   setSpouseSignaturePreview(null);
+  //   setValue("spouseOrOfficerSignature", "", {
+  //     shouldValidate: true,
+  //   });
+  //   await trigger("spouseOrOfficerSignature");
+  // };
 
   const handleReloadSignatures = () => {
     handleGetSignatures();
@@ -170,7 +173,7 @@ export function SignaturesSection({
         <Card>
           <CardHeader>
             <CardTitle>Signatures</CardTitle>
-            <div className="flex items-center gap-2 mt-2">
+            {/* <div className="flex items-center gap-2 mt-2">
               <Button
                 type="button"
                 variant="outline"
@@ -192,13 +195,13 @@ export function SignaturesSection({
                   Create New Signature
                 </Button>
               </Link>
-            </div>
+            </div> */}
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Taxpayer Signature */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
+                {/* <div>
                   <Label className="mb-2">
                     Signature of Taxpayer/Corporation Name *
                   </Label>
@@ -302,7 +305,7 @@ export function SignaturesSection({
                       </p>
                     )}
                   </div>
-                </div>
+                </div> */}
                 <FormInput
                   type="date"
                   label="Today's date (mm/dd/yyyy) *"
@@ -313,7 +316,13 @@ export function SignaturesSection({
                 <FormInput
                   label="Phone number"
                   id="taxpayerPhoneNumber"
-                  {...register("taxpayerPhoneNumber")}
+                  {...register("taxpayerPhoneNumber", {
+                    onChange: (e) =>
+                      setValue(
+                        "taxpayerPhoneNumber",
+                        formatPhone(e.target.value)
+                      ),
+                  })}
                   error={errors.taxpayerPhoneNumber?.message}
                 />
               </div>
@@ -340,7 +349,7 @@ export function SignaturesSection({
             {/* Spouse or Officer Signature */}
             <div className="space-y-4 mt-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
+                {/* <div>
                   <Label className="mb-2">
                     Signature of Spouse/Authorized Corporate Officer
                   </Label>
@@ -441,7 +450,7 @@ export function SignaturesSection({
                       </p>
                     )}
                   </div>
-                </div>
+                </div> */}
                 <FormInput
                   type="date"
                   label="Today's date (mm/dd/yyyy)"
@@ -452,7 +461,13 @@ export function SignaturesSection({
                 <FormInput
                   label="Phone number"
                   id="spouseOrOfficerPhoneNumber"
-                  {...register("spouseOrOfficerPhoneNumber")}
+                  {...register("spouseOrOfficerPhoneNumber", {
+                    onChange: (e) =>
+                      setValue(
+                        "spouseOrOfficerPhoneNumber",
+                        formatPhone(e.target.value)
+                      ),
+                  })}
                   error={errors.spouseOrOfficerPhoneNumber?.message}
                 />
               </div>

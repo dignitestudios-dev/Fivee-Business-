@@ -26,36 +26,14 @@ export const signatureSchemaFormB = z.object({
     date: z.string().min(1, "Date is required"),
   }),
   attachmentChecklist: z.object({
-    profitAndLossStatement: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
-    bankStatements: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
-    collateralLoanStatements: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
-    accountsNotesReceivableStatements: z
-      .boolean()
-      .refine((val) => val === true, {
-        message: "This attachment is required",
-      }),
-    digitalAssetsDocumentation: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
-    loanMortgageStatements: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
-    specialCircumstancesDocumentation: z
-      .boolean()
-      .refine((val) => val === true, {
-        message: "This attachment is required",
-      }),
-    form2848PowerOfAttorney: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
-    form656Completed: z.boolean().refine((val) => val === true, {
-      message: "This attachment is required",
-    }),
+    profitAndLossStatement: z.boolean().optional(),
+    bankStatements: z.boolean().optional(),
+    collateralLoanStatements: z.boolean().optional(),
+    accountsNotesReceivableStatements: z.boolean().optional(),
+    digitalAssetsDocumentation: z.boolean().optional(),
+    loanMortgageStatements: z.boolean().optional(),
+    specialCircumstancesDocumentation: z.boolean().optional(),
+    form2848PowerOfAttorney: z.boolean().optional(),
+    form656Completed: z.boolean().optional(),
   }),
 });

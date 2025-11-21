@@ -206,13 +206,22 @@ const form433aSlice = createSlice({
       state,
       action: PayloadAction<SignatureFormSchema | null>
     ) => {
-      action.payload.spouseSignature.date = action.payload.spouseSignature.date
-        ? formatDateForInput(action.payload.spouseSignature.date)
-        : action.payload.spouseSignature.date;
-      action.payload.taxpayerSignature.date = action.payload.taxpayerSignature
-        .date
-        ? formatDateForInput(action.payload.taxpayerSignature.date)
-        : action.payload.taxpayerSignature.date;
+      if (action.payload?.spouseSignature?.date) {
+        console.log("settings spouse date");
+        action.payload.spouseSignature.date = formatDateForInput(
+          action.payload.spouseSignature.date
+        );
+      }
+      console.log(
+        "action.payload.taxpayerSignature?.date: ",
+        action.payload.taxpayerSignature?.date
+      );
+      if (action.payload.taxpayerSignature?.date) {
+        action.payload.taxpayerSignature.date = formatDateForInput(
+          action.payload.taxpayerSignature.date
+        );
+      }
+
       state.signatureInfo = action.payload;
     },
   },

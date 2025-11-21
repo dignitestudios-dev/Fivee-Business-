@@ -158,7 +158,7 @@ export function SignatureSection({
     getValues,
     trigger,
   } = methods;
-
+  console.log("signature 433a errors: ", errors);
   const [taxpayerSignaturePreview, setTaxpayerSignaturePreview] = useState<
     string | null
   >(null);
@@ -170,6 +170,10 @@ export function SignatureSection({
     try {
       // delete data.taxpayerSignature.signatureId;
       // delete data.spouseSignature.signatureId;
+
+      if (maritalStatus === "unmarried") {
+        delete data.spouseSignature;
+      }
 
       await handleSaveSignatureInfo(data, caseId);
       router.push(`/dashboard/433a-oic/payment?caseId=${caseId}`);

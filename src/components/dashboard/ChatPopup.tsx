@@ -328,17 +328,14 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
       <div className="flex items-center justify-between p-4 border-b border-gray-200 rounded-t-lg">
         <div className="flex items-center gap-3">
           {companyLogo ? (
-            <Image
-              src={companyLogo}
-              alt={companyName}
-              width={60}
-              height={60}
-            />
+            <Image src={companyLogo} alt={companyName} width={60} height={60} />
           ) : (
             <div className="w-10 h-10 bg-green-600 shadow-[2px_2px_0_1px_black] rounded-lg flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
           )}
+
+          <p className="text-gray-800 font-bold text-xl">Fivee Business</p>
         </div>
         <button
           onClick={onClose}

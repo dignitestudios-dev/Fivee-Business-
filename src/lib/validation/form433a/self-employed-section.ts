@@ -6,6 +6,7 @@ import {
   shortTextSchema,
 } from "@/lib/validation-schemas";
 
+// Initial values
 export const selfEmployedInitialValues: SelfEmployedFormSchema = {
   isSelfEmployed: false,
   isSoleProprietorship: false,
@@ -16,20 +17,21 @@ export const selfEmployedInitialValues: SelfEmployedFormSchema = {
   businessWebsite: "",
   tradeName: "",
   businessDescription: "",
-  totalEmployees: "",
+  totalEmployees: 0, // numeric default
   taxDepositFrequency: "",
-  averageGrossMonthlyPayroll: "",
+  averageGrossMonthlyPayroll: 0, // numeric default
   hasOtherBusinessInterests: false,
   otherBusinessInterests: [],
 };
 
+// Schema
 export const selfEmployedSchema = z
   .object({
     isSelfEmployed: z.boolean(),
     isSoleProprietorship: z.boolean().optional(),
-    businessName: nameSchema.optional(),
-    businessAddress: shortTextSchema.optional(),
-    businessTelephone: phoneSchemaOptional,
+    businessName: z.string().optional().or(z.literal("")),
+    businessAddress: z.string().optional().or(z.literal("")),
+    businessTelephone: z.string().optional().or(z.literal("")),
     employerIdentificationNumber: z
       .string()
       .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
@@ -37,14 +39,17 @@ export const selfEmployedSchema = z
       .or(z.literal("")),
     businessWebsite: z
       .string()
-      .regex(/^(https?:\/\/).+/i, "Enter a valid URL beginning with http:// or https://")
+      .regex(
+        /^(https?:\/\/).+/i,
+        "Enter a valid URL starting with http:// or https://"
+      )
       .optional()
       .or(z.literal("")),
-    tradeName: nameSchema.optional(),
-    businessDescription: z.string().min(1, "Business description is required").max(1000, "Business description must be at most 1000 characters").optional(),
-    totalEmployees: z.coerce.number({ message: "Must be a number" }).min(0, "Must be 0 or greater").max(1000000, "Total employees seems too large").optional(),
-    taxDepositFrequency: shortTextSchema.optional(),
-    averageGrossMonthlyPayroll: moneySchema.optional(),
+    tradeName: z.string().optional().or(z.literal("")),
+    businessDescription: z.string().optional().or(z.literal("")),
+    totalEmployees: z.coerce.number().optional(),
+    taxDepositFrequency: z.string().optional().or(z.literal("")),
+    averageGrossMonthlyPayroll: z.coerce.number().optional(),
     hasOtherBusinessInterests: z.boolean().optional(),
     otherBusinessInterests: z
       .array(
@@ -54,33 +59,28 @@ export const selfEmployedSchema = z
               .number({ message: "Must be a number" })
               .min(0, "Percentage cannot be less than 0")
               .max(100, "Percentage cannot exceed 100"),
-            title: z.string().min(1, "Title is required"),
-            businessAddress: shortTextSchema.min(1, "Business address is required"),
-            businessName: nameSchema.min(1, "Business name is required"),
-            businessTelephone: phoneSchemaOptional,
+            title: z.string().optional().or(z.literal("")),
+            businessAddress: z.string().optional().or(z.literal("")),
+            businessName: z.string().optional().or(z.literal("")),
+            businessTelephone: z.string().optional().or(z.literal("")),
             employerIdentificationNumber: z
               .string()
               .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
               .optional()
               .or(z.literal("")),
-            businessType: z.enum(
-              ["partnership", "llc", "corporation", "other"],
-              {
-                message: "Business type is required",
-              }
-            ),
-            otherBusinessTypeDescription: z.string().optional(),
+            businessType: z
+              .enum(["partnership", "llc", "corporation", "other"])
+              .optional(),
+            otherBusinessTypeDescription: z
+              .string()
+              .optional()
+              .or(z.literal("")),
           })
           .refine(
-            (data) => {
-              if (data.businessType === "other") {
-                return (
-                  data.otherBusinessTypeDescription &&
-                  data.otherBusinessTypeDescription.trim().length > 0
-                );
-              }
-              return true;
-            },
+            (data) =>
+              data.businessType !== "other" ||
+              (data.otherBusinessTypeDescription &&
+                data.otherBusinessTypeDescription.trim().length > 0),
             {
               message: "Please specify the other business type",
               path: ["otherBusinessTypeDescription"],
@@ -90,84 +90,61 @@ export const selfEmployedSchema = z
       .optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.isSelfEmployed) {
-      if (data.isSoleProprietorship === undefined) {
+    if (!data.isSelfEmployed) return; // skip validation if not self-employed
+
+    // Helper to validate string fields
+    const requiredStrings = [
+      "businessName",
+      "businessTelephone",
+      "employerIdentificationNumber",
+      "businessDescription",
+      "taxDepositFrequency",
+    ];
+    requiredStrings.forEach((field) => {
+      const value = data[field as keyof typeof data];
+      if (!value || (typeof value === "string" && value.trim() === "")) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Sole proprietorship status is required",
-          path: ["isSoleProprietorship"],
+          message: `${field} is required`,
+          path: [field],
         });
       }
-      if (!data.businessName || data.businessName.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Business name is required",
-          path: ["businessName"],
-        });
-      }
-      if (!data.businessTelephone || data.businessTelephone.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Business telephone is required",
-          path: ["businessTelephone"],
-        });
-      }
-      if (
-        !data.employerIdentificationNumber ||
-        data.employerIdentificationNumber.trim() === ""
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Employer identification number is required",
-          path: ["employerIdentificationNumber"],
-        });
-      }
-      if (!data.businessDescription || data.businessDescription.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Business description is required",
-          path: ["businessDescription"],
-        });
-      }
-      if (data.totalEmployees === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Total employees is required",
-          path: ["totalEmployees"],
-        });
-      } else if (data.totalEmployees < 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Total employees cannot be negative",
-          path: ["totalEmployees"],
-        });
-      }
-      if (!data.taxDepositFrequency || data.taxDepositFrequency.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Tax deposit frequency is required",
-          path: ["taxDepositFrequency"],
-        });
-      }
-      if (data.averageGrossMonthlyPayroll === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Average gross monthly payroll is required",
-          path: ["averageGrossMonthlyPayroll"],
-        });
-      } else if (data.averageGrossMonthlyPayroll < 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Average gross monthly payroll cannot be negative",
-          path: ["averageGrossMonthlyPayroll"],
-        });
-      }
-      if (data.hasOtherBusinessInterests === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Other business interests status is required",
-          path: ["hasOtherBusinessInterests"],
-        });
-      }
+    });
+
+    // Boolean field
+    if (data.isSoleProprietorship === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Sole proprietorship status is required",
+        path: ["isSoleProprietorship"],
+      });
+    }
+
+    // Number fields
+    if (data.totalEmployees === undefined || data.totalEmployees === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Total employees is required",
+        path: ["totalEmployees"],
+      });
+    }
+    if (
+      data.averageGrossMonthlyPayroll === undefined ||
+      data.averageGrossMonthlyPayroll === null
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Average gross monthly payroll is required",
+        path: ["averageGrossMonthlyPayroll"],
+      });
+    }
+
+    // Other business interests
+    if (data.hasOtherBusinessInterests === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Other business interests status is required",
+        path: ["hasOtherBusinessInterests"],
+      });
     }
   });

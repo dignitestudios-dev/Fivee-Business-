@@ -113,8 +113,8 @@ export const otherInfoSchema = z
   .object({
     litigation: z.object({
       isInvolvedInLitigation: z.boolean(),
-      plaintiff: z.boolean(),
-      defendant: z.boolean(),
+      plaintiff: z.boolean().optional(),
+      defendant: z.boolean().optional(),
       locationOfFiling: z.string().optional(),
       representedBy: z.string().optional(),
       docketCaseNumber: z.string().optional(),

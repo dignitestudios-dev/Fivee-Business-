@@ -9,6 +9,7 @@ import {
 import FButton from "../ui/FButton";
 import { useRouter } from "next/navigation";
 import usePayment from "@/hooks/payments/usePayment";
+import toast from "react-hot-toast";
 // import { api } from "@/lib/services";
 // import { OrderData } from "@/lib/types";
 // import { utils } from "@/lib/utils";
@@ -124,7 +125,7 @@ const PaymentForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <form className="space-y-4 py-4">
       {/* Card Holder Name */}
       <div className="bg-white border border-[#E3E3E3] rounded-xl">
         <input
@@ -195,6 +196,7 @@ const PaymentForm = ({
             !cardComplete.zipCode ||
             !cardComplete.cardHolderName
           }
+          onClick={handleSubmit}
           className="flex justify-center items-center py-3 text-white bg-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {adding ? (

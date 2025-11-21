@@ -4,7 +4,7 @@ const phoneLooseRegex = /^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
 
 export const signaturesSchema656 = z.object({
   // taxpayerSignature will be the selected signature _id (string)
-  taxpayerSignature: z.string().min(1, "Taxpayer signature required"),
+  // taxpayerSignature: z.string().min(1, "Taxpayer signature required"),
   taxpayerSignatureDate: z.string().min(1, "Date required"),
   taxpayerPhoneNumber: z
     .string()
@@ -23,7 +23,7 @@ export const signaturesSchema656 = z.object({
 });
 
 export const signaturesInitialValues: SignaturesFormSchema = {
-  taxpayerSignature: "",
+  // taxpayerSignature: "",
   taxpayerSignatureDate: "",
   taxpayerPhoneNumber: "",
   taxpayerPhoneAuthorization: false,

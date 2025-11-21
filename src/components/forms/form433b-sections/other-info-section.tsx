@@ -666,22 +666,58 @@ export function OtherInfoSection({
                     error={errors.relatedPartyDebts?.[0]?.dateOfLoan?.message}
                   />
                   <FormInput
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     label="Current Balance ($)"
                     id={`relatedPartyDebts.0.currentBalance`}
                     {...register(`relatedPartyDebts.0.currentBalance`, {
                       valueAsNumber: true,
+                      setValueAs: (v: any) => {
+                        if (v === "" || v === null || v === undefined) return 0;
+                        const cleaned = String(v).replace(/[^0-9.]/g, "");
+                        const parsed = parseFloat(cleaned);
+                        return isNaN(parsed) ? 0 : parsed;
+                      },
+                      onChange: (e: any) => {
+                        let value = e.target.value;
+                        // Remove all non-numeric characters except decimal point
+                        value = value.replace(/[^0-9.]/g, "");
+                        // Ensure only one decimal point
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        e.target.value = value;
+                      },
                     })}
                     error={
                       errors.relatedPartyDebts?.[0]?.currentBalance?.message
                     }
                   />
                   <FormInput
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     label="Payment Amount ($)"
                     id={`relatedPartyDebts.0.paymentAmount`}
                     {...register(`relatedPartyDebts.0.paymentAmount`, {
                       valueAsNumber: true,
+                      setValueAs: (v: any) => {
+                        if (v === "" || v === null || v === undefined) return 0;
+                        const cleaned = String(v).replace(/[^0-9.]/g, "");
+                        const parsed = parseFloat(cleaned);
+                        return isNaN(parsed) ? 0 : parsed;
+                      },
+                      onChange: (e: any) => {
+                        let value = e.target.value;
+                        // Remove all non-numeric characters except decimal point
+                        value = value.replace(/[^0-9.]/g, "");
+                        // Ensure only one decimal point
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        e.target.value = value;
+                      },
                     })}
                     error={
                       errors.relatedPartyDebts?.[0]?.paymentAmount?.message
@@ -783,11 +819,30 @@ export function OtherInfoSection({
                       }
                     />
                     <FormInput
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       label="Amount in Dispute ($)"
                       id={`litigationHistory.0.amountInDispute`}
                       {...register(`litigationHistory.0.amountInDispute`, {
                         valueAsNumber: true,
+                        setValueAs: (v: any) => {
+                          if (v === "" || v === null || v === undefined)
+                            return 0;
+                          const cleaned = String(v).replace(/[^0-9.]/g, "");
+                          const parsed = parseFloat(cleaned);
+                          return isNaN(parsed) ? 0 : parsed;
+                        },
+                        onChange: (e: any) => {
+                          let value = e.target.value;
+                          // Remove all non-numeric characters except decimal point
+                          value = value.replace(/[^0-9.]/g, "");
+                          // Ensure only one decimal point
+                          const parts = value.split(".");
+                          if (parts.length > 2) {
+                            value = parts[0] + "." + parts.slice(1).join("");
+                          }
+                          e.target.value = value;
+                        },
                       })}
                       error={
                         errors.litigationHistory?.[0]?.amountInDispute?.message
@@ -897,11 +952,30 @@ export function OtherInfoSection({
                       error={errors.assetTransfersOver10k?.[0]?.date?.message}
                     />
                     <FormInput
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       label="Value ($)"
                       id={`assetTransfersOver10k.0.value`}
                       {...register(`assetTransfersOver10k.0.value`, {
                         valueAsNumber: true,
+                        setValueAs: (v: any) => {
+                          if (v === "" || v === null || v === undefined)
+                            return 0;
+                          const cleaned = String(v).replace(/[^0-9.]/g, "");
+                          const parsed = parseFloat(cleaned);
+                          return isNaN(parsed) ? 0 : parsed;
+                        },
+                        onChange: (e: any) => {
+                          let value = e.target.value;
+                          // Remove all non-numeric characters except decimal point
+                          value = value.replace(/[^0-9.]/g, "");
+                          // Ensure only one decimal point
+                          const parts = value.split(".");
+                          if (parts.length > 2) {
+                            value = parts[0] + "." + parts.slice(1).join("");
+                          }
+                          e.target.value = value;
+                        },
                       })}
                       error={errors.assetTransfersOver10k?.[0]?.value?.message}
                     />
@@ -964,11 +1038,30 @@ export function OtherInfoSection({
                       error={errors.realPropertyTransfers?.[0]?.date?.message}
                     />
                     <FormInput
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       label="Value ($)"
                       id={`realPropertyTransfers.0.value`}
                       {...register(`realPropertyTransfers.0.value`, {
                         valueAsNumber: true,
+                        setValueAs: (v: any) => {
+                          if (v === "" || v === null || v === undefined)
+                            return 0;
+                          const cleaned = String(v).replace(/[^0-9.]/g, "");
+                          const parsed = parseFloat(cleaned);
+                          return isNaN(parsed) ? 0 : parsed;
+                        },
+                        onChange: (e: any) => {
+                          let value = e.target.value;
+                          // Remove all non-numeric characters except decimal point
+                          value = value.replace(/[^0-9.]/g, "");
+                          // Ensure only one decimal point
+                          const parts = value.split(".");
+                          if (parts.length > 2) {
+                            value = parts[0] + "." + parts.slice(1).join("");
+                          }
+                          e.target.value = value;
+                        },
                       })}
                       error={errors.realPropertyTransfers?.[0]?.value?.message}
                     />
@@ -1063,11 +1156,29 @@ export function OtherInfoSection({
                     error={errors.foreignAssets?.[0]?.location?.message}
                   />
                   <FormInput
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     label="Value ($)"
                     id={`foreignAssets.0.value`}
                     {...register(`foreignAssets.0.value`, {
                       valueAsNumber: true,
+                      setValueAs: (v: any) => {
+                        if (v === "" || v === null || v === undefined) return 0;
+                        const cleaned = String(v).replace(/[^0-9.]/g, "");
+                        const parsed = parseFloat(cleaned);
+                        return isNaN(parsed) ? 0 : parsed;
+                      },
+                      onChange: (e: any) => {
+                        let value = e.target.value;
+                        // Remove all non-numeric characters except decimal point
+                        value = value.replace(/[^0-9.]/g, "");
+                        // Ensure only one decimal point
+                        const parts = value.split(".");
+                        if (parts.length > 2) {
+                          value = parts[0] + "." + parts.slice(1).join("");
+                        }
+                        e.target.value = value;
+                      },
                     })}
                     error={errors.foreignAssets?.[0]?.value?.message}
                   />
@@ -1109,11 +1220,29 @@ export function OtherInfoSection({
             {hasFundsHeldInTrust && (
               <div className="space-y-4">
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   label="Amount ($)"
                   id="fundsHeldInTrustAmount"
                   {...register("fundsHeldInTrustAmount", {
                     valueAsNumber: true,
+                    setValueAs: (v: any) => {
+                      if (v === "" || v === null || v === undefined) return 0;
+                      const cleaned = String(v).replace(/[^0-9.]/g, "");
+                      const parsed = parseFloat(cleaned);
+                      return isNaN(parsed) ? 0 : parsed;
+                    },
+                    onChange: (e: any) => {
+                      let value = e.target.value;
+                      // Remove all non-numeric characters except decimal point
+                      value = value.replace(/[^0-9.]/g, "");
+                      // Ensure only one decimal point
+                      const parts = value.split(".");
+                      if (parts.length > 2) {
+                        value = parts[0] + "." + parts.slice(1).join("");
+                      }
+                      e.target.value = value;
+                    },
                   })}
                   error={errors.fundsHeldInTrustAmount?.message}
                 />
@@ -1160,20 +1289,56 @@ export function OtherInfoSection({
             {hasLinesOfCredit && (
               <div className="space-y-4">
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   label="Credit Limit ($)"
                   id="lineOfCredit.creditLimit"
                   {...register("lineOfCredit.creditLimit", {
                     valueAsNumber: true,
+                    setValueAs: (v: any) => {
+                      if (v === "" || v === null || v === undefined) return 0;
+                      const cleaned = String(v).replace(/[^0-9.]/g, "");
+                      const parsed = parseFloat(cleaned);
+                      return isNaN(parsed) ? 0 : parsed;
+                    },
+                    onChange: (e: any) => {
+                      let value = e.target.value;
+                      // Remove all non-numeric characters except decimal point
+                      value = value.replace(/[^0-9.]/g, "");
+                      // Ensure only one decimal point
+                      const parts = value.split(".");
+                      if (parts.length > 2) {
+                        value = parts[0] + "." + parts.slice(1).join("");
+                      }
+                      e.target.value = value;
+                    },
                   })}
                   error={errors.lineOfCredit?.creditLimit?.message}
                 />
                 <FormInput
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   label="Amount Owed ($)"
                   id="lineOfCredit.amountOwed"
                   {...register("lineOfCredit.amountOwed", {
                     valueAsNumber: true,
+                    setValueAs: (v: any) => {
+                      if (v === "" || v === null || v === undefined) return 0;
+                      const cleaned = String(v).replace(/[^0-9.]/g, "");
+                      const parsed = parseFloat(cleaned);
+                      return isNaN(parsed) ? 0 : parsed;
+                    },
+                    onChange: (e: any) => {
+                      let value = e.target.value;
+                      // Remove all non-numeric characters except decimal point
+                      value = value.replace(/[^0-9.]/g, "");
+                      // Ensure only one decimal point
+                      const parts = value.split(".");
+                      if (parts.length > 2) {
+                        value = parts[0] + "." + parts.slice(1).join("");
+                      }
+                      e.target.value = value;
+                    },
                   })}
                   error={errors.lineOfCredit?.amountOwed?.message}
                 />
