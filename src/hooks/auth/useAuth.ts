@@ -11,9 +11,12 @@ import {
   OAuthProvider,
   UserCredential,
 } from "firebase/auth";
+import { useGlobalPopup } from "../useGlobalPopup";
 
 const useAuth = () => {
   const dispatch = useAppDispatch();
+  const { showError, showSuccess } = useGlobalPopup();
+
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -34,7 +37,8 @@ const useAuth = () => {
       }
     } catch (error: any) {
       console.error("Error during login:", error);
-      toast.error(error?.message);
+      // toast.error(error?.message);
+      showError(error?.message || "Login failed", "Login Error");
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import "./globals.css";
 import ToastProvider from "@/providers/ToastProvider";
 import StoreProvider from "@/providers/StoreProvider";
 import AuthGuard from "@/components/global/AuthGuard";
+import GlobalPopup from "@/components/global/GlobalPopup";
 import RegisterSW from "@/components/RegisterSW";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
         <ToastProvider />
 
         <StoreProvider>
+          <GlobalPopup />
           <AuthGuard>{children}</AuthGuard>
         </StoreProvider>
 

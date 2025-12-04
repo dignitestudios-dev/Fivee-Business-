@@ -15,31 +15,54 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const messaging = firebase.messaging();
 
+// ------------------------------------------------
+// FIX: HANDLE ALL NOTIFICATIONS MANUALLY
+// Even if backend sends notification payload
+// ------------------------------------------------
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: payload.notification.icon || "/images/logo.svg",
-    data: { url: payload.fcmOptions?.link || "/" },
-  };
-  console.log(notificationOptions)
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  console.log("Background message:", payload);
+
+  // Extract from notification or data (support both)
+  const title =
+    payload.notification?.title || payload.data?.title || "New Notification";
+
+  const body = payload.notification?.body || payload.data?.body || "";
+
+  // Always use your custom icon
+  const icon =
+    payload.notification?.icon || payload.data?.icon || "/images/logo.svg";
+
+  // Click URL
+  const url = payload.fcmOptions?.link || payload.data?.link || "/";
+
+  // IMPORTANT: Override Firebase auto-display
+  // by ALWAYS showing your own notification
+  self.registration.showNotification(title, {
+    body,
+    icon,
+    data: { url },
+  });
 });
 
+// ------------------------------------------------
+// Handle clicks
+// ------------------------------------------------
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification.data?.url || "/";
+
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
         for (const client of clientList) {
-          if (client.url === url && "focus" in client) return client.focus();
+          if (client.url === url && "focus" in client) {
+            return client.focus();
+          }
         }
-        if (clients.openWindow) return clients.openWindow(url);
+        return clients.openWindow(url);
       })
   );
 });

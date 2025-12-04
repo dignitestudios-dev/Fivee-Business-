@@ -62,6 +62,12 @@ const Header = () => {
       label: "videos",
       path: "/dashboard/videos",
     },
+    {
+      title: "Do my tax",
+      label: "do-my-tax",
+      path: "https://fiveetaxservices.mytaxportal.online",
+      target: "_blank",
+    },
   ];
 
   const profilePopupOptions = [
@@ -102,7 +108,7 @@ const Header = () => {
                   pathname === navLink.path && "border-b-2 border-white"
                 }`}
               >
-                <Link href={navLink.path}>{navLink.title}</Link>
+                <Link href={navLink.path} target={navLink.target || "_self"}>{navLink.title}</Link>
               </div>
             ))}
           </nav>
