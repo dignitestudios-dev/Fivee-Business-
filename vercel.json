@@ -1,0 +1,8 @@
+{
+  "buildCommand": "next build --turbopack",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "env": {
+    "SKIP_NEXT_SECURITY_CHECKS": "1"
+  }
+}
