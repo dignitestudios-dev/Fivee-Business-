@@ -15,9 +15,10 @@ import { SiVisa } from "react-icons/si";
 import { Loader2 } from "lucide-react";
 import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const ManagePaymentMethods = () => {
+  const { showError } = useGlobalPopup();
   const {
     handleGetPaymentMethods,
     getting,
@@ -68,7 +69,7 @@ const ManagePaymentMethods = () => {
       await handleDeletePaymentMethod(deletePaymentMethod);
       handleGetPaymentMethods();
     } else {
-      toast.error("Payment method ID is missing");
+      showError("Payment method ID is missing", "Error");
     }
     setDeletePaymentMethod(null);
     setConfirmDeletePaymentMethod(true);

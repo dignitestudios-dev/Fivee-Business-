@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   applicationChecklistSchema,
   applicationChecklistInitialValues,
@@ -31,6 +31,7 @@ export function ApplicationChecklistSection({
   currentStep,
   totalSteps,
 }: ApplicationChecklistSectionProps) {
+  const { showError, showSuccess } = useGlobalPopup();
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
@@ -58,13 +59,14 @@ export function ApplicationChecklistSection({
   const onSubmit = async (data: ApplicationChecklistFormSchema) => {
     try {
       await handleSaveApplicationChecklist(data, caseId);
-      toast.success(
-        "Form 656 completed successfully, Now you can download it from dashboard."
+      showSuccess(
+        "Form 656 completed successfully, Now you can download it from dashboard.",
+        "Success"
       );
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Error saving application checklist:", error);
-      toast.error(error.message || "Failed to save application checklist");
+      showError(error.message || "Failed to save application checklist", "Application Checklist Error");
     }
   };
 

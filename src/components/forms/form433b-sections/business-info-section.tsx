@@ -21,6 +21,7 @@ import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_433B_SECTIONS } from "@/lib/constants";
 import { formatPhone } from "@/utils/helper";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface BusinessInfoSectionProps {
   onNext: () => void;
@@ -35,6 +36,7 @@ export function BusinessInfoSection({
   currentStep,
   totalSteps,
 }: BusinessInfoSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessInformation } = useAppSelector((state) => state.form433b);
@@ -115,7 +117,7 @@ export function BusinessInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business info:", error);
-      toast.error(error.message || "Failed to save business info");
+      showError(error.message || "Failed to save business info", "Business Info Error");
     }
   };
 

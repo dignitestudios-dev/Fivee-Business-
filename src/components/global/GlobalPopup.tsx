@@ -9,13 +9,17 @@ export default function GlobalPopup() {
   const { closePopup } = useGlobalPopup();
 
   return (
-    <Popup
-      open={popup.open}
-      onClose={closePopup}
-      type={popup.type}
-      title={popup.title}
-      message={popup.description}
-      showCloseButton={true}
-    />
+    <div className="fixed inset-0 pointer-events-none z-[9999]">
+      <div className="pointer-events-auto">
+        <Popup
+          open={popup.open}
+          onClose={closePopup}
+          type={popup.type}
+          title={popup.title}
+          message={popup.description}
+          showCloseButton={true}
+        />
+      </div>
+    </div>
   );
 }

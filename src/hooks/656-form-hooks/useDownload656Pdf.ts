@@ -4,9 +4,10 @@
 
 import api from "@/lib/services";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const useDownload656Pdf = () => {
+  const { showError, showSuccess } = useGlobalPopup();
   const [downloadingMap, setDownloadingMap] = useState<Record<string, boolean>>(
     {}
   );
@@ -43,7 +44,7 @@ const useDownload656Pdf = () => {
     } catch (err: any) {
       const errorMessage = err.message || "Failed to download PDF";
       setError(errorMessage);
-      toast.error(errorMessage);
+      showError(errorMessage, "PDF Download Error");
     } finally {
       setDownloadingMap((prev) => ({ ...prev, [caseId]: false }));
     }

@@ -15,7 +15,7 @@ import {
   signatureSchemaFormB,
 } from "@/lib/validation/form433b/signature-section";
 import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FORM_433B_SECTIONS } from "@/lib/constants";
@@ -23,6 +23,12 @@ import useBusinessInfo from "@/hooks/433b-form-hooks/useBusinessInfo";
 import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignaturesAndAttachments from "@/hooks/433b-form-hooks/useSignaturesAndAttachments";
 import DropdownPopup from "@/components/ui/DropdownPopup";
+import { CalculationsSummaryPopup433B } from "@/components/forms/CalculationsSummaryPopup433B";
+import { CalculationSummary } from "@/lib/features/form433aSlice";
+import useBusinessAssetInfo from "@/hooks/433b-form-hooks/useBusinessAssetInfo";
+import useBusinessIncomeInfo from "@/hooks/433b-form-hooks/useBusinessIncomeInfo";
+import useBusinessExpenseInfo from "@/hooks/433b-form-hooks/useBusinessExpenseInfo";
+import useCalculationInfo from "@/hooks/433b-form-hooks/useCalculationInfo";
 
 interface SignatureSectionProps {
   onNext: () => void;
@@ -85,6 +91,7 @@ export function SignatureSection({
   currentStep,
   totalSteps,
 }: SignatureSectionProps) {
+  const { showError } = useGlobalPopup();
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
@@ -92,6 +99,10 @@ export function SignatureSection({
   const signatures = useAppSelector(
     (state) => state.signatures?.images
   ) as Signature[];
+  const businessAssetsInfo = useAppSelector((state) => state.form433b.businessAssetsInfo);
+  const businessIncomeInfo = useAppSelector((state) => state.form433b.businessIncomeInfo);
+  const businessExpenseInfo = useAppSelector((state) => state.form433b.businessExpenseInfo);
+  const calculationInfo = useAppSelector((state) => state.form433b.calculationInfo);
 
   const { loadingFormData: loadingBusiness, handleGetBusinessInfo } =
     useBusinessInfo();
@@ -102,6 +113,12 @@ export function SignatureSection({
     handleGetSignatureInfo,
   } = useSignaturesAndAttachments();
   const { handleGetSignatures, getting: loadingSignatures } = useSignatures();
+  const { handleGetBusinessAssetsInfo } = useBusinessAssetInfo();
+  const { handleGetBusinessIncomeInfo } = useBusinessIncomeInfo();
+  const { handleGetBusinessExpenseInfo } = useBusinessExpenseInfo();
+  const { handleGetCalculationInfo } = useCalculationInfo();
+
+  const [loadingAllSections, setLoadingAllSections] = useState(false);
 
   const methods = useForm<SignatureFormSchema>({
     resolver: zodResolver(signatureSchemaFormB),
@@ -122,20 +139,132 @@ export function SignatureSection({
 
   const [representativeSignaturePreview, setRepresentativeSignaturePreview] =
     useState<string | null>(null);
+  const [showCalculationsSummary, setShowCalculationsSummary] =
+    useState<boolean>(false);
+  const [calculationSummary, setCalculationSummary] =
+    useState<CalculationSummary | null>(null);
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
     try {
       await handleSaveSignatureInfo(data, caseId);
-      router.push(`/dashboard/433b-oic/payment?caseId=${caseId}`);
+
+      // Build calculation summary from 433B redux state using your mapping:
+      // Box A: total business assets
+      // Box B: total business income
+      // Box C: total business expenses
+      // Box D: remaining monthly income = Box B - Box C (do not go below 0)
+      const boxA = Math.round((businessAssetsInfo?.BoxA as number) || 0);
+      const boxB = Math.round((businessIncomeInfo?.BoxB as number) || 0);
+
+      // Compute Box C (total business expenses). The API may not return BoxC
+      // so fall back to summing the individual expense fields if BoxC is missing.
+      let boxC = Math.round((businessExpenseInfo?.BoxC as number) || 0);
+      if (!boxC && businessExpenseInfo) {
+        const materialsPurchased = Number(businessExpenseInfo.materialsPurchased) || 0;
+        const inventoryPurchased = Number(businessExpenseInfo.inventoryPurchased) || 0;
+        const grossWages = Number(businessExpenseInfo.grossWages) || 0;
+        const rent = Number(businessExpenseInfo.rent) || 0;
+        const supplies = Number(businessExpenseInfo.supplies) || 0;
+        const utilities = Number(businessExpenseInfo.utilities) || 0;
+        const vehicleCosts = Number(businessExpenseInfo.vehicleCosts) || 0;
+        const repairsMaintenance = Number(businessExpenseInfo.repairsMaintenance) || 0;
+        const insurance = Number(businessExpenseInfo.insurance) || 0;
+        const currentTaxes = Number(businessExpenseInfo.currentTaxes) || 0;
+        const otherExpenses = Number(businessExpenseInfo.otherExpenses) || 0;
+
+        const totalExpenses =
+          materialsPurchased +
+          inventoryPurchased +
+          grossWages +
+          rent +
+          supplies +
+          utilities +
+          vehicleCosts +
+          repairsMaintenance +
+          insurance +
+          currentTaxes +
+          otherExpenses;
+
+        boxC = Math.round(totalExpenses);
+      }
+
+      const boxD = Math.max(0, boxB - boxC);
+
+      // For compatibility with the summary shape used by the popup, set boxF to the
+      // remaining monthly income (same as Box D for business form) and leave boxE
+      // unused (set to 0) as the business flow doesn't require it here.
+      const boxE = 0;
+      const boxF = boxD;
+
+      const boxG = boxF * 12;
+      const boxH = boxF * 24;
+
+      const paymentTimeline = (calculationInfo?.paymentTimeline as string) || "";
+      let futureIncome = 0;
+      if (paymentTimeline === "5_months_or_less") futureIncome = boxG;
+      else if (paymentTimeline === "6_to_24_months") futureIncome = boxH;
+
+      const minimumOfferAmount = boxA + futureIncome;
+      const monthlyPaymentAmount = paymentTimeline === "5_months_or_less" ? Math.round(minimumOfferAmount / 5) : 0;
+
+      const summary: CalculationSummary = {
+        boxA,
+        boxB,
+        boxC,
+        boxD,
+        boxE,
+        boxF,
+        boxG,
+        boxH,
+        futureIncome,
+        paymentTimeline,
+        minimumOfferAmount,
+        monthlyPaymentAmount,
+      };
+
+      setCalculationSummary(summary);
+      setShowCalculationsSummary(true);
     } catch (error: any) {
       console.error("Error saving signature info:", error);
-      toast.error(error.message || "Failed to save signature info");
+      showError(error.message || "Failed to save signature info", "Signature Error");
     }
   };
 
   useEffect(() => {
     if (!signatureInfo) handleGetSignatureInfo(caseId!, FORM_433B_SECTIONS[6]);
   }, [caseId]);
+
+  // Load all form sections data if any is missing (for direct navigation or page reload)
+  useEffect(() => {
+    const loadMissingData = async () => {
+      if (!caseId) return;
+      
+      const missingData = !businessAssetsInfo || !businessIncomeInfo || !businessExpenseInfo || !calculationInfo;
+      
+      if (missingData) {
+        setLoadingAllSections(true);
+        try {
+          // Fetch all required sections in parallel
+          if (!businessAssetsInfo) {
+            handleGetBusinessAssetsInfo(caseId, FORM_433B_SECTIONS[1]);
+          }
+          if (!businessIncomeInfo) {
+            handleGetBusinessIncomeInfo(caseId, FORM_433B_SECTIONS[2]);
+          }
+          if (!businessExpenseInfo) {
+            handleGetBusinessExpenseInfo(caseId, FORM_433B_SECTIONS[3]);
+          }
+          if (!calculationInfo) {
+            handleGetCalculationInfo(caseId, FORM_433B_SECTIONS[4]);
+          }
+        } finally {
+          setLoadingAllSections(false);
+        }
+      }
+    };
+
+    loadMissingData();
+  }, [caseId, businessAssetsInfo, businessIncomeInfo, businessExpenseInfo, calculationInfo]);
 
   useEffect(() => {
     handleGetSignatures();
@@ -184,12 +313,13 @@ export function SignatureSection({
     handleGetSignatures();
   };
 
-  if (loadingFormData || loadingBusiness) {
+  if (loadingFormData || loadingBusiness || loadingAllSections) {
     return <FormLoader />;
   }
 
   return (
-    <FormProvider {...methods}>
+    <>
+      <FormProvider {...methods}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -362,7 +492,14 @@ export function SignatureSection({
           loading={loading}
         />
       </form>
-    </FormProvider>
+      </FormProvider>
+      <CalculationsSummaryPopup433B
+        open={showCalculationsSummary}
+        calculationSummary={calculationSummary}
+        caseId={caseId}
+        onClose={() => setShowCalculationsSummary(false)}
+      />
+    </>
   );
 }
 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useBusinessIncomeInfo from "@/hooks/433b-form-hooks/useBusinessIncomeInfo";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   businessIncomeFormBInitialValues,
   businessIncomeSchemaFormB,
@@ -29,6 +29,7 @@ export function BusinessIncomeSection({
   currentStep,
   totalSteps,
 }: BusinessIncomeSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessIncomeInfo } = useAppSelector((state) => state.form433b);
@@ -61,10 +62,11 @@ export function BusinessIncomeSection({
     } catch (error: any) {
       console.log("Error saving business income info:", error);
       console.log("Error save: ", error);
-      toast.error(
+      showError(
         error?.response?.data?.message ||
           error.message ||
-          "Failed to save business income info"
+          "Failed to save business income info",
+        "Business Income Error"
       );
     }
   };
@@ -278,13 +280,14 @@ export function BusinessIncomeSection({
               error={errors.otherIncome?.message}
               onWheel={(e: any) => e.target.blur()}
             />
-            <div className="text-lg font-bold">
+            {/* Total Business Income hidden — show in final calculations popup */}
+            {/* <div className="text-lg font-bold">
               Total Business Income: $
               {totalIncome.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 

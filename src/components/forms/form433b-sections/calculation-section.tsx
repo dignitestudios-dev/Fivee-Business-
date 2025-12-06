@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useCalculationInfo from "@/hooks/433b-form-hooks/useCalculationInfo";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   calculationInitialValues,
   calculationSchemaFormB,
@@ -33,6 +33,7 @@ export function CalculationSection({
   currentStep,
   totalSteps,
 }: CalculationSectionProps) {
+  const { showError, showSuccess } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessExpenseInfo, businessAssetsInfo, calculationInfo } =
@@ -105,7 +106,7 @@ export function CalculationSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving calculation info:", error);
-      toast.error(error.message || "Failed to save calculation info");
+      showError(error.message || "Failed to save calculation info", "Section Error");
     }
   };
 
@@ -121,6 +122,8 @@ export function CalculationSection({
           </p>
         </div>
 
+        {/* Remaining Monthly Income hidden — show in final calculations popup */}
+        {/*
         <Card>
           <CardHeader>
             <CardTitle>Remaining Monthly Income</CardTitle>
@@ -132,6 +135,7 @@ export function CalculationSection({
             </p>
           </CardContent>
         </Card>
+        */}
 
         <Card>
           <CardHeader>
@@ -165,6 +169,8 @@ export function CalculationSection({
           </CardContent>
         </Card>
 
+        {/* Future Remaining Income, Available Assets and Minimum Offer hidden — show in final calculations popup */}
+        {/*
         <Card>
           <CardHeader>
             <CardTitle>Future Remaining Income</CardTitle>
@@ -199,6 +205,7 @@ export function CalculationSection({
             </p>
           </CardContent>
         </Card>
+        */}
 
         <FormNavigation
           currentStep={currentStep}

@@ -10,7 +10,7 @@ import { useAppSelector } from "@/lib/hooks";
 import usePayment from "@/hooks/payments/usePayment";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/services";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 
 const stripePromise = loadStripe(
@@ -18,6 +18,7 @@ const stripePromise = loadStripe(
 );
 
 const Form433BOICPayment = () => {
+  const { showError, showSuccess } = useGlobalPopup();
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
@@ -47,8 +48,8 @@ const Form433BOICPayment = () => {
   };
 
   const handlePay = async () => {
-    if (!selectedCard) return toast.error("Please select a card to pay");
-    if (!caseId) return toast.error("Missing caseId");
+    if (!selectedCard) return showError("Please select a card to pay", "Payment Error");
+    if (!caseId) return showError("Missing caseId", "Payment Error");
 
     setProcessing(true);
     try {
@@ -79,7 +80,7 @@ const Form433BOICPayment = () => {
         result.error.payment_intent?.status === "succeeded"
       ) {
         // Payment was already successful, treat this as a success case
-        toast.success("Payment successful");
+        showSuccess("Payment successful", "Success");
         router.push("/dashboard"); // Redirect to dashboard
         return;
       }
@@ -90,18 +91,18 @@ const Form433BOICPayment = () => {
       }
 
       if (result.paymentIntent && result.paymentIntent.status === "succeeded") {
-        toast.success("Payment successful");
+        showSuccess("Payment successful", "Success");
         // refresh cards list in case server updated something
         await handleGetPaymentMethods();
         // Redirect to dashboard after successful payment
         router.push("/dashboard");
       } else {
-        toast.error("Payment did not succeed");
+        showError("Payment did not succeed", "Payment Error");
       }
     } catch (error: any) {
       // Only show error toast if it's not the "already succeeded" case
       if (!error?.message?.includes("already succeeded")) {
-        toast.error(error?.message || "Payment failed");
+        showError(error?.message || "Payment failed", "Payment Error");
       }
     } finally {
       setProcessing(false);
@@ -188,14 +189,14 @@ const Form433BOICPayment = () => {
                     </div>
                   )}
                   <PaymentForm
-                    onPaymentError={(err) => toast.error(err)}
+                    onPaymentError={(err) => showError(err, "Payment Error")}
                     onPaymentSuccess={async (resp: any) => {
                       try {
                         setAddingCard(true);
                         await handleGetPaymentMethods();
-                        toast.success("Card added successfully");
+                        showSuccess("Card added successfully", "Success");
                       } catch (e: any) {
-                        toast.error(e?.message || "Failed to refresh cards");
+                        showError(e?.message || "Failed to refresh cards", "Error");
                       } finally {
                         setAddingCard(false);
                       }

@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface IndividualInfoSectionProps {
   onNext: () => void;
@@ -41,6 +42,7 @@ export function IndividualInfoSection({
   currentStep,
   totalSteps,
 }: IndividualInfoSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { individualInfo } = useAppSelector((state) => state.form656);
@@ -219,7 +221,7 @@ export function IndividualInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving individual info:", error);
-      toast.error(error.message || "Failed to save individual info");
+      showError(error.message || "Failed to save individual info", "Individual Info Error");
     }
   };
 

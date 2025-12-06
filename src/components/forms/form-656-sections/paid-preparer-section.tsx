@@ -23,6 +23,7 @@ import useSignatures from "@/hooks/signatures/useSignatures";
 import usePaidPreparer from "@/hooks/656-form-hooks/usePaidPreparer";
 import DropdownPopup from "@/components/ui/DropdownPopup";
 import { formatPhone } from "@/utils/helper";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface PaidPreparerSectionProps {
   onNext: () => void;
@@ -37,6 +38,7 @@ export function PaidPreparerSection({
   currentStep,
   totalSteps,
 }: PaidPreparerSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { paidPreparer } = useAppSelector((state) => state.form656);
@@ -78,7 +80,7 @@ export function PaidPreparerSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving paid preparer info:", error);
-      toast.error(error.message || "Failed to save paid preparer info");
+      showError(error.message || "Failed to save paid preparer info", "Paid Preparer Error");
     }
   };
 

@@ -24,6 +24,7 @@ import useSignatures656 from "@/hooks/656-form-hooks/useSignatures656";
 import DropdownPopup from "@/components/ui/DropdownPopup";
 import Link from "next/link";
 import { formatPhone } from "@/utils/helper";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface SignaturesSectionProps {
   onNext: () => void;
@@ -38,6 +39,7 @@ export function SignaturesSection({
   currentStep,
   totalSteps,
 }: SignaturesSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { signaturesInfo } = useAppSelector((state) => state.form656);
@@ -83,7 +85,7 @@ export function SignaturesSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving signatures:", error);
-      toast.error(error.message || "Failed to save signatures");
+      showError(error.message || "Failed to save signatures", "Signatures Error");
     }
   };
 

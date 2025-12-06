@@ -30,6 +30,7 @@ import { FORM_433A_SECTIONS } from "@/lib/constants";
 import useSelfEmployed from "@/hooks/433a-form-hooks/useSelfEmployed";
 import { storage } from "@/utils/helper";
 import useCalculation from "@/hooks/433a-form-hooks/useCalculation";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface BusinessAssetsSectionProps {
   onNext: () => void;
@@ -44,6 +45,7 @@ export function BusinessAssetsSection({
   currentStep,
   totalSteps,
 }: BusinessAssetsSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessAssetsInfo, selfEmployedInfo, calculationInfo } =
@@ -94,7 +96,7 @@ export function BusinessAssetsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business assets info:", error);
-      toast.error(error.message || "Failed to save business assets info");
+      showError(error.message || "Failed to save business assets info", "Business Assets Error");
     }
   };
 
@@ -566,7 +568,8 @@ export function BusinessAssetsSection({
               Add Digital Asset
             </Button>
 
-            <div className="flex justify-between font-medium">
+            {/* COMMENTED OUT - Shows in final popup */}
+            {/* <div className="flex justify-between font-medium">
               <span>Total bank accounts from attachment</span>
               <span>${bankSum.toFixed(0)}</span>
             </div>
@@ -574,7 +577,7 @@ export function BusinessAssetsSection({
             <div className="flex justify-between font-medium">
               <span>Total of bank accounts and digital assets</span>
               <span>${total8.toFixed(0)}</span>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
@@ -704,7 +707,7 @@ export function BusinessAssetsSection({
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-3 rounded">
+                {/* <div className="bg-gray-50 p-3 rounded">
                   <Label className="text-sm font-medium">
                     Total value (if leased or used in the production of income,
                     enter 0 as the total value) = $
@@ -729,7 +732,7 @@ export function BusinessAssetsSection({
                       ).toFixed(0);
                     })()}
                   </Label>
-                </div>
+                </div> */}
               </div>
             ))}
 
@@ -865,8 +868,8 @@ export function BusinessAssetsSection({
           </CardContent>
         </Card>
 
-        {/* Box B */}
-        <div className="bg-blue-50 p-4 rounded-lg">
+        {/* Box B - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* <div className="bg-blue-50 p-4 rounded-lg">
           <div className="text-center">
             <p className="font-bold text-lg">
               Add lines (8) and (11) and enter the amount in Box B = $
@@ -876,7 +879,7 @@ export function BusinessAssetsSection({
               Box B: Available Business Equity in Assets
             </p>
           </div>
-        </div>
+        </div> */}
 
         <FormNavigation
           currentStep={currentStep}

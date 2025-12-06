@@ -12,7 +12,7 @@ import {
 } from "@/lib/validation/form433a/business-income-section";
 import { useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import useSelfEmployed from "@/hooks/433a-form-hooks/useSelfEmployed";
@@ -33,6 +33,7 @@ export function BusinessIncomeSection({
   currentStep,
   totalSteps,
 }: BusinessIncomeSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessIncomeInfo, selfEmployedInfo, householdIncomeInfo } =
@@ -81,7 +82,7 @@ export function BusinessIncomeSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business income info:", error);
-      toast.error(error.message || "Failed to save business income info");
+      showError(error.message || "Failed to save business income info", "Business Income Error");
     }
   };
 
@@ -376,7 +377,8 @@ export function BusinessIncomeSection({
                 })}
                 error={errors.otherIncome?.message}
               />
-              <div className="bg-[#22b573]/5 p-4 rounded-lg">
+              {/* COMMENTED OUT - Shows in final popup */}
+              {/* <div className="bg-[#22b573]/5 p-4 rounded-lg">
                 <div className="font-medium">Total Business Income ($)</div>
                 <div className="text-2xl font-bold text-[#22b573] mt-1">
                   ${totalBusinessIncome.toFixed(0)}
@@ -384,7 +386,7 @@ export function BusinessIncomeSection({
                 <p className="text-xs text-gray-500">
                   Calculated automatically
                 </p>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
@@ -652,7 +654,8 @@ export function BusinessIncomeSection({
                 />
                 <p className="text-xs text-gray-500">Include a list</p>
               </div>
-              <div className="bg-[#22b573]/5 p-4 rounded-lg">
+              {/* COMMENTED OUT - Shows in final popup */}
+              {/* <div className="bg-[#22b573]/5 p-4 rounded-lg">
                 <div className="font-medium">Total Business Expenses ($)</div>
                 <div className="text-2xl font-bold text-[#22b573] mt-1">
                   ${totalBusinessExpenses.toFixed(0)}
@@ -660,13 +663,13 @@ export function BusinessIncomeSection({
                 <p className="text-xs text-gray-500">
                   Calculated automatically
                 </p>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
 
-        {/* Net Business Income */}
-        <Card>
+        {/* Net Business Income - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>Net Business Income Calculation</CardTitle>
           </CardHeader>
@@ -685,7 +688,7 @@ export function BusinessIncomeSection({
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <FormNavigation
           currentStep={currentStep}

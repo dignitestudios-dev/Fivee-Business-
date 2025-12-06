@@ -10,7 +10,6 @@ import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import useBusinessInfo656 from "@/hooks/656-form-hooks/useBusinessInfo656";
-import toast from "react-hot-toast";
 import {
   businessInfoSchema656,
   businessInfoInitialValues,
@@ -21,6 +20,7 @@ import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_656_SECTIONS } from "@/lib/constants";
 import { formatEIN, formatPhone } from "@/utils/helper";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface BusinessInfoSectionProps {
   onNext: () => void;
@@ -35,6 +35,7 @@ export function BusinessInfoSection({
   currentStep,
   totalSteps,
 }: BusinessInfoSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessInfo } = useAppSelector((state) => state.form656);
@@ -66,7 +67,7 @@ export function BusinessInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business info:", error);
-      toast.error(error.message || "Failed to save business info");
+      showError(error.message || "Failed to save business info", "Business Info Error");
     }
   };
 

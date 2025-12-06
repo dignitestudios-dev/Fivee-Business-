@@ -16,6 +16,7 @@ import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_433B_SECTIONS } from "@/lib/constants";
 import useBusinessIncomeInfo from "@/hooks/433b-form-hooks/useBusinessIncomeInfo";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface BusinessExpenseSectionProps {
   onNext: () => void;
@@ -30,6 +31,7 @@ export function BusinessExpenseSection({
   currentStep,
   totalSteps,
 }: BusinessExpenseSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { businessExpenseInfo, businessIncomeInfo } = useAppSelector(
@@ -69,8 +71,11 @@ export function BusinessExpenseSection({
       await handleSaveBusinessExpenseInfo(payload, caseId);
       onNext();
     } catch (error: any) {
-      console.error("Error saving business expense info:", error);
-      toast.error(error.message || "Failed to save business expense info");
+      console.error("Error saving business expense:", error);
+      showError(
+        error.message || "Failed to save business expense",
+        "Business Expense Error"
+      );
     }
   };
 
@@ -434,18 +439,20 @@ export function BusinessExpenseSection({
               })}
               error={errors.otherExpenses?.message}
             />
-            <div className="text-lg font-bold">
+            {/* Total Expenses hidden — show in final calculations popup */}
+            {/* <div className="text-lg font-bold">
               Total Expenses: ${totalExpenses.toLocaleString()}
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
         <Card>
           <CardContent>
-            <div className="text-lg font-bold">
+            {/* Remaining Monthly Income hidden — show in final calculations popup */}
+            {/* <div className="text-lg font-bold">
               Remaining Monthly Income : $
               {remainingMonthlyIncome.toLocaleString()}
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 

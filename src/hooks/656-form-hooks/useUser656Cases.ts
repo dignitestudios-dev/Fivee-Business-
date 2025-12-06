@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import api from "@/lib/services";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { set656Cases, set656Pagination } from "@/lib/features/formsSlice";
 
 const useUser656Cases = (initialPage = 1, limit = 10) => {
   const dispatch = useAppDispatch();
+  const { showError, showSuccess } = useGlobalPopup();
   const existingCases = useAppSelector((s) => s.forms.form656) || [];
   const existingCasesRef = useRef<FormCase[]>(existingCases);
 
@@ -54,7 +55,6 @@ const useUser656Cases = (initialPage = 1, limit = 10) => {
       } catch (err: any) {
         const msg = err?.message || "Failed to load cases";
         setError(msg);
-        toast.error(msg);
         console.log(msg);
         return null;
       } finally {

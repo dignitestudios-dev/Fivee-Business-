@@ -3,10 +3,11 @@ import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { getCaseId } from "@/utils/helper";
 import { savePersonalInfo } from "@/lib/features/form433aSlice";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const usePersonalInfo = () => {
   const dispatch = useAppDispatch();
+  const { showError, showSuccess } = useGlobalPopup();
   const [loading, setLoading] = useState(false);
   const [loadingFormData, setLoadingFormData] = useState(false);
 
@@ -22,7 +23,7 @@ const usePersonalInfo = () => {
       dispatch(savePersonalInfo(info));
     } catch (error: any) {
       console.error("Error saving personal info:", error);
-      toast.error(error?.message || "Failed to save personal info");
+      showError(error?.message || "Failed to save personal info", "Personal Info Error");
     } finally {
       setLoading(false);
     }

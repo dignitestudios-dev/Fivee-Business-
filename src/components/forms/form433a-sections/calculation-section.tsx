@@ -15,7 +15,7 @@ import {
 import useCalculation from "@/hooks/433a-form-hooks/useCalculation";
 import { useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import useBusinessAssets from "@/hooks/433a-form-hooks/useBusinessAssets";
@@ -35,6 +35,7 @@ export function CalculationSection({
   currentStep,
   totalSteps,
 }: CalculationSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const {
@@ -91,7 +92,10 @@ export function CalculationSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving calculation info:", error);
-      toast.error(error.message || "Failed to save calculation info");
+      showError(
+        error.message || "Failed to save calculation info",
+        "Calculation Error"
+      );
     }
   };
 
@@ -255,8 +259,8 @@ export function CalculationSection({
           </CardContent>
         </Card>
 
-        {/* 5 Month Calculation */}
-        {(paymentTimeline === "5_months_or_less") && (
+        {/* 5 Month Calculation - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* {(paymentTimeline === "5_months_or_less") && (
           <Card>
             <CardHeader>
               <CardTitle>5 Month Payment Calculation</CardTitle>
@@ -300,10 +304,10 @@ export function CalculationSection({
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
-        {/* 24 Month Calculation */}
-        {(paymentTimeline === "6_to_24_months") && (
+        {/* 24 Month Calculation - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* {(paymentTimeline === "6_to_24_months") && (
           <Card>
             <CardHeader>
               <CardTitle>24 Month Payment Calculation</CardTitle>
@@ -346,10 +350,10 @@ export function CalculationSection({
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
-        {/* Final Offer Calculation */}
-        <Card>
+        {/* Final Offer Calculation - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>Minimum Offer Amount Calculation</CardTitle>
             <p className="text-sm text-gray-600">
@@ -425,7 +429,7 @@ export function CalculationSection({
               </p>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <FormNavigation
           currentStep={currentStep}

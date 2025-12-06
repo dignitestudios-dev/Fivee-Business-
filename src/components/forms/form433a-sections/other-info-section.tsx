@@ -13,7 +13,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useAppSelector } from "@/lib/hooks";
 import { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import useOtherInfo from "@/hooks/433a-form-hooks/useOtherInfo";
 import {
   otherInfoInitialValues,
@@ -35,6 +35,7 @@ export function OtherInfoSection({
   currentStep,
   totalSteps,
 }: OtherInfoSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { otherInfo } = useAppSelector((state) => state.form433a);
@@ -120,7 +121,7 @@ export function OtherInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving other info:", error);
-      toast.error(error.message || "Failed to save other information");
+      showError(error.message || "Failed to save other information", "Other Info Error");
     }
   };
 

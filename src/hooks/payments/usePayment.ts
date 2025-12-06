@@ -4,11 +4,12 @@ import api from "@/lib/services";
 import { getError } from "@/utils/helper";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const usePayment = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { showError } = useGlobalPopup();
   const [loading, setLoading] = useState({
     adding: false,
     getting: false,
@@ -72,7 +73,7 @@ const usePayment = () => {
       return resp;
     } catch (error: any) {
       const err = getError(error);
-      toast.error(err);
+      showError(err, "Payment Method Error");
     } finally {
       setLoading((prev) => ({ ...prev, adding: false }));
     }
@@ -86,7 +87,7 @@ const usePayment = () => {
         dispatch(setCards(response.data.cards));
     } catch (error: any) {
       const err = getError(error);
-      toast.error(err);
+      showError(err, "Payment Methods Error");
     } finally {
       setLoading((prev) => ({ ...prev, getting: false }));
     }
@@ -100,7 +101,7 @@ const usePayment = () => {
       dispatch(emptyCards());
     } catch (error) {
       const err = getError(error);
-      toast.error(err);
+      showError(err, "Delete Payment Method Error");
     } finally {
       setLoading((prev) => ({ ...prev, deleting: false }));
     }

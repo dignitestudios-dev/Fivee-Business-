@@ -10,7 +10,7 @@ import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   personalInfoInitialValues,
   personalInfoSchema,
@@ -35,6 +35,7 @@ export function PersonalInfoSection({
   currentStep,
   totalSteps,
 }: PersonalInfoSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { personalInfo } = useAppSelector((state) => state.form433a);
@@ -125,7 +126,7 @@ export function PersonalInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving personal info:", error);
-      toast.error(error.message || "Failed to save personal info");
+      showError(error.message || "Failed to save personal info", "Personal Info Error");
     }
   };
 

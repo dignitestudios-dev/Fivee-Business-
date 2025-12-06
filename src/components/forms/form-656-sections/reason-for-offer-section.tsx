@@ -17,6 +17,7 @@ import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_656_SECTIONS } from "@/lib/constants";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface ReasonForOfferSectionProps {
   onNext: () => void;
@@ -31,6 +32,7 @@ export function ReasonForOfferSection({
   currentStep,
   totalSteps,
 }: ReasonForOfferSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { reasonForOffer } = useAppSelector((state) => state.form656);
@@ -63,8 +65,8 @@ export function ReasonForOfferSection({
       await handleSaveReasonForOffer(data, caseId);
       onNext();
     } catch (error: any) {
-      console.error("Error saving reason for offer:", error);
-      toast.error(error.message || "Failed to save reason for offer");
+      console.error("Error saving reason for offer info:", error);
+      showError(error.message || "Failed to save reason for offer info", "Reason for Offer Error");
     }
   };
 

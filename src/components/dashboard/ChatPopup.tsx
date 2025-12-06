@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   X,
@@ -25,7 +26,7 @@ import {
   updateMessageStatus,
 } from "@/lib/features/chatSlice";
 import { storage } from "@/utils/helper";
-import { toast } from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface ChatPopupProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   companyName = "Fivee Business",
   companyLogo = APP_CONFIG.logo,
 }) => {
+  const { showError } = useGlobalPopup();
   const user = useAppSelector((state) => state.user.user);
   const fullName = useMemo(
     () => `${user?.firstName} ${user?.lastName}`,
@@ -226,7 +228,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
       const onMessageError = (error: { code?: string; message?: string }) => {
         console.error("Message error:", error);
-        toast.error(error?.message || "Failed to send message");
+        showError(error?.message || "Failed to send message", "Message Error");
       };
 
       socketService.on("connect", onConnect);

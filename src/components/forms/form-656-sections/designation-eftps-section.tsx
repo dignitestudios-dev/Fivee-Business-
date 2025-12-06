@@ -8,7 +8,7 @@ import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import useDesignationEftps from "@/hooks/656-form-hooks/useDesignationEftps";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   designationEftpsSchema,
   designationEftpsInitialValues,
@@ -27,12 +27,13 @@ interface DesignationEftpsSectionProps {
   totalSteps: number;
 }
 
-export function DesignationEftpsSection({
+export function DesignationEFTPSSection({
   onNext,
   onPrevious,
   currentStep,
   totalSteps,
 }: DesignationEftpsSectionProps) {
+  const { showError, showSuccess } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { designationEftps } = useAppSelector((state) => state.form656);
@@ -68,7 +69,7 @@ export function DesignationEftpsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving designation eftps:", error);
-      toast.error(error.message || "Failed to save designation eftps");
+      showError(error.message || "Failed to save designation eftps", "Section Error");
     }
   };
 

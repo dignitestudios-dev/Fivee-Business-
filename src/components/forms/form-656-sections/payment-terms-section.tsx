@@ -14,7 +14,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
 import usePaymentTerms from "@/hooks/656-form-hooks/usePaymentTerms";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   paymentTermsSchema,
   paymentTermsInitialValues,
@@ -36,6 +36,7 @@ export function PaymentTermsSection({
   currentStep,
   totalSteps,
 }: PaymentTermsSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { paymentTerms } = useAppSelector((state) => state.form656);
@@ -144,7 +145,7 @@ export function PaymentTermsSection({
           lumpSumData.initialPayment + totalAdditional !==
           lumpSumData.totalOfferAmount
         ) {
-          toast.error("Payments must sum to total offer amount.");
+          showError("Payments must sum to total offer amount.", "Payment Terms Error");
           return;
         }
         data.periodic = undefined;
@@ -157,14 +158,14 @@ export function PaymentTermsSection({
           ? data.lumpSum.totalOfferAmount
           : data.periodic.totalOfferAmount;
       if (offerAmount < minOfferAmount) {
-        toast.error(`Offer amount must be at least $${minOfferAmount}.`);
+        showError(`Offer amount must be at least $${minOfferAmount}.`, "Payment Terms Error");
         return;
       }
       await handleSavePaymentTerms(data, caseId);
       onNext();
     } catch (error: any) {
       console.error("Error saving payment terms:", error);
-      toast.error(error.message || "Failed to save payment terms");
+      showError(error.message || "Failed to save payment terms", "Payment Terms Error");
     }
   };
   useEffect(() => {
@@ -183,7 +184,7 @@ export function PaymentTermsSection({
         payableWithinMonths: 1,
       });
     } else {
-      toast.error("Maximum of 5 additional payments allowed.");
+      showError("Maximum of 5 additional payments allowed.", "Payment Terms Error");
     }
   };
   if (loadingFormData) {

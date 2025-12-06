@@ -93,6 +93,7 @@ export default function Popup({
   showCloseButton = true,
   icon,
   children,
+  zIndex,
   ...modalProps
 }: PopupProps) {
   const [loading, setLoading] = useState<boolean>(false);

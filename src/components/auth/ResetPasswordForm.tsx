@@ -10,13 +10,14 @@ import { FiEyeOff } from "react-icons/fi";
 import { FaEye } from "react-icons/fa";
 import { GoCheckCircleFill } from "react-icons/go";
 import useAuth from "@/hooks/auth/useAuth";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface ResetPasswordFormProps {
   onSuccess: () => void;
 }
 const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
   const router = useRouter();
+  const { showError, showSuccess } = useGlobalPopup();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const { loading, handleResetPassword } = useAuth();
@@ -72,7 +73,7 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
 
   useEffect(() => {
     if (!token) {
-      toast.error("Invalid or missing token, use the link from your email.");
+      showError("Invalid or missing token, use the link from your email.", "Invalid Token");
       router.push("/auth/forgot-password");
     }
   }, [token]);
@@ -85,13 +86,17 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
       });
       setIsSuccess(true);
       onSuccess(); // Call the success callback instead of setting state
-    } catch (error) {
-      toast.error("Failed to reset password. Please try again.");
+    } catch (error: any) {
+      showError(
+        error?.message || "Failed to process forgot password request",
+        "Forgot Password Error"
+      );
+
       console.log("Error resetting password:", error);
     }
   };
 
-  if (false) {
+  if (isSuccess) {
     return (
       <div className="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">

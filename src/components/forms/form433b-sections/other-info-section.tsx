@@ -25,6 +25,7 @@ import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_433B_SECTIONS } from "@/lib/constants";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface OtherInfoSectionProps {
   onNext: () => void;
@@ -39,6 +40,7 @@ export function OtherInfoSection({
   currentStep,
   totalSteps,
 }: OtherInfoSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { otherInfo } = useAppSelector((state) => state.form433b);
@@ -437,7 +439,7 @@ export function OtherInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving other info:", error);
-      toast.error(error.message || "Failed to save other info");
+      showError(error.message || "Failed to save other info", "Other Info Error");
     }
   };
 

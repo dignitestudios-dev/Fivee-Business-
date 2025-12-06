@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import api from "@/lib/services";
 
 type InitResult = {
@@ -8,6 +8,7 @@ type InitResult = {
 };
 
 const useInitializeForm = () => {
+  const { showError, showSuccess } = useGlobalPopup();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +16,7 @@ const useInitializeForm = () => {
     if (!title || !title.trim()) {
       const msg = "Form title is required";
       setError(msg);
-      toast.error(msg);
+      showError(msg, "Form Initialization Error");
       throw new Error(msg);
     }
 
@@ -26,12 +27,12 @@ const useInitializeForm = () => {
       const res = await api.startForm433a({ title });
       // res is expected to be the standardized response { status, statusCode, data }
       const caseId = res?.data?.caseId;
-      toast.success("Form initialized successfully");
+      showSuccess("Form initialized successfully", "Success");
       return { caseId, message: res?.message };
     } catch (err: any) {
       const msg = err?.message || "Unable to start form";
       setError(msg);
-      toast.error(msg);
+      showError(msg, "Form Initialization Error");
       throw err;
     } finally {
       setLoading(false);

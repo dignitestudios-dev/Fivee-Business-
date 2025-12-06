@@ -15,8 +15,8 @@ import {
   signatureSchema,
   SignatureFormSchema,
 } from "@/lib/validation/form433a/signature-section";
-import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
@@ -25,6 +25,12 @@ import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignatureAndAttachments from "@/hooks/433a-form-hooks/useSignatureAndAttachments";
 import DropdownPopup from "@/components/ui/DropdownPopup";
 import Required from "@/components/ui/Required";
+import { CalculationsSummaryPopup433A } from "@/components/forms/CalculationsSummaryPopup433A";
+import { saveCalculationSummary, CalculationSummary } from "@/lib/features/form433aSlice";
+import usePersonalAssets from "@/hooks/433a-form-hooks/usePersonalAssets";
+import useBusinessAssets from "@/hooks/433a-form-hooks/useBusinessAssets";
+import useBusinessIncome from "@/hooks/433a-form-hooks/useBusinessIncome";
+import useHouseholdIncome from "@/hooks/433a-form-hooks/useHouseHoldIncome";
 
 interface SignatureSectionProps {
   onNext: () => void;
@@ -112,17 +118,28 @@ export function SignatureSection({
   currentStep,
   totalSteps,
 }: SignatureSectionProps) {
+  const { showError } = useGlobalPopup();
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
-  const { personalInfo, signatureInfo } = useAppSelector(
-    (state) => state.form433a
-  );
+  const {
+    personalInfo,
+    signatureInfo,
+    assetsInfo,
+    businessAssetsInfo,
+    businessIncomeInfo,
+    householdIncomeInfo,
+    calculationInfo,
+  } = useAppSelector((state) => state.form433a);
   const signatures = useAppSelector(
     (state) => state.signatures?.images
   ) as Signature[];
 
-  const { loadingFormData: loadingPersonal, handleGetPersonalInfo } =
+  const [showCalculationsSummary, setShowCalculationsSummary] =
+    useState<boolean>(false);
+
+  const { handleGetPersonalInfo } =
     usePersonalInfo();
   const {
     loading,
@@ -131,6 +148,14 @@ export function SignatureSection({
     handleGetSignatureInfo,
   } = useSignatureAndAttachments();
   const { handleGetSignatures, getting: loadingSignatures } = useSignatures();
+  const { handleGetAssetsInfo } = usePersonalAssets();
+  const { handleGetBusinessAssetsInfo } = useBusinessAssets();
+  const { handleGetBusinessIncomeInfo } = useBusinessIncome();
+  const { handleGetHouseholdIncomeInfo } = useHouseholdIncome();
+
+  const calculationSummary = useAppSelector(
+    (state) => state.form433a.calculationSummary
+  );
 
   const maritalStatus = useMemo(
     () => personalInfo?.maritalStatus || "unmarried",
@@ -165,6 +190,7 @@ export function SignatureSection({
   const [spouseSignaturePreview, setSpouseSignaturePreview] = useState<
     string | null
   >(null);
+  const [loadingAllSections, setLoadingAllSections] = useState(false);
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
     try {
@@ -176,10 +202,110 @@ export function SignatureSection({
       }
 
       await handleSaveSignatureInfo(data, caseId);
-      router.push(`/dashboard/433a-oic/payment?caseId=${caseId}`);
+
+      // Calculate summary and save to Redux
+      const boxA = assetsInfo?.boxA ?? 0;
+      const boxB = businessAssetsInfo?.boxB ?? 0;
+      const boxC = businessIncomeInfo?.boxC ?? 0;
+      
+      // Recalculate boxD and boxE from household income data in case they're 0 from API fetch
+      let boxD = householdIncomeInfo?.boxD ?? 0;
+      let boxE = householdIncomeInfo?.boxE ?? 0;
+      
+      // If boxD is 0, recalculate from income components
+      if (boxD === 0 && householdIncomeInfo) {
+        const primaryTaxpayerIncome = 
+          (householdIncomeInfo.income?.primaryTaxpayer?.grossWages ?? 0) +
+          (householdIncomeInfo.income?.primaryTaxpayer?.socialSecurity ?? 0) +
+          (householdIncomeInfo.income?.primaryTaxpayer?.pension ?? 0) +
+          (householdIncomeInfo.income?.primaryTaxpayer?.otherIncome ?? 0);
+        
+        const spouseIncome = 
+          (householdIncomeInfo.income?.spouse?.grossWages ?? 0) +
+          (householdIncomeInfo.income?.spouse?.socialSecurity ?? 0) +
+          (householdIncomeInfo.income?.spouse?.pension ?? 0) +
+          (householdIncomeInfo.income?.spouse?.otherIncome ?? 0);
+        
+        boxD = 
+          primaryTaxpayerIncome +
+          spouseIncome +
+          (householdIncomeInfo.income?.interestDividendsRoyalties ?? 0) +
+          (householdIncomeInfo.income?.distributions ?? 0) +
+          (householdIncomeInfo.income?.netRentalIncome ?? 0) +
+          (householdIncomeInfo.income?.childSupportReceived ?? 0) +
+          (householdIncomeInfo.income?.alimonyReceived ?? 0) +
+          (householdIncomeInfo.income?.additionalSourcesIncome ?? 0) +
+          boxC;
+      }
+      
+      // If boxE is 0, recalculate from expense components
+      if (boxE === 0 && householdIncomeInfo) {
+        boxE =
+          (householdIncomeInfo.expenses?.foodClothingMiscellaneous ?? 0) +
+          (householdIncomeInfo.expenses?.housingUtilities ?? 0) +
+          (householdIncomeInfo.expenses?.vehicleLoanLeasePayments ?? 0) +
+          (householdIncomeInfo.expenses?.vehicleOperatingCosts ?? 0) +
+          (householdIncomeInfo.expenses?.publicTransportationCosts ?? 0) +
+          (householdIncomeInfo.expenses?.healthInsurancePremiums ?? 0) +
+          (householdIncomeInfo.expenses?.outOfPocketHealthCare ?? 0) +
+          (householdIncomeInfo.expenses?.courtOrderedPayments ?? 0) +
+          (householdIncomeInfo.expenses?.childDependentCare ?? 0) +
+          (householdIncomeInfo.expenses?.lifeInsurancePremiums ?? 0) +
+          (householdIncomeInfo.expenses?.currentMonthlyTaxes ?? 0) +
+          (householdIncomeInfo.expenses?.securedDebts ?? 0) +
+          (householdIncomeInfo.expenses?.monthlyTaxPayments ?? 0);
+      }
+      
+      let boxF = householdIncomeInfo?.boxF ?? 0;
+      // Recalculate boxF if needed
+      if (boxF === 0 && boxD > 0 && boxE > 0) {
+        boxF = Math.max(0, boxD - boxE);
+      }
+
+      const boxF5Month = boxF ?? 0;
+      const boxF24Month = boxF ?? 0;
+      const boxG = boxF5Month * 12;
+      const boxH = boxF24Month * 24;
+
+      const paymentTimeline = calculationInfo?.paymentTimeline || "";
+      let futureIncome = 0;
+      if (paymentTimeline === "5_months_or_less") {
+        futureIncome = boxG;
+      } else if (paymentTimeline === "6_to_24_months") {
+        futureIncome = boxH;
+      }
+
+      const minimumOfferAmount = boxA + boxB + futureIncome;
+
+      // Calculate monthly payment for 5 months option
+      let monthlyPaymentAmount = 0;
+      if (paymentTimeline === "5_months_or_less") {
+        monthlyPaymentAmount = minimumOfferAmount / 5;
+      }
+
+      const calculationSummary: CalculationSummary = {
+        boxA,
+        boxB,
+        boxC,
+        boxD,
+        boxE,
+        boxF,
+        boxG,
+        boxH,
+        futureIncome,
+        paymentTimeline,
+        minimumOfferAmount,
+        monthlyPaymentAmount,
+      };
+
+      dispatch(saveCalculationSummary(calculationSummary));
+      setShowCalculationsSummary(true);
     } catch (error: any) {
       console.error("Error saving signature info:", error);
-      toast.error(error.message || "Failed to save signature info");
+      showError(
+        error.message || "Failed to save signature info",
+        "Signature Error"
+      );
     }
   };
 
@@ -187,6 +313,38 @@ export function SignatureSection({
     if (!personalInfo) handleGetPersonalInfo(caseId!, FORM_433A_SECTIONS[0]);
     if (!signatureInfo) handleGetSignatureInfo(caseId!, FORM_433A_SECTIONS[9]);
   }, [caseId]);
+
+  // Load all form sections data if any is missing (for direct navigation or page reload)
+  useEffect(() => {
+    const loadMissingData = async () => {
+      if (!caseId) return;
+      
+      const missingData = !assetsInfo || !businessAssetsInfo || !businessIncomeInfo || !householdIncomeInfo;
+      
+      if (missingData) {
+        setLoadingAllSections(true);
+        try {
+          // Fetch all required sections in parallel
+          if (!assetsInfo) {
+            handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
+          }
+          if (!businessAssetsInfo) {
+            handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
+          }
+          if (!businessIncomeInfo) {
+            handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5]);
+          }
+          if (!householdIncomeInfo) {
+            handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
+          }
+        } finally {
+          setLoadingAllSections(false);
+        }
+      }
+    };
+
+    loadMissingData();
+  }, [caseId, assetsInfo, businessAssetsInfo, businessIncomeInfo, householdIncomeInfo]);
 
   useEffect(() => {
     handleGetSignatures();
@@ -256,13 +414,14 @@ export function SignatureSection({
     handleGetSignatures();
   };
 
-  if (loadingFormData || loadingPersonal) {
+  if (loadingFormData || loadingAllSections) {
     return <FormLoader />;
   }
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+    <>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Section 10: Signatures
@@ -457,6 +616,14 @@ export function SignatureSection({
         />
       </form>
     </FormProvider>
+
+    <CalculationsSummaryPopup433A
+      open={showCalculationsSummary}
+      calculationSummary={calculationSummary}
+      caseId={caseId}
+      onClose={() => setShowCalculationsSummary(false)}
+    />
+    </>
   );
 }
 

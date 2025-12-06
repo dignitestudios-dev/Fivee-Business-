@@ -2,6 +2,21 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { formatDateForInput } from "@/utils/helper";
 
 // --- Types ---
+export interface CalculationSummary {
+  boxA: number;
+  boxB: number;
+  boxC: number;
+  boxD: number;
+  boxE: number;
+  boxF: number;
+  boxG: number;
+  boxH: number;
+  futureIncome: number;
+  paymentTimeline: string;
+  minimumOfferAmount: number;
+  monthlyPaymentAmount?: number; // For 5 months or less schedule
+}
+
 interface FormData433AState {
   caseId: string | null;
   personalInfo: PersonalInfoFromSchema | null;
@@ -14,6 +29,7 @@ interface FormData433AState {
   calculationInfo: CalculationFormSchema | null;
   otherInfo: OtherInfoFormSchema | null;
   signatureInfo: SignatureFormSchema | null;
+  calculationSummary: CalculationSummary | null;
 }
 
 // --- Initial State ---
@@ -29,6 +45,7 @@ const initialState: FormData433AState = {
   calculationInfo: null,
   otherInfo: null,
   signatureInfo: null,
+  calculationSummary: null,
 };
 
 // --- Slice ---
@@ -224,6 +241,14 @@ const form433aSlice = createSlice({
 
       state.signatureInfo = action.payload;
     },
+
+    // Save calculation summary
+    saveCalculationSummary: (
+      state,
+      action: PayloadAction<CalculationSummary | null>
+    ) => {
+      state.calculationSummary = action.payload;
+    },
   },
 });
 
@@ -240,5 +265,6 @@ export const {
   saveCalculationInfo,
   saveOtherInfo,
   saveSignatureInfo,
+  saveCalculationSummary,
 } = form433aSlice.actions;
 export default form433aSlice.reducer;

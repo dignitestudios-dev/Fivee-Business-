@@ -7,13 +7,14 @@ import { formatDate } from "@/utils/helper";
 import FormLoader from "@/components/global/FormLoader";
 import { useRouter } from "next/navigation";
 import api from "@/lib/services";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FButton from "@/components/ui/FButton";
 import FInput from "@/components/ui/FInput";
 import { Loader2, Check } from "lucide-react";
 
 const StartForm656 = () => {
   const router = useRouter();
+  const { showError, showSuccess } = useGlobalPopup();
 
   // hooks provide pagination and loading; we show infinite scroll inside each list
   const aHook = useUser433aCases(1, 10, "completedAndPaymentSussessed");
@@ -49,13 +50,13 @@ const StartForm656 = () => {
       const res = await api.startForm656(payload as any);
       const caseId = res?.data?.caseId;
       if (caseId) {
-        toast.success("Form 656 created");
+        showSuccess("Form 656 created", "Success");
         router.push(`/dashboard/form-656?caseId=${caseId}`);
       } else {
-        toast.error("Failed to create form 656");
+        showError("Failed to create form 656", "Error");
       }
     } catch (err: any) {
-      toast.error(err?.message || "Failed to start form");
+      showError(err?.message || "Failed to start form", "Error");
     } finally {
       setSubmitting(false);
     }

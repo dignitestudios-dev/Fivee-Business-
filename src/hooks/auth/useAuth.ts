@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
-import toast from "react-hot-toast";
 import { loginUser } from "@/lib/features/userSlice";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
@@ -51,7 +50,7 @@ const useAuth = () => {
       return response;
     } catch (error: any) {
       console.error("Error during signup:", error);
-      toast.error(error?.message);
+      showError(error?.message || "Signup failed", "Signup Error");
       throw error;
     } finally {
       setLoading(false);
@@ -62,10 +61,10 @@ const useAuth = () => {
     setLoading(true);
     try {
       await api.forgotPassword(payload);
-      toast.success("If your email exists, you will receive a reset link.");
+      showSuccess("If your email exists, you will receive a reset link.");
     } catch (error: any) {
       console.error("Error during forgot password:", error);
-      toast.error(error?.message);
+      showError(error?.message || "Failed to process forgot password request", "Forgot Password Error");
     } finally {
       setLoading(false);
     }
@@ -121,7 +120,7 @@ const useAuth = () => {
         router.push("/dashboard");
       }
     } catch (error: any) {
-      toast.error(error?.message || "Error during social login");
+      showError(error?.message || "Error during social login", "Social Login Error");
       throw error;
     }
   };
@@ -136,7 +135,7 @@ const useAuth = () => {
       await handleSocialAuth(result, "google", employmentType);
     } catch (error: any) {
       console.error("Google Sign In Error:", error);
-      toast.error(error?.message || "Error signing in with Google");
+      showError(error?.message || "Error signing in with Google", "Google Sign In Error");
     } finally {
       setGoogleLoading(false);
     }
@@ -155,7 +154,7 @@ const useAuth = () => {
       await handleSocialAuth(result, "apple", employmentType);
     } catch (error: any) {
       console.error("Apple Sign In Error:", error);
-      toast.error(error?.message || "Error signing in with Apple");
+      showError(error?.message || "Error signing in with Apple", "Apple Sign In Error");
     } finally {
       setAppleLoading(false);
     }

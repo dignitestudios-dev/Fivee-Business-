@@ -17,7 +17,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { preventAlphabetInput } from "@/lib/validation-schemas";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import usePersonalAssets from "@/hooks/433a-form-hooks/usePersonalAssets";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -44,6 +44,7 @@ export function PersonalAssetsSection({
   currentStep,
   totalSteps,
 }: PersonalAssetsSectionProps) {
+  const { showError } = useGlobalPopup();
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
@@ -101,7 +102,7 @@ export function PersonalAssetsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving assets info:", error);
-      toast.error(error.message || "Failed to save assets info");
+      showError(error.message || "Failed to save assets info", "Personal Assets Error");
     }
   };
 
@@ -567,12 +568,12 @@ export function PersonalAssetsSection({
             </Button>
 
             {/* Auto-calculated bank accounts total value */}
-            <div className="bg-gray-50 p-3 rounded">
+            {/* <div className="bg-gray-50 p-3 rounded">
               <Label className="text-sm font-medium">
                 Total of bank accounts from attachment: $
                 {bankTotal.toLocaleString()}
               </Label>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
@@ -1596,7 +1597,7 @@ export function PersonalAssetsSection({
                   </div>
 
                   {/* Auto-calculated net value */}
-                  <div className="bg-gray-50 p-3 rounded">
+                  {/* <div className="bg-gray-50 p-3 rounded">
                     <Label className="text-sm font-medium">
                       Total Value of Real Estate: $
                       {Math.max(
@@ -1605,7 +1606,7 @@ export function PersonalAssetsSection({
                           (prop.loanBalance || 0)
                       ).toLocaleString()}
                     </Label>
-                  </div>
+                  </div> */}
                 </div>
               );
             })}
@@ -1913,7 +1914,7 @@ export function PersonalAssetsSection({
                   </div>
 
                   {/* Auto-calculated values */}
-                  <div className="space-y-2 bg-gray-50 p-3 rounded">
+                  {/* <div className="space-y-2 bg-gray-50 p-3 rounded">
                     <div>
                       <Label className="text-sm font-medium">
                         Total Value of Vehicle: $
@@ -1962,7 +1963,7 @@ export function PersonalAssetsSection({
                         </p>
                       )}
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               );
             })}
@@ -2270,7 +2271,7 @@ export function PersonalAssetsSection({
               Add Furniture/Personal Effect
             </Button>
 
-            <div className="bg-blue-50 p-4 rounded-lg mt-4">
+            {/* <div className="bg-blue-50 p-4 rounded-lg mt-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-blue-900">
                   Total Valuable Items + Furniture Value: $
@@ -2280,12 +2281,12 @@ export function PersonalAssetsSection({
                   Minus IRS Deduction of $11,710: ${otherTotal.toLocaleString()}
                 </Label>
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
-        {/* Total Available Individual Equity Summary */}
-        <Card>
+        {/* Total Available Individual Equity Summary - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>Available Individual Equity in Assets Summary</CardTitle>
           </CardHeader>
@@ -2350,7 +2351,7 @@ export function PersonalAssetsSection({
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <FormNavigation
           currentStep={currentStep}

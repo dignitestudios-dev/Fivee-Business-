@@ -15,7 +15,7 @@ import {
 import useHouseholdIncome from "@/hooks/433a-form-hooks/useHouseHoldIncome";
 import { useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import Link from "next/link";
@@ -35,6 +35,7 @@ export function HouseholdIncomeSection({
   currentStep,
   totalSteps,
 }: HouseholdIncomeSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { householdIncomeInfo, personalInfo, businessIncomeInfo } =
@@ -80,7 +81,7 @@ export function HouseholdIncomeSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving household income info:", error);
-      toast.error(error.message || "Failed to save household income info");
+      showError(error.message || "Failed to save household income info", "Household Income Error");
     }
   };
 
@@ -290,7 +291,7 @@ export function HouseholdIncomeSection({
                   error={errors.income?.primaryTaxpayer?.otherIncome?.message}
                 />
               </div>
-              <div className="mt-4 flex justify-end">
+              {/* <div className="mt-4 flex justify-end">
                 <div className="text-right">
                   <span className="text-sm text-gray-600">
                     Total primary taxpayer income ={" "}
@@ -299,7 +300,7 @@ export function HouseholdIncomeSection({
                     (30) ${totalPrimaryIncome.toFixed(0)}
                   </span>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Spouse */}
@@ -549,7 +550,8 @@ export function HouseholdIncomeSection({
                 />
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg">
+              {/* COMMENTED OUT - Shows in final popup */}
+              {/* <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="text-center">
 
                   <p className="font-bold text-lg">
@@ -560,7 +562,7 @@ export function HouseholdIncomeSection({
                     Box D - Total Household Income
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
@@ -1013,7 +1015,7 @@ export function HouseholdIncomeSection({
                 </div>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg">
+              {/* <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="text-center">
 
                   <p className="font-bold text-lg">
@@ -1024,13 +1026,13 @@ export function HouseholdIncomeSection({
                     Box E - Total Household Expenses
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
 
-        {/* Remaining Monthly Income */}
-        <Card>
+        {/* Remaining Monthly Income - COMMENTED OUT FOR FINAL SUMMARY POPUP */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>Remaining Monthly Income Calculation</CardTitle>
           </CardHeader>
@@ -1048,7 +1050,7 @@ export function HouseholdIncomeSection({
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <FormNavigation
           currentStep={currentStep}

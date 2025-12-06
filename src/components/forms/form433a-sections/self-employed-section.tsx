@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFieldArray, FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { useEffect, useMemo } from "react";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
 import {
@@ -35,6 +35,7 @@ export function SelfEmployedSection({
   currentStep,
   totalSteps,
 }: SelfEmployedSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { selfEmployedInfo } = useAppSelector((state) => state.form433a);
@@ -72,7 +73,7 @@ export function SelfEmployedSection({
       }
     } catch (error: any) {
       console.error("Error saving self-employed info:", error);
-      toast.error(error.message || "Failed to save self-employed info");
+      showError(error.message || "Failed to save self-employed info", "Self-Employed Error");
     }
   };
 

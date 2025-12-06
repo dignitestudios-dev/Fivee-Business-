@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import {
   addSignature,
   deleteSignature,
   setSignatures,
   updateSignature,
 } from "@/lib/features/signaturesSlice";
-import toast from "react-hot-toast";
 
 const useSignatures = () => {
   const dispatch = useAppDispatch();
+  const { showError } = useGlobalPopup();
   const [loadingStates, setLoadingStates] = useState({
     getting: false,
     creating: false,
@@ -35,7 +36,7 @@ const useSignatures = () => {
       dispatch(setSignatures(response.data?.images || []));
     } catch (error: any) {
       console.error("Error fetching signatures:", error);
-      toast.error(error?.message || "Failed to fetch signatures");
+      showError(error?.message || "Failed to fetch signatures", "Signatures Error");
     } finally {
       setGetting(false);
     }
@@ -55,7 +56,7 @@ const useSignatures = () => {
       return newSig;
     } catch (error: any) {
       console.error("Error creating signature:", error);
-      toast.error(error?.message || "Failed to create signature");
+      showError(error?.message || "Failed to create signature", "Create Signature Error");
       throw error;
     } finally {
       setCreating(false);
@@ -75,7 +76,7 @@ const useSignatures = () => {
       dispatch(updateSignature(updatedSig));
     } catch (error: any) {
       console.error("Error updating signature:", error);
-      toast.error(error?.message || "Failed to update signature");
+      showError(error?.message || "Failed to update signature", "Update Signature Error");
       throw error;
     } finally {
       setUpdating(false);
@@ -90,7 +91,7 @@ const useSignatures = () => {
       dispatch(deleteSignature(id));
     } catch (error: any) {
       console.error("Error deleting signature:", error);
-      toast.error(error?.message || "Failed to delete signature");
+      showError(error?.message || "Failed to delete signature", "Delete Signature Error");
     } finally {
       setDeleting(false);
     }

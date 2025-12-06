@@ -18,6 +18,7 @@ import { useAppSelector } from "@/lib/hooks";
 import FormLoader from "@/components/global/FormLoader";
 import { useSearchParams } from "next/navigation";
 import { FORM_656_SECTIONS } from "@/lib/constants";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 interface SourceOfFundsSectionProps {
   onNext: () => void;
@@ -32,6 +33,7 @@ export function SourceOfFundsSection({
   currentStep,
   totalSteps,
 }: SourceOfFundsSectionProps) {
+  const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
   const { sourceOfFunds } = useAppSelector((state) => state.form656);
@@ -66,8 +68,8 @@ export function SourceOfFundsSection({
       await handleSaveSourceOfFunds(data, caseId);
       onNext();
     } catch (error: any) {
-      console.error("Error saving source of funds from comp:", error);
-      toast.error(error.message || "Failed to save source of funds");
+      console.error("Error saving source of funds info:", error);
+      showError(error.message || "Failed to save source of funds info", "Source of Funds Error");
     }
   };
 

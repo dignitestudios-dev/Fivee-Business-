@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useAppDispatch } from "@/lib/hooks";
 import api from "@/lib/services";
 import { saveBusinessIncomeInfo } from "@/lib/features/form433bSlice";
-import toast from "react-hot-toast";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const useBusinessIncomeInfo = () => {
   const dispatch = useAppDispatch();
+  const { showError, showSuccess } = useGlobalPopup();
   const [loading, setLoading] = useState(false);
   const [loadingFormData, setLoadingFormData] = useState(false);
 
@@ -24,7 +25,7 @@ const useBusinessIncomeInfo = () => {
       await api.saveBusinessIncomeInfoFormB(data, caseId);
       dispatch(saveBusinessIncomeInfo(info));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to save business income info");
+      showError(error?.message || "Failed to save business income info", "Business Income Error");
       throw error;
     } finally {
       setLoading(false);
