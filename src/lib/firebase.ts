@@ -14,4 +14,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const messaging = getMessaging(app);
+
+// Only initialize messaging in browser environment
+export const messaging = typeof window !== "undefined" ? getMessaging(app) : null;

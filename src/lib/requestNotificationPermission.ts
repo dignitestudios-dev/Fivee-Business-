@@ -3,6 +3,12 @@ import { messaging } from "./firebase";
 
 export const requestNotificationPermission = async () => {
   try {
+    // Only run in browser environment
+    if (typeof window === "undefined" || !messaging) {
+      console.log("Messaging not available in this environment");
+      return null;
+    }
+
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
       console.log("Notification permission denied");
