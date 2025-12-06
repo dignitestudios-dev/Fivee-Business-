@@ -6,7 +6,6 @@ import { IndividualInfoSection } from "@/components/forms/form-656-sections/indi
 import { BusinessInfoSection } from "@/components/forms/form-656-sections/business-info-section";
 import { ReasonForOfferSection } from "@/components/forms/form-656-sections/reason-for-offer-section";
 import { PaymentTermsSection } from "@/components/forms/form-656-sections/payment-terms-section";
-import { DesignationEftpsSection } from "@/components/forms/form-656-sections/designation-eftps-section";
 import { SourceOfFundsSection } from "@/components/forms/form-656-sections/source-of-funds-section";
 import { OfferTermsSection } from "@/components/forms/form-656-sections/offer-terms-section";
 import { SignaturesSection } from "@/components/forms/form-656-sections/signatures-section";
@@ -18,6 +17,7 @@ import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setCaseId } from "@/lib/features/form656Slice";
 import { ApplicationChecklistSection } from "./form-656-sections/application-checklist-section";
+import { DesignationEFTPSSection } from "./form-656-sections/designation-eftps-section";
 
 const steps = [
   {
@@ -235,7 +235,7 @@ export default function Form656() {
       case 4:
         return <PaymentTermsSection {...commonProps} />;
       case 5:
-        return <DesignationEftpsSection {...commonProps} />;
+        return <DesignationEFTPSSection {...commonProps} />;
       case 6:
         return <SourceOfFundsSection {...commonProps} />;
       case 7:
