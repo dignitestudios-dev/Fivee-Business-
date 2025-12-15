@@ -37,7 +37,7 @@ const usePaymentTerms = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(savePaymentTerms(response.data || {}));
+      dispatch(savePaymentTerms(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching payment terms:", error);
     } finally {

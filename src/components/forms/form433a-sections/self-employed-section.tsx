@@ -27,6 +27,7 @@ interface SelfEmployedSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function SelfEmployedSection({
@@ -34,6 +35,7 @@ export function SelfEmployedSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: SelfEmployedSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -73,7 +75,10 @@ export function SelfEmployedSection({
       }
     } catch (error: any) {
       console.error("Error saving self-employed info:", error);
-      showError(error.message || "Failed to save self-employed info", "Self-Employed Error");
+      showError(
+        error.message || "Failed to save self-employed info",
+        "Self-Employed Error"
+      );
     }
   };
 
@@ -631,6 +636,7 @@ export function SelfEmployedSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

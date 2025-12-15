@@ -37,7 +37,7 @@ const useEmployment = () => {
 
       const response = await api.get433aSectionInfo(caseId, section);
 
-      dispatch(saveEmploymentInfo(response.data || {}));
+      dispatch(saveEmploymentInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching employment info:", error);
       throw error;

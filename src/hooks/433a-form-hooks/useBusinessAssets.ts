@@ -62,7 +62,7 @@ const useBusinessAssets = () => {
 
     try {
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(saveBusinessAssetsInfo(response.data || {}));
+      dispatch(saveBusinessAssetsInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching business assets info:", error);
     } finally {

@@ -35,7 +35,7 @@ const useCalculationInfo = () => {
     try {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveCalculationInfo(response.data || {}));
+      dispatch(saveCalculationInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching calculation info:", error);
     } finally {

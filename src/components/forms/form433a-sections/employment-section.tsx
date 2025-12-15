@@ -27,6 +27,7 @@ interface EmploymentSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function EmploymentSection({
@@ -34,6 +35,7 @@ export function EmploymentSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: EmploymentSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -581,6 +583,7 @@ export function EmploymentSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

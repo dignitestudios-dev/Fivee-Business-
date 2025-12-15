@@ -18,6 +18,8 @@ import FormLoader from "@/components/global/FormLoader";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setCaseId } from "@/lib/features/form433aSlice";
 import { useSearchParams } from "next/navigation";
+import { Button } from "../ui/Button";
+import useSkipSection from "@/hooks/useSkipSection";
 
 const steps = [
   {
@@ -78,10 +80,27 @@ export default function Form433AOIC() {
 
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  // hydrated indicates we've determined the correct step (from local or server)
-  // and it's safe to render the section UI. When false we show a loader so
-  // the UI doesn't render step 1 then jump to another step.
+  const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
   const [hydrated, setHydrated] = useState<boolean>(false);
+  const [disableForm, setDisableForm] = useState<boolean>(false);
+  const [viewOnlyMessage, setViewOnlyMessage] = useState<string>("");
+
+  // Skip section hook
+  const { skipping, skipSection } = useSkipSection({
+    caseId,
+    currentStep,
+    onSkipSuccess: (step) => {
+      // Mark step as skipped and move to next
+      const newSkippedSteps = new Set([...skippedSteps, step]);
+      setSkippedSteps(newSkippedSteps);
+      if (step < 10) {
+        const nextStep = step + 1;
+        setCurrentStep(nextStep);
+        saveProgress(nextStep, completedSteps, newSkippedSteps, caseId);
+      }
+    },
+    formType: "433a",
+  });
 
   // Load saved progress from localStorage
   const getSavedProgress = () => {
@@ -89,9 +108,10 @@ export default function Form433AOIC() {
       caseId: string | null;
       currentStep: number;
       completedSteps: number[];
+      skippedSteps: number[];
     }>("433a_progress");
     return (
-      savedProgress || { caseId: null, currentStep: 1, completedSteps: [] }
+      savedProgress || { caseId: null, currentStep: 1, completedSteps: [], skippedSteps: [] }
     );
   };
 
@@ -107,6 +127,7 @@ export default function Form433AOIC() {
     if (savedProgress.caseId === caseId) {
       setCurrentStep(savedProgress.currentStep);
       setCompletedSteps(new Set(savedProgress.completedSteps));
+      setSkippedSteps(new Set(savedProgress.skippedSteps || []));
     }
 
     // Now ask server for authoritative section completion status
@@ -130,15 +151,22 @@ export default function Form433AOIC() {
         ];
 
         const newCompleted: number[] = [];
+        const newSkipped: number[] = [];
         for (let i = 0; i < sectionOrder.length; i++) {
           const key = sectionOrder[i];
-          if (sections && sections[key]) {
+          const status = sections && sections[key];
+          if (status === "completed") {
             newCompleted.push(i + 1);
+          } else if (status === "skipped") {
+            newSkipped.push(i + 1);
           }
         }
 
         const firstIncompleteIndex = sectionOrder.findIndex(
-          (k) => !(sections && sections[k])
+          (k) => {
+            const status = sections && sections[k];
+            return status !== "completed" && status !== "skipped";
+          }
         );
 
         const computedCurrentStep =
@@ -147,6 +175,7 @@ export default function Form433AOIC() {
             : firstIncompleteIndex + 1;
 
         setCompletedSteps(new Set(newCompleted));
+        setSkippedSteps(new Set(newSkipped));
         setCurrentStep(computedCurrentStep);
 
         // mark hydrated after applying server state
@@ -157,12 +186,35 @@ export default function Form433AOIC() {
           caseId,
           currentStep: computedCurrentStep,
           completedSteps: newCompleted,
+          skippedSteps: newSkipped,
         });
       } catch (error) {
         // If API fails, we already applied optimistic local progress above.
         console.error("Failed to fetch section status:", error);
         // still mark hydrated so UI can render using optimistic/local state
         setHydrated(true);
+      }
+
+      // Fetch payment status
+      try {
+        const paymentResp = await api.get433aSectionInfo(
+          caseId,
+          "paymentStatus"
+        );
+        const paymentStatus = paymentResp?.data?.status === "completed";
+        if (paymentStatus) {
+          setDisableForm(true);
+          setViewOnlyMessage(
+            "You can only view the completed form but cannot edit it."
+          );
+        } else {
+          setDisableForm(false);
+          setViewOnlyMessage("");
+        }
+      } catch (error) {
+        console.error("Failed to fetch payment status:", error);
+        setDisableForm(false);
+        setViewOnlyMessage("");
       }
     })();
   }, [caseId]);
@@ -179,6 +231,7 @@ export default function Form433AOIC() {
       if (savedProgress.caseId === null) {
         setCurrentStep(savedProgress.currentStep);
         setCompletedSteps(new Set(savedProgress.completedSteps));
+        setSkippedSteps(new Set(savedProgress.skippedSteps || []));
       }
       setHydrated(true);
       return;
@@ -189,6 +242,7 @@ export default function Form433AOIC() {
     if (savedProgress.caseId === caseId) {
       setCurrentStep(savedProgress.currentStep);
       setCompletedSteps(new Set(savedProgress.completedSteps));
+      setSkippedSteps(new Set(savedProgress.skippedSteps || []));
       setHydrated(true);
     }
     // Otherwise we intentionally wait for the server before rendering
@@ -215,6 +269,7 @@ export default function Form433AOIC() {
   const saveProgress = (
     step: number,
     completed: Set<number>,
+    skipped: Set<number>,
     caseIdToSave?: string | null
   ) => {
     try {
@@ -222,6 +277,7 @@ export default function Form433AOIC() {
         caseId: caseIdToSave || caseId || null,
         currentStep: step,
         completedSteps: Array.from(completed),
+        skippedSteps: Array.from(skipped),
       };
       storage.set("433a_progress", progressData);
       console.log("Progress saved to localStorage", progressData);
@@ -252,7 +308,7 @@ export default function Form433AOIC() {
         setCurrentStep(nextStep);
 
         // Save progress to localStorage
-        saveProgress(nextStep, newCompletedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
       } else {
         // Mark current step as completed
         const newCompletedSteps = new Set([...completedSteps, currentStep]);
@@ -261,7 +317,7 @@ export default function Form433AOIC() {
         setCurrentStep(nextStep);
 
         // Save progress to localStorage
-        saveProgress(nextStep, newCompletedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
       }
     }
   };
@@ -272,17 +328,17 @@ export default function Form433AOIC() {
       setCurrentStep(prevStep);
 
       // Save progress to localStorage
-      saveProgress(prevStep, completedSteps, caseId);
+      saveProgress(prevStep, completedSteps, skippedSteps, caseId);
     }
   };
 
   const handleStepClick = (stepNumber: number) => {
-    // Only allow navigation to completed steps or current step
-    if (stepNumber <= currentStep || completedSteps.has(stepNumber)) {
+    // Only allow navigation to completed, skipped steps or current step
+    if (stepNumber <= currentStep || completedSteps.has(stepNumber) || skippedSteps.has(stepNumber)) {
       setCurrentStep(stepNumber);
 
       // update progress
-      saveProgress(stepNumber, completedSteps, caseId);
+      saveProgress(stepNumber, completedSteps, skippedSteps, caseId);
     }
   };
 
@@ -292,6 +348,7 @@ export default function Form433AOIC() {
       onPrevious: handlePrevious,
       currentStep,
       totalSteps: 10,
+      paymentStatus: disableForm
     };
 
     switch (currentStep) {
@@ -336,6 +393,13 @@ export default function Form433AOIC() {
           </p>
         </div>
 
+        {viewOnlyMessage && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg">
+            <p className="font-medium">Form View Only</p>
+            <p>{viewOnlyMessage}</p>
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-8 min-h-[60vh]">
           {/* Stepper Navigation */}
           <div className="lg:w-1/4">
@@ -344,6 +408,7 @@ export default function Form433AOIC() {
                 steps={steps}
                 currentStep={currentStep}
                 completedSteps={completedSteps}
+                skippedSteps={skippedSteps}
                 onStepClick={handleStepClick}
               />
             ) : (
@@ -355,7 +420,22 @@ export default function Form433AOIC() {
 
           {/* Form Content */}
           <div className="lg:w-3/4 h-full">
-            <div className="bg-white h-full rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="relative bg-white h-full rounded-lg shadow-sm border border-gray-200 p-6">
+              <div
+                className={`absolute top-0 right-0 rounded-lg bg-white/50 h-full w-full ${
+                  disableForm || skipping ? "block" : "hidden"
+                }`}
+              />
+
+              <div className="w-full flex justify-end">
+                <Button
+                  disabled={skipping}
+                  onClick={skipSection}
+                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/80 transition-all text-white font-medium mb-5"
+                >
+                  {skipping ? "Skipping..." : "Skip"}
+                </Button>
+              </div>
               {hydrated ? renderCurrentSection() : <FormLoader />}
             </div>
           </div>

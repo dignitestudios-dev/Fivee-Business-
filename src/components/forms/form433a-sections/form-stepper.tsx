@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/utils/helper";
-import { Check, Lock } from "lucide-react";
+import { Check, Info, Lock } from "lucide-react";
 
 interface Step {
   id: number;
@@ -13,6 +13,7 @@ interface FormStepperProps {
   steps: Step[];
   currentStep: number;
   completedSteps: Set<number>;
+  skippedSteps?: Set<number>;
   onStepClick: (step: number) => void;
 }
 
@@ -20,6 +21,7 @@ export function FormStepper({
   steps,
   currentStep,
   completedSteps,
+  skippedSteps = new Set(),
   onStepClick,
 }: FormStepperProps) {
   return (
@@ -33,9 +35,12 @@ export function FormStepper({
 
       {steps.map((step) => {
         const isCompleted = completedSteps.has(step.id);
+        const isSkipped = skippedSteps.has(step.id);
         const isCurrent = step.id === currentStep;
         const isAccessible =
-          step.id <= currentStep || completedSteps.has(step.id);
+          step.id <= currentStep ||
+          completedSteps.has(step.id) ||
+          skippedSteps.has(step.id);
 
         return (
           <button
@@ -50,8 +55,10 @@ export function FormStepper({
               isCurrent &&
                 "border-[#22b573] bg-[#22b573]/5 ring-2 !ring-[#22b573]/70",
               isCompleted && "border-green-200 bg-green-50",
+              isSkipped && "border-yellow-200 bg-yellow-50",
               !isCurrent &&
                 !isCompleted &&
+                !isSkipped &&
                 isAccessible &&
                 "border-gray-200 bg-white hover:border-gray-300",
               !isAccessible && "border-gray-100 bg-gray-50"
@@ -63,8 +70,10 @@ export function FormStepper({
                   "flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium",
                   isCurrent && "bg-[#22b573] text-white",
                   isCompleted && "bg-green-500 text-white",
+                  isSkipped && "bg-yellow-500 text-white",
                   !isCurrent &&
                     !isCompleted &&
+                    !isSkipped &&
                     isAccessible &&
                     "bg-gray-200 text-gray-600",
                   !isAccessible && "bg-gray-300 text-gray-500"
@@ -74,6 +83,8 @@ export function FormStepper({
                   <Lock className="w-3 h-3" />
                 ) : isCompleted ? (
                   <Check className="w-4 h-4" />
+                ) : isSkipped ? (
+                  <Info className="w-4 h-4" />
                 ) : (
                   step.id
                 )}
@@ -85,8 +96,10 @@ export function FormStepper({
                     "text-sm font-medium",
                     isCurrent && "text-[#22b573]",
                     isCompleted && "text-green-700",
+                    isSkipped && "text-yellow-700",
                     !isCurrent &&
                       !isCompleted &&
+                      !isSkipped &&
                       isAccessible &&
                       "text-gray-900",
                     !isAccessible && "text-gray-500"
@@ -99,8 +112,10 @@ export function FormStepper({
                     "text-xs mt-1",
                     isCurrent && "text-[#22b573]/70",
                     isCompleted && "text-green-600",
+                    isSkipped && "text-yellow-600",
                     !isCurrent &&
                       !isCompleted &&
+                      !isSkipped &&
                       isAccessible &&
                       "text-gray-500",
                     !isAccessible && "text-gray-400"

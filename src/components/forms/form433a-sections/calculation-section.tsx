@@ -27,6 +27,7 @@ interface CalculationSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function CalculationSection({
@@ -34,6 +35,7 @@ export function CalculationSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: CalculationSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -436,6 +438,7 @@ export function CalculationSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

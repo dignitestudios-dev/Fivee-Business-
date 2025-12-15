@@ -37,7 +37,7 @@ const useDesignationEftps = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(saveDesignationEftps(response.data || {}));
+      dispatch(saveDesignationEftps(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching designation eftps:", error);
     } finally {

@@ -9,6 +9,7 @@ interface FormNavigationProps {
   onPrevious: any;
   onNext: any;
   onSubmit?: any;
+  paymentStatus?: boolean;
   loading?: boolean; // Add loading prop
 }
 
@@ -18,6 +19,7 @@ export function FormNavigation({
   onPrevious,
   onNext,
   onSubmit,
+  paymentStatus = false,
   loading = false,
 }: FormNavigationProps) {
   return (
@@ -37,26 +39,27 @@ export function FormNavigation({
         Step {currentStep} of {totalSteps}
       </div>
 
-      {currentStep === totalSteps ? (
-        <Button
-          type="button"
-          onClick={onSubmit}
-          disabled={loading}
-          className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
-        >
-          {loading ? "Submitting..." : "Submit Form"}
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          onClick={onNext}
-          disabled={loading}
-          className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Next"}
-          {!loading && <ChevronRight className="w-4 h-4" />}
-        </Button>
-      )}
+      {!paymentStatus &&
+        (currentStep === totalSteps ? (
+          <Button
+            type="button"
+            onClick={onSubmit}
+            disabled={loading}
+            className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? "Submitting..." : "Submit Form"}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={onNext}
+            disabled={loading}
+            className="bg-[#22b573] hover:bg-[#22b573]/90 text-white flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? "Saving..." : "Next"}
+            {!loading && <ChevronRight className="w-4 h-4" />}
+          </Button>
+        ))}
     </div>
   );
 }

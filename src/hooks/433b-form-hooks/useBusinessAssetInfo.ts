@@ -48,7 +48,7 @@ const useBusinessAssetInfo = () => {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
       console.log("response.data business info: ", response.data);
-      dispatch(saveBusinessAssetInfo(response.data || {}));
+      dispatch(saveBusinessAssetInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching business asset info:", error);
     } finally {

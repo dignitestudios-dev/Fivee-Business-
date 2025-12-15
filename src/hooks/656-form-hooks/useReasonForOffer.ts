@@ -37,7 +37,7 @@ const useReasonForOffer = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(saveReasonForOffer(response.data?.reasonType || null));
+      dispatch(saveReasonForOffer(response.data?.data?.reasonType || null));
     } catch (error: any) {
       console.error("Error fetching reason for offer:", error);
     } finally {

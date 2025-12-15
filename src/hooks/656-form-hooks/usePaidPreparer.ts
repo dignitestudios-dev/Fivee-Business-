@@ -37,7 +37,7 @@ const usePaidPreparer = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(savePaidPreparer(response.data || {}));
+      dispatch(savePaidPreparer(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching paid preparer:", error);
     } finally {

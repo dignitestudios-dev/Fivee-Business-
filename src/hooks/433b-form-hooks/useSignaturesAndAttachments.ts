@@ -32,7 +32,7 @@ const useSignaturesAndAttachments = () => {
     try {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveSignatureInfo(response.data || {}));
+      dispatch(saveSignatureInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching signatures info:", error);
     } finally {
@@ -47,5 +47,5 @@ const useSignaturesAndAttachments = () => {
     handleGetSignatureInfo,
   };
 };
-
+  
 export default useSignaturesAndAttachments;

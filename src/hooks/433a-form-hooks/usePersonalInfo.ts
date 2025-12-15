@@ -40,7 +40,7 @@ const usePersonalInfo = () => {
       if (!caseId) return;
 
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(savePersonalInfo(response.data || {}));
+      dispatch(savePersonalInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching personal info:", error);
       throw error;

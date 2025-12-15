@@ -27,6 +27,7 @@ interface PersonalInfoSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function PersonalInfoSection({
@@ -34,6 +35,7 @@ export function PersonalInfoSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: PersonalInfoSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -126,7 +128,10 @@ export function PersonalInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving personal info:", error);
-      showError(error.message || "Failed to save personal info", "Personal Info Error");
+      showError(
+        error.message || "Failed to save personal info",
+        "Personal Info Error"
+      );
     }
   };
 
@@ -604,6 +609,7 @@ export function PersonalInfoSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

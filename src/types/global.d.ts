@@ -113,7 +113,8 @@ declare global {
     | "offerCalculationInfo"
     | "otherInfo"
     | "signaturesAndAttachmentsInfo"
-    | "sectionStatus";
+    | "sectionStatus"
+    | "paymentStatus";
 
   type Form433bSection =
     | "businessInfo"
@@ -123,7 +124,8 @@ declare global {
     | "offerCalculationInfo"
     | "otherInfo"
     | "signaturesAndAttachmentsInfo"
-    | "sectionStatus";
+    | "sectionStatus"
+    | "paymentStatus";
 
   type Form656Section =
     | "individualInfo"
@@ -135,7 +137,8 @@ declare global {
     | "signaturesInfo"
     | "applicationChecklistInfo"
     | "paidPreparerUseOnlyInfo"
-    | "sectionStatus";
+    | "sectionStatus"
+    | "paymentStatus";
 
   type FormData433A = z.infer<typeof completeFormSchema>;
 

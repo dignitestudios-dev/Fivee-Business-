@@ -40,7 +40,7 @@ const useBusinessExpenseInfo = () => {
     try {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveBusinessExpenseInfo(response.data || {}));
+      dispatch(saveBusinessExpenseInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching business expense info:", error);
     } finally {

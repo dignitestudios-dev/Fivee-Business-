@@ -37,7 +37,7 @@ const useSourceOfFunds = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      const payload = response.data;
+      const payload = response.data?.data || {};
       payload.yearsNotRequiredToFileCheckbox =
         payload?.yearsNotRequiredToFile &&
         payload.yearsNotRequiredToFile !== "0"

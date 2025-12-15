@@ -37,6 +37,7 @@ interface BusinessAssetsSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function BusinessAssetsSection({
@@ -44,6 +45,7 @@ export function BusinessAssetsSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: BusinessAssetsSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -96,7 +98,10 @@ export function BusinessAssetsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business assets info:", error);
-      showError(error.message || "Failed to save business assets info", "Business Assets Error");
+      showError(
+        error.message || "Failed to save business assets info",
+        "Business Assets Error"
+      );
     }
   };
 
@@ -265,6 +270,7 @@ export function BusinessAssetsSection({
             totalSteps={totalSteps}
             onPrevious={onPrevious}
             onNext={handleSubmit(onSubmit)}
+            paymentStatus={paymentStatus}
             loading={loading}
           />
         </form>
@@ -287,7 +293,6 @@ export function BusinessAssetsSection({
             additional space is needed, attach a list of items. Do not include
             personal assets listed in Section 3.
           </p>
-
         </div>
 
         {/* Bank Accounts and Digital Assets */}
@@ -409,7 +414,10 @@ export function BusinessAssetsSection({
                   {...register(`bankAccountsInfo.bankAccounts.${index}.value`, {
                     valueAsNumber: true,
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                     min: { value: 0, message: "Value cannot be negative" },
                   })}
@@ -477,7 +485,10 @@ export function BusinessAssetsSection({
                     {
                       valueAsNumber: true,
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9]/g,
+                          ""
+                        );
                       },
                       min: {
                         value: 0,
@@ -542,7 +553,10 @@ export function BusinessAssetsSection({
                     {
                       valueAsNumber: true,
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: {
                         value: 0,
@@ -631,7 +645,10 @@ export function BusinessAssetsSection({
                     {
                       valueAsNumber: true,
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     }
                   )}
@@ -662,7 +679,10 @@ export function BusinessAssetsSection({
                   {...register(`assetItems.assets.${index}.loanBalance`, {
                     valueAsNumber: true,
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={
@@ -762,7 +782,10 @@ export function BusinessAssetsSection({
               {...register("assetItems.irsAllowedDeduction", {
                 valueAsNumber: true,
                 onChange: (e: any) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                  e.currentTarget.value = e.currentTarget.value.replace(
+                    /[^0-9.]/g,
+                    ""
+                  );
                 },
               })}
               error={errors.assetItems?.irsAllowedDeduction?.message}
@@ -886,6 +909,7 @@ export function BusinessAssetsSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

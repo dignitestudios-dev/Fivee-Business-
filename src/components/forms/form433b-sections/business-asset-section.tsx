@@ -66,8 +66,7 @@ export function BusinessAssetsSection({
     control,
   } = methods;
 
-
-  console.log("errors in bus assets",errors)
+  console.log("errors in bus assets", errors);
   // Field arrays
   const {
     fields: bankFields,
@@ -150,38 +149,38 @@ export function BusinessAssetsSection({
 
   // Real-time calculations
   const calculateAssets = (data: BusinessAssetsFormSchema) => {
-    const banksSum = data.bankAccounts.reduce(
+    const banksSum = data?.bankAccounts?.reduce(
       (sum: number, acc: any) => sum + (acc.balance || 0),
       0
     );
 
-    const investsSum = data.investmentAccounts.reduce(
+    const investsSum = data?.investmentAccounts?.reduce(
       (sum: number, inv: any) => {
         const equity = (inv.currentMarketValue || 0) - (inv.loanBalance || 0);
         return sum + Math.max(0, equity);
       },
       0
     );
-    const digitalSum = data.digitalAssets.reduce(
+    const digitalSum = data?.digitalAssets?.reduce(
       (sum: number, dig: any) => sum + (dig.usdValue || 0),
       0
     );
     const investTotal = investsSum + digitalSum;
 
-    const realSum = data.realEstate.reduce((sum: number, real: any) => {
+    const realSum = data?.realEstate?.reduce((sum: number, real: any) => {
       const equity =
         (real.currentMarketValue || 0) * 0.8 - (real.loanBalance || 0);
       return sum + Math.max(0, equity);
     }, 0);
 
-    const vehSum = data.vehicles.reduce((sum: number, veh: any) => {
+    const vehSum = data?.vehicles?.reduce((sum: number, veh: any) => {
       if (veh.leaseOrOwn === "Lease") return sum;
       const equity =
         (veh.currentMarketValue || 0) * 0.8 - (veh.loanBalance || 0);
       return sum + Math.max(0, equity);
     }, 0);
 
-    const equipSum = data.businessEquipment.reduce(
+    const equipSum = data?.businessEquipment?.reduce(
       (sum: number, equip: any) => {
         if (equip.isLeased || equip.usedInProductionOfIncome) return sum;
         const equity =

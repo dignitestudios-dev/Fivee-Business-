@@ -38,7 +38,7 @@ const useBusinessInfo = () => {
       if (!caseId) return;
 
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveBusinessInformation(response.data || {}));
+      dispatch(saveBusinessInformation(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching business info:", error);
     } finally {

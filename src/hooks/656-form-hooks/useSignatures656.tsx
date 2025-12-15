@@ -37,7 +37,7 @@ const useSignatures656 = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(saveSignatures(response.data || {}));
+      dispatch(saveSignatures(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching signatures:", error);
     } finally {

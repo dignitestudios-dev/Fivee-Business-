@@ -26,7 +26,10 @@ import useSignatureAndAttachments from "@/hooks/433a-form-hooks/useSignatureAndA
 import DropdownPopup from "@/components/ui/DropdownPopup";
 import Required from "@/components/ui/Required";
 import { CalculationsSummaryPopup433A } from "@/components/forms/CalculationsSummaryPopup433A";
-import { saveCalculationSummary, CalculationSummary } from "@/lib/features/form433aSlice";
+import {
+  saveCalculationSummary,
+  CalculationSummary,
+} from "@/lib/features/form433aSlice";
 import usePersonalAssets from "@/hooks/433a-form-hooks/usePersonalAssets";
 import useBusinessAssets from "@/hooks/433a-form-hooks/useBusinessAssets";
 import useBusinessIncome from "@/hooks/433a-form-hooks/useBusinessIncome";
@@ -37,6 +40,7 @@ interface SignatureSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 const attachmentData = [
@@ -117,6 +121,7 @@ export function SignatureSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: SignatureSectionProps) {
   const { showError } = useGlobalPopup();
   const dispatch = useAppDispatch();
@@ -139,8 +144,7 @@ export function SignatureSection({
   const [showCalculationsSummary, setShowCalculationsSummary] =
     useState<boolean>(false);
 
-  const { handleGetPersonalInfo } =
-    usePersonalInfo();
+  const { handleGetPersonalInfo } = usePersonalInfo();
   const {
     loading,
     loadingFormData,
@@ -207,26 +211,26 @@ export function SignatureSection({
       const boxA = assetsInfo?.boxA ?? 0;
       const boxB = businessAssetsInfo?.boxB ?? 0;
       const boxC = businessIncomeInfo?.boxC ?? 0;
-      
+
       // Recalculate boxD and boxE from household income data in case they're 0 from API fetch
       let boxD = householdIncomeInfo?.boxD ?? 0;
       let boxE = householdIncomeInfo?.boxE ?? 0;
-      
+
       // If boxD is 0, recalculate from income components
       if (boxD === 0 && householdIncomeInfo) {
-        const primaryTaxpayerIncome = 
+        const primaryTaxpayerIncome =
           (householdIncomeInfo.income?.primaryTaxpayer?.grossWages ?? 0) +
           (householdIncomeInfo.income?.primaryTaxpayer?.socialSecurity ?? 0) +
           (householdIncomeInfo.income?.primaryTaxpayer?.pension ?? 0) +
           (householdIncomeInfo.income?.primaryTaxpayer?.otherIncome ?? 0);
-        
-        const spouseIncome = 
+
+        const spouseIncome =
           (householdIncomeInfo.income?.spouse?.grossWages ?? 0) +
           (householdIncomeInfo.income?.spouse?.socialSecurity ?? 0) +
           (householdIncomeInfo.income?.spouse?.pension ?? 0) +
           (householdIncomeInfo.income?.spouse?.otherIncome ?? 0);
-        
-        boxD = 
+
+        boxD =
           primaryTaxpayerIncome +
           spouseIncome +
           (householdIncomeInfo.income?.interestDividendsRoyalties ?? 0) +
@@ -237,7 +241,7 @@ export function SignatureSection({
           (householdIncomeInfo.income?.additionalSourcesIncome ?? 0) +
           boxC;
       }
-      
+
       // If boxE is 0, recalculate from expense components
       if (boxE === 0 && householdIncomeInfo) {
         boxE =
@@ -255,7 +259,7 @@ export function SignatureSection({
           (householdIncomeInfo.expenses?.securedDebts ?? 0) +
           (householdIncomeInfo.expenses?.monthlyTaxPayments ?? 0);
       }
-      
+
       let boxF = householdIncomeInfo?.boxF ?? 0;
       // Recalculate boxF if needed
       if (boxF === 0 && boxD > 0 && boxE > 0) {
@@ -318,9 +322,13 @@ export function SignatureSection({
   useEffect(() => {
     const loadMissingData = async () => {
       if (!caseId) return;
-      
-      const missingData = !assetsInfo || !businessAssetsInfo || !businessIncomeInfo || !householdIncomeInfo;
-      
+
+      const missingData =
+        !assetsInfo ||
+        !businessAssetsInfo ||
+        !businessIncomeInfo ||
+        !householdIncomeInfo;
+
       if (missingData) {
         setLoadingAllSections(true);
         try {
@@ -344,7 +352,13 @@ export function SignatureSection({
     };
 
     loadMissingData();
-  }, [caseId, assetsInfo, businessAssetsInfo, businessIncomeInfo, householdIncomeInfo]);
+  }, [
+    caseId,
+    assetsInfo,
+    businessAssetsInfo,
+    businessIncomeInfo,
+    householdIncomeInfo,
+  ]);
 
   useEffect(() => {
     handleGetSignatures();
@@ -422,20 +436,20 @@ export function SignatureSection({
     <>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Section 10: Signatures
-          </h2>
-          <p className="text-gray-600">
-            Under penalties of perjury, I declare that I have examined this
-            offer, including accompanying documents, and to the best of my
-            knowledge it is true, correct, and complete.
-          </p>
-        </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Section 10: Signatures
+            </h2>
+            <p className="text-gray-600">
+              Under penalties of perjury, I declare that I have examined this
+              offer, including accompanying documents, and to the best of my
+              knowledge it is true, correct, and complete.
+            </p>
+          </div>
 
-        {/* Signatures */}
-        <Card>
-          {/* <CardHeader>
+          {/* Signatures */}
+          <Card>
+            {/* <CardHeader>
             <CardTitle>Required Signatures</CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Button
@@ -454,175 +468,178 @@ export function SignatureSection({
               </Button>
             </div>
           </CardHeader> */}
-          <CardContent className="space-y-6">
-            {/* Taxpayer Signature */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="taxpayerSignature.date">
-                    Tax Payer Signature Date (mm/dd/yyyy) <Required />
-                  </Label>
-                  <FormInput
-                    label=""
-                    required
-                    id="taxpayerSignature.date"
-                    type="date"
-                    min={new Date().toISOString().split("T")[0]}
-                    {...register("taxpayerSignature.date")}
-                    error={errors.taxpayerSignature?.date?.message}
-                    className="focus:ring-[#22b573] focus:border-[#22b573]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Spouse Signature */}
-            {maritalStatus === "married" && (
+            <CardContent className="space-y-6">
+              {/* Taxpayer Signature */}
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="spouseSignature.date">
-                      Tax Payer Spouse Signature Date (mm/dd/yyyy) <Required />
+                    <Label htmlFor="taxpayerSignature.date">
+                      Tax Payer Signature Date (mm/dd/yyyy) <Required />
                     </Label>
                     <FormInput
                       label=""
                       required
-                      id="spouseSignature.date"
+                      id="taxpayerSignature.date"
                       type="date"
                       min={new Date().toISOString().split("T")[0]}
-                      {...register("spouseSignature.date")}
-                      error={errors.spouseSignature?.date?.message}
+                      {...register("taxpayerSignature.date")}
+                      error={errors.taxpayerSignature?.date?.message}
                       className="focus:ring-[#22b573] focus:border-[#22b573]"
                     />
                   </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Required Attachments */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Required Attachments</CardTitle>
-            <p className="text-sm text-gray-600">
-              Please confirm that you have included all applicable attachments
-              listed below by checking each box.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              {attachmentData.map((attachment) => {
-                const attachmentKey =
-                  attachment.name as keyof SignatureFormSchema["attachments"];
-                const isChecked =
-                  watch(`attachments.${attachment.name}` as any) || false;
-                const error = errors.attachments?.[attachmentKey];
-
-                return (
-                  <div
-                    key={attachment.id}
-                    className="flex items-start space-x-3"
-                  >
-                    <div className="flex flex-col">
-                      <Checkbox
-                        id={`attachment-${attachment.name}`}
-                        checked={Boolean(isChecked)}
-                        onCheckedChange={(checked) =>
-                          setValue(
-                            `attachments.${attachment.name}` as any,
-                            checked as boolean,
-                            {
-                              shouldValidate: true,
-                            }
-                          )
-                        }
-                        className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
+              {/* Spouse Signature */}
+              {maritalStatus === "married" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="spouseSignature.date">
+                        Tax Payer Spouse Signature Date (mm/dd/yyyy){" "}
+                        <Required />
+                      </Label>
+                      <FormInput
+                        label=""
+                        required
+                        id="spouseSignature.date"
+                        type="date"
+                        min={new Date().toISOString().split("T")[0]}
+                        {...register("spouseSignature.date")}
+                        error={errors.spouseSignature?.date?.message}
+                        className="focus:ring-[#22b573] focus:border-[#22b573]"
                       />
                     </div>
-                    <div className="flex-grow">
-                      <Label
-                        htmlFor={`attachment-${attachment.name}`}
-                        className="text-sm font-medium cursor-pointer"
-                      >
-                        {attachment.text} *
-                      </Label>
-                      {error && (
-                        <p className="text-red-600 text-xs mt-1">
-                          {error.message}
-                        </p>
-                      )}
-                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Privacy Act Statement */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Privacy Act Statement</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-gray-700 space-y-3">
-              <p>
-                We ask for the information on this form to carry out the
-                internal revenue laws of the United States. Our authority to
-                request this information is section § 7801 of the Internal
-                Revenue Code.
+          {/* Required Attachments */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Required Attachments</CardTitle>
+              <p className="text-sm text-gray-600">
+                Please confirm that you have included all applicable attachments
+                listed below by checking each box.
               </p>
-              <p>
-                Our purpose for requesting the information is to determine if it
-                is in the best interests of the IRS to accept an offer. You are
-                not required to make an offer; however, if you choose to do so,
-                you must provide all of the taxpayer information requested.
-                Failure to provide all of the information may prevent us from
-                processing your request.
-              </p>
-              <p>
-                If you are a paid preparer and you prepared the Form 656 for the
-                taxpayer submitting an offer, we request that you complete and
-                sign Section 9 on Form 656, and provide identifying information.
-                Providing this information is voluntary. This information will
-                be used to administer and enforce the internal revenue laws of
-                the United States and may be used to regulate practice before
-                the Internal Revenue Service for those persons subject to
-                Treasury Department Circular No. 230, Regulations Governing the
-                Practice of Attorneys, Certified Public Accountants, Enrolled
-                Agents, Enrolled Actuaries, and Appraisers before the Internal
-                Revenue Service.
-              </p>
-              <p>
-                Information on this form may be disclosed to the Department of
-                Justice for civil and criminal litigation. We may also disclose
-                this information to cities, states and the District of Columbia
-                for use in administering their tax laws and to combat terrorism.
-                Providing false or fraudulent information on this form may
-                subject you to criminal prosecution and penalties.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                {attachmentData.map((attachment) => {
+                  const attachmentKey =
+                    attachment.name as keyof SignatureFormSchema["attachments"];
+                  const isChecked =
+                    watch(`attachments.${attachment.name}` as any) || false;
+                  const error = errors.attachments?.[attachmentKey];
 
-        <FormNavigation
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          onPrevious={onPrevious}
-          onNext={onNext}
-          onSubmit={handleSubmit(handleFormSubmit)}
-          loading={loading}
-        />
-      </form>
-    </FormProvider>
+                  return (
+                    <div
+                      key={attachment.id}
+                      className="flex items-start space-x-3"
+                    >
+                      <div className="flex flex-col">
+                        <Checkbox
+                          id={`attachment-${attachment.name}`}
+                          checked={Boolean(isChecked)}
+                          onCheckedChange={(checked) =>
+                            setValue(
+                              `attachments.${attachment.name}` as any,
+                              checked as boolean,
+                              {
+                                shouldValidate: true,
+                              }
+                            )
+                          }
+                          className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <Label
+                          htmlFor={`attachment-${attachment.name}`}
+                          className="text-sm font-medium cursor-pointer"
+                        >
+                          {attachment.text} *
+                        </Label>
+                        {error && (
+                          <p className="text-red-600 text-xs mt-1">
+                            {error.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
 
-    <CalculationsSummaryPopup433A
-      open={showCalculationsSummary}
-      calculationSummary={calculationSummary}
-      caseId={caseId}
-      onClose={() => setShowCalculationsSummary(false)}
-    />
+          {/* Privacy Act Statement */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Privacy Act Statement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-gray-700 space-y-3">
+                <p>
+                  We ask for the information on this form to carry out the
+                  internal revenue laws of the United States. Our authority to
+                  request this information is section § 7801 of the Internal
+                  Revenue Code.
+                </p>
+                <p>
+                  Our purpose for requesting the information is to determine if
+                  it is in the best interests of the IRS to accept an offer. You
+                  are not required to make an offer; however, if you choose to
+                  do so, you must provide all of the taxpayer information
+                  requested. Failure to provide all of the information may
+                  prevent us from processing your request.
+                </p>
+                <p>
+                  If you are a paid preparer and you prepared the Form 656 for
+                  the taxpayer submitting an offer, we request that you complete
+                  and sign Section 9 on Form 656, and provide identifying
+                  information. Providing this information is voluntary. This
+                  information will be used to administer and enforce the
+                  internal revenue laws of the United States and may be used to
+                  regulate practice before the Internal Revenue Service for
+                  those persons subject to Treasury Department Circular No. 230,
+                  Regulations Governing the Practice of Attorneys, Certified
+                  Public Accountants, Enrolled Agents, Enrolled Actuaries, and
+                  Appraisers before the Internal Revenue Service.
+                </p>
+                <p>
+                  Information on this form may be disclosed to the Department of
+                  Justice for civil and criminal litigation. We may also
+                  disclose this information to cities, states and the District
+                  of Columbia for use in administering their tax laws and to
+                  combat terrorism. Providing false or fraudulent information on
+                  this form may subject you to criminal prosecution and
+                  penalties.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <FormNavigation
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            onPrevious={onPrevious}
+            onNext={onNext}
+            onSubmit={handleSubmit(handleFormSubmit)}
+            paymentStatus={paymentStatus}
+            loading={loading}
+          />
+        </form>
+      </FormProvider>
+
+      <CalculationsSummaryPopup433A
+        open={showCalculationsSummary}
+        calculationSummary={calculationSummary}
+        caseId={caseId}
+        onClose={() => setShowCalculationsSummary(false)}
+      />
     </>
   );
 }

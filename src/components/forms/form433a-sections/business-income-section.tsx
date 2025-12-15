@@ -25,6 +25,7 @@ interface BusinessIncomeSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function BusinessIncomeSection({
@@ -32,6 +33,7 @@ export function BusinessIncomeSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: BusinessIncomeSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -82,7 +84,10 @@ export function BusinessIncomeSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving business income info:", error);
-      showError(error.message || "Failed to save business income info", "Business Income Error");
+      showError(
+        error.message || "Failed to save business income info",
+        "Business Income Error"
+      );
     }
   };
 
@@ -212,6 +217,7 @@ export function BusinessIncomeSection({
             totalSteps={totalSteps}
             onPrevious={onPrevious}
             onNext={handleSubmit(onSubmit)}
+            paymentStatus={paymentStatus}
             loading={loading}
           />
         </form>
@@ -695,6 +701,7 @@ export function BusinessIncomeSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

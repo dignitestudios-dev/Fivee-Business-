@@ -45,7 +45,7 @@ const useHouseholdIncome = () => {
 
     try {
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(saveHouseholdIncomeInfo(response.data || {}));
+      dispatch(saveHouseholdIncomeInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching household income info:", error);
     } finally {

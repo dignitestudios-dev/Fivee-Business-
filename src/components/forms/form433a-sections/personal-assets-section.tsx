@@ -36,6 +36,7 @@ interface PersonalAssetsSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function PersonalAssetsSection({
@@ -43,6 +44,7 @@ export function PersonalAssetsSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: PersonalAssetsSectionProps) {
   const { showError } = useGlobalPopup();
   const dispatch = useAppDispatch();
@@ -102,7 +104,10 @@ export function PersonalAssetsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving assets info:", error);
-      showError(error.message || "Failed to save assets info", "Personal Assets Error");
+      showError(
+        error.message || "Failed to save assets info",
+        "Personal Assets Error"
+      );
     }
   };
 
@@ -536,10 +541,15 @@ export function PersonalAssetsSection({
                     required
                     {...register(`bankAccounts.${index}.balance`, {
                       setValueAs: (v) =>
-                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        v === ""
+                          ? 0
+                          : Number(String(v).replace(/[^0-9.]/g, "")),
                       onChange: (e) => {
                         // allow only numbers and decimal point
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: { value: 0, message: "Balance cannot be negative" },
                     })}
@@ -717,9 +727,12 @@ export function PersonalAssetsSection({
                         `investmentAccounts.${index}.currentMarketValue`,
                         {
                           setValueAs: (v) =>
-                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
                           onChange: (e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                           min: {
                             value: 0,
@@ -744,9 +757,14 @@ export function PersonalAssetsSection({
                     placeholder=""
                     {...register(`investmentAccounts.${index}.loanBalance`, {
                       setValueAs: (v) =>
-                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        v === ""
+                          ? 0
+                          : Number(String(v).replace(/[^0-9.]/g, "")),
                       onChange: (e) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: {
                         value: 0,
@@ -841,9 +859,14 @@ export function PersonalAssetsSection({
                     required
                     {...register(`digitalAssets.${index}.numberOfUnits`, {
                       setValueAs: (v) =>
-                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        v === ""
+                          ? 0
+                          : Number(String(v).replace(/[^0-9.]/g, "")),
                       onChange: (e) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: { value: 0, message: "Units cannot be negative" },
                     })}
@@ -894,9 +917,14 @@ export function PersonalAssetsSection({
                     required
                     {...register(`digitalAssets.${index}.usdEquivalent`, {
                       setValueAs: (v) =>
-                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        v === ""
+                          ? 0
+                          : Number(String(v).replace(/[^0-9.]/g, "")),
                       onChange: (e) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: { value: 0, message: "Value cannot be negative" },
                     })}
@@ -1083,9 +1111,12 @@ export function PersonalAssetsSection({
                         `retirementAccounts.${index}.currentMarketValue`,
                         {
                           setValueAs: (v) =>
-                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
                           onChange: (e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                           min: {
                             value: 0,
@@ -1116,9 +1147,14 @@ export function PersonalAssetsSection({
                       placeholder=""
                       {...register(`retirementAccounts.${index}.loanBalance`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -1243,9 +1279,12 @@ export function PersonalAssetsSection({
                         `lifeInsurancePolicies.${index}.currentCashValue`,
                         {
                           setValueAs: (v) =>
-                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
                           onChange: (e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                           min: {
                             value: 0,
@@ -1267,17 +1306,23 @@ export function PersonalAssetsSection({
                       pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
                       placeholder=""
-                      {...register(`lifeInsurancePolicies.${index}.loanBalance`, {
-                        setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
-                        onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
-                        },
-                        min: {
-                          value: 0,
-                          message: "Loan balance cannot be negative",
-                        },
-                      })}
+                      {...register(
+                        `lifeInsurancePolicies.${index}.loanBalance`,
+                        {
+                          setValueAs: (v) =>
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
+                          min: {
+                            value: 0,
+                            message: "Loan balance cannot be negative",
+                          },
+                        }
+                      )}
                       error={
                         errors.lifeInsurancePolicies?.[index]?.loanBalance
                           ?.message
@@ -1330,9 +1375,7 @@ export function PersonalAssetsSection({
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Property Sale Status Questions */}
-            <FormField
-              id="realProperties-sale-status"
-            >
+            <FormField id="realProperties-sale-status">
               <div className="space-y-4 mt-2">
                 <div className="flex items-center space-x-2">
                   <Controller
@@ -1380,11 +1423,16 @@ export function PersonalAssetsSection({
                     min="0"
                     required
                     placeholder=""
-                      {...register(`listingPrice`, {
+                    {...register(`listingPrice`, {
                       setValueAs: (v) =>
-                        v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                        v === ""
+                          ? 0
+                          : Number(String(v).replace(/[^0-9.]/g, "")),
                       onChange: (e) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                       min: {
                         value: 0,
@@ -1455,9 +1503,14 @@ export function PersonalAssetsSection({
                       placeholder=""
                       {...register(`realProperties.${index}.mortgagePayment`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -1546,9 +1599,12 @@ export function PersonalAssetsSection({
                         `realProperties.${index}.currentMarketValue`,
                         {
                           setValueAs: (v) =>
-                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
                           onChange: (e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                           min: {
                             value: 0,
@@ -1581,9 +1637,14 @@ export function PersonalAssetsSection({
                       placeholder=""
                       {...register(`realProperties.${index}.loanBalance`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -1718,10 +1779,15 @@ export function PersonalAssetsSection({
                       required
                       {...register(`vehicles.${index}.year`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9]/g, "")),
                         onChange: (e) => {
                           // integers only for year
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
                         },
                         min: { value: 1900, message: "Invalid year" },
                         max: {
@@ -1753,9 +1819,14 @@ export function PersonalAssetsSection({
                       required
                       {...register(`vehicles.${index}.mileage`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -1844,9 +1915,14 @@ export function PersonalAssetsSection({
                       placeholder=""
                       {...register(`vehicles.${index}.monthlyLeaseLoanAmount`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -1872,9 +1948,14 @@ export function PersonalAssetsSection({
                       required
                       {...register(`vehicles.${index}.currentMarketValue`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: { value: 0, message: "Value cannot be negative" },
                       })}
@@ -1900,9 +1981,14 @@ export function PersonalAssetsSection({
                       placeholder=""
                       {...register(`vehicles.${index}.loanBalance`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -2050,9 +2136,12 @@ export function PersonalAssetsSection({
                         `valuableItems.${index}.currentMarketValue`,
                         {
                           setValueAs: (v) =>
-                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
                           onChange: (e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                           min: {
                             value: 0,
@@ -2083,9 +2172,14 @@ export function PersonalAssetsSection({
                       placeholder=""
                       {...register(`valuableItems.${index}.loanBalance`, {
                         setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                          v === ""
+                            ? 0
+                            : Number(String(v).replace(/[^0-9.]/g, "")),
                         onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          e.currentTarget.value = e.currentTarget.value.replace(
+                            /[^0-9.]/g,
+                            ""
+                          );
                         },
                         min: {
                           value: 0,
@@ -2189,9 +2283,12 @@ export function PersonalAssetsSection({
                         `furniturePersonalEffects.${index}.currentMarketValue`,
                         {
                           setValueAs: (v) =>
-                            v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
                           onChange: (e) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                           min: {
                             value: 0,
@@ -2222,17 +2319,23 @@ export function PersonalAssetsSection({
                       pattern="^[0-9]*\\.?[0-9]*$"
                       min="0"
                       placeholder=""
-                      {...register(`furniturePersonalEffects.${index}.loanBalance`, {
-                        setValueAs: (v) =>
-                          v === "" ? 0 : Number(String(v).replace(/[^0-9.]/g, "")),
-                        onChange: (e) => {
-                          e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
-                        },
-                        min: {
-                          value: 0,
-                          message: "Loan balance cannot be negative",
-                        },
-                      })}
+                      {...register(
+                        `furniturePersonalEffects.${index}.loanBalance`,
+                        {
+                          setValueAs: (v) =>
+                            v === ""
+                              ? 0
+                              : Number(String(v).replace(/[^0-9.]/g, "")),
+                          onChange: (e) => {
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
+                          },
+                          min: {
+                            value: 0,
+                            message: "Loan balance cannot be negative",
+                          },
+                        }
+                      )}
                       error={
                         errors.furniturePersonalEffects?.[index]?.loanBalance
                           ?.message
@@ -2358,6 +2461,7 @@ export function PersonalAssetsSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

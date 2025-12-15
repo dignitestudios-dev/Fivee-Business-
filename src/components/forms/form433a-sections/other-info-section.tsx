@@ -27,6 +27,7 @@ interface OtherInfoSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function OtherInfoSection({
@@ -34,6 +35,7 @@ export function OtherInfoSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: OtherInfoSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -121,7 +123,10 @@ export function OtherInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving other info:", error);
-      showError(error.message || "Failed to save other information", "Other Info Error");
+      showError(
+        error.message || "Failed to save other information",
+        "Other Info Error"
+      );
     }
   };
 
@@ -1172,6 +1177,7 @@ export function OtherInfoSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>

@@ -42,7 +42,7 @@ const useBusinessIncome = () => {
 
     try {
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(saveBusinessIncomeInfo(response.data || {}));
+      dispatch(saveBusinessIncomeInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching business income info:", error);
     } finally {

@@ -1,17 +1,15 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import toast from "react-hot-toast";
 import api from "@/lib/services";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { set433aCases, set433aPagination } from "@/lib/features/formsSlice";
+import {
+  set433aCompletedCases,
+  set433aCompletedPagination,
+} from "@/lib/features/formsSlice";
 
-const useUser433aCases = (
-  initialPage = 1,
-  limit = 50,
-  filter: FormsCasesFilter = "all"
-) => {
+const useUser433aCompletedCases = (initialPage = 1, limit = 10) => {
   const dispatch = useAppDispatch();
-  const existingCases = useAppSelector((s) => s.forms.form433a) || [];
-  const pagination = useAppSelector((s) => s.forms.form433aPagination);
+  const existingCases = useAppSelector((s) => s.forms.form433aCompleted) || [];
+  const pagination = useAppSelector((s) => s.forms.form433aCompletedPagination);
   const existingCasesRef = useRef<FormCase[]>(existingCases);
 
   useEffect(() => {
@@ -31,34 +29,34 @@ const useUser433aCases = (
         else setLoading(true);
 
         setError(null);
-        const res = await api.getUserForm433ACases(p, limit, filter);
+        const res = await api.getUserForm433ACases(
+          p,
+          limit,
+          "completedAndPaymentSussessed"
+        );
 
-        // response data may be either an array or an object with `cases` key
         const cases: FormCase[] = Array.isArray(res?.data)
           ? res.data
           : res?.data?.cases || [];
 
-        // determine hasMore
         setHasMore(cases.length === limit);
 
-        // save to redux - append or replace
         if (append) {
           const merged = [...(existingCasesRef.current || []), ...cases];
-          dispatch(set433aCases(merged));
+          dispatch(set433aCompletedCases(merged));
         } else {
-          dispatch(set433aCases(cases));
+          dispatch(set433aCompletedCases(cases));
         }
 
         // Set pagination if available
         if (res?.data?.pagination) {
-          dispatch(set433aPagination(res.data.pagination));
+          dispatch(set433aCompletedPagination(res.data.pagination));
         }
 
         return cases;
       } catch (err: any) {
         const msg = err?.message || "Failed to load cases";
         setError(msg);
-        // toast.error(msg);
         console.log(msg);
         return null;
       } finally {
@@ -66,11 +64,10 @@ const useUser433aCases = (
         setLoadingMore(false);
       }
     },
-    [dispatch, initialPage, limit, filter]
+    [dispatch, initialPage, limit]
   );
 
   useEffect(() => {
-    // initial load
     fetchCases(initialPage, false);
     setPage(initialPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,8 +88,8 @@ const useUser433aCases = (
   const reset = useCallback(() => {
     setPage(initialPage);
     setHasMore(true);
-    dispatch(set433aCases([]));
-    dispatch(set433aPagination(null));
+    dispatch(set433aCompletedCases([]));
+    dispatch(set433aCompletedPagination(null));
   }, [dispatch, initialPage]);
 
   return {
@@ -108,4 +105,4 @@ const useUser433aCases = (
   } as const;
 };
 
-export default useUser433aCases;
+export default useUser433aCompletedCases;

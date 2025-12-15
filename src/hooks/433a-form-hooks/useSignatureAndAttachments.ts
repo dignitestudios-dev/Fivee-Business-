@@ -37,7 +37,7 @@ const useSignatureAndAttachments = () => {
       if (!caseId) return;
       const response = await api.get433aSectionInfo(caseId, section);
       console.log("Signature data: ", response);
-      dispatch(saveSignatureInfo(response?.data || {}));
+      dispatch(saveSignatureInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching signature info:", error);
     } finally {

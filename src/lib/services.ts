@@ -135,7 +135,7 @@ const getUserForm433ACases = (
   filter: FormsCasesFilter = "all"
 ) =>
   apiHandler(() =>
-    API.get(`/form433a/my-cases?page=${page}&limit=${limit}&filter=${filter}`)
+    API.get(`/form433a/my-cases?page=${page}&limit=${50}&filter=${filter}`)
   );
 
 const get433aSectionInfo = (caseId: string, section: Form433aSection) =>
@@ -192,6 +192,117 @@ const saveSignatureInfo = (info: any, caseId: string) =>
   apiHandler<{ data: any; message: string }>(() =>
     API.post(`/form433a/${caseId}/signatures-and-attachments`, info)
   );
+
+// Skip section API
+const skipSection = async (
+  caseId: string,
+  stepNumber: number,
+  formType: "433a" | "433b" | "656"
+) => {
+  // Map step numbers to section endpoint names for each form type
+  const sectionMappings = {
+    "433a": {
+      1: { endpoint: "personal-info", sectionName: "personalInfo" },
+      2: { endpoint: "employment", sectionName: "employmentInfo" },
+      3: { endpoint: "assets", sectionName: "assetsInfo" },
+      4: { endpoint: "self-employed-info", sectionName: "selfEmployedInfo" },
+      5: { endpoint: "business", sectionName: "businessInfo" },
+      6: {
+        endpoint: "business-income-expense",
+        sectionName: "businessIncomeExpenseInfo",
+      },
+      7: {
+        endpoint: "household-income-expense",
+        sectionName: "householdIncomeExpenseInfo",
+      },
+      8: { endpoint: "offer-calculation", sectionName: "offerCalculationInfo" },
+      9: { endpoint: "other-information", sectionName: "otherInfo" },
+      10: {
+        endpoint: "signatures-and-attachments",
+        sectionName: "signaturesAndAttachmentsInfo",
+      },
+    },
+    "433b": {
+      1: { endpoint: "business-info", sectionName: "businessInfo" },
+      2: { endpoint: "business-asset-info", sectionName: "businessAssetInfo" },
+      3: {
+        endpoint: "business-income-info",
+        sectionName: "businessIncomeInfo",
+      },
+      4: {
+        endpoint: "business-expense-info",
+        sectionName: "businessExpenseInfo",
+      },
+      5: {
+        endpoint: "calculate-minimum-offer-amount",
+        sectionName: "offerCalculationInfo",
+      },
+      6: { endpoint: "other-information", sectionName: "otherInfo" },
+      7: {
+        endpoint: "signatures",
+        sectionName: "signaturesAndAttachmentsInfo",
+      },
+    },
+    "656": {
+      1: { endpoint: "individual-info", sectionName: "individualInfo" },
+      2: { endpoint: "business-info", sectionName: "businessInfo" },
+      3: { endpoint: "reason-for-offer", sectionName: "reasonForOfferInfo" },
+      4: { endpoint: "payment-terms", sectionName: "paymentTermsInfo" },
+      5: {
+        endpoint: "designation-and-eftps",
+        sectionName: "designationAndEftpsInfo",
+      },
+      6: {
+        endpoint: "source-of-funds-requirements",
+        sectionName: "sourceOfFundsAndRequirementsInfo",
+      },
+      7: { endpoint: "signatures", sectionName: "signaturesInfo" },
+      8: {
+        endpoint: "paid-preparer-use-only",
+        sectionName: "paidPreparerUseOnlyInfo",
+      },
+      9: {
+        endpoint: "application-checklist",
+        sectionName: "applicationChecklistInfo",
+      },
+    },
+  };
+
+  const baseUrls = {
+    "433a": `/form433a/${caseId}`,
+    "433b": `/form433b/${caseId}`,
+    "656": `/form656b/${caseId}`,
+  };
+
+  const sectionName =
+    sectionMappings[formType][
+      stepNumber as keyof (typeof sectionMappings)[typeof formType]
+    ];
+
+  const endpoint = `${baseUrls[formType]}/${sectionName.endpoint}?skipped=${sectionName.sectionName}`;
+
+  try {
+    const response = await API.post(endpoint, {});
+    const responseData = response.data;
+
+    // Check if the response body has status: true
+    if (responseData.status === true) {
+      return responseData;
+    } else {
+      throw new Error(responseData.data?.message || "Failed to skip section");
+    }
+  } catch (error: any) {
+    // If it's an axios error with response data, check the response body
+    if (error.response?.data) {
+      const responseData = error.response.data;
+      if (responseData.status === true) {
+        return responseData;
+      }
+    }
+    // Otherwise, re-throw the error
+    throw error;
+  }
+};
 
 // Signature APIs
 
@@ -255,7 +366,7 @@ const getUserForm433BCases = (
 ) =>
   apiHandler(() =>
     API.get(
-      `/form433boic/my-cases?page=${page}&limit=${limit}&filter=${filter}`
+      `/form433boic/my-cases?page=${page}&limit=${50}&filter=${filter}`
     )
   );
 
@@ -282,6 +393,17 @@ const updateForm433b = (caseId: string, payload: { title?: string }) =>
 
 const deleteForm433b = (caseId: string) =>
   apiHandler(() => API.delete(`/form433boic/${caseId}`));
+
+// Clone APIs (dummy endpoints — POST takes { caseId })
+const duplicateForm433a = (caseId: string, title: string) =>
+  apiHandler<{ data: { caseId: string }; message: string }>(() =>
+    API.post(`/form433a/duplicate/${caseId}`, { title })
+  );
+
+const duplicateForm433b = (caseId: string, title: string) =>
+  apiHandler<{ data: { caseId: string }; message: string }>(() =>
+    API.post(`/form433boic/duplicate/${caseId}`, { title })
+  );
 
 const get433bSectionInfo = (caseId: string, section: Form433bSection) =>
   apiHandler<{ data: any; message: string }>(() =>
@@ -386,7 +508,12 @@ const startForm656 = (payload: {
   form433BOICId?: string;
   usedPreQualifierOrIOLACheck: boolean;
   title: string;
-}) => apiHandler(() => API.post(`/form656b/start`, payload));
+  caseId?: string;
+}) => {
+  const { caseId, ...body } = payload;
+  const url = caseId ? `/form656b/start?caseId=${caseId}` : `/form656b/start`;
+  return apiHandler(() => API.post(url, body));
+};
 
 // Payment Method API's
 
@@ -419,6 +546,7 @@ const api = {
   saveCalculationInfo,
   saveOtherInfo,
   saveSignatureInfo,
+  skipSection,
   getSignatures,
   createSignature,
   updateSignature,
@@ -448,6 +576,8 @@ const api = {
   createPaymentIntent,
   getUserForm433ACases,
   getUserForm433BCases,
+  duplicateForm433a,
+  duplicateForm433b,
   getUserForm656Cases,
   startForm656,
   startForm433a,

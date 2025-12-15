@@ -115,7 +115,7 @@ const useOtherInfo = () => {
     try {
       console.log("Fetching other info for section:", section);
       const response = await api.get433aSectionInfo(caseId, section);
-      dispatch(saveOtherInfo(response.data || {}));
+      dispatch(saveOtherInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching other info:", error);
     } finally {

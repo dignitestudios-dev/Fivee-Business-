@@ -42,7 +42,7 @@ const useOtherInfo = () => {
     try {
       if (!caseId) return;
       const response = await api.get433bSectionInfo(caseId, section);
-      dispatch(saveOtherInfo(response.data || {}));
+      dispatch(saveOtherInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching other info:", error);
     } finally {

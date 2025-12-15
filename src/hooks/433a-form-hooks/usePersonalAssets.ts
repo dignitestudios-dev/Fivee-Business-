@@ -68,7 +68,7 @@ const usePersonalAssets = () => {
 
       const response = await api.get433aSectionInfo(caseId, section);
       console.log("assets data from API: ", response.data);
-      dispatch(savePersonalAssetsInfo(response.data || {}));
+      dispatch(savePersonalAssetsInfo(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching assets info:", error);
     } finally {

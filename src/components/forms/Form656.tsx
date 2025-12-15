@@ -18,6 +18,8 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setCaseId } from "@/lib/features/form656Slice";
 import { ApplicationChecklistSection } from "./form-656-sections/application-checklist-section";
 import { DesignationEFTPSSection } from "./form-656-sections/designation-eftps-section";
+import { Button } from "../ui/Button";
+import useSkipSection from "@/hooks/useSkipSection";
 
 const steps = [
   {
@@ -79,16 +81,40 @@ export default function Form656() {
 
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
   const [hydrated, setHydrated] = useState<boolean>(false);
+
+  // Skip section hook
+  const { skipping, skipSection } = useSkipSection({
+    caseId,
+    currentStep,
+    onSkipSuccess: (step) => {
+      // Mark step as skipped and move to next
+      const newSkippedSteps = new Set([...skippedSteps, step]);
+      setSkippedSteps(newSkippedSteps);
+      if (step < 10) {
+        const nextStep = step + 1;
+        setCurrentStep(nextStep);
+        saveProgress(nextStep, completedSteps, newSkippedSteps, caseId);
+      }
+    },
+    formType: "656",
+  });
 
   const getSavedProgress = () => {
     const savedProgress = storage.get<{
       caseId: string;
       currentStep: number;
       completedSteps: number[];
+      skippedSteps: number[];
     }>(`656_progress`);
     return (
-      savedProgress || { caseId: null, currentStep: 1, completedSteps: [] }
+      savedProgress || {
+        caseId: null,
+        currentStep: 1,
+        completedSteps: [],
+        skippedSteps: [],
+      }
     );
   };
 
@@ -99,6 +125,7 @@ export default function Form656() {
       if (savedProgress.caseId === null) {
         setCurrentStep(savedProgress.currentStep);
         setCompletedSteps(new Set(savedProgress.completedSteps));
+        setSkippedSteps(new Set(savedProgress.skippedSteps || []));
       }
       setHydrated(true);
       return;
@@ -107,6 +134,7 @@ export default function Form656() {
     if (savedProgress.caseId === caseId) {
       setCurrentStep(savedProgress.currentStep);
       setCompletedSteps(new Set(savedProgress.completedSteps));
+      setSkippedSteps(new Set(savedProgress.skippedSteps || []));
       setHydrated(true);
     }
   }, []);
@@ -126,23 +154,44 @@ export default function Form656() {
           "paymentTermsInfo",
           "designationAndEftpsInfo",
           "sourceOfFundsAndRequirementsInfo",
-          "sourceOfFundsAndRequirementsInfo",
+          "offerTermsInfo",
           "signaturesInfo",
           "paidPreparerUseOnlyInfo",
           "applicationChecklistInfo",
         ];
 
         const newCompleted: number[] = [];
+        const newSkipped: number[] = [];
         for (let i = 0; i < sectionOrder.length; i++) {
           const key = sectionOrder[i];
-          if (sections && sections[key]) {
+          let status = sections && sections[key];
+
+          // Special handling for offerTermsInfo - use sourceOfFundsAndRequirementsInfo status
+          if (key === "offerTermsInfo") {
+            status = sections
+              ? sections["sourceOfFundsAndRequirementsInfo"] === "skipped"
+                ? "completed"
+                : sections["sourceOfFundsAndRequirementsInfo"]
+              : "incompleted";
+          }
+
+          if (status === "completed") {
             newCompleted.push(i + 1);
+          } else if (status === "skipped") {
+            newSkipped.push(i + 1);
           }
         }
 
-        const firstIncompleteIndex = sectionOrder.findIndex(
-          (k) => !(sections && sections[k])
-        );
+        const firstIncompleteIndex = sectionOrder.findIndex((k) => {
+          let status = sections && sections[k];
+
+          // Special handling for offerTermsInfo - use sourceOfFundsAndRequirementsInfo status
+          if (k === "offerTermsInfo") {
+            status = sections && sections["sourceOfFundsAndRequirementsInfo"];
+          }
+
+          return status !== "completed" && status !== "skipped";
+        });
 
         const computedCurrentStep =
           firstIncompleteIndex === -1
@@ -150,6 +199,7 @@ export default function Form656() {
             : firstIncompleteIndex + 1;
 
         setCompletedSteps(new Set(newCompleted));
+        setSkippedSteps(new Set(newSkipped));
         setCurrentStep(computedCurrentStep);
 
         setHydrated(true);
@@ -158,6 +208,7 @@ export default function Form656() {
           caseId,
           currentStep: computedCurrentStep,
           completedSteps: newCompleted,
+          skippedSteps: newSkipped,
         });
       } catch (error) {
         console.error("Failed to fetch 656 section status:", error);
@@ -178,6 +229,7 @@ export default function Form656() {
   const saveProgress = (
     step: number,
     completed: Set<number>,
+    skipped: Set<number>,
     caseIdToSave?: string | null
   ) => {
     try {
@@ -185,6 +237,7 @@ export default function Form656() {
         caseId: caseIdToSave || caseId || null,
         currentStep: step,
         completedSteps: Array.from(completed),
+        skippedSteps: Array.from(skipped),
       };
       storage.set("656_progress", progressData);
     } catch (error) {
@@ -198,7 +251,7 @@ export default function Form656() {
       setCompletedSteps(newCompletedSteps);
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);
-      saveProgress(nextStep, newCompletedSteps, caseId);
+      saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
     }
   };
 
@@ -206,14 +259,18 @@ export default function Form656() {
     if (currentStep > 1) {
       const prevStep = currentStep - 1;
       setCurrentStep(prevStep);
-      saveProgress(prevStep, completedSteps, caseId);
+      saveProgress(prevStep, completedSteps, skippedSteps, caseId);
     }
   };
 
   const handleStepClick = (stepNumber: number) => {
-    if (stepNumber <= currentStep || completedSteps.has(stepNumber)) {
+    if (
+      stepNumber <= currentStep ||
+      completedSteps.has(stepNumber) ||
+      skippedSteps.has(stepNumber)
+    ) {
       setCurrentStep(stepNumber);
-      saveProgress(stepNumber, completedSteps, caseId);
+      saveProgress(stepNumber, completedSteps, skippedSteps, caseId);
     }
   };
 
@@ -269,6 +326,7 @@ export default function Form656() {
                 steps={steps}
                 currentStep={currentStep}
                 completedSteps={completedSteps}
+                skippedSteps={skippedSteps}
                 onStepClick={handleStepClick}
               />
             ) : (
@@ -280,6 +338,15 @@ export default function Form656() {
 
           <div className="lg:w-3/4 h-full">
             <div className="bg-white h-full rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="w-full flex justify-end">
+                <Button
+                  disabled={skipping}
+                  onClick={skipSection}
+                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/80 transition-all text-white font-medium mb-5"
+                >
+                  {skipping ? "Skipping..." : "Skip"}
+                </Button>
+              </div>
               {hydrated ? renderCurrentSection() : <FormLoader />}
             </div>
           </div>

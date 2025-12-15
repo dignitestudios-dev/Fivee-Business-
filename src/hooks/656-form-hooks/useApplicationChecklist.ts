@@ -37,7 +37,7 @@ const useApplicationChecklist = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(saveApplicationChecklist(response.data || {}));
+      dispatch(saveApplicationChecklist(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching application checklist:", error);
     } finally {

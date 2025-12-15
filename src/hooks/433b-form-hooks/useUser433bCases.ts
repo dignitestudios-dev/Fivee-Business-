@@ -2,15 +2,16 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
 import api from "@/lib/services";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { set433bCases } from "@/lib/features/formsSlice";
+import { set433bCases, set433bPagination } from "@/lib/features/formsSlice";
 
 const useUser433bCases = (
   initialPage = 1,
-  limit = 20,
+  limit = 50,
   filter: FormsCasesFilter = "all"
 ) => {
   const dispatch = useAppDispatch();
   const existingCases = useAppSelector((s) => s.forms.form433b) || [];
+  const pagination = useAppSelector((s) => s.forms.form433bPagination);
   const existingCasesRef = useRef<FormCase[]>(existingCases);
 
   useEffect(() => {
@@ -44,6 +45,11 @@ const useUser433bCases = (
           dispatch(set433bCases(cases));
         }
 
+        // Set pagination if available
+        if (res?.data?.pagination) {
+          dispatch(set433bPagination(res.data.pagination));
+        }
+
         return cases;
       } catch (err: any) {
         const msg = err?.message || "Failed to load cases";
@@ -56,7 +62,7 @@ const useUser433bCases = (
         setLoadingMore(false);
       }
     },
-    [dispatch, initialPage, limit]
+    [dispatch, initialPage, limit, filter]
   );
 
   useEffect(() => {
@@ -81,6 +87,7 @@ const useUser433bCases = (
     setPage(initialPage);
     setHasMore(true);
     dispatch(set433bCases([]));
+    dispatch(set433bPagination(null));
   }, [dispatch, initialPage]);
 
   return {
@@ -92,6 +99,7 @@ const useUser433bCases = (
     reset,
     hasMore,
     page,
+    pagination,
   } as const;
 };
 

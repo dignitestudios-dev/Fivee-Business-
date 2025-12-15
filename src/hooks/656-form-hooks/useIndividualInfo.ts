@@ -41,7 +41,7 @@ const useIndividualInfo = () => {
       if (!caseId) return;
 
       const response = await api.get656SectionInfo(caseId, section);
-      dispatch(saveIndividualInformation(response.data || {}));
+      dispatch(saveIndividualInformation(response.data?.data || {}));
     } catch (error: any) {
       console.error("Error fetching individual info:", error);
     } finally {

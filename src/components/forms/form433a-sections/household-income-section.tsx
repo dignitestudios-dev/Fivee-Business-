@@ -27,6 +27,7 @@ interface HouseholdIncomeSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  paymentStatus: boolean;
 }
 
 export function HouseholdIncomeSection({
@@ -34,6 +35,7 @@ export function HouseholdIncomeSection({
   onPrevious,
   currentStep,
   totalSteps,
+  paymentStatus,
 }: HouseholdIncomeSectionProps) {
   const { showError } = useGlobalPopup();
   const searchParams = useSearchParams();
@@ -81,7 +83,10 @@ export function HouseholdIncomeSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving household income info:", error);
-      showError(error.message || "Failed to save household income info", "Household Income Error");
+      showError(
+        error.message || "Failed to save household income info",
+        "Household Income Error"
+      );
     }
   };
 
@@ -235,7 +240,10 @@ export function HouseholdIncomeSection({
                   {...register("income.primaryTaxpayer.grossWages", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.primaryTaxpayer?.grossWages?.message}
@@ -251,7 +259,10 @@ export function HouseholdIncomeSection({
                   {...register("income.primaryTaxpayer.socialSecurity", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={
@@ -269,7 +280,10 @@ export function HouseholdIncomeSection({
                   {...register("income.primaryTaxpayer.pension", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.primaryTaxpayer?.pension?.message}
@@ -285,7 +299,10 @@ export function HouseholdIncomeSection({
                   {...register("income.primaryTaxpayer.otherIncome", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.primaryTaxpayer?.otherIncome?.message}
@@ -319,7 +336,10 @@ export function HouseholdIncomeSection({
                     {...register("income.spouse.grossWages", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.income?.spouse?.grossWages?.message}
@@ -335,7 +355,10 @@ export function HouseholdIncomeSection({
                     {...register("income.spouse.socialSecurity", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.income?.spouse?.socialSecurity?.message}
@@ -351,7 +374,10 @@ export function HouseholdIncomeSection({
                     {...register("income.spouse.pension", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.income?.spouse?.pension?.message}
@@ -367,7 +393,10 @@ export function HouseholdIncomeSection({
                     {...register("income.spouse.otherIncome", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.income?.spouse?.otherIncome?.message}
@@ -409,7 +438,10 @@ export function HouseholdIncomeSection({
                   {...register("income.additionalSourcesIncome", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.additionalSourcesIncome?.message}
@@ -430,7 +462,10 @@ export function HouseholdIncomeSection({
                   {...register("income.interestDividendsRoyalties", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.interestDividendsRoyalties?.message}
@@ -454,7 +489,10 @@ export function HouseholdIncomeSection({
                   {...register("income.distributions", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.distributions?.message}
@@ -475,7 +513,10 @@ export function HouseholdIncomeSection({
                   {...register("income.netRentalIncome", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.netRentalIncome?.message}
@@ -521,7 +562,10 @@ export function HouseholdIncomeSection({
                   {...register("income.childSupportReceived", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.childSupportReceived?.message}
@@ -542,7 +586,10 @@ export function HouseholdIncomeSection({
                   {...register("income.alimonyReceived", {
                     setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                     onChange: (e: any) => {
-                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9.]/g,
+                        ""
+                      );
                     },
                   })}
                   error={errors.income?.alimonyReceived?.message}
@@ -612,7 +659,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.foodClothingMiscellaneous", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.foodClothingMiscellaneous?.message}
@@ -642,9 +692,11 @@ export function HouseholdIncomeSection({
                         placeholder=""
                         required
                         {...register("expenses.monthlyRentalPayment", {
-                          setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                          setValueAs: (v: any) =>
+                            String(v).replace(/[^0-9.]/g, ""),
                           onChange: (e: any) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                         })}
                         error={errors.expenses?.monthlyRentalPayment?.message}
@@ -663,7 +715,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.housingUtilities", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.housingUtilities?.message}
@@ -686,7 +741,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.vehicleLoanLeasePayments", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.vehicleLoanLeasePayments?.message}
@@ -718,7 +776,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.vehicleOperatingCosts", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.vehicleOperatingCosts?.message}
@@ -750,7 +811,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.publicTransportationCosts", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.publicTransportationCosts?.message}
@@ -773,7 +837,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.healthInsurancePremiums", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.healthInsurancePremiums?.message}
@@ -802,7 +869,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.outOfPocketHealthCare", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.outOfPocketHealthCare?.message}
@@ -828,7 +898,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.courtOrderedPayments", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.courtOrderedPayments?.message}
@@ -853,7 +926,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.childDependentCare", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expnenses?.childDependentCare?.message}
@@ -876,9 +952,11 @@ export function HouseholdIncomeSection({
                         placeholder=""
                         required
                         {...register("expenses.lifeInsuranceAmount", {
-                          setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
+                          setValueAs: (v: any) =>
+                            String(v).replace(/[^0-9.]/g, ""),
                           onChange: (e: any) => {
-                            e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                            e.currentTarget.value =
+                              e.currentTarget.value.replace(/[^0-9.]/g, "");
                           },
                         })}
                         error={errors.expenses?.lifeInsuranceAmount?.message}
@@ -897,7 +975,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.lifeInsurancePremiums", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.lifeInsurancePremiums?.message}
@@ -923,7 +1004,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.currentMonthlyTaxes", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.currentMonthlyTaxes?.message}
@@ -961,7 +1045,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.securedDebts", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.securedDebts?.message}
@@ -987,7 +1074,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.monthlyTaxPayments", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.monthlyTaxPayments?.message}
@@ -1006,7 +1096,10 @@ export function HouseholdIncomeSection({
                     {...register("expenses.totalTaxOwed", {
                       setValueAs: (v: any) => String(v).replace(/[^0-9.]/g, ""),
                       onChange: (e: any) => {
-                        e.currentTarget.value = e.currentTarget.value.replace(/[^0-9.]/g, "");
+                        e.currentTarget.value = e.currentTarget.value.replace(
+                          /[^0-9.]/g,
+                          ""
+                        );
                       },
                     })}
                     error={errors.expenses?.totalTaxOwed?.message}
@@ -1057,6 +1150,7 @@ export function HouseholdIncomeSection({
           totalSteps={totalSteps}
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
+          paymentStatus={paymentStatus}
           loading={loading}
         />
       </form>
