@@ -265,7 +265,6 @@ const Header = () => {
         confirmText="Logout"
         cancelText="Cancel"
         confirmVariant="danger"
-        btnType="danger"
         onConfirm={handleLogout}
         onCancel={() => setShowLogout(false)}
       />
