@@ -51,6 +51,8 @@ interface PopupProps {
   children?: ReactNode;
   /** Whether the confirm button is disabled */
   confirmDisabled?: boolean;
+  /** Z-index for the modal */
+  zIndex?: number | string;
 }
 
 /**
@@ -123,6 +125,7 @@ export default function Popup({
       isOpen={open}
       onClose={handleCancel}
       showCloseButton={showCloseButton}
+      zIndex={zIndex}
       {...modalProps}
     >
       <div className="flex flex-col items-center space-y-2">

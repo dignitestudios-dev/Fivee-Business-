@@ -17,6 +17,7 @@ interface ModalProps {
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   className?: string;
+  zIndex?: number | string;
 }
 
 // Enhanced Modal Component
@@ -30,6 +31,7 @@ const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   closeOnOverlayClick = true,
   className = "",
+  zIndex = 50,
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -73,7 +75,7 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   const getPositionClasses = () => {
-    const baseContainer = "fixed inset-0 z-50";
+    const baseContainer = `fixed inset-0 z-${zIndex}`;
     const baseModal = `inline-block w-full ${sizes[size]} text-left transition-all duration-200 ease-out transform bg-white shadow-xl rounded-lg`;
 
     switch (position) {
