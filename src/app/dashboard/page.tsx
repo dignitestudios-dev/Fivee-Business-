@@ -373,6 +373,7 @@ const Dashboard = () => {
           setFormTitle("");
           setSelectedCloneId(null);
         }}
+        confirmDisabled={popupStep === "clone" && (!formTitle.trim() || !selectedCloneId)}
       >
         {popupStep === "choice" && (
           <div className="w-full space-y-4">

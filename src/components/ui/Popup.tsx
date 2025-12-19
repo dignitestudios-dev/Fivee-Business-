@@ -49,8 +49,8 @@ interface PopupProps {
   icon?: ReactNode;
   /** Custom content to render below message */
   children?: ReactNode;
-  /** Additional props passed to Modal component */
-  [key: string]: any;
+  /** Whether the confirm button is disabled */
+  confirmDisabled?: boolean;
 }
 
 /**
@@ -93,6 +93,7 @@ export default function Popup({
   showCloseButton = true,
   icon,
   children,
+  confirmDisabled = false,
   zIndex,
   ...modalProps
 }: PopupProps) {
@@ -165,7 +166,7 @@ export default function Popup({
             type="button"
             className="min-w-[96px] w-full"
             loading={loading}
-            disabled={loading}
+            disabled={loading || confirmDisabled}
             onClick={handleConfirm}
             variant={confirmVariant}
           >
