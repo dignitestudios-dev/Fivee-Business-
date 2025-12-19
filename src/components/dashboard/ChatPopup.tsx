@@ -53,7 +53,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   const [connectionStatus, setConnectionStatus] =
     useState<Status>("disconnected");
   const [isConnecting, setIsConnecting] = useState(false);
-  const ADMIN_ID = "68e8ff9582494fc2027a5b62";
+  const ADMIN_ID = "693fde09c4cf2aad17d4c5a0";
   const dispatch = useAppDispatch();
   const messages = useAppSelector((state) => state.chats.messages || []);
   const [inputValue, setInputValue] = useState<string>("");
