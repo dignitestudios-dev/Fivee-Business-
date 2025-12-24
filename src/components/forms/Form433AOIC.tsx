@@ -301,23 +301,31 @@ export default function Form433AOIC() {
 
     if (currentStep < 10) {
       if (employmentStatus === "self") {
-        // Mark current step as completed
+        // Mark current step as completed and remove from skipped if it was skipped
         const newCompletedSteps = new Set([...completedSteps, 5, 6, 7]);
+        const newSkippedSteps = new Set(skippedSteps);
+        newSkippedSteps.delete(5);
+        newSkippedSteps.delete(6);
+        newSkippedSteps.delete(7);
         setCompletedSteps(newCompletedSteps);
+        setSkippedSteps(newSkippedSteps);
         const nextStep = currentStep + 3;
         setCurrentStep(nextStep);
 
         // Save progress to localStorage
-        saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, newSkippedSteps, caseId);
       } else {
-        // Mark current step as completed
+        // Mark current step as completed and remove from skipped if it was skipped
         const newCompletedSteps = new Set([...completedSteps, currentStep]);
+        const newSkippedSteps = new Set(skippedSteps);
+        newSkippedSteps.delete(currentStep);
         setCompletedSteps(newCompletedSteps);
+        setSkippedSteps(newSkippedSteps);
         const nextStep = currentStep + 1;
         setCurrentStep(nextStep);
 
         // Save progress to localStorage
-        saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, newSkippedSteps, caseId);
       }
     }
   };

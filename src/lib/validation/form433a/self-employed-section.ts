@@ -1,6 +1,7 @@
 import z from "zod";
 import {
   nameSchema,
+  phoneSchema,
   phoneSchemaOptional,
   moneySchema,
   shortTextSchema,
@@ -60,14 +61,13 @@ export const selfEmployedSchema = z
               .min(0, "Percentage cannot be less than 0")
               .max(100, "Percentage cannot exceed 100"),
             title: z.string().optional().or(z.literal("")),
-            businessAddress: z.string().optional().or(z.literal("")),
-            businessName: z.string().optional().or(z.literal("")),
-            businessTelephone: z.string().optional().or(z.literal("")),
+            businessAddress: z.string().min(1, "Business address is required"),
+            businessName: z.string().min(1, "Business name is required"),
+            businessTelephone: phoneSchema,
             employerIdentificationNumber: z
               .string()
-              .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)")
-              .optional()
-              .or(z.literal("")),
+              .min(1, "EIN is required")
+              .regex(/^\d{2}-?\d{7}$/, "Please enter a valid EIN (XX-XXXXXXX)"),
             businessType: z
               .enum(["partnership", "llc", "corporation", "other"])
               .optional(),

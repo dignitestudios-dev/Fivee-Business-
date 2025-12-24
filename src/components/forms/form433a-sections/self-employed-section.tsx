@@ -302,6 +302,7 @@ export function SelfEmployedSection({
                     inputMode="numeric"
                     pattern="^[0-9]*$"
                     placeholder="0"
+                    defaultValue={0}
                     {...register("totalEmployees", {
                       valueAsNumber: true,
                       onChange: (e: React.ChangeEvent<HTMLInputElement>) => {

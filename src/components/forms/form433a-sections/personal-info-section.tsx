@@ -65,6 +65,8 @@ export function PersonalInfoSection({
     control,
   } = methods;
 
+  console.log("personal info section errors: ", errors);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "householdMembers",
@@ -339,8 +341,7 @@ export function PersonalInfoSection({
 
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="livedInCommunityPropertyStateInLast10Years"
-                {...register("livedInCommunityPropertyStateInLast10Years")}
+                name="livedInCommunityPropertyStateInLast10Years"
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
               />
               <Label
@@ -550,10 +551,7 @@ export function PersonalInfoSection({
                 <div className="flex flex-wrap gap-6">
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={`householdMembers.${index}.claimedAsDependent`}
-                      {...register(
-                        `householdMembers.${index}.claimedAsDependent`
-                      )}
+                      name={`householdMembers.${index}.claimedAsDependent`}
                       className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                     />
                     <Label
@@ -565,10 +563,7 @@ export function PersonalInfoSection({
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={`householdMembers.${index}.contributesToIncome`}
-                      {...register(
-                        `householdMembers.${index}.contributesToIncome`
-                      )}
+                      name={`householdMembers.${index}.contributesToIncome`}
                       className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                     />
                     <Label
