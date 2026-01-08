@@ -80,33 +80,41 @@ const form433bSlice = createSlice({
     saveOtherInfo: (state, action: PayloadAction<any | null>) => {
       if (action.payload) {
         // Format dates
-        action.payload.bankruptcyHistory = {
-          ...action.payload.bankruptcyHistory,
-          dateFiled: formatDateForInput(
-            action.payload.bankruptcyHistory.dateFiled
-          ),
-          dateDismissedOrDischarged: formatDateForInput(
-            action.payload.bankruptcyHistory.dateDismissedOrDischarged
-          ),
-        };
-        action.payload.litigationHistory = action.payload.litigationHistory.map(
-          (lit: any) => ({
-            ...lit,
-            possibleCompletionDate: formatDateForInput(
-              lit.possibleCompletionDate
+        if (action.payload.bankruptcyHistory) {
+          action.payload.bankruptcyHistory = {
+            ...action.payload.bankruptcyHistory,
+            dateFiled: formatDateForInput(
+              action.payload.bankruptcyHistory.dateFiled
             ),
-          })
-        );
-        action.payload.assetTransfersOver10k =
-          action.payload.assetTransfersOver10k.map((trans: any) => ({
-            ...trans,
-            date: formatDateForInput(trans.date),
-          }));
-        action.payload.realPropertyTransfers =
-          action.payload.realPropertyTransfers.map((trans: any) => ({
-            ...trans,
-            date: formatDateForInput(trans.date),
-          }));
+            dateDismissedOrDischarged: formatDateForInput(
+              action.payload.bankruptcyHistory.dateDismissedOrDischarged
+            ),
+          };
+        }
+        if (action.payload.litigationHistory) {
+          action.payload.litigationHistory = action.payload.litigationHistory?.map(
+            (lit: any) => ({
+              ...lit,
+              possibleCompletionDate: formatDateForInput(
+                lit.possibleCompletionDate
+              ),
+            })
+          );
+        }
+        if (action.payload.assetTransfersOver10k) {
+          action.payload.assetTransfersOver10k =
+            action.payload.assetTransfersOver10k?.map((trans: any) => ({
+              ...trans,
+              date: formatDateForInput(trans.date),
+            }));
+        }
+        if (action.payload.realPropertyTransfers) {
+          action.payload.realPropertyTransfers =
+            action.payload.realPropertyTransfers?.map((trans: any) => ({
+              ...trans,
+              date: formatDateForInput(trans.date),
+            }));
+        }
       }
       state.otherInfo = action.payload;
     },

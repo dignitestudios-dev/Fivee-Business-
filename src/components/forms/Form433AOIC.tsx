@@ -93,10 +93,13 @@ export default function Form433AOIC() {
       // Mark step as skipped and move to next
       const newSkippedSteps = new Set([...skippedSteps, step]);
       setSkippedSteps(newSkippedSteps);
+      const newCompletedSteps = new Set(completedSteps);
+      newCompletedSteps.delete(step);
+      setCompletedSteps(newCompletedSteps);
       if (step < 10) {
         const nextStep = step + 1;
         setCurrentStep(nextStep);
-        saveProgress(nextStep, completedSteps, newSkippedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, newSkippedSteps, caseId);
       }
     },
     formType: "433a",
@@ -356,7 +359,8 @@ export default function Form433AOIC() {
       onPrevious: handlePrevious,
       currentStep,
       totalSteps: 10,
-      paymentStatus: disableForm
+      paymentStatus: disableForm,
+      completedSteps,
     };
 
     switch (currentStep) {

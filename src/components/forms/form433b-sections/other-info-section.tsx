@@ -111,15 +111,6 @@ export function OtherInfoSection({
     name: "foreignAssets",
   });
 
-  const {
-    fields: relatedPartyFields,
-    append: appendRelatedParty,
-    remove: removeRelatedParty,
-  } = useFieldArray({
-    control,
-    name: "relatedPartyDebts",
-  });
-
   // Watch conditionals
   const isCurrentlyInBankruptcy = watch("isCurrentlyInBankruptcy");
   const hasFiledBankruptcyInPast10Years = watch(
@@ -171,24 +162,17 @@ export function OtherInfoSection({
         removeForeignAsset(i);
       }
     }
-    if (relatedPartyFields.length > 1) {
-      for (let i = relatedPartyFields.length - 1; i > 0; i--) {
-        removeRelatedParty(i);
-      }
-    }
   }, [
     affiliationFields.length,
     litigationFields.length,
     assetTransferFields.length,
     realTransferFields.length,
     foreignAssetFields.length,
-    relatedPartyFields.length,
     removeAffiliation,
     removeLitigation,
     removeAssetTransfer,
     removeRealTransfer,
     removeForeignAsset,
-    removeRelatedParty,
   ]);
 
   // Manage businessAffiliations array based on yes/no
@@ -311,27 +295,6 @@ export function OtherInfoSection({
     removeForeignAsset,
   ]);
 
-  // Manage relatedPartyDebts array based on yes/no
-  useEffect(() => {
-    if (doRelatedPartiesOweMoney && relatedPartyFields.length === 0) {
-      appendRelatedParty({
-        nameAndAddress: "",
-        dateOfLoan: "",
-        currentBalance: 0,
-        paymentAmount: 0,
-      });
-    } else if (!doRelatedPartiesOweMoney && relatedPartyFields.length > 0) {
-      for (let i = relatedPartyFields.length - 1; i >= 0; i--) {
-        removeRelatedParty(i);
-      }
-    }
-  }, [
-    doRelatedPartiesOweMoney,
-    relatedPartyFields.length,
-    appendRelatedParty,
-    removeRelatedParty,
-  ]);
-
   // Clear conditional fields when switching to no
   useEffect(() => {
     if (!hasFiledBankruptcyInPast10Years) {
@@ -397,12 +360,6 @@ export function OtherInfoSection({
     }
   }, [hasLinesOfCredit, setValue]);
 
-  useEffect(() => {
-    if (!doRelatedPartiesOweMoney) {
-      setValue("relatedPartyDebts", []);
-    }
-  }, [doRelatedPartiesOweMoney, setValue]);
-
   const onSubmit = async (data: OtherInfoFormSchema) => {
     try {
       if (!data.hasFiledBankruptcyInPast10Years) {
@@ -433,13 +390,42 @@ export function OtherInfoSection({
           propertySecuring: "",
         };
       }
-      if (!data.doRelatedPartiesOweMoney) data.relatedPartyDebts = [];
 
-      await handleSaveOtherInfo(data, caseId);
+      // Remove empty arrays from payload
+      const payload = { ...data };
+      if (
+        payload.businessAffiliations &&
+        payload.businessAffiliations.length === 0
+      ) {
+        delete payload.businessAffiliations;
+      }
+      if (payload.litigationHistory && payload.litigationHistory.length === 0) {
+        delete payload.litigationHistory;
+      }
+      if (
+        payload.assetTransfersOver10k &&
+        payload.assetTransfersOver10k.length === 0
+      ) {
+        delete payload.assetTransfersOver10k;
+      }
+      if (
+        payload.realPropertyTransfers &&
+        payload.realPropertyTransfers.length === 0
+      ) {
+        delete payload.realPropertyTransfers;
+      }
+      if (payload.foreignAssets && payload.foreignAssets.length === 0) {
+        delete payload.foreignAssets;
+      }
+
+      await handleSaveOtherInfo(payload, caseId);
       onNext();
     } catch (error: any) {
       console.error("Error saving other info:", error);
-      showError(error.message || "Failed to save other info", "Other Info Error");
+      showError(
+        error.message || "Failed to save other info",
+        "Other Info Error"
+      );
     }
   };
 
@@ -449,7 +435,17 @@ export function OtherInfoSection({
 
   useEffect(() => {
     if (otherInfo) {
-      reset(otherInfo);
+      const data = { ...otherInfoInitialValues, ...otherInfo };
+      // Ensure arrays are not undefined
+      const keys = Object.keys(
+        otherInfoInitialValues
+      ) as (keyof typeof otherInfoInitialValues)[];
+      keys.forEach((key) => {
+        if (data[key] === undefined) {
+          data[key] = otherInfoInitialValues[key];
+        }
+      });
+      reset(data);
     }
   }, [otherInfo]);
 
@@ -647,87 +643,6 @@ export function OtherInfoSection({
                 </div>
               </RadioGroup>
             </FormField>
-
-            {doRelatedPartiesOweMoney && relatedPartyFields.length > 0 && (
-              <div className="space-y-4">
-                <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-                  <h4 className="font-medium">Related Party Debt</h4>
-                  <FormInput
-                    label="Name and Address (Street, City, State, ZIP code)"
-                    id={`relatedPartyDebts.0.nameAndAddress`}
-                    {...register(`relatedPartyDebts.0.nameAndAddress`)}
-                    error={
-                      errors.relatedPartyDebts?.[0]?.nameAndAddress?.message
-                    }
-                  />
-                  <FormInput
-                    type="date"
-                    label="Date of Loan (mmddyyyy)"
-                    id={`relatedPartyDebts.0.dateOfLoan`}
-                    {...register(`relatedPartyDebts.0.dateOfLoan`)}
-                    error={errors.relatedPartyDebts?.[0]?.dateOfLoan?.message}
-                  />
-                  <FormInput
-                    type="text"
-                    inputMode="decimal"
-                    label="Current Balance ($)"
-                    id={`relatedPartyDebts.0.currentBalance`}
-                    {...register(`relatedPartyDebts.0.currentBalance`, {
-                      valueAsNumber: true,
-                      setValueAs: (v: any) => {
-                        if (v === "" || v === null || v === undefined) return 0;
-                        const cleaned = String(v).replace(/[^0-9.]/g, "");
-                        const parsed = parseFloat(cleaned);
-                        return isNaN(parsed) ? 0 : parsed;
-                      },
-                      onChange: (e: any) => {
-                        let value = e.target.value;
-                        // Remove all non-numeric characters except decimal point
-                        value = value.replace(/[^0-9.]/g, "");
-                        // Ensure only one decimal point
-                        const parts = value.split(".");
-                        if (parts.length > 2) {
-                          value = parts[0] + "." + parts.slice(1).join("");
-                        }
-                        e.target.value = value;
-                      },
-                    })}
-                    error={
-                      errors.relatedPartyDebts?.[0]?.currentBalance?.message
-                    }
-                  />
-                  <FormInput
-                    type="text"
-                    inputMode="decimal"
-                    label="Payment Amount ($)"
-                    id={`relatedPartyDebts.0.paymentAmount`}
-                    {...register(`relatedPartyDebts.0.paymentAmount`, {
-                      valueAsNumber: true,
-                      setValueAs: (v: any) => {
-                        if (v === "" || v === null || v === undefined) return 0;
-                        const cleaned = String(v).replace(/[^0-9.]/g, "");
-                        const parsed = parseFloat(cleaned);
-                        return isNaN(parsed) ? 0 : parsed;
-                      },
-                      onChange: (e: any) => {
-                        let value = e.target.value;
-                        // Remove all non-numeric characters except decimal point
-                        value = value.replace(/[^0-9.]/g, "");
-                        // Ensure only one decimal point
-                        const parts = value.split(".");
-                        if (parts.length > 2) {
-                          value = parts[0] + "." + parts.slice(1).join("");
-                        }
-                        e.target.value = value;
-                      },
-                    })}
-                    error={
-                      errors.relatedPartyDebts?.[0]?.paymentAmount?.message
-                    }
-                  />
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 

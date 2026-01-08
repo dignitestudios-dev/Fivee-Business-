@@ -41,6 +41,7 @@ interface SignatureSectionProps {
   currentStep: number;
   totalSteps: number;
   paymentStatus: boolean;
+  completedSteps: Set<number>;
 }
 
 const attachmentData = [
@@ -122,6 +123,7 @@ export function SignatureSection({
   currentStep,
   totalSteps,
   paymentStatus,
+  completedSteps,
 }: SignatureSectionProps) {
   const { showError } = useGlobalPopup();
   const dispatch = useAppDispatch();
@@ -197,6 +199,12 @@ export function SignatureSection({
   const [loadingAllSections, setLoadingAllSections] = useState(false);
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
+    // Check if all previous sections (1-9) are completed
+    if (completedSteps.size < 9) {
+      showError("Please complete all sections to continue to the payment", "Incomplete Form");
+      return;
+    }
+
     try {
       // delete data.taxpayerSignature.signatureId;
       // delete data.spouseSignature.signatureId;
@@ -564,7 +572,7 @@ export function SignatureSection({
                         </Label>
                         {error && (
                           <p className="text-red-600 text-xs mt-1">
-                            {error.message}
+                            {(error as any)?.message}
                           </p>
                         )}
                       </div>

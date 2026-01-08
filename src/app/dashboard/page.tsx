@@ -222,11 +222,7 @@ const Dashboard = () => {
               <div className="space-y-3">
                 <IndividualTaxIcon />
                 <p className="font-bold text-base sm:text-lg">
-                  File Individual Tax
-                </p>
-                <p className="text-desc text-sm sm:text-base">
-                  Potenti feugiat sit libero leo id vitae. Sit euismod ac nulla
-                  vitae magna sed quis.
+                  File Individual Tax (Form-433A)
                 </p>
 
                 <DropdownPopup
@@ -244,11 +240,7 @@ const Dashboard = () => {
               <div className="space-y-3">
                 <BusinessTaxIcon />
                 <p className="font-bold text-base sm:text-lg">
-                  File Business Tax
-                </p>
-                <p className="text-desc text-sm sm:text-base">
-                  Potenti feugiat sit libero leo id vitae. Sit euismod ac nulla
-                  vitae magna sed quis.
+                  File Business Tax (Form-433B)
                 </p>
 
                 <DropdownPopup
@@ -373,7 +365,9 @@ const Dashboard = () => {
           setFormTitle("");
           setSelectedCloneId(null);
         }}
-        confirmDisabled={popupStep === "clone" && (!formTitle.trim() || !selectedCloneId)}
+        confirmDisabled={
+          popupStep === "clone" && (!formTitle.trim() || !selectedCloneId)
+        }
       >
         {popupStep === "choice" && (
           <div className="w-full space-y-4">

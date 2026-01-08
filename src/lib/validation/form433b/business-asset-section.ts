@@ -120,22 +120,6 @@ export const businessAssetSchema = z
     businessEquipment: z.array(businessEquipmentSchema),
   })
   .superRefine((data, ctx) => {
-    // If hasNotes, require at least one note
-    if (data.hasNotesReceivable && data.notesReceivable.length === 0) {
-      ctx.addIssue({
-        code: "custom",
-        message: "At least one note receivable is required",
-        path: ["notesReceivable"],
-      });
-    }
-    // Same for accounts
-    if (data.hasAccountsReceivable && data.accountsReceivable.length === 0) {
-      ctx.addIssue({
-        code: "custom",
-        message: "At least one account receivable is required",
-        path: ["accountsReceivable"],
-      });
-    }
     // For investments, if type Other, require text
     data.investmentAccounts.forEach((inv, i) => {
       if (

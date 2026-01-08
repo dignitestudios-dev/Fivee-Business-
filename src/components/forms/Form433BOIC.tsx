@@ -80,10 +80,13 @@ export default function Form433BOIC() {
       // Mark step as skipped and move to next
       const newSkippedSteps = new Set([...skippedSteps, step]);
       setSkippedSteps(newSkippedSteps);
+      const newCompletedSteps = new Set(completedSteps);
+      newCompletedSteps.delete(step);
+      setCompletedSteps(newCompletedSteps);
       if (step < 7) {
         const nextStep = step + 1;
         setCurrentStep(nextStep);
-        saveProgress(nextStep, completedSteps, newSkippedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, newSkippedSteps, caseId);
       }
     },
     formType: "433b",
@@ -98,7 +101,12 @@ export default function Form433BOIC() {
       skippedSteps: number[];
     }>(`433b_progress`);
     return (
-      savedProgress || { caseId: null, currentStep: 1, completedSteps: [], skippedSteps: [] }
+      savedProgress || {
+        caseId: null,
+        currentStep: 1,
+        completedSteps: [],
+        skippedSteps: [],
+      }
     );
   };
 
@@ -157,15 +165,15 @@ export default function Form433BOIC() {
           }
         }
 
-        const firstIncompleteIndex = sectionOrder.findIndex(
-          (k) => {
-            const status = sections && sections[k];
-            return status !== "completed" && status !== "skipped";
-          }
-        );
+        const firstIncompleteIndex = sectionOrder.findIndex((k) => {
+          const status = sections && sections[k];
+          return status !== "completed" && status !== "skipped";
+        });
 
         const computedCurrentStep =
-          firstIncompleteIndex === -1 ? sectionOrder.length : firstIncompleteIndex + 1;
+          firstIncompleteIndex === -1
+            ? sectionOrder.length
+            : firstIncompleteIndex + 1;
 
         setCompletedSteps(new Set(newCompleted));
         setSkippedSteps(new Set(newSkipped));
@@ -186,11 +194,16 @@ export default function Form433BOIC() {
 
       // Fetch payment status
       try {
-        const paymentResp = await api.get433bSectionInfo(caseId, "paymentStatus");
+        const paymentResp = await api.get433bSectionInfo(
+          caseId,
+          "paymentStatus"
+        );
         const paymentStatus = paymentResp?.data?.status === "completed";
         if (paymentStatus) {
           setDisableForm(true);
-          setViewOnlyMessage("You can only view the completed form but cannot edit it.");
+          setViewOnlyMessage(
+            "You can only view the completed form but cannot edit it."
+          );
         } else {
           setDisableForm(false);
           setViewOnlyMessage("");
@@ -216,7 +229,12 @@ export default function Form433BOIC() {
   }, [caseId, storedCaseId, dispatch]);
 
   // Save progress to localStorage
-  const saveProgress = (step: number, completed: Set<number>, skipped: Set<number>, caseIdToSave?: string | null) => {
+  const saveProgress = (
+    step: number,
+    completed: Set<number>,
+    skipped: Set<number>,
+    caseIdToSave?: string | null
+  ) => {
     try {
       const progressData = {
         caseId: caseIdToSave || caseId || null,
@@ -244,13 +262,17 @@ export default function Form433BOIC() {
   const handleNext = async () => {
     if (currentStep < 7) {
       // Mark current step as completed
+      const newSkippedSteps = new Set(skippedSteps);
+      newSkippedSteps.delete(currentStep);
+      setSkippedSteps(newSkippedSteps);
+
       const newCompletedSteps = new Set([...completedSteps, currentStep]);
       setCompletedSteps(newCompletedSteps);
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);
 
       // Save progress to localStorage
-      saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
+      saveProgress(nextStep, newCompletedSteps, newSkippedSteps, caseId);
     }
   };
 
@@ -266,7 +288,11 @@ export default function Form433BOIC() {
 
   const handleStepClick = (stepNumber: number) => {
     // Only allow navigation to completed, skipped steps or current step
-    if (stepNumber <= currentStep || completedSteps.has(stepNumber) || skippedSteps.has(stepNumber)) {
+    if (
+      stepNumber <= currentStep ||
+      completedSteps.has(stepNumber) ||
+      skippedSteps.has(stepNumber)
+    ) {
       setCurrentStep(stepNumber);
 
       // update progress
@@ -280,6 +306,7 @@ export default function Form433BOIC() {
       onPrevious: handlePrevious,
       currentStep,
       totalSteps: 7,
+      completedSteps,
     };
 
     switch (currentStep) {

@@ -35,6 +35,7 @@ interface SignatureSectionProps {
   onPrevious: () => void;
   currentStep: number;
   totalSteps: number;
+  completedSteps: Set<number>;
 }
 
 const attachmentData = [
@@ -90,6 +91,7 @@ export function SignatureSection({
   onPrevious,
   currentStep,
   totalSteps,
+  completedSteps,
 }: SignatureSectionProps) {
   const { showError } = useGlobalPopup();
   const router = useRouter();
@@ -145,6 +147,12 @@ export function SignatureSection({
     useState<CalculationSummary | null>(null);
 
   const handleFormSubmit = async (data: SignatureFormSchema) => {
+    // Check if all previous sections (1-6) are completed
+    if (completedSteps.size < 6) {
+      showError("Please complete all sections to continue to the submission", "Incomplete Form");
+      return;
+    }
+
     try {
       await handleSaveSignatureInfo(data, caseId);
 

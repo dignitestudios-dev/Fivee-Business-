@@ -128,7 +128,7 @@ export function BusinessInfoSection({
 
   useEffect(() => {
     if (businessInformation) {
-      reset(businessInformation);
+      reset({ ...businessInfoInitialValues, ...businessInformation });
     }
   }, [businessInformation]);
 
@@ -314,8 +314,7 @@ export function BusinessInfoSection({
               />
               <div className="flex items-center space-x-2 pt-6">
                 <Checkbox
-                  id="isSoleEmployee"
-                  {...register("isSoleEmployee")}
+                  name="isSoleEmployee"
                   className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
                 />
                 <Label htmlFor="isSoleEmployee" className="text-sm">

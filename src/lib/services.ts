@@ -1,8 +1,8 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
-// export const BASE_URL = "http://localhost:3001/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "http://localhost:3001/";
 
 // Create an Axios instance
 const API = axios.create({
@@ -223,7 +223,7 @@ const skipSection = async (
       },
     },
     "433b": {
-      1: { endpoint: "business-info", sectionName: "businessInfo" },
+      1: { endpoint: "business-information", sectionName: "businessInfo" },
       2: { endpoint: "business-asset-info", sectionName: "businessAssetInfo" },
       3: {
         endpoint: "business-income-info",
@@ -270,7 +270,7 @@ const skipSection = async (
 
   const baseUrls = {
     "433a": `/form433a/${caseId}`,
-    "433b": `/form433b/${caseId}`,
+    "433b": `/form433boic/${caseId}`,
     "656": `/form656b/${caseId}`,
   };
 

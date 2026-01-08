@@ -11,7 +11,7 @@ export interface SignatureFormSchema {
     // signatureId: string;
     date: string;
   };
-  attachments: {
+  attachments?: {
     payStubs: boolean;
     investmentStatements: boolean;
     digitalAssetsDocs: boolean;
@@ -84,7 +84,7 @@ export const signatureSchema = (maritalStatus: MaritalStatus) =>
         specialCircumstancesDocs: z.boolean().optional().default(false),
         form2848: z.boolean().optional().default(false),
         form656: z.boolean().optional().default(false),
-      }),
+      }).optional(),
     })
     .superRefine((data, ctx) => {
       if (maritalStatus === "married") {
