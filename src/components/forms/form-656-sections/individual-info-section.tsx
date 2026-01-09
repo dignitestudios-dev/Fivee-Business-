@@ -221,7 +221,10 @@ export function IndividualInfoSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving individual info:", error);
-      showError(error.message || "Failed to save individual info", "Individual Info Error");
+      showError(
+        error.message || "Failed to save individual info",
+        "Individual Info Error"
+      );
     }
   };
 
@@ -855,10 +858,16 @@ export function IndividualInfoSection({
                         className="text-[#22b573]"
                       />
                       <Label htmlFor="basis-agi">
-                        I qualify for the Low-Income Certification because my
-                        adjusted gross income for my household&apos;s size is
-                        equal to or less than the amount shown in the table
-                        below.
+                        <span>
+                          I qualify for the Low-Income Certification because my
+                          adjusted gross income for my household&apos;s size is
+                          equal to or less than the amount shown below{" "}
+                          <span className="text-gray-500">
+                            {" "}
+                            (Income limit for your household)
+                          </span>
+                          .
+                        </span>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -868,9 +877,16 @@ export function IndividualInfoSection({
                         className="text-[#22b573]"
                       />
                       <Label htmlFor="basis-monthly">
-                        I qualify for the Low-Income Certification because my
-                        household size and gross monthly income x 12 is equal to
-                        or less than the income shown in the table below.
+                        <span>
+                          I qualify for the Low-Income Certification because my
+                          household size and gross monthly income x 12 is equal
+                          to or less than the income shown below{" "}
+                          <span className="text-gray-500">
+                            {" "}
+                            (Income limit for your household)
+                          </span>
+                          .
+                        </span>
                       </Label>
                     </div>
                   </RadioGroup>

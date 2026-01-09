@@ -10,26 +10,30 @@ export const sourceOfFundsSchema = z
     yearsNotRequiredToFile: z
       .number({ message: "Must be a number" })
       .optional(),
-    madeEstimatedTaxPayments: z.boolean(),
-    notRequiredEstimatedTaxPayments: z.boolean(),
-    madeFederalTaxDeposits: z.boolean(),
-    notRequiredFederalTaxDeposits: z.boolean(),
+    madeEstimatedTaxPayments: z.boolean().optional().default(false),
+    notRequiredEstimatedTaxPayments: z.boolean().optional().default(false),
+    madeFederalTaxDeposits: z.boolean().optional().default(false),
+    notRequiredFederalTaxDeposits: z.boolean().optional().default(false),
   })
-  .refine(
-    (data) =>
-      data.madeEstimatedTaxPayments || data.notRequiredEstimatedTaxPayments,
-    {
-      message: "Must select one for estimated tax payments",
-      path: ["madeEstimatedTaxPayments"],
+  .superRefine((data, ctx) => {
+    if (!data.madeEstimatedTaxPayments && !data.notRequiredEstimatedTaxPayments) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Please select either 'I have made estimated tax payments' or 'I am not required to make estimated tax payments'.",
+        path: ["madeEstimatedTaxPayments"],
+      });
     }
-  )
-  .refine(
-    (data) => data.madeFederalTaxDeposits || data.notRequiredFederalTaxDeposits,
-    {
-      message: "Must select one for federal tax deposits",
-      path: ["madeFederalTaxDeposits"],
+
+    if (!data.madeFederalTaxDeposits && !data.notRequiredFederalTaxDeposits) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Please select either 'I have made federal tax deposits' or 'I am not required to make federal tax deposits'.",
+        path: ["madeFederalTaxDeposits"],
+      });
     }
-  );
+  });
 
 export type SourceOfFundsFormSchema = z.infer<typeof sourceOfFundsSchema>;
 

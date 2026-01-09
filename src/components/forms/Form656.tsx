@@ -89,13 +89,16 @@ export default function Form656() {
     caseId,
     currentStep,
     onSkipSuccess: (step) => {
-      // Mark step as skipped and move to next
+      // Mark step as skipped, remove it from completed, and move to next
       const newSkippedSteps = new Set([...skippedSteps, step]);
       setSkippedSteps(newSkippedSteps);
+      const newCompletedSteps = new Set(completedSteps);
+      newCompletedSteps.delete(step);
+      setCompletedSteps(newCompletedSteps);
       if (step < 10) {
         const nextStep = step + 1;
         setCurrentStep(nextStep);
-        saveProgress(nextStep, completedSteps, newSkippedSteps, caseId);
+        saveProgress(nextStep, newCompletedSteps, newSkippedSteps, caseId);
       }
     },
     formType: "656",

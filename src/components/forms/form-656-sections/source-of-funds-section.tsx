@@ -4,7 +4,7 @@ import { FormNavigation } from "@/components/forms/form433a-sections/form-naviga
 import { FormInput } from "@/components/ui/form-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
 import useSourceOfFunds from "@/hooks/656-form-hooks/useSourceOfFunds";
@@ -69,7 +69,10 @@ export function SourceOfFundsSection({
       onNext();
     } catch (error: any) {
       console.error("Error saving source of funds info:", error);
-      showError(error.message || "Failed to save source of funds info", "Source of Funds Error");
+      showError(
+        error.message || "Failed to save source of funds info",
+        "Source of Funds Error"
+      );
     }
   };
 
@@ -125,10 +128,17 @@ export function SourceOfFundsSection({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start space-x-2">
-              <Checkbox
-                id="allRequiredReturnsFiled"
-                {...register("allRequiredReturnsFiled")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-0.5"
+              <Controller
+                name="allRequiredReturnsFiled"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="allRequiredReturnsFiled"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(val) => field.onChange(Boolean(val))}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-0.5"
+                  />
+                )}
               />
               <Label htmlFor="allRequiredReturnsFiled">
                 I have filed all required tax returns and have included a
@@ -143,10 +153,17 @@ export function SourceOfFundsSection({
             )}
 
             <div className="flex items-start space-x-2">
-              <Checkbox
-                id="yearsNotRequiredToFileCheckbox"
-                {...register("yearsNotRequiredToFileCheckbox")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-0.5"
+              <Controller
+                name="yearsNotRequiredToFileCheckbox"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="yearsNotRequiredToFileCheckbox"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(val) => field.onChange(Boolean(val))}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-0.5"
+                  />
+                )}
               />
               <Label htmlFor="yearsNotRequiredToFileCheckbox">
                 I was not required to file a tax return for the following years
@@ -182,10 +199,17 @@ export function SourceOfFundsSection({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="madeEstimatedTaxPayments"
-                {...register("madeEstimatedTaxPayments")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+              <Controller
+                name="madeEstimatedTaxPayments"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="madeEstimatedTaxPayments"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(val) => field.onChange(Boolean(val))}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
               />
               <Label htmlFor="madeEstimatedTaxPayments">
                 I have made all required estimated tax payments for the current
@@ -198,10 +222,17 @@ export function SourceOfFundsSection({
               </p>
             )}
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="notRequiredEstimatedTaxPayments"
-                {...register("notRequiredEstimatedTaxPayments")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+              <Controller
+                name="notRequiredEstimatedTaxPayments"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="notRequiredEstimatedTaxPayments"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(val) => field.onChange(Boolean(val))}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
               />
               <Label htmlFor="notRequiredEstimatedTaxPayments">
                 I am not required to make any estimated tax payments for the
@@ -209,10 +240,17 @@ export function SourceOfFundsSection({
               </Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="madeFederalTaxDeposits"
-                {...register("madeFederalTaxDeposits")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+              <Controller
+                name="madeFederalTaxDeposits"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="madeFederalTaxDeposits"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(val) => field.onChange(Boolean(val))}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
               />
               <Label htmlFor="madeFederalTaxDeposits">
                 I have made all required federal tax deposits for the current
@@ -225,10 +263,17 @@ export function SourceOfFundsSection({
               </p>
             )}
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="notRequiredFederalTaxDeposits"
-                {...register("notRequiredFederalTaxDeposits")}
-                className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+              <Controller
+                name="notRequiredFederalTaxDeposits"
+                control={methods.control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="notRequiredFederalTaxDeposits"
+                    checked={Boolean(field.value)}
+                    onCheckedChange={(val) => field.onChange(Boolean(val))}
+                    className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                  />
+                )}
               />
               <Label htmlFor="notRequiredFederalTaxDeposits">
                 I am not required to make federal tax deposits.
