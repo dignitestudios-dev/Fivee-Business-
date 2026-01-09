@@ -230,7 +230,7 @@ export function BusinessAssetsSection({
       const hasAccounts = businessAssetsInfo.accountsReceivable?.length > 0;
       const data = { ...businessAssetInitialValues, ...businessAssetsInfo };
       // Ensure arrays are not undefined
-      Object.keys(businessAssetInitialValues).forEach(key => {
+      (Object.keys(businessAssetInitialValues) as (keyof typeof businessAssetInitialValues)[]).forEach(key => {
         if (data[key] === undefined) {
           data[key] = businessAssetInitialValues[key];
         }
