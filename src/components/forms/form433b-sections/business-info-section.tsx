@@ -180,7 +180,6 @@ export function BusinessInfoSection({
                 label="Employer Identification Number (EIN)"
                 id="employerIdentificationNumber"
                 placeholder="XX-XXXXXXX"
-                required
                 {...register("employerIdentificationNumber", {
                   onChange: handleEINInput,
                 })}

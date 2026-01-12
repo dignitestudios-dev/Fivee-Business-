@@ -50,16 +50,20 @@ export function BusinessInfoSection({
     resolver: zodResolver(businessInfoSchema656),
     defaultValues: businessInfoInitialValues,
     mode: "onSubmit",
+    shouldUnregister: false,
   });
 
   const {
     register,
     reset,
+    watch,
     handleSubmit,
     formState: { errors },
     setValue,
     control,
   } = methods;
+
+  console.log(errors)
 
   const onSubmit = async (data: BusinessInfoFormSchema) => {
     try {
@@ -78,8 +82,17 @@ export function BusinessInfoSection({
   useEffect(() => {
     if (businessInfo) {
       reset(businessInfo);
+    } else {
+      // Explicitly set default values for checkboxes to ensure they're false
+      reset(businessInfoInitialValues);
+      setValue("isNewAddressSinceLastFiled", false);
+      setValue("updateRecordsToThisAddress", false);
+      setValue("businessTaxPeriods.isIndividualIncomeTax", false);
+      setValue("businessTaxPeriods.isEmployerQuarterlyTax", false);
+      setValue("businessTaxPeriods.isEmployerAnnualFUTATax", false);
+      setValue("businessTaxPeriods.isOtherFederalTax", false);
     }
-  }, [businessInfo]);
+  }, [businessInfo, reset, setValue]);
 
   if (loadingFormData) {
     return <FormLoader />;
@@ -131,6 +144,9 @@ export function BusinessInfoSection({
                 id="isNewAddressSinceLastFiled"
                 {...register("isNewAddressSinceLastFiled")}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                onCheckedChange={(checked) => {
+                  setValue("isNewAddressSinceLastFiled", checked === true);
+                }}
               />
               <Label htmlFor="isNewAddressSinceLastFiled">
                 Is this a new address since your last filed tax return?
@@ -142,6 +158,9 @@ export function BusinessInfoSection({
                 id="updateRecordsToThisAddress"
                 {...register("updateRecordsToThisAddress")}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                onCheckedChange={(checked) => {
+                  setValue("updateRecordsToThisAddress", checked === true);
+                }}
               />
               <Label htmlFor="updateRecordsToThisAddress">
                 If yes, would you like us to update our records to this address?
@@ -153,7 +172,6 @@ export function BusinessInfoSection({
                 label="Employer Identification Number (EIN)"
                 id="employerIdentificationNumber"
                 placeholder="XX-XXXXXXX"
-                required
                 {...register("employerIdentificationNumber", {
                   onChange: (e) =>
                     setValue(
@@ -200,6 +218,12 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.isIndividualIncomeTax"
                 {...register("businessTaxPeriods.isIndividualIncomeTax")}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                onCheckedChange={(checked) => {
+                  setValue("businessTaxPeriods.isIndividualIncomeTax", checked === true);
+                  if (!checked) {
+                    setValue("businessTaxPeriods.individualTaxDescription", "");
+                  }
+                }}
               />
               <Label htmlFor="businessTaxPeriods.isIndividualIncomeTax">
                 Form 1120 U.S. Corporate Income Tax Return - (e.g., 12-31-2021)
@@ -209,9 +233,12 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.individualTaxDescription"
                 placeholder="12-31-2021"
                 className="w-32 inline-block"
+                disabled={!watch("businessTaxPeriods.isIndividualIncomeTax")}
                 {...register("businessTaxPeriods.individualTaxDescription")}
                 error={
-                  errors.businessTaxPeriods?.individualTaxDescription?.message
+                  watch("businessTaxPeriods.isIndividualIncomeTax")
+                    ? errors.businessTaxPeriods?.individualTaxDescription?.message
+                    : undefined
                 }
               />
             </div>
@@ -221,6 +248,12 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.isEmployerQuarterlyTax"
                 {...register("businessTaxPeriods.isEmployerQuarterlyTax")}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                onCheckedChange={(checked) => {
+                  setValue("businessTaxPeriods.isEmployerQuarterlyTax", checked === true);
+                  if (!checked) {
+                    setValue("businessTaxPeriods.quarterlyPeriods", "");
+                  }
+                }}
               />
               <Label htmlFor="businessTaxPeriods.isEmployerQuarterlyTax">
                 Form 941 Employer's Quarterly Federal Tax Return - (e.g.,
@@ -231,8 +264,13 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.quarterlyPeriods"
                 placeholder="03-31-2021"
                 className="w-64 inline-block"
+                disabled={!watch("businessTaxPeriods.isEmployerQuarterlyTax")}
                 {...register("businessTaxPeriods.quarterlyPeriods")}
-                error={errors.businessTaxPeriods?.quarterlyPeriods?.message}
+                error={
+                  watch("businessTaxPeriods.isEmployerQuarterlyTax")
+                    ? errors.businessTaxPeriods?.quarterlyPeriods?.message
+                    : undefined
+                }
               />
             </div>
 
@@ -241,6 +279,12 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.isEmployerAnnualFUTATax"
                 {...register("businessTaxPeriods.isEmployerAnnualFUTATax")}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                onCheckedChange={(checked) => {
+                  setValue("businessTaxPeriods.isEmployerAnnualFUTATax", checked === true);
+                  if (!checked) {
+                    setValue("businessTaxPeriods.annualYears", "");
+                  }
+                }}
               />
               <Label htmlFor="businessTaxPeriods.isEmployerAnnualFUTATax">
                 Form 940 Employer's Annual Federal Unemployment (FUTA) Tax
@@ -251,8 +295,13 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.annualYears"
                 placeholder="12-31-2021"
                 className="w-32 inline-block"
+                disabled={!watch("businessTaxPeriods.isEmployerAnnualFUTATax")}
                 {...register("businessTaxPeriods.annualYears")}
-                error={errors.businessTaxPeriods?.annualYears?.message}
+                error={
+                  watch("businessTaxPeriods.isEmployerAnnualFUTATax")
+                    ? errors.businessTaxPeriods?.annualYears?.message
+                    : undefined
+                }
               />
             </div>
 
@@ -261,6 +310,12 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.isOtherFederalTax"
                 {...register("businessTaxPeriods.isOtherFederalTax")}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573]"
+                onCheckedChange={(checked) => {
+                  setValue("businessTaxPeriods.isOtherFederalTax", checked === true);
+                  if (!checked) {
+                    setValue("businessTaxPeriods.otherTaxDescription", "");
+                  }
+                }}
               />
               <Label htmlFor="businessTaxPeriods.isOtherFederalTax">
                 Other Federal Tax(es) [specify type(s) and period(s)]
@@ -270,8 +325,13 @@ export function BusinessInfoSection({
                 id="businessTaxPeriods.otherTaxDescription"
                 placeholder="Specify type(s) and period(s)"
                 className="w-64 inline-block"
+                disabled={!watch("businessTaxPeriods.isOtherFederalTax")}
                 {...register("businessTaxPeriods.otherTaxDescription")}
-                error={errors.businessTaxPeriods?.otherTaxDescription?.message}
+                error={
+                  watch("businessTaxPeriods.isOtherFederalTax")
+                    ? errors.businessTaxPeriods?.otherTaxDescription?.message
+                    : undefined
+                }
               />
             </div>
 

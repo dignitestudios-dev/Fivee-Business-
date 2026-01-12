@@ -11,28 +11,33 @@ const addressSchema = z.object({
   county: z.string().min(1, "County is required"),
 });
 
-const taxpayerSchema = z
-  .object({
-    firstName: z.string().min(1, "First name is required"),
-    middleInitial: z.string().optional(),
-    lastName: z.string().min(1, "Last name is required"),
-    socialSecurityNumber: z
-      .string()
-      .regex(ssnItinRegex, "Invalid SSN format")
-      .optional(),
-    individualTaxpayerIdentificationNumber: z
-      .string()
-      .regex(ssnItinRegex, "Invalid ITIN format")
-      .optional(),
-  })
-  .refine(
-    (data) =>
-      data.socialSecurityNumber || data.individualTaxpayerIdentificationNumber,
-    {
-      message: "Either SSN or ITIN is required",
-      path: ["socialSecurityNumber"],
-    }
-  );
+const mailingAddressSchema = z.object({
+  street: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+  county: z.string().optional(),
+});
+
+const taxpayerSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  middleInitial: z.string().optional(),
+  lastName: z.string().min(1, "Last name is required"),
+  socialSecurityNumber: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || ssnItinRegex.test(val),
+      "Invalid SSN format"
+    ),
+  individualTaxpayerIdentificationNumber: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || ssnItinRegex.test(val),
+      "Invalid ITIN format"
+    ),
+});
 
 const taxPeriodsSchema = z
   .object({
@@ -90,14 +95,17 @@ export const individualInfoSchema = z
     isJointOffer: z.boolean(),
     addressInformation: z.object({
       physicalAddress: addressSchema,
-      mailingAddress: addressSchema.optional(),
+      mailingAddress: mailingAddressSchema.optional(),
     }),
     isNewAddressSinceLastReturn: z.boolean(),
     updateRecordsToThisAddress: z.boolean(),
     employerIdentificationNumber: z
       .string()
-      .regex(einRegex, "Invalid EIN format")
-      .optional(),
+      .optional()
+      .refine(
+        (val) => !val || einRegex.test(val),
+        "Invalid EIN format"
+      ),
     taxPeriods: taxPeriodsSchema,
     lowIncomeCertification: lowIncomeSchema,
   })

@@ -65,8 +65,12 @@ export const businessInfoSchema = z
     businessName: z.string().min(1, "Business name is required"),
     employerIdentificationNumber: z
       .string()
-      .min(1, "EIN is required")
-      .regex(einRegex, "EIN must be in the format XX-XXXXXXX"),
+      .optional()
+      .nullable()
+      .refine(
+        (val) => !val || einRegex.test(val),
+        "EIN must be in the format XX-XXXXXXX"
+      ),
     businessPhysicalAddress: z.string().min(1, "Physical address is required"),
     countyOfBusinessLocation: z.string().min(1, "County is required"),
     descriptionOfBusiness: z.string().min(1, "Description is required"),

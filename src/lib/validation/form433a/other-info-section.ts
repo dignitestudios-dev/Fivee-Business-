@@ -403,13 +403,6 @@ export const otherInfoSchema = z
           message: "Place recorded is required when a trust beneficiary",
         });
       }
-      if (!data.trustBeneficiary.ein) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["trustBeneficiary", "ein"],
-          message: "EIN is required when a trust beneficiary",
-        });
-      }
       if (!data.trustBeneficiary.nameOfTrust) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -440,13 +433,6 @@ export const otherInfoSchema = z
           code: z.ZodIssueCode.custom,
           path: ["trustFiduciary", "nameOfTrust"],
           message: "Name of trust is required when a trustee or fiduciary",
-        });
-      }
-      if (!data.trustFiduciary.ein) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["trustFiduciary", "ein"],
-          message: "EIN is required when a trustee or fiduciary",
         });
       }
     }

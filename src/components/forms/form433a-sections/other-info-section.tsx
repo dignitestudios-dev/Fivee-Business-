@@ -980,12 +980,14 @@ export function OtherInfoSection({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormInput
                     label="Place where recorded"
+                    required
                     id="trustBeneficiary.placeRecorded"
                     {...register("trustBeneficiary.placeRecorded")}
                     error={errors.trustBeneficiary?.placeRecorded?.message}
                   />
                   <FormInput
                     label="Name of the trust, estate, or policy"
+                    required
                     id="trustBeneficiary.nameOfTrust"
                     {...register("trustBeneficiary.nameOfTrust")}
                     error={errors.trustBeneficiary?.nameOfTrust?.message}
@@ -1011,6 +1013,7 @@ export function OtherInfoSection({
                   />
                   <FormInput
                     label="When will the amount be received"
+                    required
                     id="trustBeneficiary.whenAmountReceived"
                     type="date"
                     {...register("trustBeneficiary.whenAmountReceived")}

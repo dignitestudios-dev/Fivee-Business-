@@ -251,7 +251,6 @@ export function SelfEmployedSection({
                   />
                   <FormInput
                     label="Employer Identification Number"
-                    required
                     id="employerIdentificationNumber"
                     placeholder="XX-XXXXXXX"
                     {...register("employerIdentificationNumber", {

@@ -96,7 +96,6 @@ export const selfEmployedSchema = z
     const requiredStrings = [
       "businessName",
       "businessTelephone",
-      "employerIdentificationNumber",
       "businessDescription",
       "taxDepositFrequency",
     ];
