@@ -61,6 +61,7 @@ export const useVideos = () => {
       setLoading(false);
     } catch (err: any) {
       setError(err?.message || "Failed to load videos");
+    } finally {
       setLoading(false);
     }
   }, []);
