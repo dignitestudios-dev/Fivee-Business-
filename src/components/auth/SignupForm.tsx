@@ -212,7 +212,7 @@ const SignupForm = () => {
                   >
                     <div className="h-full w-full bg-white rounded-full" />
                   </div>
-                  Self Employed
+                  Individual
                 </div>
               </label>
 

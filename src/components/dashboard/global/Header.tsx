@@ -28,13 +28,13 @@ const Header = () => {
   const unreadCount = useAppSelector(
     (state: any) =>
       state.chat?.messages?.filter(
-        (msg: any) => msg.sender === "support" && !msg.read
-      ).length || 0
+        (msg: any) => msg.sender === "support" && !msg.read,
+      ).length || 0,
   );
 
   const fullName = useMemo(
     () => `${user?.firstName} ${user?.lastName}`,
-    [user]
+    [user],
   );
 
   const handleLogout = () => {
@@ -108,7 +108,9 @@ const Header = () => {
                   pathname === navLink.path && "border-b-2 border-white"
                 }`}
               >
-                <Link href={navLink.path} target={navLink.target || "_self"}>{navLink.title}</Link>
+                <Link href={navLink.path} target={navLink.target || "_self"}>
+                  {navLink.title}
+                </Link>
               </div>
             ))}
           </nav>
@@ -139,7 +141,11 @@ const Header = () => {
                   <div>
                     <p className="select-none">{fullName}</p>
                     <p className="text-xs select-none">
-                      {toTitleCase(user?.employmentType || "")}
+                      {toTitleCase(
+                        user?.employmentType === "self-employed"
+                          ? "Individual"
+                          : user?.employmentType || "",
+                      )}
                     </p>
                   </div>
 
@@ -156,7 +162,11 @@ const Header = () => {
                     {fullName}
                   </p>
                   <p className="text-sm text-desc">
-                    {toTitleCase(user?.employmentType || "")}
+                    {toTitleCase(
+                      user?.employmentType === "self-employed"
+                        ? "Individual"
+                        : user?.employmentType || "",
+                    )}
                   </p>
                 </div>
               }
