@@ -270,7 +270,7 @@ const Header = () => {
         open={showLogout}
         icon={<LogoutIcon />}
         title="Logout"
-        message="Volutpat pretium blandit amet ac tempor nulla hendrerit ultricies. Aenean in quis faucibus purus at."
+        message=""
         type="confirm"
         confirmText="Logout"
         cancelText="Cancel"
