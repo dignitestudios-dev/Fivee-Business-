@@ -55,7 +55,7 @@ const Form433BOICPayment = () => {
     try {
       const resp = await api.createPaymentIntent({
         paymentMethodId: selectedCard,
-        amount: 20,
+        amount: 157.99,
         formId: caseId,
         formModel: "Form433A-OIC",
       });
@@ -163,7 +163,7 @@ const Form433BOICPayment = () => {
                   disabled={!selectedCard || processing}
                   onClick={handlePay}
                 >
-                  {processing ? "Processing..." : "Pay $20"}
+                  {processing ? "Processing..." : "Pay $157.99"}
                 </button>
               </div>
             </div>
