@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/services";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
+import { pricing } from "@/lib/constants";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
@@ -55,7 +56,7 @@ const Form433BOICPayment = () => {
     try {
       const resp = await api.createPaymentIntent({
         paymentMethodId: selectedCard,
-        amount: 157.99,
+        amount: pricing,
         formId: caseId,
         formModel: "Form433A-OIC",
       });
@@ -163,7 +164,7 @@ const Form433BOICPayment = () => {
                   disabled={!selectedCard || processing}
                   onClick={handlePay}
                 >
-                  {processing ? "Processing..." : "Pay $157.99"}
+                  {processing ? "Processing..." : `Pay $${pricing}`}
                 </button>
               </div>
             </div>
