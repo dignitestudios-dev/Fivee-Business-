@@ -16,7 +16,7 @@ export const SECURITY_CONFIG = {
   otpExpiry: 10 * 60 * 1000, // 10 minutes
 };
 
-export const pricing = 157.99
+export const pricing = 149.00
 
 export const constants = {
   APP_CONFIG,
