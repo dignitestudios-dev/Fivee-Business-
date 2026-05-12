@@ -34,6 +34,7 @@ import usePersonalAssets from "@/hooks/433a-form-hooks/usePersonalAssets";
 import useBusinessAssets from "@/hooks/433a-form-hooks/useBusinessAssets";
 import useBusinessIncome from "@/hooks/433a-form-hooks/useBusinessIncome";
 import useHouseholdIncome from "@/hooks/433a-form-hooks/useHouseHoldIncome";
+import useCalculation from "@/hooks/433a-form-hooks/useCalculation";
 
 interface SignatureSectionProps {
   onNext: () => void;
@@ -158,6 +159,7 @@ export function SignatureSection({
   const { handleGetBusinessAssetsInfo } = useBusinessAssets();
   const { handleGetBusinessIncomeInfo } = useBusinessIncome();
   const { handleGetHouseholdIncomeInfo } = useHouseholdIncome();
+  const { handleGetCalculationInfo } = useCalculation();
 
   const calculationSummary = useAppSelector(
     (state) => state.form433a.calculationSummary
@@ -335,24 +337,31 @@ export function SignatureSection({
         !assetsInfo ||
         !businessAssetsInfo ||
         !businessIncomeInfo ||
-        !householdIncomeInfo;
+        !householdIncomeInfo ||
+        !calculationInfo;
 
       if (missingData) {
         setLoadingAllSections(true);
         try {
-          // Fetch all required sections in parallel
-          if (!assetsInfo) {
-            handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
-          }
-          if (!businessAssetsInfo) {
-            handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
-          }
-          if (!businessIncomeInfo) {
-            handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5]);
-          }
-          if (!householdIncomeInfo) {
-            handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
-          }
+          // Fetch all required sections in parallel and AWAIT them so the
+          // data is in Redux before the loader disappears and the user can submit.
+          await Promise.all([
+            !assetsInfo
+              ? handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2])
+              : Promise.resolve(),
+            !businessAssetsInfo
+              ? handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4])
+              : Promise.resolve(),
+            !businessIncomeInfo
+              ? handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5])
+              : Promise.resolve(),
+            !householdIncomeInfo
+              ? handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6])
+              : Promise.resolve(),
+            !calculationInfo
+              ? handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7])
+              : Promise.resolve(),
+          ]);
         } finally {
           setLoadingAllSections(false);
         }
@@ -366,6 +375,7 @@ export function SignatureSection({
     businessAssetsInfo,
     businessIncomeInfo,
     householdIncomeInfo,
+    calculationInfo,
   ]);
 
   useEffect(() => {

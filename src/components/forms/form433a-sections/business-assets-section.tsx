@@ -233,7 +233,9 @@ export function BusinessAssetsSection({
   const total9 = assetSum;
   const deduction = watch("assetItems.irsAllowedDeduction") || 0;
   const value11 = Math.max(0, total9 - deduction);
+  console.log("value11: ", value11, "\n total9: ", total9, "\n deduction: ", deduction, "total8: ", total8);
   const boxB = total8 + value11;
+  console.log("boxB: ",boxB)
 
   const bankAccountTypes = [
     { title: "Cash", label: "cash" },
