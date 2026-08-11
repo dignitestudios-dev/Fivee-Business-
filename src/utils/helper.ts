@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { APP_URL, RESET_PASSWORD_PATH } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -41,6 +42,11 @@ export const storage = {
     }
   },
 };
+
+// Absolute reset-password URL sent to the forgot-password API. Uses the current
+// origin so links generated in dev/staging come back to the same environment.
+export const getResetPasswordLink = (): string =>
+  `${isBrowser ? window.location.origin : APP_URL}${RESET_PASSWORD_PATH}`;
 
 export const toTitleCase = (str: string): string => {
   if (!str) return "";

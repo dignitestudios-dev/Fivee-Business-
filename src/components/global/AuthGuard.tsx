@@ -6,6 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
 
+// Auth routes that stay reachable with an active session — a logged-in user
+// following the reset link from their email must not be bounced to /dashboard.
+const SESSION_ALLOWED_AUTH_ROUTES = ["/auth/reset-password"];
+
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch();
   const pathname = usePathname();
@@ -31,13 +35,16 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   // ✅ Run when pathname/user state changes: handle redirects
   useEffect(() => {
     if (loading) return;
-    console.log("AuthGuard:", { pathname, isLoggedIn, user, loading });
+
+    const isAuthRoute =
+      pathname.startsWith("/auth") &&
+      !SESSION_ALLOWED_AUTH_ROUTES.some((route) => pathname.startsWith(route));
 
     if (pathname === "/" && (!isLoggedIn || !user)) {
       router.replace("/auth/login");
     } else if (pathname === "/" && isLoggedIn) {
       router.replace("/dashboard");
-    } else if (pathname.includes("auth") && (isLoggedIn || user)) {
+    } else if (isAuthRoute && (isLoggedIn || user)) {
       router.replace("/dashboard");
     } else if (pathname.includes("dashboard") && (!isLoggedIn || !user)) {
       router.replace("/auth/login");

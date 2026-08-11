@@ -18,6 +18,11 @@ export const SECURITY_CONFIG = {
 
 export const pricing = 149.00
 
+// Where the password reset email should point. Used as the fallback when the
+// app origin is not available (SSR); see getResetPasswordLink() in utils/helper.
+export const APP_URL = "https://app.fiveebusiness.com";
+export const RESET_PASSWORD_PATH = "/auth/reset-password";
+
 export const constants = {
   APP_CONFIG,
   SECURITY_CONFIG,

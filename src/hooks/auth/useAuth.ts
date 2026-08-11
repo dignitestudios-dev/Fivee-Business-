@@ -11,6 +11,7 @@ import {
   UserCredential,
 } from "firebase/auth";
 import { useGlobalPopup } from "../useGlobalPopup";
+import { getResetPasswordLink } from "@/utils/helper";
 
 const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -57,10 +58,13 @@ const useAuth = () => {
     }
   };
 
-  const handleForgotPassword = async (payload: ForgotPasswordPayload) => {
+  const handleForgotPassword = async (payload: ForgotPasswordFormValues) => {
     setLoading(true);
     try {
-      await api.forgotPassword(payload);
+      await api.forgotPassword({
+        email: payload.email,
+        link: getResetPasswordLink(),
+      });
       showSuccess("If your email exists, you will receive a reset link.");
     } catch (error: any) {
       console.error("Error during forgot password:", error);

@@ -43,6 +43,8 @@ interface User {
 
 interface ForgotPasswordPayload {
   email: string;
+  // Absolute URL of the reset page; the backend appends ?token=... and emails it
+  link: string;
 }
 
 interface ResetPasswordPayload {
