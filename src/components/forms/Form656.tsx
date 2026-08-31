@@ -169,13 +169,10 @@ export default function Form656() {
           const key = sectionOrder[i];
           let status = sections && sections[key];
 
-          // Special handling for offerTermsInfo - use sourceOfFundsAndRequirementsInfo status
+          // Special handling for offerTermsInfo: always completed if previous step is done
           if (key === "offerTermsInfo") {
-            status = sections
-              ? sections["sourceOfFundsAndRequirementsInfo"] === "skipped"
-                ? "completed"
-                : sections["sourceOfFundsAndRequirementsInfo"]
-              : "incompleted";
+            const prevStatus = sections ? sections["sourceOfFundsAndRequirementsInfo"] : "incompleted";
+            status = (prevStatus === "completed" || prevStatus === "skipped") ? "completed" : "incompleted";
           }
 
           if (status === "completed") {
@@ -188,9 +185,10 @@ export default function Form656() {
         const firstIncompleteIndex = sectionOrder.findIndex((k) => {
           let status = sections && sections[k];
 
-          // Special handling for offerTermsInfo - use sourceOfFundsAndRequirementsInfo status
+          // Special handling for offerTermsInfo: always completed if previous step is done
           if (k === "offerTermsInfo") {
-            status = sections && sections["sourceOfFundsAndRequirementsInfo"];
+            const prevStatus = sections ? sections["sourceOfFundsAndRequirementsInfo"] : "incompleted";
+            status = (prevStatus === "completed" || prevStatus === "skipped") ? "completed" : "incompleted";
           }
 
           return status !== "completed" && status !== "skipped";
@@ -342,13 +340,15 @@ export default function Form656() {
           <div className="lg:w-3/4 h-full">
             <div className="bg-white h-full rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="w-full flex justify-end">
-                <Button
-                  disabled={skipping}
-                  onClick={skipSection}
-                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/80 transition-all text-white font-medium mb-5"
-                >
-                  {skipping ? "Skipping..." : "Skip"}
-                </Button>
+                {currentStep !== 7 && (
+                  <Button
+                    disabled={skipping}
+                    onClick={skipSection}
+                    className="bg-[var(--primary)] hover:bg-[var(--primary)]/80 transition-all text-white font-medium mb-5"
+                  >
+                    {skipping ? "Skipping..." : "Skip"}
+                  </Button>
+                )}
               </div>
               {hydrated ? renderCurrentSection() : <FormLoader />}
             </div>
