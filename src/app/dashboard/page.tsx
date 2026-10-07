@@ -31,6 +31,7 @@ import useClone433a from "@/hooks/433a-form-hooks/useClone433a";
 import useClone433b from "@/hooks/433b-form-hooks/useClone433b";
 import Link from "next/link";
 import Form656List from "@/components/forms/Form656List";
+import FormW7List from "@/components/forms/FormW7List";
 import { useFcmSubscription } from "@/hooks/notification/useFcmSubscription";
 
 const Dashboard = () => {
@@ -314,6 +315,29 @@ const Dashboard = () => {
             <div>
               <div className="w-full">
                 <Form656List />
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-[#E7E8E9] rounded-xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-5 mb-3 sm:mb-5">
+              <p className="text-base sm:text-lg font-bold">
+                Form W-7 Review{" "}
+                <span className="text-gray-400 text-xs font-medium">
+                  (The form can be downloaded once payment is complete.)
+                </span>
+              </p>
+              <Button
+                variant={"outline"}
+                onClick={() => router.push("/dashboard/form-w7/start")}
+              >
+                + Create new
+              </Button>
+            </div>
+
+            <div>
+              <div className="w-full">
+                <FormW7List />
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import userSlice from "./features/userSlice";
 import form433aSlice from "./features/form433aSlice";
 import form433bSlice from "./features/form433bSlice";
 import form656Slice from "./features/form656Slice";
+import formW7Slice from "./features/formW7Slice";
 import signaturesSlice from "./features/signaturesSlice";
 import cardsSlice from "./features/cardsSlice";
 import formsSlice from "./features/formsSlice";
@@ -16,6 +17,7 @@ export const makeStore = () => {
       form433a: form433aSlice,
       form433b: form433bSlice,
       form656: form656Slice,
+      formW7: formW7Slice,
       signatures: signaturesSlice,
       cards: cardsSlice,
       forms: formsSlice,

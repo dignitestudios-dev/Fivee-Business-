@@ -1,8 +1,8 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
-// export const BASE_URL = "http://localhost:3001/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "http://localhost:3001/";
 
 // Create an Axios instance
 const API = axios.create({
@@ -493,6 +493,98 @@ const saveApplicationChecklist = (info: any, caseId: string) =>
     API.post(`/form656b/${caseId}/application-checklist`, info)
   );
 
+// Form W-7 (ITIN application)
+
+// Creates a case, or renames it when caseId is supplied
+const startFormW7 = (payload: { title: string }, caseId?: string | null) => {
+  const url = caseId ? `/formw7/start?caseId=${caseId}` : `/formw7/start`;
+  return apiHandler<{ data: { caseId: string }; message: string }>(() =>
+    API.post(url, payload)
+  );
+};
+
+const getUserFormW7Cases = (
+  page: number = 1,
+  limit: number = defaultLimit,
+  filter: W7CasesFilter = "all"
+) =>
+  apiHandler<{
+    data: {
+      cases: FormW7Case[];
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }>(() =>
+    API.get(`/formw7/my-cases?page=${page}&limit=${limit}&filter=${filter}`)
+  );
+
+const getW7SectionInfo = (caseId: string, section: FormW7Section) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.get(`/formw7/${caseId}/section?section=${section}`)
+  );
+
+const saveW7ApplicationInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/formw7/${caseId}/application-info`, info)
+  );
+
+const saveW7PersonalInfo = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/formw7/${caseId}/personal-info`, info)
+  );
+
+const saveW7OtherInformation = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/formw7/${caseId}/other-information`, info)
+  );
+
+const saveW7SignatureDelegate = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/formw7/${caseId}/signature-delegate`, info)
+  );
+
+const saveW7AcceptanceAgent = (info: any, caseId: string) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/formw7/${caseId}/acceptance-agent`, info)
+  );
+
+// acceptanceAgentInfo is the only skippable W-7 section
+const skipW7Section = (caseId: string, section: FormW7Section) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/formw7/${caseId}/skip/${section}`, {})
+  );
+
+const duplicateFormW7 = (caseId: string, payload: { title: string }) =>
+  apiHandler<{ data: { caseId: string }; message: string }>(() =>
+    API.post(`/formw7/duplicate/${caseId}`, payload)
+  );
+
+// Returns { url } in production and { filePath } when the API runs with NODE_ENV=dev
+const generateW7Pdf = (caseId: string) =>
+  apiHandler<{ data: { url?: string; filePath?: string } }>(() =>
+    API.get(`/formw7/${caseId}/generate-pdf`)
+  );
+
+// Supporting documents reuse the shared media endpoints. POST /media/image does
+// not return the new media id, so the list endpoint is used to resolve it.
+const uploadW7SupportingDocument = (data: FormData) =>
+  apiHandler<{ data: any; message: string }>(() =>
+    API.post(`/media/image`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  );
+
+const getW7SupportingDocuments = (
+  category: string,
+  page: number = 1,
+  limit: number = 20
+) =>
+  apiHandler<{ data: { images: W7SupportingDocument[]; total: number } }>(() =>
+    API.get(`/media/image?page=${page}&limit=${limit}&category=${category}`)
+  );
+
 // Form 656 - list user's cases
 const getUserForm656Cases = (page: number = 1, limit: number = defaultLimit) =>
   apiHandler(() => API.get(`/form656b/my-cases?page=${page}&limit=${limit}`));
@@ -593,6 +685,19 @@ const api = {
   savePaidPreparer,
   saveApplicationChecklist,
   generate656Pdf,
+  startFormW7,
+  getUserFormW7Cases,
+  getW7SectionInfo,
+  saveW7ApplicationInfo,
+  saveW7PersonalInfo,
+  saveW7OtherInformation,
+  saveW7SignatureDelegate,
+  saveW7AcceptanceAgent,
+  skipW7Section,
+  duplicateFormW7,
+  generateW7Pdf,
+  uploadW7SupportingDocument,
+  getW7SupportingDocuments,
 };
 
 export default api;

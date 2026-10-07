@@ -18,6 +18,9 @@ export const SECURITY_CONFIG = {
 
 export const pricing = 149.00
 
+// Form W-7 (ITIN application) is priced separately from the OIC forms above
+export const w7Pricing = 25.00
+
 // Where the password reset email should point. Used as the fallback when the
 // app origin is not available (SSR); see getResetPasswordLink() in utils/helper.
 export const APP_URL = "https://app.fiveebusiness.com";
@@ -74,6 +77,20 @@ export const FORM_656_SECTIONS: Form656Section[] = [
   "applicationChecklistInfo",
   "sectionStatus",
 ];
+
+// Form W-7 sections, in the order the wizard presents them. The backend requires
+// applicationInfo -> personalInfo -> otherInformation -> signatureDelegateInfo;
+// acceptanceAgentInfo is the only section that may be skipped.
+export const FORM_W7_SECTIONS: FormW7Section[] = [
+  "applicationInfo",
+  "personalInfo",
+  "otherInformation",
+  "signatureDelegateInfo",
+  "acceptanceAgentInfo",
+];
+
+// Category used when uploading W-7 supporting documents to the media endpoint
+export const W7_SUPPORTING_DOCUMENT_CATEGORY = "w7-supporting-document";
 
 export const DUMMY_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZDEzOWI1YzBmMDViZGI2NmFhNjJlOCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzYxNjM2MzI4LCJleHAiOjE3NjE3MjI3Mjh9.qNQ_057KU3JD4YGBKYhl8QRhfFZwWBbdmVyUULSYXq8";

@@ -25,6 +25,11 @@ import { sourceOfFundsSchema } from "@/lib/validation/form656/source-of-funds-se
 import { signaturesSchema656 } from "@/lib/validation/form656/signatures-section";
 import { paidPreparerSchema } from "@/lib/validation/form656/paid-preparer-section";
 import { applicationChecklistSchema } from "@/lib/validation/form656/application-checklist-section";
+import type { W7ApplicationInfoForm } from "@/lib/validation/formw7/application-info-section";
+import type { W7PersonalInfoForm } from "@/lib/validation/formw7/personal-info-section";
+import type { W7OtherInformationForm } from "@/lib/validation/formw7/other-information-section";
+import type { W7SignatureDelegateForm } from "@/lib/validation/formw7/signature-delegate-section";
+import type { W7AcceptanceAgentForm } from "@/lib/validation/formw7/acceptance-agent-section";
 
 export {}; // makes this a module
 
@@ -271,6 +276,58 @@ declare global {
     signaturesInfo: SignaturesFormSchema | null;
     paidPreparer: PaidPreparerFormSchema | null;
     applicationChecklist: ApplicationChecklistFormSchema | null;
+  }
+
+  // Form W-7 (ITIN application) types
+  type FormW7Section =
+    | "applicationInfo"
+    | "personalInfo"
+    | "otherInformation"
+    | "signatureDelegateInfo"
+    | "acceptanceAgentInfo"
+    | "sectionStatus"
+    | "paymentStatus";
+
+  // Mirrors the filter values accepted by GET /formw7/my-cases
+  type W7CasesFilter = "all" | "incompleted" | "completedAndPaymentSucceeded";
+
+  type FormW7SectionStatus = "incomplete" | "completed" | "skipped";
+
+  type FormW7CaseState = "incompleted" | "completed" | "edited";
+
+  interface FormW7Case {
+    _id: string;
+    title: string;
+    isCompleted: FormW7CaseState;
+    createdAt: string;
+    updatedAt: string;
+    downloadUrl?: string;
+  }
+
+  interface W7SupportingDocument {
+    _id: string;
+    title: string;
+    description?: string;
+    category?: string;
+    url: string;
+  }
+
+  // Aliased from the exported types rather than z.infer<>: this file does not
+  // import zod, so z.infer<> resolves to any here.
+  type W7ApplicationInfoFormSchema = W7ApplicationInfoForm;
+  type W7PersonalInfoFormSchema = W7PersonalInfoForm;
+  type W7OtherInformationFormSchema = W7OtherInformationForm;
+  type W7SignatureDelegateFormSchema = W7SignatureDelegateForm;
+  type W7AcceptanceAgentFormSchema = W7AcceptanceAgentForm;
+
+  interface FormDataW7State {
+    caseId: string | null;
+    applicationInfo: W7ApplicationInfoFormSchema | null;
+    personalInfo: W7PersonalInfoFormSchema | null;
+    otherInformation: W7OtherInformationFormSchema | null;
+    signatureDelegateInfo: W7SignatureDelegateFormSchema | null;
+    acceptanceAgentInfo: W7AcceptanceAgentFormSchema | null;
+    sectionStatus: Record<string, FormW7SectionStatus> | null;
   }
 
   // API Payload Types

@@ -23,6 +23,10 @@ interface FormsState {
   // Form 656
   form656: FormCase[];
   form656Pagination: PaginationState | null;
+
+  // Form W-7
+  formW7: FormW7Case[];
+  formW7Pagination: PaginationState | null;
 }
 
 const initialState: FormsState = {
@@ -38,6 +42,9 @@ const initialState: FormsState = {
   
   form656: [],
   form656Pagination: null,
+
+  formW7: [],
+  formW7Pagination: null,
 };
 
 const formsSlice = createSlice({
@@ -134,6 +141,21 @@ const formsSlice = createSlice({
       state.form656Pagination = action.payload;
     },
 
+    // Form W-7
+    setW7Cases(state, action: PayloadAction<FormW7Case[]>) {
+      state.formW7 = action.payload;
+    },
+    addW7Case(state, action: PayloadAction<FormW7Case>) {
+      state.formW7.unshift(action.payload);
+    },
+    clearW7Cases(state) {
+      state.formW7 = [];
+      state.formW7Pagination = null;
+    },
+    setW7Pagination(state, action: PayloadAction<PaginationState | null>) {
+      state.formW7Pagination = action.payload;
+    },
+
     clearAllForms(state) {
       state.form433a = [];
       state.form433aCompleted = [];
@@ -173,6 +195,10 @@ export const {
   remove656Case,
   clear656Cases,
   set656Pagination,
+  setW7Cases,
+  addW7Case,
+  clearW7Cases,
+  setW7Pagination,
   clearAllForms,
 } = formsSlice.actions;
 
