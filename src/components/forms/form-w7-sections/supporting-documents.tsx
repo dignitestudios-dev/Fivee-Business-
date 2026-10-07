@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, Trash2, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import useW7SupportingDocuments, {
   W7_UPLOAD_ACCEPT,
