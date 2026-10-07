@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, Trash2, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { W7_LIMITS } from "@/lib/validation/formw7/rules";
 import useW7SupportingDocuments, {
   W7_UPLOAD_ACCEPT,
   W7_UPLOAD_HINT,
@@ -62,7 +63,10 @@ export function SupportingDocuments({
     const uploaded = await uploadDocument(file, pendingDescription, caseId);
     if (uploaded) {
       onDocumentIdsChange([...documentIds, uploaded._id]);
-      if (pendingDescription.trim()) {
+      if (
+        pendingDescription.trim() &&
+        descriptions.length < W7_LIMITS.maxDocumentDescriptions
+      ) {
         onDescriptionsChange([...descriptions, pendingDescription.trim()]);
       }
       setPendingDescription("");
@@ -93,6 +97,7 @@ export function SupportingDocuments({
         <Input
           placeholder="Optional label for the next upload, e.g. Passport identity page"
           value={pendingDescription}
+          maxLength={W7_LIMITS.documentDescription}
           onChange={(event) => setPendingDescription(event.target.value)}
           disabled={disabled || uploading}
           className="bg-white"
@@ -109,7 +114,11 @@ export function SupportingDocuments({
         <Button
           type="button"
           variant="outline"
-          disabled={disabled || uploading}
+          disabled={
+            disabled ||
+            uploading ||
+            documentIds.length >= W7_LIMITS.maxSupportingDocuments
+          }
           onClick={() => fileInputRef.current?.click()}
           className="flex items-center gap-2"
         >
@@ -118,7 +127,11 @@ export function SupportingDocuments({
           ) : (
             <Upload className="h-4 w-4" />
           )}
-          {uploading ? "Uploading..." : "Upload document"}
+          {uploading
+            ? "Uploading..."
+            : documentIds.length >= W7_LIMITS.maxSupportingDocuments
+            ? `Maximum of ${W7_LIMITS.maxSupportingDocuments} documents`
+            : "Upload document"}
         </Button>
       </div>
 
@@ -184,6 +197,7 @@ export function SupportingDocuments({
             <Button
               type="button"
               variant="outline"
+              disabled={descriptions.length >= W7_LIMITS.maxDocumentDescriptions}
               onClick={() => onDescriptionsChange([...descriptions, ""])}
               className="flex items-center gap-2"
             >
@@ -199,6 +213,7 @@ export function SupportingDocuments({
           <div key={index} className="flex items-center gap-2">
             <Input
               value={description}
+              maxLength={W7_LIMITS.documentDescription}
               placeholder="For example: Birth certificate"
               onChange={(event) => updateDescription(index, event.target.value)}
               disabled={disabled}

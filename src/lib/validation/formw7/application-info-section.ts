@@ -1,4 +1,13 @@
 import * as z from "zod";
+import {
+  COUNTRY_RE,
+  MESSAGES,
+  NAME_RE,
+  TREATY_ARTICLE_RE,
+  W7_LIMITS,
+  isValidSsnOrItin,
+  requireText,
+} from "./rules";
 
 // Reason codes a-g are mutually exclusive on the IRS form; h may be added on top.
 export const W7_PRIMARY_REASONS = [
@@ -11,6 +20,9 @@ export const W7_PRIMARY_REASONS = [
   "g",
 ] as const;
 
+// Fields below that depend on the chosen reason are plain strings here and are
+// checked inside superRefine only while they are shown, so a stale value left
+// behind after changing reason never blocks submitting.
 export const applicationInfoSchema = z
   .object({
     applicationType: z.enum(["new", "renewal"], {
@@ -62,53 +74,87 @@ export const applicationInfoSchema = z
       });
     }
 
-    if (value.includeOtherReason && !value.otherReason.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["otherReason"],
-        message: "Enter the explanation or IRS exception for reason h",
-      });
+    if (value.includeOtherReason) {
+      requireText(
+        ctx,
+        ["otherReason"],
+        value.otherReason,
+        "The explanation",
+        { max: W7_LIMITS.otherReason },
+        "Enter the explanation or IRS exception for reason h"
+      );
     }
 
     if (requiresOtherReason) {
-      if (!value.treatyCountry.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["treatyCountry"],
-          message: "Enter the treaty country",
-        });
-      }
-      if (!value.treatyArticleNumber.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["treatyArticleNumber"],
-          message: "Enter the treaty article number",
-        });
-      }
+      requireText(
+        ctx,
+        ["treatyCountry"],
+        value.treatyCountry,
+        "Treaty country",
+        {
+          max: W7_LIMITS.treatyCountry,
+          pattern: COUNTRY_RE,
+          patternMessage: `Treaty country ${MESSAGES.country}`,
+        },
+        "Enter the treaty country"
+      );
+      requireText(
+        ctx,
+        ["treatyArticleNumber"],
+        value.treatyArticleNumber,
+        "Treaty article number",
+        {
+          max: W7_LIMITS.treatyArticle,
+          pattern: TREATY_ARTICLE_RE,
+          patternMessage:
+            "Treaty article number can only contain letters, numbers, spaces, and ( ) . , / -",
+        },
+        "Enter the treaty article number"
+      );
     }
 
-    if (reason === "d" && !value.relationshipToCitizenResident.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["relationshipToCitizenResident"],
-        message:
-          "Enter the relationship to the U.S. citizen/resident alien (for example, child)",
-      });
+    if (reason === "d") {
+      requireText(
+        ctx,
+        ["relationshipToCitizenResident"],
+        value.relationshipToCitizenResident,
+        "The relationship",
+        {
+          max: W7_LIMITS.relationship,
+          pattern: NAME_RE,
+          patternMessage: `The relationship ${MESSAGES.name}`,
+        },
+        "Enter the relationship to the U.S. citizen/resident alien (for example, child)"
+      );
     }
 
     if (reason === "d" || reason === "e") {
-      if (!value.citizenResidentName.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["citizenResidentName"],
-          message: "Enter the name of the U.S. citizen/resident alien",
-        });
-      }
-      if (!value.citizenResidentTin.trim()) {
+      requireText(
+        ctx,
+        ["citizenResidentName"],
+        value.citizenResidentName,
+        "The name",
+        {
+          max: W7_LIMITS.citizenResidentName,
+          pattern: NAME_RE,
+          patternMessage: `The name ${MESSAGES.name}`,
+        },
+        "Enter the name of the U.S. citizen/resident alien"
+      );
+
+      const tin = value.citizenResidentTin.trim();
+      if (!tin) {
         ctx.addIssue({
           code: "custom",
           path: ["citizenResidentTin"],
           message: "Enter the SSN or ITIN of the U.S. citizen/resident alien",
+        });
+      } else if (!isValidSsnOrItin(tin)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["citizenResidentTin"],
+          message:
+            "Enter a valid 9-digit SSN or ITIN, for example 123-45-6789",
         });
       }
     }

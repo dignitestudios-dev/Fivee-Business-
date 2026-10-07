@@ -12,11 +12,18 @@ import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import { useW7AcceptanceAgent } from "@/hooks/w7-form-hooks/useW7Section";
+import { maskedRegister } from "./masked-register";
 import {
   acceptanceAgentInitialValues,
   acceptanceAgentSchema,
 } from "@/lib/validation/formw7/acceptance-agent-section";
-import { formatEIN, formatPhone } from "@/utils/helper";
+import { formatEIN } from "@/utils/helper";
+import {
+  FORMATTED_INPUT_MAXLENGTH,
+  W7_LIMITS,
+  formatPhoneInput,
+  formatPtinInput,
+} from "@/lib/validation/formw7/rules";
 
 interface SectionProps {
   onNext: () => void;
@@ -53,6 +60,7 @@ export function AcceptanceAgentSection({
     register,
     reset,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = methods;
 
@@ -105,6 +113,7 @@ export function AcceptanceAgentSection({
                 id="nameAndTitle"
                 placeholder="Alex Agent, Acceptance Agent"
                 disabled={disabled}
+                maxLength={W7_LIMITS.agentNameTitle}
                 {...register("nameAndTitle")}
                 error={errors.nameAndTitle?.message}
               />
@@ -112,6 +121,7 @@ export function AcceptanceAgentSection({
                 label="Name of Company"
                 id="companyName"
                 disabled={disabled}
+                maxLength={W7_LIMITS.agentCompany}
                 {...register("companyName")}
                 error={errors.companyName?.message}
               />
@@ -122,28 +132,25 @@ export function AcceptanceAgentSection({
                 label="EIN"
                 id="ein"
                 placeholder="12-3456789"
-                maxLength={10}
+                maxLength={FORMATTED_INPUT_MAXLENGTH}
                 disabled={disabled}
-                {...register("ein", {
-                  onChange: (event) => {
-                    event.target.value = formatEIN(event.target.value);
-                  },
-                })}
+                {...maskedRegister(register, setValue, "ein", formatEIN)}
                 error={errors.ein?.message}
               />
               <FormInput
                 label="PTIN"
                 id="ptin"
                 placeholder="P12345678"
-                maxLength={9}
+                maxLength={FORMATTED_INPUT_MAXLENGTH}
                 disabled={disabled}
-                {...register("ptin")}
+                {...maskedRegister(register, setValue, "ptin", formatPtinInput)}
                 error={errors.ptin?.message}
               />
               <FormInput
                 label="Office Code"
                 id="officeCode"
                 disabled={disabled}
+                maxLength={W7_LIMITS.agentOfficeCode}
                 {...register("officeCode")}
                 error={errors.officeCode?.message}
               />
@@ -154,22 +161,18 @@ export function AcceptanceAgentSection({
                 label="Phone"
                 id="phone"
                 disabled={disabled}
-                {...register("phone", {
-                  onChange: (event) => {
-                    event.target.value = formatPhone(event.target.value);
-                  },
-                })}
+                maxLength={W7_LIMITS.phone}
+                inputMode="tel"
+                {...maskedRegister(register, setValue, "phone", formatPhoneInput)}
                 error={errors.phone?.message}
               />
               <FormInput
                 label="Fax"
                 id="fax"
                 disabled={disabled}
-                {...register("fax", {
-                  onChange: (event) => {
-                    event.target.value = formatPhone(event.target.value);
-                  },
-                })}
+                maxLength={W7_LIMITS.phone}
+                inputMode="tel"
+                {...maskedRegister(register, setValue, "fax", formatPhoneInput)}
                 error={errors.fax?.message}
               />
             </div>

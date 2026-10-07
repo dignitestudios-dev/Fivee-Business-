@@ -9,7 +9,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, FormInput } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,6 +29,14 @@ import {
   W7_ID_DOCUMENT_TYPES,
 } from "@/lib/validation/formw7/other-information-section";
 import { SupportingDocuments } from "./supporting-documents";
+import { maskedRegister } from "./masked-register";
+import {
+  FORMATTED_INPUT_MAXLENGTH,
+  MAX_YEARS_UNTIL_EXPIRY,
+  W7_LIMITS,
+  formatTinInput,
+  isoDate,
+} from "@/lib/validation/formw7/rules";
 import { todayForDateInput } from "@/utils/formw7";
 
 interface SectionProps {
@@ -128,6 +136,25 @@ export function OtherInformationSection({
     if (requiresVisa && !hasUsVisa) setValue("hasUsVisa", true);
   }, [requiresVisa, hasUsVisa, setValue]);
 
+  // A renewal only exists if an ITIN was issued before, so the answer is Yes
+  useEffect(() => {
+    if (isRenewal && previouslyReceived !== "yes") {
+      setValue("previouslyReceivedTaxpayerNumber", "yes");
+    }
+  }, [isRenewal, previouslyReceived, setValue]);
+
+  // The college/company block is only shown for reason f. Clear it otherwise so
+  // a value typed before the reason changed is never saved or printed.
+  useEffect(() => {
+    if (!requiresInstitution) {
+      setValue("institutionOrCompany", {
+        name: "",
+        cityAndState: "",
+        lengthOfStay: "",
+      });
+    }
+  }, [requiresInstitution, setValue]);
+
   const onSubmit = async (data: W7OtherInformationFormSchema) => {
     if (disabled) return onNext();
     try {
@@ -176,6 +203,7 @@ export function OtherInformationSection({
                     <Input
                       placeholder="Enter a country of citizenship"
                       disabled={disabled}
+                      maxLength={W7_LIMITS.country}
                       {...register(`citizenshipCountries.${index}`)}
                       className="border-gray-300 focus:ring-[#22b573] focus:border-[#22b573]"
                     />
@@ -227,7 +255,8 @@ export function OtherInformationSection({
               label="Foreign Tax I.D. Number (if any)"
               id="foreignTaxId"
               disabled={disabled}
-              {...register("foreignTaxId")}
+              maxLength={W7_LIMITS.foreignTaxId}
+                {...register("foreignTaxId")}
               error={errors.foreignTaxId?.message}
             />
           </CardContent>
@@ -270,7 +299,8 @@ export function OtherInformationSection({
                   required
                   placeholder="For example: F-1"
                   disabled={disabled}
-                  {...register("usVisa.type")}
+                  maxLength={W7_LIMITS.visaType}
+                {...register("usVisa.type")}
                   error={errors.usVisa?.type?.message}
                 />
                 <FormInput
@@ -278,7 +308,8 @@ export function OtherInformationSection({
                   id="usVisa.number"
                   required
                   disabled={disabled}
-                  {...register("usVisa.number")}
+                  maxLength={W7_LIMITS.visaNumber}
+                {...register("usVisa.number")}
                   error={errors.usVisa?.number?.message}
                 />
                 <FormInput
@@ -288,6 +319,7 @@ export function OtherInformationSection({
                   required
                   min={todayForDateInput()}
                   disabled={disabled}
+                  max={isoDate(MAX_YEARS_UNTIL_EXPIRY)}
                   {...register("usVisa.expirationDate")}
                   error={errors.usVisa?.expirationDate?.message}
                 />
@@ -354,6 +386,7 @@ export function OtherInformationSection({
                 id="identificationDocument.otherType"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.idOtherType}
                 {...register("identificationDocument.otherType")}
                 error={errors.identificationDocument?.otherType?.message}
               />
@@ -365,6 +398,7 @@ export function OtherInformationSection({
                 id="identificationDocument.issuedBy"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.idIssuedBy}
                 {...register("identificationDocument.issuedBy")}
                 error={errors.identificationDocument?.issuedBy?.message}
               />
@@ -373,6 +407,7 @@ export function OtherInformationSection({
                 id="identificationDocument.number"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.idNumber}
                 {...register("identificationDocument.number")}
                 error={errors.identificationDocument?.number?.message}
               />
@@ -382,6 +417,7 @@ export function OtherInformationSection({
                 type="date"
                 min={todayForDateInput()}
                 disabled={disabled}
+                max={isoDate(MAX_YEARS_UNTIL_EXPIRY)}
                 {...register("identificationDocument.expirationDate")}
                 error={errors.identificationDocument?.expirationDate?.message}
               />
@@ -400,6 +436,7 @@ export function OtherInformationSection({
                     required
                     max={todayForDateInput()}
                     disabled={disabled}
+                    min="1900-01-01"
                     {...register("identificationDocument.dateOfEntry")}
                     error={errors.identificationDocument?.dateOfEntry?.message}
                   />
@@ -466,6 +503,7 @@ export function OtherInformationSection({
                     value="no-or-unknown"
                     id="w7-prior-no"
                     className="text-[#22b573] mt-0.5"
+                    disabled={isRenewal}
                   />
                   <Label htmlFor="w7-prior-no" className="items-start">
                     No, or I don&apos;t know
@@ -504,14 +542,18 @@ export function OtherInformationSection({
                     required={isRenewal}
                     placeholder="912345678"
                     disabled={disabled}
-                    {...register("itin")}
+                    maxLength={FORMATTED_INPUT_MAXLENGTH}
+                    inputMode="numeric"
+                    {...maskedRegister(register, setValue, "itin", formatTinInput)}
                     error={errors.itin?.message}
                   />
                   <FormInput
                     label="IRSN"
                     id="irsn"
                     disabled={disabled}
-                    {...register("irsn")}
+                    maxLength={FORMATTED_INPUT_MAXLENGTH}
+                    inputMode="numeric"
+                    {...maskedRegister(register, setValue, "irsn", formatTinInput)}
                     error={errors.irsn?.message}
                   />
                 </div>
@@ -523,14 +565,16 @@ export function OtherInformationSection({
                       id="issuedName.firstName"
                       required
                       disabled={disabled}
-                      {...register("issuedName.firstName")}
+                      maxLength={W7_LIMITS.issuedFirstName}
+                {...register("issuedName.firstName")}
                       error={errors.issuedName?.firstName?.message}
                     />
                     <FormInput
                       label="Middle Name"
                       id="issuedName.middleName"
                       disabled={disabled}
-                      {...register("issuedName.middleName")}
+                      maxLength={W7_LIMITS.issuedMiddleName}
+                {...register("issuedName.middleName")}
                       error={errors.issuedName?.middleName?.message}
                     />
                     <FormInput
@@ -538,7 +582,8 @@ export function OtherInformationSection({
                       id="issuedName.lastName"
                       required
                       disabled={disabled}
-                      {...register("issuedName.lastName")}
+                      maxLength={W7_LIMITS.issuedLastName}
+                {...register("issuedName.lastName")}
                       error={errors.issuedName?.lastName?.message}
                     />
                   </div>
@@ -564,6 +609,7 @@ export function OtherInformationSection({
                 id="institutionOrCompany.name"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.institutionName}
                 {...register("institutionOrCompany.name")}
                 error={errors.institutionOrCompany?.name?.message}
               />
@@ -573,6 +619,7 @@ export function OtherInformationSection({
                 required
                 placeholder="For example: Boston, MA"
                 disabled={disabled}
+                maxLength={W7_LIMITS.institutionCityState}
                 {...register("institutionOrCompany.cityAndState")}
                 error={errors.institutionOrCompany?.cityAndState?.message}
               />
@@ -582,6 +629,7 @@ export function OtherInformationSection({
                 required
                 placeholder="For example: 4 years"
                 disabled={disabled}
+                maxLength={W7_LIMITS.lengthOfStay}
                 {...register("institutionOrCompany.lengthOfStay")}
                 error={errors.institutionOrCompany?.lengthOfStay?.message}
               />

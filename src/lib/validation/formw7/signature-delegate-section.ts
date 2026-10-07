@@ -1,4 +1,11 @@
 import * as z from "zod";
+import {
+  MESSAGES,
+  NAME_RE,
+  W7_LIMITS,
+  isValidPhone,
+  requireText,
+} from "./rules";
 
 export const W7_DELEGATE_RELATIONSHIPS = [
   "parent",
@@ -15,9 +22,12 @@ export const W7_DELEGATE_RELATIONSHIP_LABELS: Record<
   "court-appointed-guardian": "Court-appointed guardian",
 };
 
+export const PHONE_MESSAGE =
+  "Enter a valid phone number: 10 digits, or start with + and a country code";
+
 export const signatureDelegateSchema = z
   .object({
-    phoneNumber: z.string().trim().min(1, "Phone number is required"),
+    phoneNumber: z.string(),
     signedByDelegate: z.boolean(),
     delegateName: z.string(),
     delegateRelationship: z
@@ -29,15 +39,42 @@ export const signatureDelegateSchema = z
     }),
   })
   .superRefine((value, ctx) => {
-    if (!value.signedByDelegate) return;
-
-    if (!value.delegateName.trim()) {
+    const phone = value.phoneNumber.trim();
+    if (!phone) {
       ctx.addIssue({
         code: "custom",
-        path: ["delegateName"],
-        message: "Enter the name of the delegate who will sign",
+        path: ["phoneNumber"],
+        message: "Phone number is required",
+      });
+    } else if (phone.length > W7_LIMITS.phone) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["phoneNumber"],
+        message: `Phone number cannot exceed ${W7_LIMITS.phone} characters`,
+      });
+    } else if (!isValidPhone(phone)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["phoneNumber"],
+        message: PHONE_MESSAGE,
       });
     }
+
+    if (!value.signedByDelegate) return;
+
+    requireText(
+      ctx,
+      ["delegateName"],
+      value.delegateName,
+      "The delegate's name",
+      {
+        max: W7_LIMITS.delegateName,
+        min: 2,
+        pattern: NAME_RE,
+        patternMessage: `The delegate's name ${MESSAGES.name}`,
+      },
+      "Enter the name of the delegate who will sign"
+    );
     if (!value.delegateRelationship) {
       ctx.addIssue({
         code: "custom",

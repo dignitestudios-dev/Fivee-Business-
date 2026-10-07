@@ -1,18 +1,52 @@
 import * as z from "zod";
+import {
+  COUNTRY_RE,
+  EARLIEST_BIRTH_DATE,
+  MESSAGES,
+  NAME_RE,
+  W7_LIMITS,
+  isoDate,
+  requireText,
+  textField,
+  validateDate,
+  validateText,
+} from "./rules";
 
 const nameSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required"),
-  middleName: z.string(),
-  lastName: z.string().trim().min(1, "Last name is required"),
+  firstName: textField("First name", {
+    required: true,
+    max: W7_LIMITS.firstName,
+    pattern: NAME_RE,
+    patternMessage: `First name ${MESSAGES.name}`,
+  }),
+  middleName: textField("Middle name", {
+    max: W7_LIMITS.middleName,
+    pattern: NAME_RE,
+    patternMessage: `Middle name ${MESSAGES.name}`,
+  }),
+  lastName: textField("Last name", {
+    required: true,
+    max: W7_LIMITS.lastName,
+    pattern: NAME_RE,
+    patternMessage: `Last name ${MESSAGES.name}`,
+  }),
 });
 
 const addressSchema = z.object({
-  street: z.string(),
-  cityStateProvinceCountryPostal: z
-    .string()
-    .trim()
-    .min(1, "City, state/province, country, and postal code are required"),
+  street: textField("Street address", { max: W7_LIMITS.addressLine }),
+  cityStateProvinceCountryPostal: textField(
+    "City, state/province, country, and postal code",
+    {
+      required: true,
+      max: W7_LIMITS.addressLine,
+      requiredMessage:
+        "City, state/province, country, and postal code are required",
+    }
+  ),
 });
+
+// Line 3 on the form says not to use a P.O. box for the foreign address
+const PO_BOX_RE = /\bP\.?\s*O\.?\s*Box\b/i;
 
 export const personalInfoSchema = z
   .object({
@@ -25,55 +59,80 @@ export const personalInfoSchema = z
     }),
     mailingAddress: addressSchema,
     foreignAddress: addressSchema,
-    dateOfBirth: z.string().min(1, "Date of birth is required"),
-    countryOfBirth: z.string().trim().min(1, "Country of birth is required"),
-    cityStateProvinceOfBirth: z.string(),
+    dateOfBirth: z.string(),
+    countryOfBirth: textField("Country of birth", {
+      required: true,
+      max: W7_LIMITS.countryOfBirth,
+      pattern: COUNTRY_RE,
+      patternMessage: `Country of birth ${MESSAGES.country}`,
+    }),
+    cityStateProvinceOfBirth: textField("City and state or province", {
+      max: W7_LIMITS.cityStateProvinceOfBirth,
+    }),
     gender: z.enum(["male", "female"], { error: "Select a gender" }),
   })
   .superRefine((value, ctx) => {
-    if (value.dateOfBirth) {
-      const dob = new Date(value.dateOfBirth);
-      if (Number.isNaN(dob.getTime())) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["dateOfBirth"],
-          message: "Enter a valid date",
-        });
-      } else {
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        if (dob > today) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["dateOfBirth"],
-            message: "Date of birth cannot be in the future",
-          });
-        } else if (dob < new Date("1900-01-01")) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["dateOfBirth"],
-            message: "Enter a date of birth on or after 1900",
-          });
-        }
-      }
+    if (!value.dateOfBirth) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["dateOfBirth"],
+        message: "Date of birth is required",
+      });
+    } else {
+      validateDate(ctx, ["dateOfBirth"], value.dateOfBirth, "date of birth", {
+        min: EARLIEST_BIRTH_DATE,
+        max: isoDate(),
+        minMessage: "Enter a date of birth on or after 1900",
+        maxMessage: "Date of birth cannot be in the future",
+      });
+    }
+
+    if (PO_BOX_RE.test(value.foreignAddress.street)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["foreignAddress", "street"],
+        message: "A P.O. box cannot be used for the foreign address",
+      });
     }
 
     // Line 1b is only filled in when the name at birth differs from the legal name
     if (value.hasDifferentBirthName) {
-      if (!value.birthName.firstName.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["birthName", "firstName"],
-          message: "First name at birth is required",
-        });
-      }
-      if (!value.birthName.lastName.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["birthName", "lastName"],
-          message: "Last name at birth is required",
-        });
-      }
+      const birth = value.birthName;
+      requireText(
+        ctx,
+        ["birthName", "firstName"],
+        birth.firstName,
+        "First name at birth",
+        {
+          max: W7_LIMITS.firstName,
+          pattern: NAME_RE,
+          patternMessage: `First name at birth ${MESSAGES.name}`,
+        },
+        "First name at birth is required"
+      );
+      validateText(
+        ctx,
+        ["birthName", "middleName"],
+        birth.middleName,
+        "Middle name at birth",
+        {
+          max: W7_LIMITS.middleName,
+          pattern: NAME_RE,
+          patternMessage: `Middle name at birth ${MESSAGES.name}`,
+        }
+      );
+      requireText(
+        ctx,
+        ["birthName", "lastName"],
+        birth.lastName,
+        "Last name at birth",
+        {
+          max: W7_LIMITS.lastName,
+          pattern: NAME_RE,
+          patternMessage: `Last name at birth ${MESSAGES.name}`,
+        },
+        "Last name at birth is required"
+      );
     }
   });
 

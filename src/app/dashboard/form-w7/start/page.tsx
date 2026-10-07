@@ -12,8 +12,10 @@ import FButton from "@/components/ui/FButton";
 import FInput from "@/components/ui/FInput";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import useUserW7Cases from "@/hooks/w7-form-hooks/useUserW7Cases";
+import { TEXT_RE, W7_LIMITS } from "@/lib/validation/formw7/rules";
 
-const TITLE_MAX_LENGTH = 120;
+// The API allows 120 characters; titles must also be unique per user (the API checks that)
+const TITLE_MAX_LENGTH = W7_LIMITS.title;
 
 const StartFormW7 = () => {
   const router = useRouter();
@@ -37,6 +39,16 @@ const StartFormW7 = () => {
     }
     if (trimmed.length > TITLE_MAX_LENGTH) {
       setTitleError(`The title cannot exceed ${TITLE_MAX_LENGTH} characters`);
+      return false;
+    }
+    if (trimmed.length < 3) {
+      setTitleError("The title must be at least 3 characters");
+      return false;
+    }
+    if (!TEXT_RE.test(trimmed)) {
+      setTitleError(
+        "The title contains characters that are not allowed. Use letters, numbers, and common punctuation only"
+      );
       return false;
     }
     setTitleError("");

@@ -15,13 +15,14 @@ import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import { useW7SignatureDelegate } from "@/hooks/w7-form-hooks/useW7Section";
+import { maskedRegister } from "./masked-register";
 import {
   signatureDelegateInitialValues,
   signatureDelegateSchema,
   W7_DELEGATE_RELATIONSHIPS,
   W7_DELEGATE_RELATIONSHIP_LABELS,
 } from "@/lib/validation/formw7/signature-delegate-section";
-import { formatPhone } from "@/utils/helper";
+import { W7_LIMITS, formatPhoneInput } from "@/lib/validation/formw7/rules";
 
 const PERJURY_DECLARATION =
   "Under penalties of perjury, I (applicant/delegate/acceptance agent) declare that I have examined this application, including accompanying documentation and statements, and to the best of my knowledge and belief, it is true, correct, and complete. I authorize the IRS to share information with my acceptance agent in order to perfect this Form W-7, Application for IRS Individual Taxpayer Identification Number.";
@@ -127,11 +128,9 @@ export function SignatureDelegateSection({
                 required
                 placeholder="(212) 555-0199"
                 disabled={disabled}
-                {...register("phoneNumber", {
-                  onChange: (event) => {
-                    event.target.value = formatPhone(event.target.value);
-                  },
-                })}
+                maxLength={W7_LIMITS.phone}
+                inputMode="tel"
+                {...maskedRegister(register, setValue, "phoneNumber", formatPhoneInput)}
                 error={errors.phoneNumber?.message}
               />
             </div>
@@ -168,7 +167,8 @@ export function SignatureDelegateSection({
                     id="delegateName"
                     required
                     disabled={disabled}
-                    {...register("delegateName")}
+                    maxLength={W7_LIMITS.delegateName}
+                {...register("delegateName")}
                     error={errors.delegateName?.message}
                   />
                 </div>

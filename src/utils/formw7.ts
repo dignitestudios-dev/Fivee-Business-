@@ -189,11 +189,7 @@ export const toOtherInformationPayload = (
     additionalDocumentDescriptions: form.additionalDocumentDescriptions
       .map((description) => description.trim())
       .filter(Boolean),
-    ...compact({
-      foreignTaxId: form.foreignTaxId,
-      itin: form.itin,
-      irsn: form.irsn,
-    }),
+    ...compact({ foreignTaxId: form.foreignTaxId }),
   };
 
   if (form.hasUsVisa) {
@@ -204,7 +200,11 @@ export const toOtherInformationPayload = (
     };
   }
 
+  // The ITIN/IRSN block is only shown (and only valid) when the answer is Yes.
+  // Sending a leftover value from before the answer was changed to No would
+  // print an ITIN next to a ticked "No" box.
   if (form.previouslyReceivedTaxpayerNumber === "yes") {
+    Object.assign(payload, compact({ itin: form.itin, irsn: form.irsn }));
     payload.issuedName = nameToPayload(form.issuedName);
   }
 

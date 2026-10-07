@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
+import { EARLIEST_BIRTH_DATE, W7_LIMITS } from "@/lib/validation/formw7/rules";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import { useW7PersonalInfo } from "@/hooks/w7-form-hooks/useW7Section";
 import {
@@ -109,6 +110,7 @@ export function PersonalInfoSection({
                 id="legalName.firstName"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.firstName}
                 {...register("legalName.firstName")}
                 error={errors.legalName?.firstName?.message}
               />
@@ -116,6 +118,7 @@ export function PersonalInfoSection({
                 label="Middle Name"
                 id="legalName.middleName"
                 disabled={disabled}
+                maxLength={W7_LIMITS.middleName}
                 {...register("legalName.middleName")}
                 error={errors.legalName?.middleName?.message}
               />
@@ -124,6 +127,7 @@ export function PersonalInfoSection({
                 id="legalName.lastName"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.lastName}
                 {...register("legalName.lastName")}
                 error={errors.legalName?.lastName?.message}
               />
@@ -153,14 +157,16 @@ export function PersonalInfoSection({
                   id="birthName.firstName"
                   required
                   disabled={disabled}
-                  {...register("birthName.firstName")}
+                  maxLength={W7_LIMITS.firstName}
+                {...register("birthName.firstName")}
                   error={errors.birthName?.firstName?.message}
                 />
                 <FormInput
                   label="Middle Name at Birth"
                   id="birthName.middleName"
                   disabled={disabled}
-                  {...register("birthName.middleName")}
+                  maxLength={W7_LIMITS.middleName}
+                {...register("birthName.middleName")}
                   error={errors.birthName?.middleName?.message}
                 />
                 <FormInput
@@ -168,7 +174,8 @@ export function PersonalInfoSection({
                   id="birthName.lastName"
                   required
                   disabled={disabled}
-                  {...register("birthName.lastName")}
+                  maxLength={W7_LIMITS.lastName}
+                {...register("birthName.lastName")}
                   error={errors.birthName?.lastName?.message}
                 />
               </div>
@@ -185,7 +192,8 @@ export function PersonalInfoSection({
               label="Street address, apartment number, or rural route number"
               id="mailingAddress.street"
               disabled={disabled}
-              {...register("mailingAddress.street")}
+              maxLength={W7_LIMITS.addressLine}
+                {...register("mailingAddress.street")}
               error={errors.mailingAddress?.street?.message}
             />
             <FormInput
@@ -193,7 +201,8 @@ export function PersonalInfoSection({
               id="mailingAddress.cityStateProvinceCountryPostal"
               required
               disabled={disabled}
-              {...register("mailingAddress.cityStateProvinceCountryPostal")}
+              maxLength={W7_LIMITS.addressLine}
+                {...register("mailingAddress.cityStateProvinceCountryPostal")}
               error={
                 errors.mailingAddress?.cityStateProvinceCountryPostal?.message
               }
@@ -210,7 +219,8 @@ export function PersonalInfoSection({
               label="Street address, apartment number, or rural route number. Don't use a P.O. box number."
               id="foreignAddress.street"
               disabled={disabled}
-              {...register("foreignAddress.street")}
+              maxLength={W7_LIMITS.addressLine}
+                {...register("foreignAddress.street")}
               error={errors.foreignAddress?.street?.message}
             />
             <FormInput
@@ -218,7 +228,8 @@ export function PersonalInfoSection({
               id="foreignAddress.cityStateProvinceCountryPostal"
               required
               disabled={disabled}
-              {...register("foreignAddress.cityStateProvinceCountryPostal")}
+              maxLength={W7_LIMITS.addressLine}
+                {...register("foreignAddress.cityStateProvinceCountryPostal")}
               error={
                 errors.foreignAddress?.cityStateProvinceCountryPostal?.message
               }
@@ -241,6 +252,7 @@ export function PersonalInfoSection({
                 required
                 max={todayForDateInput()}
                 disabled={disabled}
+                min={EARLIEST_BIRTH_DATE}
                 {...register("dateOfBirth")}
                 error={errors.dateOfBirth?.message}
               />
@@ -249,6 +261,7 @@ export function PersonalInfoSection({
                 id="countryOfBirth"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.countryOfBirth}
                 {...register("countryOfBirth")}
                 error={errors.countryOfBirth?.message}
               />
@@ -256,6 +269,7 @@ export function PersonalInfoSection({
                 label="City and State or Province (optional)"
                 id="cityStateProvinceOfBirth"
                 disabled={disabled}
+                maxLength={W7_LIMITS.cityStateProvinceOfBirth}
                 {...register("cityStateProvinceOfBirth")}
                 error={errors.cityStateProvinceOfBirth?.message}
               />

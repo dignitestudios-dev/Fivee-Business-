@@ -13,6 +13,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
+import { maskedRegister } from "./masked-register";
+import {
+  FORMATTED_INPUT_MAXLENGTH,
+  W7_LIMITS,
+  formatTinInput,
+} from "@/lib/validation/formw7/rules";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import { useW7ApplicationInfo } from "@/hooks/w7-form-hooks/useW7Section";
 import {
@@ -304,6 +310,7 @@ export function ApplicationInfoSection({
                 rows={3}
                 placeholder="For example: Exception 1d - Pension income"
                 disabled={disabled}
+                maxLength={W7_LIMITS.otherReason}
                 {...register("otherReason")}
                 error={errors.otherReason?.message}
               />
@@ -322,6 +329,7 @@ export function ApplicationInfoSection({
                 id="treatyCountry"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.treatyCountry}
                 {...register("treatyCountry")}
                 error={errors.treatyCountry?.message}
               />
@@ -330,6 +338,7 @@ export function ApplicationInfoSection({
                 id="treatyArticleNumber"
                 required
                 disabled={disabled}
+                maxLength={W7_LIMITS.treatyArticle}
                 {...register("treatyArticleNumber")}
                 error={errors.treatyArticleNumber?.message}
               />
@@ -350,7 +359,8 @@ export function ApplicationInfoSection({
                   required
                   placeholder="For example: Child"
                   disabled={disabled}
-                  {...register("relationshipToCitizenResident")}
+                  maxLength={W7_LIMITS.relationship}
+                {...register("relationshipToCitizenResident")}
                   error={errors.relationshipToCitizenResident?.message}
                 />
               )}
@@ -361,7 +371,8 @@ export function ApplicationInfoSection({
                   id="citizenResidentName"
                   required
                   disabled={disabled}
-                  {...register("citizenResidentName")}
+                  maxLength={W7_LIMITS.citizenResidentName}
+                {...register("citizenResidentName")}
                   error={errors.citizenResidentName?.message}
                 />
                 <FormInput
@@ -370,7 +381,9 @@ export function ApplicationInfoSection({
                   required
                   placeholder="123-45-6789"
                   disabled={disabled}
-                  {...register("citizenResidentTin")}
+                  maxLength={FORMATTED_INPUT_MAXLENGTH}
+                  inputMode="numeric"
+                  {...maskedRegister(register, setValue, "citizenResidentTin", formatTinInput)}
                   error={errors.citizenResidentTin?.message}
                 />
               </div>
