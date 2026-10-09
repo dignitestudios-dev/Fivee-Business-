@@ -1,8 +1,9 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
 // export const BASE_URL = "http://localhost:3001/";
+export const BASE_URL = "https://416zwbs6-3050.inc1.devtunnels.ms/";
 
 // Create an Axios instance
 const API = axios.create({

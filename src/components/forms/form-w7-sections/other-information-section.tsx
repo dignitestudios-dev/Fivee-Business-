@@ -9,7 +9,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField, FormInput } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
