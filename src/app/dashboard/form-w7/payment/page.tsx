@@ -17,7 +17,7 @@ import useW7PaymentStatus from "@/hooks/w7-form-hooks/useW7PaymentStatus";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
+  "pk_test_51RdEBhCRLH0jRzmbC88gJ8wF6Kd4JKRtfpgkfDkNd3IyaWgEJe2GCqOM45PopKDfmiwfpPeLKqiFho085gNreavX00e8mEu7Sw" as string
 );
 
 const FormW7Payment = () => {

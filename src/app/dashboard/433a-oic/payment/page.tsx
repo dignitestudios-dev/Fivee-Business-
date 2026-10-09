@@ -15,7 +15,7 @@ import FormLoader from "@/components/global/FormLoader";
 import { pricing } from "@/lib/constants";
 
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
+  "pk_test_51RdEBhCRLH0jRzmbC88gJ8wF6Kd4JKRtfpgkfDkNd3IyaWgEJe2GCqOM45PopKDfmiwfpPeLKqiFho085gNreavX00e8mEu7Sw" as string
 );
 
 const Form433BOICPayment = () => {
