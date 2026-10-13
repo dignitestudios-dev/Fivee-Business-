@@ -24,12 +24,12 @@ export const Form656Row = ({
   onDownload,
 }: Form656RowProps) => (
   <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 border-b border-[#E7E8E9]">
-    <div>
-      <p className="font-semibold text-base sm:text-lg">{c.title}</p>
+    <div className="min-w-0 w-full sm:w-auto sm:flex-1">
+      <p className="font-semibold text-base sm:text-lg break-words [overflow-wrap:anywhere]">{c.title}</p>
       <p className="text-xs text-desc">{formatDate(c.createdAt)}</p>
     </div>
 
-    <div className="flex flex-row items-center gap-3">
+    <div className="flex flex-row items-center gap-3 shrink-0">
       {c?.isCompleted === "completed" && (
         <Button
           onClick={() => onDownload(c)}

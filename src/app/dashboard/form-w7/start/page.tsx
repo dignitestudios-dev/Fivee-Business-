@@ -149,14 +149,14 @@ const StartFormW7 = () => {
                           )
                         }
                         aria-pressed={selectedCloneId === c._id}
-                        className={`text-left p-3 rounded-lg border transition-all flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${
+                        className={`text-left p-3 rounded-lg border transition-all flex items-center justify-between gap-2 min-w-0 overflow-hidden focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${
                           selectedCloneId === c._id
                             ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-md"
                             : "border-gray-100 hover:border-[var(--primary)] hover:bg-[var(--primary)]/5"
                         }`}
                       >
-                        <div>
-                          <p className="font-medium">{c.title}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium break-words [overflow-wrap:anywhere]">{c.title}</p>
                           <p
                             className={`text-xs ${
                               selectedCloneId === c._id
@@ -168,7 +168,7 @@ const StartFormW7 = () => {
                           </p>
                         </div>
                         {selectedCloneId === c._id && (
-                          <Check className="h-5 w-5 text-white" />
+                          <Check className="h-5 w-5 text-white shrink-0" />
                         )}
                       </button>
                     ))
