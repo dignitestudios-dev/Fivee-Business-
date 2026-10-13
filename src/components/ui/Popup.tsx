@@ -128,7 +128,7 @@ export default function Popup({
       zIndex={zIndex}
       {...modalProps}
     >
-      <div className="flex flex-col items-center space-y-2">
+      <div className="flex flex-col items-center space-y-2 w-full min-w-0">
         <div
           className={`flex justify-center items-center rounded-full bg-transparent`}
         >
@@ -138,7 +138,7 @@ export default function Popup({
           <h3
             className={`${
               textOptions.title === "center" ? "text-center" : "self-start"
-            } text-xl font-bold text-gray-900 mt-2`}
+            } text-xl font-bold text-gray-900 mt-2 max-w-full whitespace-pre-wrap break-words [overflow-wrap:anywhere]`}
           >
             {title}
           </h3>
@@ -147,7 +147,7 @@ export default function Popup({
           <p
             className={`${
               textOptions.title === "center" ? "text-center" : "self-start"
-            } text-gray-700 text-base mt-1 w-[440px]`}
+            } text-gray-700 text-base mt-1 w-full max-w-[440px] whitespace-pre-wrap break-words [overflow-wrap:anywhere]`}
           >
             {message}
           </p>

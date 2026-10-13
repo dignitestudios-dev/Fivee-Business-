@@ -405,7 +405,7 @@ export function ApplicationInfoSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={disabled ? onNext : handleSubmit(onSubmit)}
           loading={loading}
         />
       </form>

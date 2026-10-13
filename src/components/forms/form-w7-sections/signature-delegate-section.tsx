@@ -89,7 +89,7 @@ export function SignatureDelegateSection({
   }, [signedByDelegate, setValue]);
 
   const onSubmit = async (data: W7SignatureDelegateFormSchema) => {
-    if (disabled) return;
+    if (disabled) return onNext();
     try {
       await handleSave(data, caseId);
       // Saving this section marks the case complete on the backend
@@ -264,10 +264,8 @@ export function SignatureDelegateSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={disabled ? onNext : handleSubmit(onSubmit)}
           onSubmit={handleSubmit(onSubmit)}
-          // A paid form is read-only, so the save action is hidden
-          paymentStatus={disabled}
           loading={loading}
         />
       </form>

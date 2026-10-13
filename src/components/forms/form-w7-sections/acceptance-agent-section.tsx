@@ -194,7 +194,7 @@ export function AcceptanceAgentSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={disabled ? onNext : handleSubmit(onSubmit)}
           onSubmit={handleSubmit(onSubmit)}
           paymentStatus={disabled}
           loading={loading}

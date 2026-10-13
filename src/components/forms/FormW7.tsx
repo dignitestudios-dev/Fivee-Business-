@@ -13,7 +13,6 @@ import { AcceptanceAgentSection } from "@/components/forms/form-w7-sections/acce
 import { SignatureDelegateSection } from "@/components/forms/form-w7-sections/signature-delegate-section";
 import FormLoader from "@/components/global/FormLoader";
 import { Button } from "@/components/ui/Button";
-import FButton from "@/components/ui/FButton";
 import api from "@/lib/services";
 import { storage } from "@/utils/helper";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -21,6 +20,7 @@ import { setCaseId, setSectionStatus } from "@/lib/features/formW7Slice";
 import { FORM_W7_SECTIONS, w7Pricing } from "@/lib/constants";
 import useSkipW7Section from "@/hooks/w7-form-hooks/useSkipW7Section";
 import useDownloadW7Pdf from "@/hooks/w7-form-hooks/useDownloadW7Pdf";
+import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 
 const steps = [
   {
@@ -51,8 +51,8 @@ const steps = [
 ];
 
 const PROGRESS_KEY = "w7_progress";
-// Seconds the "submitted" screen waits before sending the user to payment
-const PAYMENT_REDIRECT_SECONDS = 5;
+// How long the "submitted" dialog shows before the payment page opens
+const PAYMENT_REDIRECT_DELAY_MS = 1500;
 // The acceptance-agent section is the only one the API lets us skip
 const SKIPPABLE_STEP = 5;
 
@@ -66,6 +66,7 @@ interface SavedProgress {
 export default function FormW7() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { showSuccess, closePopup } = useGlobalPopup();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
 
@@ -77,8 +78,6 @@ export default function FormW7() {
   const [viewOnlyMessage, setViewOnlyMessage] = useState<string>("");
   const [isPaid, setIsPaid] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  // null = not submitted; a number = seconds left before redirecting to payment
-  const [redirectIn, setRedirectIn] = useState<number | null>(null);
 
   const storedCaseId = useAppSelector((state) => state.formW7.caseId);
   const { downloadPdf, downloadingMap } = useDownloadW7Pdf();
@@ -101,9 +100,18 @@ export default function FormW7() {
     }
   };
 
-  // A paid form has nothing left to pay for, so it never redirects
+  // A paid form has nothing left to pay for, so it never redirects. Otherwise
+  // a success dialog shows briefly and the user lands on the payment page.
   const beginPaymentRedirect = () => {
-    if (!isPaid) setRedirectIn(PAYMENT_REDIRECT_SECONDS);
+    if (isPaid || !caseId) return;
+    showSuccess(
+      "Your Form W-7 was submitted successfully. Redirecting you to the payment page...",
+      "Form submitted"
+    );
+    setTimeout(() => {
+      closePopup();
+      router.push(`/dashboard/form-w7/payment?caseId=${caseId}`);
+    }, PAYMENT_REDIRECT_DELAY_MS);
   };
 
   const { skipping, skipSection } = useSkipW7Section({
@@ -129,19 +137,6 @@ export default function FormW7() {
   useEffect(() => {
     if (caseId && caseId !== storedCaseId) dispatch(setCaseId(caseId));
   }, [caseId, storedCaseId, dispatch]);
-
-  const paymentUrl = `/dashboard/form-w7/payment?caseId=${caseId}`;
-
-  useEffect(() => {
-    if (redirectIn === null) return;
-    if (redirectIn <= 0) {
-      router.push(paymentUrl);
-      return;
-    }
-    const timer = setTimeout(() => setRedirectIn(redirectIn - 1), 1000);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [redirectIn]);
 
   // Restore locally saved progress for a case opened without a server round-trip
   useEffect(() => {
@@ -339,36 +334,6 @@ export default function FormW7() {
           </p>
         </div>
 
-        {redirectIn !== null && caseId ? (
-          <div className="max-w-xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Form W-7 submitted
-            </h2>
-            <p className="text-gray-600">
-              Your application has been saved. You&apos;ll be redirected to
-              payment in {redirectIn} second{redirectIn === 1 ? "" : "s"}.
-            </p>
-            <p className="text-sm text-gray-500 mt-3">
-              You can pay later from your dashboard. The form can&apos;t be
-              generated or downloaded until the ${w7Pricing} payment is complete.
-            </p>
-
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-              <FButton
-                variant="outline"
-                onClick={() => {
-                  setRedirectIn(null);
-                  router.push("/dashboard");
-                }}
-              >
-                Pay later
-              </FButton>
-              <FButton onClick={() => router.push(paymentUrl)}>
-                Pay now
-              </FButton>
-            </div>
-          </div>
-        ) : (
           <>
             {viewOnlyMessage && (
               <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg">
@@ -455,7 +420,6 @@ export default function FormW7() {
               </div>
             </div>
           </>
-        )}
       </div>
     </div>
   );

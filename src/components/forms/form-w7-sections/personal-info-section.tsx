@@ -332,7 +332,7 @@ export function PersonalInfoSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={disabled ? onNext : handleSubmit(onSubmit)}
           loading={loading}
         />
       </form>

@@ -39,6 +39,11 @@ export function FormNavigation({
         Step {currentStep} of {totalSteps}
       </div>
 
+      {/* Keeps the step counter centered when there is no action to show */}
+      {paymentStatus && (
+        <div aria-hidden className="invisible w-[96px]" />
+      )}
+
       {!paymentStatus &&
         (currentStep === totalSteps ? (
           <Button
