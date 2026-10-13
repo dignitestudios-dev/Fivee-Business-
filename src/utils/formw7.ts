@@ -281,7 +281,7 @@ export const toSignatureDelegatePayload = (
         delegateRelationship: form.delegateRelationship,
       }
     : {}),
-  acknowledgesOriginalSignatureRequired: true as const,
+  acknowledgesOriginalSignatureRequired: form.acknowledgesOriginalSignatureRequired,
 });
 
 export const fromSignatureDelegateResponse = (
@@ -293,7 +293,8 @@ export const fromSignatureDelegateResponse = (
     signedByDelegate: Boolean(data.signedByDelegate),
     delegateName: data.delegateName ?? "",
     delegateRelationship: data.delegateRelationship ?? "",
-    acknowledgesOriginalSignatureRequired: true,
+    acknowledgesOriginalSignatureRequired:
+      data.acknowledgesOriginalSignatureRequired === true,
   };
 };
 

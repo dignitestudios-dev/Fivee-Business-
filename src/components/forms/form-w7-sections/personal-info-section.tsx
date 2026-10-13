@@ -21,6 +21,7 @@ import {
   personalInfoSchema,
 } from "@/lib/validation/formw7/personal-info-section";
 import { todayForDateInput } from "@/utils/formw7";
+import { useLiveValidation } from "./use-live-validation";
 
 interface SectionProps {
   onNext: () => void;
@@ -49,6 +50,7 @@ export function PersonalInfoSection({
     defaultValues: personalInfoInitialValues,
     mode: "onSubmit",
   });
+  useLiveValidation(methods);
 
   const {
     register,
@@ -108,6 +110,7 @@ export function PersonalInfoSection({
               <FormInput
                 label="First Name"
                 id="legalName.firstName"
+                placeholder="Enter first name"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.firstName}
@@ -117,6 +120,7 @@ export function PersonalInfoSection({
               <FormInput
                 label="Middle Name"
                 id="legalName.middleName"
+                placeholder="Enter middle name"
                 disabled={disabled}
                 maxLength={W7_LIMITS.middleName}
                 {...register("legalName.middleName")}
@@ -125,6 +129,7 @@ export function PersonalInfoSection({
               <FormInput
                 label="Last Name"
                 id="legalName.lastName"
+                placeholder="Enter last name"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.lastName}
@@ -155,6 +160,7 @@ export function PersonalInfoSection({
                 <FormInput
                   label="First Name at Birth"
                   id="birthName.firstName"
+                  placeholder="First name at birth"
                   required
                   disabled={disabled}
                   maxLength={W7_LIMITS.firstName}
@@ -164,6 +170,7 @@ export function PersonalInfoSection({
                 <FormInput
                   label="Middle Name at Birth"
                   id="birthName.middleName"
+                  placeholder="Middle name at birth"
                   disabled={disabled}
                   maxLength={W7_LIMITS.middleName}
                 {...register("birthName.middleName")}
@@ -172,6 +179,7 @@ export function PersonalInfoSection({
                 <FormInput
                   label="Last Name at Birth"
                   id="birthName.lastName"
+                  placeholder="Last name at birth"
                   required
                   disabled={disabled}
                   maxLength={W7_LIMITS.lastName}
@@ -191,6 +199,7 @@ export function PersonalInfoSection({
             <FormInput
               label="Street address, apartment number, or rural route number"
               id="mailingAddress.street"
+              placeholder="Street and unit number"
               disabled={disabled}
               maxLength={W7_LIMITS.addressLine}
                 {...register("mailingAddress.street")}
@@ -199,6 +208,7 @@ export function PersonalInfoSection({
             <FormInput
               label="City or town, state or province, and country. Include ZIP code or postal code where appropriate."
               id="mailingAddress.cityStateProvinceCountryPostal"
+              placeholder="e.g. Austin, TX 78701"
               required
               disabled={disabled}
               maxLength={W7_LIMITS.addressLine}
@@ -218,6 +228,7 @@ export function PersonalInfoSection({
             <FormInput
               label="Street address, apartment number, or rural route number. Don't use a P.O. box number."
               id="foreignAddress.street"
+              placeholder="Street and unit number"
               disabled={disabled}
               maxLength={W7_LIMITS.addressLine}
                 {...register("foreignAddress.street")}
@@ -226,6 +237,7 @@ export function PersonalInfoSection({
             <FormInput
               label="City or town, state or province, and country. Include postal code where appropriate."
               id="foreignAddress.cityStateProvinceCountryPostal"
+              placeholder="City, country, postal code"
               required
               disabled={disabled}
               maxLength={W7_LIMITS.addressLine}
@@ -259,6 +271,7 @@ export function PersonalInfoSection({
               <FormInput
                 label="Country of Birth"
                 id="countryOfBirth"
+                placeholder="Enter country of birth"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.countryOfBirth}
@@ -268,6 +281,7 @@ export function PersonalInfoSection({
               <FormInput
                 label="City and State or Province (optional)"
                 id="cityStateProvinceOfBirth"
+                placeholder="City, state or province"
                 disabled={disabled}
                 maxLength={W7_LIMITS.cityStateProvinceOfBirth}
                 {...register("cityStateProvinceOfBirth")}
@@ -292,6 +306,7 @@ export function PersonalInfoSection({
                   <RadioGroupItem
                     value="male"
                     id="w7-gender-male"
+                aria-invalid={!!errors.gender}
                     className="text-[#22b573]"
                   />
                   <Label htmlFor="w7-gender-male">Male</Label>
@@ -300,6 +315,7 @@ export function PersonalInfoSection({
                   <RadioGroupItem
                     value="female"
                     id="w7-gender-female"
+                aria-invalid={!!errors.gender}
                     className="text-[#22b573]"
                   />
                   <Label htmlFor="w7-gender-female">Female</Label>

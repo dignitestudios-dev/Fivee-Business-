@@ -29,6 +29,8 @@ import {
   W7_ID_DOCUMENT_TYPES,
 } from "@/lib/validation/formw7/other-information-section";
 import { SupportingDocuments } from "./supporting-documents";
+import { cn } from "@/utils/helper";
+import { useLiveValidation } from "./use-live-validation";
 import { maskedRegister } from "./masked-register";
 import {
   FORMATTED_INPUT_MAXLENGTH,
@@ -89,6 +91,7 @@ export function OtherInformationSection({
     defaultValues: otherInformationInitialValues,
     mode: "onSubmit",
   });
+  useLiveValidation(methods);
 
   const {
     register,
@@ -108,6 +111,13 @@ export function OtherInformationSection({
   const additionalDocumentDescriptions = watch(
     "additionalDocumentDescriptions"
   );
+
+  // The list-level errors (too many, repeated, too long to print together)
+  // apply to every row, so they turn every row red, not only the one edited.
+  const countryHasError = (index: number) =>
+    !!errors.citizenshipCountries?.[index] ||
+    !!errors.citizenshipCountries?.message ||
+    !!errors.citizenshipCountries?.root?.message;
 
   const isRenewal = validationContext.applicationType === "renewal";
   const reasonCodes = validationContext.reasonCodes ?? [];
@@ -201,11 +211,16 @@ export function OtherInformationSection({
                 {citizenshipCountries.map((_, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
-                      placeholder="Enter a country of citizenship"
+                      placeholder="Country of citizenship"
                       disabled={disabled}
                       maxLength={W7_LIMITS.country}
+                      aria-invalid={countryHasError(index)}
                       {...register(`citizenshipCountries.${index}`)}
-                      className="border-gray-300 focus:ring-[#22b573] focus:border-[#22b573]"
+                      className={cn(
+                        "border-gray-300 focus:ring-[#22b573] focus:border-[#22b573]",
+                        countryHasError(index) &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
                     />
                     {!disabled && citizenshipCountries.length > 1 && (
                       <Button
@@ -233,7 +248,8 @@ export function OtherInformationSection({
                   ) : null
                 )}
 
-                {!disabled && (
+                {!disabled &&
+                  citizenshipCountries.length < W7_LIMITS.citizenshipMaxCount && (
                   <Button
                     type="button"
                     variant="outline"
@@ -254,6 +270,7 @@ export function OtherInformationSection({
             <FormInput
               label="Foreign Tax I.D. Number (if any)"
               id="foreignTaxId"
+              placeholder="Enter foreign tax I.D. number"
               disabled={disabled}
               maxLength={W7_LIMITS.foreignTaxId}
                 {...register("foreignTaxId")}
@@ -270,6 +287,7 @@ export function OtherInformationSection({
             <div className="flex items-start space-x-2">
               <Checkbox
                 id="hasUsVisa"
+                aria-invalid={!!errors.hasUsVisa}
                 {...register("hasUsVisa")}
                 disabled={disabled || requiresVisa}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
@@ -297,7 +315,7 @@ export function OtherInformationSection({
                   label="Type of U.S. Visa"
                   id="usVisa.type"
                   required
-                  placeholder="For example: F-1"
+                  placeholder="e.g. F-1"
                   disabled={disabled}
                   maxLength={W7_LIMITS.visaType}
                 {...register("usVisa.type")}
@@ -306,6 +324,7 @@ export function OtherInformationSection({
                 <FormInput
                   label="Number"
                   id="usVisa.number"
+                  placeholder="Enter visa number"
                   required
                   disabled={disabled}
                   maxLength={W7_LIMITS.visaNumber}
@@ -358,6 +377,7 @@ export function OtherInformationSection({
                   <div key={type} className="flex items-start space-x-2">
                     <RadioGroupItem
                       value={type}
+                      aria-invalid={!!errors.identificationDocument?.type}
                       id={`w7-doc-${type}`}
                       className="text-[#22b573] mt-0.5"
                     />
@@ -384,6 +404,7 @@ export function OtherInformationSection({
               <FormInput
                 label="Describe the Document Type"
                 id="identificationDocument.otherType"
+                placeholder="e.g. National ID card"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.idOtherType}
@@ -396,6 +417,7 @@ export function OtherInformationSection({
               <FormInput
                 label="Issued By"
                 id="identificationDocument.issuedBy"
+                placeholder="Country or agency"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.idIssuedBy}
@@ -405,6 +427,7 @@ export function OtherInformationSection({
               <FormInput
                 label="Number"
                 id="identificationDocument.number"
+                placeholder="Enter document number"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.idNumber}
@@ -450,6 +473,7 @@ export function OtherInformationSection({
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="neverEnteredUnitedStates"
+                aria-invalid={!!errors.identificationDocument?.entryStatus}
                   checked={entryStatus === "never"}
                   disabled={disabled || requiresVisa}
                   onCheckedChange={(checked) =>
@@ -540,7 +564,7 @@ export function OtherInformationSection({
                     label="ITIN"
                     id="itin"
                     required={isRenewal}
-                    placeholder="912345678"
+                    placeholder="912-70-1234"
                     disabled={disabled}
                     maxLength={FORMATTED_INPUT_MAXLENGTH}
                     inputMode="numeric"
@@ -550,6 +574,7 @@ export function OtherInformationSection({
                   <FormInput
                     label="IRSN"
                     id="irsn"
+                    placeholder="Enter IRSN (9 digits)"
                     disabled={disabled}
                     maxLength={FORMATTED_INPUT_MAXLENGTH}
                     inputMode="numeric"
@@ -563,6 +588,7 @@ export function OtherInformationSection({
                     <FormInput
                       label="First Name"
                       id="issuedName.firstName"
+                      placeholder="Enter first name"
                       required
                       disabled={disabled}
                       maxLength={W7_LIMITS.issuedFirstName}
@@ -572,6 +598,7 @@ export function OtherInformationSection({
                     <FormInput
                       label="Middle Name"
                       id="issuedName.middleName"
+                      placeholder="Enter middle name"
                       disabled={disabled}
                       maxLength={W7_LIMITS.issuedMiddleName}
                 {...register("issuedName.middleName")}
@@ -580,6 +607,7 @@ export function OtherInformationSection({
                     <FormInput
                       label="Last Name"
                       id="issuedName.lastName"
+                      placeholder="Enter last name"
                       required
                       disabled={disabled}
                       maxLength={W7_LIMITS.issuedLastName}
@@ -607,6 +635,7 @@ export function OtherInformationSection({
               <FormInput
                 label="Name of College/University or Company"
                 id="institutionOrCompany.name"
+                placeholder="Name of college, university, or company"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.institutionName}
@@ -617,7 +646,7 @@ export function OtherInformationSection({
                 label="City and State"
                 id="institutionOrCompany.cityAndState"
                 required
-                placeholder="For example: Boston, MA"
+                placeholder="e.g. Boston, MA"
                 disabled={disabled}
                 maxLength={W7_LIMITS.institutionCityState}
                 {...register("institutionOrCompany.cityAndState")}
@@ -627,7 +656,7 @@ export function OtherInformationSection({
                 label="Length of Stay"
                 id="institutionOrCompany.lengthOfStay"
                 required
-                placeholder="For example: 4 years"
+                placeholder="e.g. 4 years"
                 disabled={disabled}
                 maxLength={W7_LIMITS.lengthOfStay}
                 {...register("institutionOrCompany.lengthOfStay")}
@@ -658,6 +687,13 @@ export function OtherInformationSection({
               descriptions={additionalDocumentDescriptions}
               onDescriptionsChange={(descriptions) =>
                 setValue("additionalDocumentDescriptions", descriptions)
+              }
+              descriptionErrors={additionalDocumentDescriptions.map(
+                (_, index) => errors.additionalDocumentDescriptions?.[index]?.message
+              )}
+              descriptionsError={
+                errors.additionalDocumentDescriptions?.message ||
+                errors.additionalDocumentDescriptions?.root?.message
               }
               error={
                 errors.supportingDocumentIds?.message ||

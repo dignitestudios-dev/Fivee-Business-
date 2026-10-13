@@ -33,8 +33,10 @@ export const signatureDelegateSchema = z
     delegateRelationship: z
       .enum(W7_DELEGATE_RELATIONSHIPS)
       .or(z.literal("")),
-    acknowledgesOriginalSignatureRequired: z.literal(true, {
-      error:
+    // Starts unticked. A boolean (not z.literal(true)) so the form can hold the
+    // unticked state; the refine below is what insists it is ticked to continue.
+    acknowledgesOriginalSignatureRequired: z.boolean().refine((value) => value === true, {
+      message:
         "You must acknowledge that the printed form requires an original signature",
     }),
   })
@@ -91,5 +93,5 @@ export const signatureDelegateInitialValues: W7SignatureDelegateForm = {
   signedByDelegate: false,
   delegateName: "",
   delegateRelationship: "",
-  acknowledgesOriginalSignatureRequired: true,
+  acknowledgesOriginalSignatureRequired: false,
 };

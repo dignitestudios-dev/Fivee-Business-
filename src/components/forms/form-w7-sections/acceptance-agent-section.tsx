@@ -13,6 +13,7 @@ import { useAppSelector } from "@/lib/hooks";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import { useW7AcceptanceAgent } from "@/hooks/w7-form-hooks/useW7Section";
 import { maskedRegister } from "./masked-register";
+import { useLiveValidation } from "./use-live-validation";
 import {
   acceptanceAgentInitialValues,
   acceptanceAgentSchema,
@@ -55,6 +56,7 @@ export function AcceptanceAgentSection({
     defaultValues: acceptanceAgentInitialValues,
     mode: "onSubmit",
   });
+  useLiveValidation(methods);
 
   const {
     register,
@@ -120,6 +122,7 @@ export function AcceptanceAgentSection({
               <FormInput
                 label="Name of Company"
                 id="companyName"
+                placeholder="Enter company name"
                 disabled={disabled}
                 maxLength={W7_LIMITS.agentCompany}
                 {...register("companyName")}
@@ -149,6 +152,7 @@ export function AcceptanceAgentSection({
               <FormInput
                 label="Office Code"
                 id="officeCode"
+                placeholder="Enter office code"
                 disabled={disabled}
                 maxLength={W7_LIMITS.agentOfficeCode}
                 {...register("officeCode")}
@@ -160,6 +164,7 @@ export function AcceptanceAgentSection({
               <FormInput
                 label="Phone"
                 id="phone"
+                placeholder="(212) 555-0199"
                 disabled={disabled}
                 maxLength={W7_LIMITS.phone}
                 inputMode="tel"
@@ -169,6 +174,7 @@ export function AcceptanceAgentSection({
               <FormInput
                 label="Fax"
                 id="fax"
+                placeholder="(212) 555-0199"
                 disabled={disabled}
                 maxLength={W7_LIMITS.phone}
                 inputMode="tel"

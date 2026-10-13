@@ -203,7 +203,7 @@ const StartFormW7 = () => {
                   setTitle(event.target.value);
                   if (titleError) setTitleError("");
                 }}
-                placeholder="For example: John Smith ITIN Application 2026"
+                placeholder="e.g. John Smith ITIN Application 2026"
                 error={titleError}
                 helperText="Titles must be unique across your Form W-7 cases."
               />

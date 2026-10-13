@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
 import { maskedRegister } from "./masked-register";
+import { useLiveValidation } from "./use-live-validation";
 import {
   FORMATTED_INPUT_MAXLENGTH,
   W7_LIMITS,
@@ -82,6 +83,7 @@ export function ApplicationInfoSection({
     defaultValues: applicationInfoInitialValues,
     mode: "onSubmit",
   });
+  useLiveValidation(methods);
 
   const {
     register,
@@ -174,6 +176,7 @@ export function ApplicationInfoSection({
                 <RadioGroupItem
                   value="new"
                   id="w7-type-new"
+                aria-invalid={!!errors.applicationType}
                   className="text-[#22b573] mt-1"
                 />
                 <Label htmlFor="w7-type-new" className="font-medium">
@@ -185,6 +188,7 @@ export function ApplicationInfoSection({
                 <RadioGroupItem
                   value="renewal"
                   id="w7-type-renewal"
+                aria-invalid={!!errors.applicationType}
                   className="text-[#22b573] mt-1"
                 />
                 <Label htmlFor="w7-type-renewal" className="font-medium">
@@ -225,6 +229,7 @@ export function ApplicationInfoSection({
                 <div key={reason.code} className="flex items-start space-x-3">
                   <RadioGroupItem
                     value={reason.code}
+                    aria-invalid={!!errors.primaryReason}
                     id={`w7-reason-${reason.code}`}
                     className="text-[#22b573] mt-1"
                   />
@@ -252,6 +257,7 @@ export function ApplicationInfoSection({
               <div className="flex items-start space-x-2 rounded-lg bg-gray-50 border border-gray-200 p-4">
                 <Checkbox
                   id="claimingException"
+                aria-invalid={!!errors.claimingException}
                   {...register("claimingException")}
                   disabled={disabled}
                   className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
@@ -276,6 +282,7 @@ export function ApplicationInfoSection({
             <div className="flex items-start space-x-2 border-t border-gray-200 pt-5">
               <Checkbox
                 id="includeOtherReason"
+                aria-invalid={!!errors.includeOtherReason}
                 {...register("includeOtherReason")}
                 disabled={disabled || requiresTreaty}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"
@@ -308,7 +315,7 @@ export function ApplicationInfoSection({
                 id="otherReason"
                 required
                 rows={3}
-                placeholder="For example: Exception 1d - Pension income"
+                placeholder="e.g. Exception 1d - Pension income"
                 disabled={disabled}
                 maxLength={W7_LIMITS.otherReason}
                 {...register("otherReason")}
@@ -327,6 +334,7 @@ export function ApplicationInfoSection({
               <FormInput
                 label="Treaty Country"
                 id="treatyCountry"
+                placeholder="Enter the treaty country"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.treatyCountry}
@@ -336,6 +344,7 @@ export function ApplicationInfoSection({
               <FormInput
                 label="Treaty Article Number"
                 id="treatyArticleNumber"
+                placeholder="e.g. 21"
                 required
                 disabled={disabled}
                 maxLength={W7_LIMITS.treatyArticle}
@@ -357,7 +366,7 @@ export function ApplicationInfoSection({
                   label="Relationship to U.S. Citizen/Resident Alien"
                   id="relationshipToCitizenResident"
                   required
-                  placeholder="For example: Child"
+                  placeholder="e.g. Child"
                   disabled={disabled}
                   maxLength={W7_LIMITS.relationship}
                 {...register("relationshipToCitizenResident")}
@@ -369,6 +378,7 @@ export function ApplicationInfoSection({
                 <FormInput
                   label="Name of U.S. Citizen/Resident Alien"
                   id="citizenResidentName"
+                  placeholder="Enter their full name"
                   required
                   disabled={disabled}
                   maxLength={W7_LIMITS.citizenResidentName}

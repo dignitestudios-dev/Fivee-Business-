@@ -15,6 +15,7 @@ import FormLoader from "@/components/global/FormLoader";
 import { useAppSelector } from "@/lib/hooks";
 import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import { useW7SignatureDelegate } from "@/hooks/w7-form-hooks/useW7Section";
+import { useLiveValidation } from "./use-live-validation";
 import { maskedRegister } from "./masked-register";
 import {
   signatureDelegateInitialValues,
@@ -56,6 +57,7 @@ export function SignatureDelegateSection({
     defaultValues: signatureDelegateInitialValues,
     mode: "onSubmit",
   });
+  useLiveValidation(methods);
 
   const {
     register,
@@ -165,6 +167,7 @@ export function SignatureDelegateSection({
                   <FormInput
                     label="Name of Delegate (type or print)"
                     id="delegateName"
+                    placeholder="Delegate's full name"
                     required
                     disabled={disabled}
                     maxLength={W7_LIMITS.delegateName}
@@ -196,6 +199,7 @@ export function SignatureDelegateSection({
                       >
                         <RadioGroupItem
                           value={relationship}
+                          aria-invalid={!!errors.delegateRelationship}
                           id={`w7-delegate-${relationship}`}
                           className="text-[#22b573] mt-0.5"
                         />
@@ -227,6 +231,7 @@ export function SignatureDelegateSection({
             <div className="flex items-start space-x-2">
               <Checkbox
                 id="acknowledgesOriginalSignatureRequired"
+                aria-invalid={!!errors.acknowledgesOriginalSignatureRequired}
                 {...register("acknowledgesOriginalSignatureRequired")}
                 disabled={disabled}
                 className="data-[state=checked]:bg-[#22b573] data-[state=checked]:border-[#22b573] mt-1"

@@ -6,6 +6,7 @@ import { Loader2, Plus, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/utils/helper";
 import { W7_LIMITS } from "@/lib/validation/formw7/rules";
 import useW7SupportingDocuments, {
   W7_UPLOAD_ACCEPT,
@@ -18,6 +19,10 @@ interface SupportingDocumentsProps {
   onDocumentIdsChange: (ids: string[]) => void;
   descriptions: string[];
   onDescriptionsChange: (descriptions: string[]) => void;
+  /** One error message per description row (undefined when the row is fine). */
+  descriptionErrors?: Array<string | undefined>;
+  /** An error about the list as a whole (for example, too many entries). */
+  descriptionsError?: string;
   error?: string;
   disabled?: boolean;
 }
@@ -28,6 +33,8 @@ export function SupportingDocuments({
   onDocumentIdsChange,
   descriptions,
   onDescriptionsChange,
+  descriptionErrors = [],
+  descriptionsError,
   error,
   disabled = false,
 }: SupportingDocumentsProps) {
@@ -95,7 +102,7 @@ export function SupportingDocuments({
 
       <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 space-y-4">
         <Input
-          placeholder="Optional label for the next upload, e.g. Passport identity page"
+          placeholder="Label, e.g. Passport"
           value={pendingDescription}
           maxLength={W7_LIMITS.documentDescription}
           onChange={(event) => setPendingDescription(event.target.value)}
@@ -209,32 +216,50 @@ export function SupportingDocuments({
           List any document that is mailed to the IRS but not uploaded here.
         </p>
 
-        {descriptions.map((description, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <Input
-              value={description}
-              maxLength={W7_LIMITS.documentDescription}
-              placeholder="For example: Birth certificate"
-              onChange={(event) => updateDescription(index, event.target.value)}
-              disabled={disabled}
-              className="bg-white"
-            />
-            {!disabled && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  onDescriptionsChange(
-                    descriptions.filter((_, i) => i !== index)
-                  )
-                }
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        ))}
+        {descriptions.map((description, index) => {
+          const rowError = descriptionErrors[index] || descriptionsError;
+          return (
+            <div key={index} className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={description}
+                  maxLength={W7_LIMITS.documentDescription}
+                  placeholder="e.g. Birth certificate"
+                  onChange={(event) =>
+                    updateDescription(index, event.target.value)
+                  }
+                  disabled={disabled}
+                  aria-invalid={!!rowError}
+                  className={cn(
+                    "bg-white",
+                    rowError &&
+                      "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  )}
+                />
+                {!disabled && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      onDescriptionsChange(
+                        descriptions.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {descriptionErrors[index] && (
+                <p className="text-sm text-red-600">{descriptionErrors[index]}</p>
+              )}
+            </div>
+          );
+        })}
+        {descriptionsError && (
+          <p className="text-sm text-red-600">{descriptionsError}</p>
+        )}
       </div>
     </div>
   );
