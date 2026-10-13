@@ -2,6 +2,7 @@ import * as z from "zod";
 import {
   OFFICE_CODE_RE,
   W7_LIMITS,
+  W7_BOX,
   isValidEin,
   isValidPhone,
   isValidPtin,
@@ -27,11 +28,11 @@ const optionalPhone = (label: string) =>
 
 export const acceptanceAgentSchema = z.object({
   nameAndTitle: textField("Name and title", {
-    max: W7_LIMITS.agentNameTitle,
+    max: W7_LIMITS.agentNameTitle, box: W7_BOX.agentNameTitle,
     min: 2,
   }),
   companyName: textField("Company name", {
-    max: W7_LIMITS.agentCompany,
+    max: W7_LIMITS.agentCompany, box: W7_BOX.agentCompany,
     min: 2,
   }),
   ein: z.string().superRefine((value, ctx) => {
@@ -53,7 +54,7 @@ export const acceptanceAgentSchema = z.object({
     }
   }),
   officeCode: textField("Office code", {
-    max: W7_LIMITS.agentOfficeCode,
+    max: W7_LIMITS.agentOfficeCode, box: W7_BOX.agentOfficeCode,
     pattern: OFFICE_CODE_RE,
     patternMessage:
       "Office code can only contain letters, numbers, spaces, and hyphens",

@@ -5,6 +5,7 @@ import {
   NAME_RE,
   TREATY_ARTICLE_RE,
   W7_LIMITS,
+  W7_BOX,
   isValidSsnOrItin,
   requireText,
 } from "./rules";
@@ -80,7 +81,7 @@ export const applicationInfoSchema = z
         ["otherReason"],
         value.otherReason,
         "The explanation",
-        { max: W7_LIMITS.otherReason, min: 2 },
+        { max: W7_LIMITS.otherReason, box: W7_BOX.otherReason, min: 2 },
         "Enter the explanation or IRS exception for reason h"
       );
     }
@@ -92,7 +93,7 @@ export const applicationInfoSchema = z
         value.treatyCountry,
         "Treaty country",
         {
-          max: W7_LIMITS.treatyCountry,
+          max: W7_LIMITS.treatyCountry, box: W7_BOX.treatyCountry,
           min: 2,
           pattern: COUNTRY_RE,
           patternMessage: `Treaty country ${MESSAGES.country}`,
@@ -105,7 +106,7 @@ export const applicationInfoSchema = z
         value.treatyArticleNumber,
         "Treaty article number",
         {
-          max: W7_LIMITS.treatyArticle,
+          max: W7_LIMITS.treatyArticle, box: W7_BOX.treatyArticle,
           pattern: TREATY_ARTICLE_RE,
           patternMessage:
             "Treaty article number can only contain letters, numbers, spaces, and ( ) . , / -",
@@ -121,7 +122,7 @@ export const applicationInfoSchema = z
         value.relationshipToCitizenResident,
         "The relationship",
         {
-          max: W7_LIMITS.relationship,
+          max: W7_LIMITS.relationship, box: W7_BOX.relationship,
           min: 2,
           pattern: NAME_RE,
           patternMessage: `The relationship ${MESSAGES.name}`,
@@ -137,7 +138,7 @@ export const applicationInfoSchema = z
         value.citizenResidentName,
         "The name",
         {
-          max: W7_LIMITS.citizenResidentName,
+          max: W7_LIMITS.citizenResidentName, box: W7_BOX.citizenResidentName,
           min: 2,
           pattern: NAME_RE,
           patternMessage: `The name ${MESSAGES.name}`,

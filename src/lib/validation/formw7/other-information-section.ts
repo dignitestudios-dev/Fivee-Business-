@@ -10,6 +10,8 @@ import {
   VISA_NUMBER_RE,
   VISA_TYPE_RE,
   W7_LIMITS,
+  W7_BOX,
+  fitsBox,
   isValidIrsn,
   isValidItin,
   isoDate,
@@ -111,6 +113,7 @@ export const makeOtherInformationSchema = (
         "Country of citizenship",
         {
           max: W7_LIMITS.country,
+          box: W7_BOX.citizenshipTotal,
           pattern: COUNTRY_RE,
           patternMessage: `Country of citizenship ${MESSAGES.country}`,
         },
@@ -141,18 +144,18 @@ export const makeOtherInformationSchema = (
       });
     }
     // The countries print in one narrow field, separated by ", "
-    const joinedLength = entered.join(", ").length;
-    if (joinedLength > W7_LIMITS.citizenshipTotal) {
+    if (!fitsBox(entered.join(", "), W7_BOX.citizenshipTotal)) {
       ctx.addIssue({
         code: "custom",
         path: ["citizenshipCountries"],
-        message: `The countries are too long to print together (${joinedLength} of ${W7_LIMITS.citizenshipTotal} characters). Shorten or remove one`,
+        message:
+          "The countries are too long to print together in the one box on the form. Shorten or remove one",
       });
     }
 
     // ---- 6b: foreign tax I.D. -----------------------------------------------
     validateText(ctx, ["foreignTaxId"], value.foreignTaxId, "Foreign tax I.D.", {
-      max: W7_LIMITS.foreignTaxId,
+      max: W7_LIMITS.foreignTaxId, box: W7_BOX.foreignTaxId,
       min: 3,
       pattern: FOREIGN_TAX_ID_RE,
       patternMessage:
@@ -187,6 +190,21 @@ export const makeOtherInformationSchema = (
         },
         "Enter the visa number"
       );
+      // Type, number, and date print together in a single box
+      const visaType = value.usVisa.type.trim();
+      const visaNumber = value.usVisa.number.trim();
+      if (
+        visaType &&
+        visaNumber &&
+        !fitsBox(`${visaType}, ${visaNumber}, 00/00/0000`, W7_BOX.visa)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["usVisa", "number"],
+          message:
+            "The visa type, number, and date are too long to print together in the box on the form. Shorten the number",
+        });
+      }
       if (!value.usVisa.expirationDate) {
         ctx.addIssue({
           code: "custom",
@@ -216,7 +234,7 @@ export const makeOtherInformationSchema = (
         ["identificationDocument", "otherType"],
         identification.otherType,
         "The document type",
-        { max: W7_LIMITS.idOtherType, min: 2 },
+        { max: W7_LIMITS.idOtherType, box: W7_BOX.idOtherType, min: 2 },
         "Describe the document type"
       );
     }
@@ -225,7 +243,7 @@ export const makeOtherInformationSchema = (
       ["identificationDocument", "issuedBy"],
       identification.issuedBy,
       "The issuing authority",
-      { max: W7_LIMITS.idIssuedBy, min: 2 },
+      { max: W7_LIMITS.idIssuedBy, box: W7_BOX.idIssuedBy, min: 2 },
       "Enter the issuing authority"
     );
     requireText(
@@ -234,7 +252,7 @@ export const makeOtherInformationSchema = (
       identification.number,
       "The document number",
       {
-        max: W7_LIMITS.idNumber,
+        max: W7_LIMITS.idNumber, box: W7_BOX.idNumber,
         min: 3,
         pattern: ID_NUMBER_RE,
         patternMessage:
@@ -359,7 +377,7 @@ export const makeOtherInformationSchema = (
         value.issuedName.firstName,
         "First name",
         {
-          max: W7_LIMITS.issuedFirstName,
+          max: W7_LIMITS.issuedFirstName, box: W7_BOX.issuedFirstName,
           pattern: NAME_RE,
           patternMessage: `First name ${MESSAGES.name}`,
         },
@@ -371,7 +389,7 @@ export const makeOtherInformationSchema = (
         value.issuedName.middleName,
         "Middle name",
         {
-          max: W7_LIMITS.issuedMiddleName,
+          max: W7_LIMITS.issuedMiddleName, box: W7_BOX.issuedMiddleName,
           pattern: NAME_RE,
           patternMessage: `Middle name ${MESSAGES.name}`,
         }
@@ -382,7 +400,7 @@ export const makeOtherInformationSchema = (
         value.issuedName.lastName,
         "Last name",
         {
-          max: W7_LIMITS.issuedLastName,
+          max: W7_LIMITS.issuedLastName, box: W7_BOX.issuedLastName,
           pattern: NAME_RE,
           patternMessage: `Last name ${MESSAGES.name}`,
         },
@@ -405,7 +423,7 @@ export const makeOtherInformationSchema = (
         ["institutionOrCompany", "name"],
         value.institutionOrCompany.name,
         "The name",
-        { max: W7_LIMITS.institutionName, min: 2 },
+        { max: W7_LIMITS.institutionName, box: W7_BOX.institutionName, min: 2 },
         "Enter the college, university, or company name"
       );
       requireText(
@@ -413,7 +431,7 @@ export const makeOtherInformationSchema = (
         ["institutionOrCompany", "cityAndState"],
         value.institutionOrCompany.cityAndState,
         "City and state",
-        { max: W7_LIMITS.institutionCityState, min: 2 },
+        { max: W7_LIMITS.institutionCityState, box: W7_BOX.institutionCityState, min: 2 },
         "Enter the city and state"
       );
       requireText(
@@ -421,7 +439,7 @@ export const makeOtherInformationSchema = (
         ["institutionOrCompany", "lengthOfStay"],
         value.institutionOrCompany.lengthOfStay,
         "Length of stay",
-        { max: W7_LIMITS.lengthOfStay },
+        { max: W7_LIMITS.lengthOfStay, box: W7_BOX.lengthOfStay },
         "Enter the length of stay"
       );
     }

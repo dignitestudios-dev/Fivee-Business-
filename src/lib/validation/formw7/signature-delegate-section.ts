@@ -3,6 +3,7 @@ import {
   MESSAGES,
   NAME_RE,
   W7_LIMITS,
+  W7_BOX,
   isValidPhone,
   requireText,
 } from "./rules";
@@ -70,7 +71,7 @@ export const signatureDelegateSchema = z
       value.delegateName,
       "The delegate's name",
       {
-        max: W7_LIMITS.delegateName,
+        max: W7_LIMITS.delegateName, box: W7_BOX.delegateName,
         min: 2,
         pattern: NAME_RE,
         patternMessage: `The delegate's name ${MESSAGES.name}`,

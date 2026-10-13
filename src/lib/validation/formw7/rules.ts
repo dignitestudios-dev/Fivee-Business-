@@ -4,11 +4,15 @@
  *
  * Why the limits are what they are
  * --------------------------------
- * The printed form has fixed-width fields and the generated PDF shrinks text to
- * fit, so a very long value comes out too small to read. Every limit below is
- * at or under what the field can hold at a legible size (roughly the field
- * width in points divided by 3.8). The widths are listed in the Form W-7 field
- * validation document.
+ * The printed form has fixed-width fields filled at 8 pt Helvetica, and the PDF
+ * clips whatever does not fit its box (no wrapping, no shrinking), so any text
+ * past the box edge is lost. Two guards keep every entry fully printed:
+ *  - the character limits below, which are the typical capacity of each box
+ *    (box width less padding, divided by ~4.5 pt per character), and
+ *  - W7_BOX, the real box width, checked against the actual Helvetica width of
+ *    the text, because "WWWW" is far wider than "iiii".
+ * The widths come from the official fillable PDF (Rev. December 2024) and are
+ * listed in the Form W-7 field validation document.
  *
  * Why the character sets are what they are
  * ----------------------------------------
@@ -26,36 +30,36 @@ export const W7_LIMITS = {
   title: 120,
 
   // Section 1 - application type and reason
-  otherReason: 100,
-  treatyCountry: 30,
+  otherReason: 93,
+  treatyCountry: 26,
   treatyArticle: 20,
-  relationship: 25,
+  relationship: 22,
   citizenResidentName: 40,
   tin: 11, // 9 digits + 2 hyphens, e.g. 123-45-6789
 
   // Section 2 - name, address, birth
   firstName: 35,
   middleName: 30,
-  lastName: 35,
+  lastName: 34,
   addressLine: 100,
-  countryOfBirth: 30,
-  cityStateProvinceOfBirth: 30,
+  countryOfBirth: 25,
+  cityStateProvinceOfBirth: 29,
 
   // Section 3 - other information
   country: 30, // each country of citizenship
-  citizenshipTotal: 33, // all countries joined with ", " share one printed field
+  citizenshipTotal: 27, // typical cap; the exact check is the joined width (see W7_BOX)
   citizenshipMaxCount: 3,
   foreignTaxId: 25,
   visaType: 10,
   visaNumber: 20,
-  idOtherType: 25,
+  idOtherType: 23,
   idIssuedBy: 50,
   idNumber: 25,
-  issuedFirstName: 24, // line 6f name fields are narrower than line 1a
-  issuedMiddleName: 20,
-  issuedLastName: 30,
-  institutionName: 60,
-  institutionCityState: 45,
+  issuedFirstName: 19, // line 6f name fields are narrower than line 1a
+  issuedMiddleName: 18,
+  issuedLastName: 24,
+  institutionName: 52,
+  institutionCityState: 40,
   lengthOfStay: 30,
   documentDescription: 100,
   maxDocumentDescriptions: 10,
@@ -63,11 +67,11 @@ export const W7_LIMITS = {
 
   // Section 4 - signatures
   phone: 20,
-  delegateName: 50,
+  delegateName: 46,
 
   // Section 5 - acceptance agent
-  agentNameTitle: 45,
-  agentCompany: 27,
+  agentNameTitle: 40,
+  agentCompany: 22,
   agentOfficeCode: 20,
   ein: 10, // NN-NNNNNNN
   ptin: 9, // P + 8 digits
@@ -82,6 +86,92 @@ export const W7_LIMITS = {
  * these inputs just allow slack for pasted spacing and punctuation.
  */
 export const FORMATTED_INPUT_MAXLENGTH = 20;
+
+// ----------------------------------------------------------- printed box widths
+
+/** Usable width, in points, of each printed text box (field width less padding). */
+const BOX_PADDING = 4;
+const box = (fieldWidth: number) => fieldWidth - BOX_PADDING;
+
+export const W7_BOX = {
+  // Section 1
+  relationship: box(106.8),
+  citizenResidentName: box(352.8),
+  otherReason: box(424.8),
+  treatyCountry: box(121.8),
+  treatyArticle: box(127.2),
+  // Section 2 (the same widths serve the birth-name row)
+  firstName: box(163.9),
+  middleName: box(142.2),
+  lastName: box(157.4),
+  addressLine: box(467.0),
+  countryOfBirth: box(120.6),
+  cityStateProvinceOfBirth: box(135.1),
+  // Section 3
+  citizenshipTotal: box(127.9),
+  foreignTaxId: box(129.6),
+  visa: box(207.8), // "type, number, MM/DD/YYYY" share one box
+  idOtherType: box(108.0),
+  idIssuedBy: box(262.4),
+  idNumber: box(145.0),
+  issuedFirstName: box(93.6),
+  issuedMiddleName: box(86.4),
+  issuedLastName: box(115.2),
+  institutionName: box(240.4),
+  institutionCityState: box(184.6),
+  lengthOfStay: box(139.4),
+  // Section 4
+  delegateName: box(212.2),
+  // Section 5
+  agentNameTitle: box(184.2),
+  agentCompany: box(106.2),
+  agentOfficeCode: box(123.8),
+} as const;
+
+const PDF_FONT_SIZE = 8;
+
+// Helvetica advance widths (1/1000 em) for U+0020..U+00FF
+const HELVETICA_WIDTHS = [
+  278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278,
+  556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556,
+  1015, 667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778,
+  667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 278, 278, 278, 469, 556,
+  333, 556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556,
+  556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  278, 333, 556, 556, 556, 556, 260, 556, 333, 737, 370, 556, 584, 333, 737, 333,
+  400, 584, 333, 333, 333, 556, 537, 278, 333, 333, 365, 556, 834, 834, 834, 611,
+  667, 667, 667, 667, 667, 667, 1000, 722, 667, 667, 667, 667, 278, 278, 278, 278,
+  722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722, 667, 667, 611,
+  556, 556, 556, 556, 556, 556, 889, 500, 556, 556, 556, 556, 278, 278, 278, 278,
+  556, 556, 556, 556, 556, 556, 556, 584, 611, 556, 556, 556, 556, 500, 556, 500,
+];
+const QUOTE_WIDTHS: Record<string, number> = {
+  "‘": 222,
+  "’": 222,
+  "“": 333,
+  "”": 333,
+};
+
+/** Width in points the text takes when printed at the form's font size. */
+export const textWidthPt = (text: string) => {
+  let total = 0;
+  for (const char of text) {
+    const code = char.charCodeAt(0);
+    total +=
+      QUOTE_WIDTHS[char] ??
+      (code >= 32 && code <= 255 ? HELVETICA_WIDTHS[code - 32] : 556);
+  }
+  return (total / 1000) * PDF_FONT_SIZE;
+};
+
+/** True when the text fits its printed box without being clipped. */
+export const fitsBox = (text: string, boxWidth: number) =>
+  textWidthPt(text.trim()) <= boxWidth;
+
+export const BOX_OVERFLOW_MESSAGE =
+  "is too wide to print fully in its box on the form. Shorten it";
 
 // --------------------------------------------------------- allowed characters
 
@@ -123,6 +213,8 @@ export const MESSAGES = {
 
 interface TextRule {
   max: number;
+  /** Width of the printed box; the text must fit it at 8 pt Helvetica. */
+  box?: number;
   min?: number;
   pattern?: RegExp;
   patternMessage?: string;
@@ -141,7 +233,7 @@ export const validateText = (
   label: string,
   rule: TextRule
 ): boolean => {
-  const { max, min = 1, pattern = TEXT_RE, patternMessage } = rule;
+  const { max, min = 1, pattern = TEXT_RE, patternMessage, box } = rule;
   const text = value.trim();
 
   if (!text) return false;
@@ -167,6 +259,14 @@ export const validateText = (
       code: "custom",
       path,
       message: patternMessage ?? `${label} ${MESSAGES.text}`,
+    });
+    return false;
+  }
+  if (box !== undefined && !fitsBox(text, box)) {
+    ctx.addIssue({
+      code: "custom",
+      path,
+      message: `${label} ${BOX_OVERFLOW_MESSAGE}`,
     });
     return false;
   }

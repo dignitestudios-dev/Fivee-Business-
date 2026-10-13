@@ -5,6 +5,7 @@ import {
   MESSAGES,
   NAME_RE,
   W7_LIMITS,
+  W7_BOX,
   isoDate,
   requireText,
   textField,
@@ -15,30 +16,30 @@ import {
 const nameSchema = z.object({
   firstName: textField("First name", {
     required: true,
-    max: W7_LIMITS.firstName,
+    max: W7_LIMITS.firstName, box: W7_BOX.firstName,
     pattern: NAME_RE,
     patternMessage: `First name ${MESSAGES.name}`,
   }),
   middleName: textField("Middle name", {
-    max: W7_LIMITS.middleName,
+    max: W7_LIMITS.middleName, box: W7_BOX.middleName,
     pattern: NAME_RE,
     patternMessage: `Middle name ${MESSAGES.name}`,
   }),
   lastName: textField("Last name", {
     required: true,
-    max: W7_LIMITS.lastName,
+    max: W7_LIMITS.lastName, box: W7_BOX.lastName,
     pattern: NAME_RE,
     patternMessage: `Last name ${MESSAGES.name}`,
   }),
 });
 
 const addressSchema = z.object({
-  street: textField("Street address", { max: W7_LIMITS.addressLine }),
+  street: textField("Street address", { max: W7_LIMITS.addressLine, box: W7_BOX.addressLine }),
   cityStateProvinceCountryPostal: textField(
     "City, state/province, country, and postal code",
     {
       required: true,
-      max: W7_LIMITS.addressLine,
+      max: W7_LIMITS.addressLine, box: W7_BOX.addressLine,
       requiredMessage:
         "City, state/province, country, and postal code are required",
     }
@@ -62,12 +63,12 @@ export const personalInfoSchema = z
     dateOfBirth: z.string(),
     countryOfBirth: textField("Country of birth", {
       required: true,
-      max: W7_LIMITS.countryOfBirth,
+      max: W7_LIMITS.countryOfBirth, box: W7_BOX.countryOfBirth,
       pattern: COUNTRY_RE,
       patternMessage: `Country of birth ${MESSAGES.country}`,
     }),
     cityStateProvinceOfBirth: textField("City and state or province", {
-      max: W7_LIMITS.cityStateProvinceOfBirth,
+      max: W7_LIMITS.cityStateProvinceOfBirth, box: W7_BOX.cityStateProvinceOfBirth,
     }),
     gender: z.enum(["male", "female"], { error: "Select a gender" }),
   })
@@ -104,7 +105,7 @@ export const personalInfoSchema = z
         birth.firstName,
         "First name at birth",
         {
-          max: W7_LIMITS.firstName,
+          max: W7_LIMITS.firstName, box: W7_BOX.firstName,
           pattern: NAME_RE,
           patternMessage: `First name at birth ${MESSAGES.name}`,
         },
@@ -116,7 +117,7 @@ export const personalInfoSchema = z
         birth.middleName,
         "Middle name at birth",
         {
-          max: W7_LIMITS.middleName,
+          max: W7_LIMITS.middleName, box: W7_BOX.middleName,
           pattern: NAME_RE,
           patternMessage: `Middle name at birth ${MESSAGES.name}`,
         }
@@ -127,7 +128,7 @@ export const personalInfoSchema = z
         birth.lastName,
         "Last name at birth",
         {
-          max: W7_LIMITS.lastName,
+          max: W7_LIMITS.lastName, box: W7_BOX.lastName,
           pattern: NAME_RE,
           patternMessage: `Last name at birth ${MESSAGES.name}`,
         },

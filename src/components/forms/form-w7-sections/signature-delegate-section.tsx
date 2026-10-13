@@ -80,13 +80,11 @@ export function SignatureDelegateSection({
     if (signatureDelegateInfo) reset(signatureDelegateInfo);
   }, [signatureDelegateInfo, reset]);
 
-  // Delegate details may only be sent when a delegate signs
-  useEffect(() => {
-    if (!signedByDelegate) {
-      setValue("delegateName", "");
-      setValue("delegateRelationship", "");
-    }
-  }, [signedByDelegate, setValue]);
+  // Delegate details are only sent when a delegate signs (toSignatureDelegatePayload
+  // drops them otherwise), and the schema only checks them while they are shown,
+  // so a hidden leftover value needs no clearing. Clearing them in an effect
+  // wiped the saved delegate when a saved section was loaded, because the effect
+  // ran with the pre-load "not signed by a delegate" value.
 
   const onSubmit = async (data: W7SignatureDelegateFormSchema) => {
     if (disabled) return onNext();
