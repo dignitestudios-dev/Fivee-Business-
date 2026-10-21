@@ -24,7 +24,7 @@ export const W7_DELEGATE_RELATIONSHIP_LABELS: Record<
 };
 
 export const PHONE_MESSAGE =
-  "Enter a valid phone number: 10 digits, or start with + and a country code";
+  "Enter a valid 10-digit phone number, for example (212) 555-0199, or start with + for international numbers";
 
 export const signatureDelegateSchema = z
   .object({

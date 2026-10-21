@@ -311,10 +311,10 @@ export const textField = (
 
 const digitsOnly = (value: string) => value.replace(/\D/g, "");
 
-// ITIN: starts with 9; the 4th and 5th digits are 50-65, 70-88, 90-92, or 94-99
-const ITIN_RE = /^9\d{2}(5\d|6[0-5]|7\d|8[0-8]|9[0-2]|9[4-9])\d{4}$/;
+// ITIN: nine digits starting with 9 (9XX-XX-XXXX)
+const ITIN_RE = /^9\d{8}$/;
 
-export const isValidItin = (value: string) => ITIN_RE.test(digitsOnly(value));
+export const isValidItin = (value: string) => /^[9\d\s-]+$/.test(value.trim()) && ITIN_RE.test(digitsOnly(value));
 
 /** SSN: 9 digits; area not 000, 666 or 9xx; group not 00; serial not 0000. */
 export const isValidSsn = (value: string) => {
@@ -344,7 +344,7 @@ export const isValidPtin = (value: string) => /^P\d{8}$/.test(value.trim());
 // ------------------------------------------------------------------- phone
 
 // North American numbers: area code and exchange both start with 2-9
-const isValidNanp = (d: string) => /^[2-9]\d{2}[2-9]\d{6}$/.test(d);
+const isValidNanp = (d: string) => d.length === 10 || (d.length === 11 && d.startsWith("1"));
 
 /**
  * US/Canada numbers are 10 digits, with an optional +1. A number written with
@@ -357,8 +357,8 @@ export const isValidPhone = (value: string) => {
   const d = digitsOnly(v);
 
   if (v.startsWith("+")) {
-    if (d.startsWith("1")) return d.length === 11 && isValidNanp(d.slice(1));
-    return d.length >= 8 && d.length <= 15;
+    if (d.startsWith("1")) return d.length === 11;
+    return d.length >= 7 && d.length <= 15;
   }
   return isValidNanp(d);
 };
@@ -390,7 +390,12 @@ export const formatPhoneInput = (value: string) => {
     }
     return `+${d}`;
   }
-  return formatNanp(digitsOnly(v).slice(0, 10));
+  const d = digitsOnly(v);
+  if (d.startsWith("1") && d.length > 10) {
+    const national = formatNanp(d.slice(1, 11));
+    return national ? `+1 ${national}` : "+1";
+  }
+  return formatNanp(d.slice(0, 10));
 };
 
 export const formatPtinInput = (value: string) =>

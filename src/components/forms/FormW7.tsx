@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { MdOutlineFileDownload } from "react-icons/md";
@@ -81,6 +81,26 @@ export default function FormW7() {
 
   const storedCaseId = useAppSelector((state) => state.formW7.caseId);
   const { downloadPdf, downloadingMap } = useDownloadW7Pdf();
+
+  const formTopRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef<boolean>(true);
+
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (formTopRef.current) {
+        formTopRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    scrollToTop();
+  }, [currentStep]);
 
   const saveProgress = (
     step: number,
@@ -246,6 +266,7 @@ export default function FormW7() {
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);
       saveProgress(nextStep, newCompletedSteps, skippedSteps, caseId);
+      scrollToTop();
     }
   };
 
@@ -254,6 +275,7 @@ export default function FormW7() {
       const prevStep = currentStep - 1;
       setCurrentStep(prevStep);
       saveProgress(prevStep, completedSteps, skippedSteps, caseId);
+      scrollToTop();
     }
   };
 
@@ -265,6 +287,7 @@ export default function FormW7() {
     ) {
       setCurrentStep(stepNumber);
       saveProgress(stepNumber, completedSteps, skippedSteps, caseId);
+      scrollToTop();
     }
   };
 
@@ -322,7 +345,7 @@ export default function FormW7() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div ref={formTopRef} className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Form W-7</h1>
