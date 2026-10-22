@@ -193,10 +193,38 @@ export default function FormW7() {
 
     (async () => {
       try {
-        const response = await api.getW7SectionInfo(caseId, "sectionStatus");
+        const [sectionRes, paymentRes] = await Promise.all([
+          api.getW7SectionInfo(caseId, "sectionStatus"),
+          api.getW7SectionInfo(caseId, "paymentStatus"),
+        ]);
         const sections: Record<string, FormW7SectionStatus> =
-          response?.data || {};
+          sectionRes?.data || {};
         dispatch(setSectionStatus(sections));
+
+        const paid = paymentRes?.data?.status === "completed";
+        setIsPaid(paid);
+        setDisableForm(paid);
+        setViewOnlyMessage(
+          paid
+            ? "You can view this completed form but can no longer edit it."
+            : ""
+        );
+
+        const formCompleted =
+          sections.signatureDelegateInfo === "completed" || paid;
+        setIsCompleted(formCompleted);
+
+        // When the form is submitted and paid, all steps are completed
+        if (paid) {
+          const allStepIds = steps.map((s) => s.id);
+          setCompletedSteps(new Set(allStepIds));
+          setSkippedSteps(new Set());
+          setCurrentStep(1);
+          setHydrated(true);
+
+          saveProgress(1, new Set(allStepIds), new Set(), caseId);
+          return;
+        }
 
         const newCompleted: number[] = [];
         const newSkipped: number[] = [];
@@ -214,7 +242,7 @@ export default function FormW7() {
 
         const computedCurrentStep =
           firstIncompleteIndex === -1
-            ? FORM_W7_SECTIONS.length
+            ? 1
             : firstIncompleteIndex + 1;
 
         setCompletedSteps(new Set(newCompleted));
@@ -237,27 +265,6 @@ export default function FormW7() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
 
-  // A paid form becomes view-only so the generated PDF cannot drift from it
-  useEffect(() => {
-    if (!caseId) return;
-
-    (async () => {
-      try {
-        const response = await api.getW7SectionInfo(caseId, "paymentStatus");
-        const paid = response?.data?.status === "completed";
-        setIsPaid(paid);
-        setDisableForm(paid);
-        setViewOnlyMessage(
-          paid ? "You can view this completed form but can no longer edit it." : ""
-        );
-      } catch (error) {
-        console.error("Failed to fetch W-7 payment status:", error);
-        setIsPaid(false);
-        setDisableForm(false);
-        setViewOnlyMessage("");
-      }
-    })();
-  }, [caseId]);
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -281,6 +288,7 @@ export default function FormW7() {
 
   const handleStepClick = (stepNumber: number) => {
     if (
+      isPaid ||
       stepNumber <= currentStep ||
       completedSteps.has(stepNumber) ||
       skippedSteps.has(stepNumber)
