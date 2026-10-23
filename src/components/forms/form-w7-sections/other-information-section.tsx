@@ -111,6 +111,7 @@ export function OtherInformationSection({
   const additionalDocumentDescriptions = watch(
     "additionalDocumentDescriptions"
   );
+  const supportingDocuments = watch("supportingDocuments") || [];
 
   // The list-level errors (too many, repeated, too long to print together)
   // apply to every row, so they turn every row red, not only the one edited.
@@ -688,6 +689,8 @@ export function OtherInformationSection({
               onDescriptionsChange={(descriptions) =>
                 setValue("additionalDocumentDescriptions", descriptions)
               }
+              initialDocuments={supportingDocuments}
+              onDocumentsChange={(docs) => setValue("supportingDocuments", docs)}
               descriptionErrors={additionalDocumentDescriptions.map(
                 (_, index) => errors.additionalDocumentDescriptions?.[index]?.message
               )}

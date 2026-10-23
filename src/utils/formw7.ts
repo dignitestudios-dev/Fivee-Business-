@@ -264,6 +264,9 @@ export const fromOtherInformationResponse = (
       String(id)
     ),
     additionalDocumentDescriptions: data.additionalDocumentDescriptions ?? [],
+    supportingDocuments: Array.isArray(data.supportingDocuments)
+      ? data.supportingDocuments
+      : [],
   };
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   ExternalLink,
@@ -50,6 +50,8 @@ interface SupportingDocumentsProps {
   onDocumentIdsChange: (ids: string[]) => void;
   descriptions: string[];
   onDescriptionsChange: (descriptions: string[]) => void;
+  initialDocuments?: W7SupportingDocument[];
+  onDocumentsChange?: (docs: W7SupportingDocument[]) => void;
   /** One error message per description row (undefined when the row is fine). */
   descriptionErrors?: Array<string | undefined>;
   /** An error about the list as a whole (for example, too many entries). */
@@ -64,6 +66,8 @@ export function SupportingDocuments({
   onDocumentIdsChange,
   descriptions,
   onDescriptionsChange,
+  initialDocuments = [],
+  onDocumentsChange,
   descriptionErrors = [],
   descriptionsError,
   error,
@@ -78,6 +82,29 @@ export function SupportingDocuments({
     loadingDocuments,
   } = useW7SupportingDocuments();
 
+  const [localDocs, setLocalDocs] = useState<W7SupportingDocument[]>(
+    initialDocuments || []
+  );
+
+  useEffect(() => {
+    if (initialDocuments && initialDocuments.length > 0) {
+      setLocalDocs((prev) => {
+        const map = new Map<string, W7SupportingDocument>();
+        prev.forEach((d) => map.set(d._id, d));
+        initialDocuments.forEach((d) => map.set(d._id, d));
+        return Array.from(map.values());
+      });
+    }
+  }, [initialDocuments]);
+
+  const allDocumentsMap = useMemo(() => {
+    const map = new Map<string, W7SupportingDocument>();
+    (initialDocuments || []).forEach((doc) => map.set(doc._id, doc));
+    localDocs.forEach((doc) => map.set(doc._id, doc));
+    documents.forEach((doc) => map.set(doc._id, doc));
+    return map;
+  }, [initialDocuments, localDocs, documents]);
+
   const [pendingDescription, setPendingDescription] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState("");
@@ -89,14 +116,16 @@ export function SupportingDocuments({
     description: string;
   } | null>(null);
 
-  // Resolves titles/thumbnails for documents attached in an earlier session
+  // Resolves titles/thumbnails for documents attached in an earlier session if missing
   useEffect(() => {
-    if (documentIds.length) loadDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const hasMissing = documentIds.some((id) => !allDocumentsMap.has(id));
+    if (documentIds.length && hasMissing) {
+      loadDocuments();
+    }
+  }, [documentIds, allDocumentsMap, loadDocuments]);
 
   const attached = documentIds.map((id, index) => {
-    const media = documents.find((doc) => doc._id === id);
+    const media = allDocumentsMap.get(id);
     const cleanFileName = getCleanFileName(media?.title);
 
     // Prioritize user-entered description for this document
@@ -131,6 +160,12 @@ export function SupportingDocuments({
 
     const uploaded = await uploadDocument(file, finalDescription, caseId);
     if (uploaded) {
+      const nextDocs = [
+        ...localDocs.filter((d) => d._id !== uploaded._id),
+        uploaded,
+      ];
+      setLocalDocs(nextDocs);
+      onDocumentsChange?.(nextDocs);
       onDocumentIdsChange([...documentIds, uploaded._id]);
       if (descriptions.length < W7_LIMITS.maxDocumentDescriptions) {
         onDescriptionsChange([...descriptions, finalDescription]);
@@ -140,10 +175,14 @@ export function SupportingDocuments({
   };
 
   const removeAttachedDocument = (indexToRemove: number) => {
+    const idToRemove = documentIds[indexToRemove];
     onDocumentIdsChange(documentIds.filter((_, i) => i !== indexToRemove));
     if (indexToRemove < descriptions.length) {
       onDescriptionsChange(descriptions.filter((_, i) => i !== indexToRemove));
     }
+    const nextDocs = localDocs.filter((d) => d._id !== idToRemove);
+    setLocalDocs(nextDocs);
+    onDocumentsChange?.(nextDocs);
     if (editingIndex === indexToRemove) {
       setEditingIndex(null);
     }
@@ -312,20 +351,37 @@ export function SupportingDocuments({
                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
                     {/* Thumbnail */}
                     {media?.url ? (
-                      <img
-                        src={media.url}
-                        alt={label}
-                        className="h-14 w-14 rounded-lg object-cover border border-gray-200 cursor-pointer hover:opacity-80 transition shrink-0"
-                        onClick={() =>
-                          media &&
-                          setPreviewDoc({
-                            url: media.url,
-                            title: cleanFileName,
-                            description: label,
-                          })
-                        }
-                        title="Click to view full preview"
-                      />
+                      media.url.toLowerCase().includes(".pdf") ? (
+                        <div
+                          className="h-14 w-14 rounded-lg bg-red-50 border border-red-200 flex flex-col items-center justify-center shrink-0 cursor-pointer hover:opacity-80 transition text-red-600"
+                          onClick={() =>
+                            setPreviewDoc({
+                              url: media.url,
+                              title: cleanFileName,
+                              description: label,
+                            })
+                          }
+                          title="Click to view full preview"
+                        >
+                          <FileText className="h-6 w-6" />
+                          <span className="text-[9px] font-bold uppercase mt-0.5">PDF</span>
+                        </div>
+                      ) : (
+                        <img
+                          src={media.url}
+                          alt={label}
+                          className="h-14 w-14 rounded-lg object-cover border border-gray-200 cursor-pointer hover:opacity-80 transition shrink-0"
+                          onClick={() =>
+                            media &&
+                            setPreviewDoc({
+                              url: media.url,
+                              title: cleanFileName,
+                              description: label,
+                            })
+                          }
+                          title="Click to view full preview"
+                        />
+                      )
                     ) : (
                       <div className="h-14 w-14 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
                         <FileText className="h-6 w-6 text-gray-400" />
@@ -526,12 +582,20 @@ export function SupportingDocuments({
           size="lg"
         >
           <div className="flex flex-col items-center justify-center p-2 space-y-4">
-            <div className="max-h-[70vh] overflow-auto flex items-center justify-center w-full bg-gray-50 rounded-lg p-2 border border-gray-200">
-              <img
-                src={previewDoc.url}
-                alt={previewDoc.description || previewDoc.title}
-                className="max-h-[65vh] w-auto max-w-full object-contain rounded"
-              />
+            <div className="max-h-[70vh] min-h-[300px] overflow-auto flex items-center justify-center w-full bg-gray-50 rounded-lg p-2 border border-gray-200">
+              {previewDoc.url.toLowerCase().includes(".pdf") ? (
+                <iframe
+                  src={previewDoc.url}
+                  title={previewDoc.description || previewDoc.title}
+                  className="w-full h-[65vh] rounded border-0"
+                />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.description || previewDoc.title}
+                  className="max-h-[65vh] w-auto max-w-full object-contain rounded"
+                />
+              )}
             </div>
             <div className="flex items-center justify-between w-full pt-2">
               <p className="text-xs text-gray-500 truncate max-w-xs">

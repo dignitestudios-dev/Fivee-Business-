@@ -80,6 +80,7 @@ export const otherInformationBaseSchema = z.object({
   }),
   supportingDocumentIds: z.array(z.string()),
   additionalDocumentDescriptions: z.array(z.string()),
+  supportingDocuments: z.array(z.any()).optional(),
 });
 
 export interface OtherInformationContext {
@@ -508,4 +509,5 @@ export const otherInformationInitialValues: W7OtherInformationForm = {
   institutionOrCompany: { name: "", cityAndState: "", lengthOfStay: "" },
   supportingDocumentIds: [],
   additionalDocumentDescriptions: [],
+  supportingDocuments: [],
 };
