@@ -77,7 +77,16 @@ const AllFormW7 = () => {
                   paid={paidIds.has(c._id)}
                   paymentLoading={paymentLoading}
                   downloading={downloadingMap[c._id]}
-                  onDownload={(item) => downloadPdf(item._id, item.title)}
+                  onDownload={async (item) => {
+                    const res = await downloadPdf(
+                      item._id,
+                      item.title,
+                      item.downloadUrl
+                    );
+                    if (res && !item.downloadUrl) {
+                      item.downloadUrl = res;
+                    }
+                  }}
                 />
               ))}
             </div>

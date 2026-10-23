@@ -67,7 +67,7 @@ export const FormW7Row = ({
             onClick={() => onDownload(c)}
             variant={"outline"}
             disabled={downloading}
-            title="Generate and download the completed Form W-7"
+            title={c.downloadUrl ? "Download the completed Form W-7" : "Generate and download the completed Form W-7"}
           >
             {downloading ? (
               <Loader2 className="animate-spin h-5 w-5" />
@@ -125,7 +125,7 @@ const FormW7List = ({ limit = 5 }: { limit?: number }) => {
               paid={paidIds.has(c._id)}
               paymentLoading={paymentLoading}
               downloading={downloadingMap[c._id]}
-              onDownload={(item) => downloadPdf(item._id, item.title)}
+              onDownload={(item) => downloadPdf(item._id, item.title, item.downloadUrl)}
             />
           ))
         )}

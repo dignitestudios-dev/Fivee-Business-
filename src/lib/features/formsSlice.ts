@@ -155,6 +155,15 @@ const formsSlice = createSlice({
     setW7Pagination(state, action: PayloadAction<PaginationState | null>) {
       state.formW7Pagination = action.payload;
     },
+    updateW7CaseDownloadUrl(
+      state,
+      action: PayloadAction<{ caseId: string; downloadUrl: string }>
+    ) {
+      const target = state.formW7.find((c) => c._id === action.payload.caseId);
+      if (target) {
+        target.downloadUrl = action.payload.downloadUrl;
+      }
+    },
 
     clearAllForms(state) {
       state.form433a = [];
@@ -199,6 +208,7 @@ export const {
   addW7Case,
   clearW7Cases,
   setW7Pagination,
+  updateW7CaseDownloadUrl,
   clearAllForms,
 } = formsSlice.actions;
 

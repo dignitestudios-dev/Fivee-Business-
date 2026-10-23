@@ -80,7 +80,21 @@ export default function FormW7() {
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
   const storedCaseId = useAppSelector((state) => state.formW7.caseId);
+  const existingCase = useAppSelector((state) =>
+    state.forms.formW7.find((c) => c._id === caseId)
+  );
+  const [downloadUrl, setDownloadUrl] = useState<string | undefined>(
+    existingCase?.downloadUrl
+  );
   const { downloadPdf, downloadingMap } = useDownloadW7Pdf();
+
+  const handleDownload = async () => {
+    if (!caseId) return;
+    const res = await downloadPdf(caseId, undefined, downloadUrl);
+    if (res) {
+      setDownloadUrl(res);
+    }
+  };
 
   const formTopRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef<boolean>(true);
@@ -204,6 +218,9 @@ export default function FormW7() {
         const paid = paymentRes?.data?.status === "completed";
         setIsPaid(paid);
         setDisableForm(paid);
+        if (paymentRes?.data?.downloadUrl) {
+          setDownloadUrl(paymentRes.data.downloadUrl);
+        }
         setViewOnlyMessage(
           paid
             ? "You can view this completed form but can no longer edit it."
@@ -216,6 +233,17 @@ export default function FormW7() {
 
         // When the form is submitted and paid, all steps are completed
         if (paid) {
+          if (!downloadUrl) {
+            try {
+              const casesRes = await api.getUserFormW7Cases(1, 100, "all");
+              const found = casesRes?.data?.cases?.find((c) => c._id === caseId);
+              if (found?.downloadUrl) {
+                setDownloadUrl(found.downloadUrl);
+              }
+            } catch {
+              // ignore
+            }
+          }
           const allStepIds = steps.map((s) => s.id);
           setCompletedSteps(new Set(allStepIds));
           setSkippedSteps(new Set());
@@ -382,14 +410,16 @@ export default function FormW7() {
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
                       {isPaid
-                        ? "Generate the form, then print it and add the original signature before mailing it to the IRS."
+                        ? downloadUrl
+                          ? "Download the completed form, then print it and add the original signature before mailing it to the IRS."
+                          : "Generate the form, then print it and add the original signature before mailing it to the IRS."
                         : `Complete the $${w7Pricing} payment to generate and download the completed Form W-7.`}
                     </p>
                   </div>
 
                   {isPaid ? (
                     <Button
-                      onClick={() => downloadPdf(caseId)}
+                      onClick={handleDownload}
                       disabled={downloadingMap[caseId]}
                       className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white flex items-center gap-2"
                     >
@@ -399,7 +429,11 @@ export default function FormW7() {
                         <MdOutlineFileDownload className="h-4 w-4" />
                       )}
                       {downloadingMap[caseId]
-                        ? "Generating..."
+                        ? downloadUrl
+                          ? "Downloading..."
+                          : "Generating..."
+                        : downloadUrl
+                        ? "Download"
                         : "Generate and download"}
                     </Button>
                   ) : (
