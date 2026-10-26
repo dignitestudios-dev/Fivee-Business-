@@ -46,11 +46,26 @@ const Header = () => {
     setShowChatSupport(toggle === "show" ? true : false);
   };
 
+  const isNavLinkActive = (navLinkPath: string) => {
+    if (navLinkPath === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    if (navLinkPath.startsWith("/dashboard/form-w7")) {
+      return pathname.startsWith("/dashboard/form-w7");
+    }
+    return pathname === navLinkPath || pathname.startsWith(navLinkPath);
+  };
+
   const navLinks = [
     {
       title: "Home",
       label: "home",
       path: "/dashboard",
+    },
+    {
+      title: "Form W-7",
+      label: "form-w7",
+      path: "/dashboard/form-w7/all",
     },
     {
       title: "Signatures",
@@ -105,7 +120,7 @@ const Header = () => {
               <div
                 key={index}
                 className={`p-5 cursor-pointer ${
-                  pathname === navLink.path && "border-b-2 border-white"
+                  isNavLinkActive(navLink.path) && "border-b-2 border-white"
                 }`}
               >
                 <Link href={navLink.path} target={navLink.target || "_self"}>
@@ -219,7 +234,7 @@ const Header = () => {
                 key={index}
                 href={navLink.path}
                 className={`py-2 cursor-pointer ${
-                  pathname === navLink.path && "font-bold"
+                  isNavLinkActive(navLink.path) && "font-bold"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
