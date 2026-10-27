@@ -80,11 +80,10 @@ export function BusinessExpenseSection({
   };
 
   useEffect(() => {
-    if (!businessExpenseInfo)
-      handleGetBusinessExpenseInfo(caseId, FORM_433B_SECTIONS[3]);
-    if (!businessIncomeInfo)
-      handleGetBusinessIncomeInfo(caseId, FORM_433B_SECTIONS[2]);
-  }, []);
+    // Always refetch: Box B comes from the income step and may be stale/missing
+    handleGetBusinessExpenseInfo(caseId, FORM_433B_SECTIONS[3]);
+    handleGetBusinessIncomeInfo(caseId, FORM_433B_SECTIONS[2]);
+  }, [caseId]);
 
   useEffect(() => {
     if (businessExpenseInfo) {

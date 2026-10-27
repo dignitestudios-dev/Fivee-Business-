@@ -101,15 +101,15 @@ export function CalculationSection({
     }
   };
 
+  // Always refetch on mount: the backend recalculates boxes A/B/F and the
+  // offer whenever assets, income or expenses change, so cached slices go stale.
   useEffect(() => {
-    if (!calculationInfo)
-      handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7]);
-    if (!assetsInfo) handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
-    if (!businessAssetsInfo)
-      handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
-    if (!householdIncomeInfo)
-      handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
-  }, [calculationInfo, caseId]);
+    if (!caseId) return;
+    handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7]);
+    handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]);
+    handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]);
+    handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
+  }, [caseId]);
 
   useEffect(() => {
     if (calculationInfo) {

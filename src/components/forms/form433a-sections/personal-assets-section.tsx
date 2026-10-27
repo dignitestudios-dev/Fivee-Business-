@@ -1,3 +1,5 @@
+import { OIC_RULES } from "@/lib/oicRules";
+import { computeAssetEquity } from "@/utils/oicMath";
 import { FormNavigation } from "./form-navigation";
 import { FormInput, FormField } from "@/components/ui/form-field";
 import { Label } from "@/components/ui/label";
@@ -234,7 +236,7 @@ export function PersonalAssetsSection({
     [bankAccountsValue]
   );
   const bankTotalMinus1000 = useMemo(
-    () => Math.max(0, bankTotal - 1000),
+    () => Math.max(0, bankTotal - OIC_RULES.bankAllowance),
     [bankTotal]
   );
 
@@ -316,10 +318,10 @@ export function PersonalAssetsSection({
           (vehicle.currentMarketValue || 0) * 0.8 - (vehicle.loanBalance || 0)
         );
         if (index === 0) {
-          total += Math.max(0, vehicleValue - 3450);
+          total += Math.max(0, vehicleValue - OIC_RULES.vehicleDeduction);
         } else {
           if (vehicle.isJointOffer) {
-            total += Math.max(0, vehicleValue - 3450);
+            total += Math.max(0, vehicleValue - OIC_RULES.vehicleDeduction);
           } else {
             total += vehicleValue;
           }
@@ -360,30 +362,15 @@ export function PersonalAssetsSection({
     [furniturePersonalEffectsValue]
   );
   const otherTotal = useMemo(
-    () => Math.max(0, valuablesTotal + furnitureTotal - 11710),
+    () => Math.max(0, valuablesTotal + furnitureTotal - OIC_RULES.personalEffectsDeduction),
     [valuablesTotal, furnitureTotal]
   );
 
+  // Single source for Box A so what is shown/saved matches the tested backend math
+  const allAssetValues = useWatch({ control });
   const totalEquity = useMemo(
-    () =>
-      bankTotalMinus1000 +
-      investmentTotal +
-      digitalTotal +
-      retirementTotal +
-      insuranceTotal +
-      propertyTotal +
-      vehicleTotal +
-      otherTotal,
-    [
-      bankTotalMinus1000,
-      investmentTotal,
-      digitalTotal,
-      retirementTotal,
-      insuranceTotal,
-      propertyTotal,
-      vehicleTotal,
-      otherTotal,
-    ]
+    () => computeAssetEquity(allAssetValues || {}),
+    [allAssetValues]
   );
 
   // Save boxA in form state (debounced to avoid excessive setValue calls & re-renders)
@@ -2381,7 +2368,7 @@ export function PersonalAssetsSection({
                   {(valuablesTotal + furnitureTotal).toLocaleString()}
                 </Label>
                 <Label className="text-sm font-medium text-blue-900">
-                  Minus IRS Deduction of $11,710: ${otherTotal.toLocaleString()}
+                  Minus IRS Deduction of ${OIC_RULES.personalEffectsDeduction.toLocaleString()}: ${otherTotal.toLocaleString()}
                 </Label>
               </div>
             </div> */}
@@ -2438,7 +2425,7 @@ export function PersonalAssetsSection({
                 </div>
                 <div className="text-sm">
                   <span className="font-medium text-gray-600">
-                    Other Items (minus $11,710):{" "}
+                    Other Items (minus ${OIC_RULES.personalEffectsDeduction.toLocaleString()}):{" "}
                   </span>
                   ${otherTotal.toLocaleString()}
                 </div>

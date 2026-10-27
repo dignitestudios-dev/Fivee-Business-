@@ -1,4 +1,5 @@
 "use client";
+import { computeHouseholdBoxes } from "@/utils/oicMath";
 
 import { FormNavigation } from "./form-navigation";
 import { FormInput, FormField } from "@/components/ui/form-field";
@@ -93,11 +94,10 @@ export function HouseholdIncomeSection({
   useEffect(() => {
     if (!personalInfo) handleGetPersonalInfo(caseId, FORM_433A_SECTIONS[0]);
 
-    if (!householdIncomeInfo)
-      handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
-
-    if (!businessIncomeInfo)
-      handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5]);
+    // Always refetch: Box C (business income) feeds Box D and may have changed
+    // since this was cached, or may never have been loaded (direct navigation).
+    handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]);
+    handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5]);
   }, [caseId]);
 
   useEffect(() => {
@@ -131,41 +131,15 @@ export function HouseholdIncomeSection({
     [spouse]
   );
 
-  const totalHouseholdIncome = useMemo(
-    () =>
-      totalPrimaryIncome +
-      totalSpouseIncome +
-      Number(income.interestDividendsRoyalties || 0) +
-      Number(income.distributions || 0) +
-      Number(income.netRentalIncome || 0) +
-      Number(income.childSupportReceived || 0) +
-      Number(income.alimonyReceived || 0) +
-      Number(income.additionalSourcesIncome || 0) +
-      boxC,
-    [totalPrimaryIncome, totalSpouseIncome, income, boxC]
-  );
-
-  const totalHouseholdExpenses = useMemo(
-    () =>
-      Number(expenses.foodClothingMiscellaneous || 0) +
-      Number(expenses.housingUtilities || 0) +
-      Number(expenses.vehicleLoanLeasePayments || 0) +
-      Number(expenses.vehicleOperatingCosts || 0) +
-      Number(expenses.publicTransportationCosts || 0) +
-      Number(expenses.healthInsurancePremiums || 0) +
-      Number(expenses.outOfPocketHealthCare || 0) +
-      Number(expenses.courtOrderedPayments || 0) +
-      Number(expenses.childDependentCare || 0) +
-      Number(expenses.lifeInsurancePremiums || 0) +
-      Number(expenses.currentMonthlyTaxes || 0) +
-      Number(expenses.securedDebts || 0) +
-      Number(expenses.monthlyTaxPayments || 0),
-    [expenses]
-  );
-
-  const remainingMonthlyIncome = useMemo(
-    () => Math.max(0, totalHouseholdIncome - totalHouseholdExpenses),
-    [totalHouseholdIncome, totalHouseholdExpenses]
+  // Same function the backend parity test checks, so on-screen Boxes D/E/F
+  // always equal what the backend stores on save.
+  const {
+    boxD: totalHouseholdIncome,
+    boxE: totalHouseholdExpenses,
+    boxF: remainingMonthlyIncome,
+  } = useMemo(
+    () => computeHouseholdBoxes({ income, expenses }, boxC),
+    [income, expenses, boxC]
   );
 
   useEffect(() => {

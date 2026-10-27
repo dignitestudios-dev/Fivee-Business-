@@ -73,34 +73,6 @@ export function EmploymentSection({
     setValue,
   } = methods;
 
-  // Watch ownership interest fields
-  const hasOwnershipInterest = watch("hasOwnershipInterest");
-  const spouseHasOwnershipInterest = watch("spouseHasOwnershipInterest");
-
-  // Clear and disable Your Employment section when ownership is No
-  useEffect(() => {
-    if (hasOwnershipInterest === false) {
-      setValue("employerName", "");
-      setValue("payPeriod", "weekly");
-      setValue("employerAddress", "");
-      setValue("jobTitle", "");
-      setValue("yearsWithEmployer", "");
-      setValue("monthsWithEmployer", "");
-    }
-  }, [hasOwnershipInterest, setValue]);
-
-  // Clear and disable Spouse Employment section when ownership is No
-  useEffect(() => {
-    if (spouseHasOwnershipInterest === false && maritalStatus === "married") {
-      setValue("spouseEmployerName", "");
-      setValue("spousePayPeriod", "weekly");
-      setValue("spouseEmployerAddress", "");
-      setValue("spouseJobTitle", "");
-      setValue("spouseYearsWithEmployer", "");
-      setValue("spouseMonthsWithEmployer", "");
-    }
-  }, [spouseHasOwnershipInterest, maritalStatus, setValue]);
-
   const onSubmit = async (data: EmploymentFromSchema) => {
     try {
       delete data.maritalStatus;
@@ -119,25 +91,6 @@ export function EmploymentSection({
         data.spouseMonthsWithEmployer = data.spouseMonthsWithEmployer === "" ? 0 : Number(data.spouseMonthsWithEmployer);
       }
       
-      // Clear fields if ownership interest is "No"
-      if (!data.hasOwnershipInterest) {
-        data.employerName = "";
-        data.payPeriod = "weekly";
-        data.employerAddress = "";
-        data.jobTitle = "";
-        data.yearsWithEmployer = 0;
-        data.monthsWithEmployer = 0;
-      }
-
-      if (maritalStatus === "married" && !data.spouseHasOwnershipInterest) {
-        data.spouseEmployerName = "";
-        data.spousePayPeriod = "weekly";
-        data.spouseEmployerAddress = "";
-        data.spouseJobTitle = "";
-        data.spouseYearsWithEmployer = 0;
-        data.spouseMonthsWithEmployer = 0;
-      }
-
       console.log("emp info:", data);
 
       // Data is already validated by Zod through zodResolver
@@ -224,7 +177,6 @@ export function EmploymentSection({
                 label="Your Employer's Name"
                 id="employerName"
                 placeholder="Enter employer name"
-                disabled={!hasOwnershipInterest}
                 {...register("employerName")}
                 error={errors.employerName?.message}
               />
@@ -238,14 +190,12 @@ export function EmploymentSection({
                     value: "weekly" | "bi-weekly" | "monthly" | "other"
                   ) => setValue("payPeriod", value, { shouldValidate: true })}
                   className="flex flex-wrap gap-4"
-                  disabled={!hasOwnershipInterest}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem
                       value="weekly"
                       id="weekly"
                       className="text-[#22b573]"
-                      disabled={!hasOwnershipInterest}
                     />
                     <Label htmlFor="weekly">Weekly</Label>
                   </div>
@@ -254,7 +204,6 @@ export function EmploymentSection({
                       value="bi-weekly"
                       id="bi-weekly"
                       className="text-[#22b573]"
-                      disabled={!hasOwnershipInterest}
                     />
                     <Label htmlFor="bi-weekly">Bi-weekly</Label>
                   </div>
@@ -263,7 +212,6 @@ export function EmploymentSection({
                       value="monthly"
                       id="monthly"
                       className="text-[#22b573]"
-                      disabled={!hasOwnershipInterest}
                     />
                     <Label htmlFor="monthly">Monthly</Label>
                   </div>
@@ -272,7 +220,6 @@ export function EmploymentSection({
                       value="other"
                       id="other"
                       className="text-[#22b573]"
-                      disabled={!hasOwnershipInterest}
                     />
                     <Label htmlFor="other">Other</Label>
                   </div>
@@ -289,7 +236,6 @@ export function EmploymentSection({
               id="employerAddress"
               label="Employer's Address (street, city, state, ZIP code)"
               placeholder="Enter full employer address"
-              disabled={!hasOwnershipInterest}
               {...register("employerAddress")}
               error={errors.employerAddress?.message}
             />
@@ -338,7 +284,6 @@ export function EmploymentSection({
                 id="jobTitle"
                 label="Your Occupation"
                 placeholder="Enter your jobTitle"
-                disabled={!hasOwnershipInterest}
                 {...register("jobTitle")}
                 error={errors.jobTitle?.message}
               />
@@ -355,7 +300,6 @@ export function EmploymentSection({
                       inputMode="numeric"
                       pattern="[0-9]*"
                       maxLength={2}
-                      disabled={!hasOwnershipInterest}
                       {...register("yearsWithEmployer")}
                       onInput={(e: any) => {
                         e.target.value = e.target.value.replace(/[^0-9]/g, "");
@@ -372,7 +316,6 @@ export function EmploymentSection({
                       inputMode="numeric"
                       pattern="[0-9]*"
                       maxLength={2}
-                      disabled={!hasOwnershipInterest}
                       {...register("monthsWithEmployer")}
                       onInput={(e: any) => {
                         e.target.value = e.target.value.replace(/[^0-9]/g, "");
@@ -399,7 +342,6 @@ export function EmploymentSection({
                   label="Spouse's Employer's Name"
                   id="spouseEmployerName"
                   placeholder="Enter spouse's employer name"
-                  disabled={!spouseHasOwnershipInterest}
                   {...register("spouseEmployerName")}
                   error={errors.spouseEmployerName?.message}
                 />
@@ -417,14 +359,12 @@ export function EmploymentSection({
                       })
                     }
                     className="flex flex-wrap gap-4"
-                    disabled={!spouseHasOwnershipInterest}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem
                         value="weekly"
                         id="spouse-weekly"
                         className="text-[#22b573]"
-                        disabled={!spouseHasOwnershipInterest}
                       />
                       <Label htmlFor="spouse-weekly">Weekly</Label>
                     </div>
@@ -433,7 +373,6 @@ export function EmploymentSection({
                         value="bi-weekly"
                         id="spouse-bi-weekly"
                         className="text-[#22b573]"
-                        disabled={!spouseHasOwnershipInterest}
                       />
                       <Label htmlFor="spouse-bi-weekly">Bi-weekly</Label>
                     </div>
@@ -442,7 +381,6 @@ export function EmploymentSection({
                         value="monthly"
                         id="spouse-monthly"
                         className="text-[#22b573]"
-                        disabled={!spouseHasOwnershipInterest}
                       />
                       <Label htmlFor="spouse-monthly">Monthly</Label>
                     </div>
@@ -451,7 +389,6 @@ export function EmploymentSection({
                         value="other"
                         id="spouse-other"
                         className="text-[#22b573]"
-                        disabled={!spouseHasOwnershipInterest}
                       />
                       <Label htmlFor="spouse-other">Other</Label>
                     </div>
@@ -468,7 +405,6 @@ export function EmploymentSection({
                 id="spouseEmployerAddress"
                 label="Employer's Address (street, city, state, ZIP code)"
                 placeholder="Enter spouse's employer address"
-                disabled={!spouseHasOwnershipInterest}
                 {...register("spouseEmployerAddress")}
                 error={errors.spouseEmployerAddress?.message}
               />
@@ -518,7 +454,6 @@ export function EmploymentSection({
                   id="spouseJobTitle"
                   label="Spouse's Occupation"
                   placeholder="Enter spouse's jobTitle"
-                  disabled={!spouseHasOwnershipInterest}
                   {...register("spouseJobTitle")}
                   error={errors.spouseJobTitle?.message}
                 />
@@ -535,7 +470,6 @@ export function EmploymentSection({
                         inputMode="numeric"
                         pattern="[0-9]*"
                         maxLength={4}
-                        disabled={!spouseHasOwnershipInterest}
                         {...register("spouseYearsWithEmployer")}
                         onInput={(e: any) => {
                           e.target.value = e.target.value.replace(
@@ -557,7 +491,6 @@ export function EmploymentSection({
                         inputMode="numeric"
                         pattern="[0-9]*"
                         maxLength={2}
-                        disabled={!spouseHasOwnershipInterest}
                         {...register("spouseMonthsWithEmployer")}
                         onInput={(e: any) => {
                           e.target.value = e.target.value.replace(

@@ -105,8 +105,8 @@ export const employmentSchema = (maritalStatus: MaritalStatus) =>
       // YOUR EMPLOYMENT SECTION - Conditional validation
       const hasAnyYourField = hasAnyEmploymentField(data);
 
-      // Only validate if ownership interest is true AND any field is filled
-      if (data.hasOwnershipInterest && hasAnyYourField) {
+      // Ownership interest is independent: validate whenever any employer field is filled
+      if (hasAnyYourField) {
         // If any field is filled, all fields become required
         if (!data.employerName || String(data.employerName).trim() === "") {
           ctx.addIssue({
@@ -179,8 +179,8 @@ export const employmentSchema = (maritalStatus: MaritalStatus) =>
       if (maritalStatus === "married") {
         const hasAnySpouseField = hasAnySpouseEmploymentField(data);
 
-        // Only validate if spouse ownership interest is true AND any field is filled
-        if (data.spouseHasOwnershipInterest && hasAnySpouseField) {
+        // Ownership interest is independent: validate whenever any spouse employer field is filled
+        if (hasAnySpouseField) {
           // If any field is filled, all fields become required
           if (
             !data.spouseEmployerName ||

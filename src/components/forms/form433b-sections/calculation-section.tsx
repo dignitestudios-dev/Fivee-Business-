@@ -67,14 +67,13 @@ export function CalculationSection({
 
   const paymentTimeline = watch("paymentTimeline");
 
+  // Always refetch: the backend recalculates when assets/income/expenses change
   useEffect(() => {
-    if (!calculationInfo)
-      handleGetCalculationInfo(caseId, FORM_433B_SECTIONS[4]);
-    if (!businessAssetsInfo)
-      handleGetBusinessAssetsInfo(caseId, FORM_433B_SECTIONS[1]);
-    if (!businessExpenseInfo)
-      handleGetBusinessExpenseInfo(caseId, FORM_433B_SECTIONS[3]);
-  }, []);
+    if (!caseId) return;
+    handleGetCalculationInfo(caseId, FORM_433B_SECTIONS[4]);
+    handleGetBusinessAssetsInfo(caseId, FORM_433B_SECTIONS[1]);
+    handleGetBusinessExpenseInfo(caseId, FORM_433B_SECTIONS[3]);
+  }, [caseId]);
 
   useEffect(() => {
     if (calculationInfo) {

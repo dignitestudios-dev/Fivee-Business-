@@ -20,6 +20,7 @@ import { useGlobalPopup } from "@/hooks/useGlobalPopup";
 import FormLoader from "@/components/global/FormLoader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FORM_433A_SECTIONS } from "@/lib/constants";
+import { fetch433aSummary } from "@/utils/oicSummary";
 import usePersonalInfo from "@/hooks/433a-form-hooks/usePersonalInfo";
 import useSignatures from "@/hooks/signatures/useSignatures";
 import useSignatureAndAttachments from "@/hooks/433a-form-hooks/useSignatureAndAttachments";
@@ -217,100 +218,11 @@ export function SignatureSection({
 
       await handleSaveSignatureInfo(data, caseId);
 
-      // Calculate summary and save to Redux
-      const boxA = assetsInfo?.boxA ?? 0;
-      const boxB = businessAssetsInfo?.boxB ?? 0;
-      const boxC = businessIncomeInfo?.boxC ?? 0;
-
-      // Recalculate boxD and boxE from household income data in case they're 0 from API fetch
-      let boxD = householdIncomeInfo?.boxD ?? 0;
-      let boxE = householdIncomeInfo?.boxE ?? 0;
-
-      // If boxD is 0, recalculate from income components
-      if (boxD === 0 && householdIncomeInfo) {
-        const primaryTaxpayerIncome =
-          (householdIncomeInfo.income?.primaryTaxpayer?.grossWages ?? 0) +
-          (householdIncomeInfo.income?.primaryTaxpayer?.socialSecurity ?? 0) +
-          (householdIncomeInfo.income?.primaryTaxpayer?.pension ?? 0) +
-          (householdIncomeInfo.income?.primaryTaxpayer?.otherIncome ?? 0);
-
-        const spouseIncome =
-          (householdIncomeInfo.income?.spouse?.grossWages ?? 0) +
-          (householdIncomeInfo.income?.spouse?.socialSecurity ?? 0) +
-          (householdIncomeInfo.income?.spouse?.pension ?? 0) +
-          (householdIncomeInfo.income?.spouse?.otherIncome ?? 0);
-
-        boxD =
-          primaryTaxpayerIncome +
-          spouseIncome +
-          (householdIncomeInfo.income?.interestDividendsRoyalties ?? 0) +
-          (householdIncomeInfo.income?.distributions ?? 0) +
-          (householdIncomeInfo.income?.netRentalIncome ?? 0) +
-          (householdIncomeInfo.income?.childSupportReceived ?? 0) +
-          (householdIncomeInfo.income?.alimonyReceived ?? 0) +
-          (householdIncomeInfo.income?.additionalSourcesIncome ?? 0) +
-          boxC;
-      }
-
-      // If boxE is 0, recalculate from expense components
-      if (boxE === 0 && householdIncomeInfo) {
-        boxE =
-          (householdIncomeInfo.expenses?.foodClothingMiscellaneous ?? 0) +
-          (householdIncomeInfo.expenses?.housingUtilities ?? 0) +
-          (householdIncomeInfo.expenses?.vehicleLoanLeasePayments ?? 0) +
-          (householdIncomeInfo.expenses?.vehicleOperatingCosts ?? 0) +
-          (householdIncomeInfo.expenses?.publicTransportationCosts ?? 0) +
-          (householdIncomeInfo.expenses?.healthInsurancePremiums ?? 0) +
-          (householdIncomeInfo.expenses?.outOfPocketHealthCare ?? 0) +
-          (householdIncomeInfo.expenses?.courtOrderedPayments ?? 0) +
-          (householdIncomeInfo.expenses?.childDependentCare ?? 0) +
-          (householdIncomeInfo.expenses?.lifeInsurancePremiums ?? 0) +
-          (householdIncomeInfo.expenses?.currentMonthlyTaxes ?? 0) +
-          (householdIncomeInfo.expenses?.securedDebts ?? 0) +
-          (householdIncomeInfo.expenses?.monthlyTaxPayments ?? 0);
-      }
-
-      let boxF = householdIncomeInfo?.boxF ?? 0;
-      // Recalculate boxF if needed
-      if (boxF === 0 && boxD > 0 && boxE > 0) {
-        boxF = Math.max(0, boxD - boxE);
-      }
-
-      const boxF5Month = boxF ?? 0;
-      const boxF24Month = boxF ?? 0;
-      const boxG = boxF5Month * 12;
-      const boxH = boxF24Month * 24;
-
-      const paymentTimeline = calculationInfo?.paymentTimeline || "";
-      let futureIncome = 0;
-      if (paymentTimeline === "5_months_or_less") {
-        futureIncome = boxG;
-      } else if (paymentTimeline === "6_to_24_months") {
-        futureIncome = boxH;
-      }
-
-      const minimumOfferAmount = boxA + boxB + futureIncome;
-
-      // Calculate monthly payment for 5 months option
-      let monthlyPaymentAmount = 0;
-      if (paymentTimeline === "5_months_or_less") {
-        monthlyPaymentAmount = minimumOfferAmount / 5;
-      }
-
-      const calculationSummary: CalculationSummary = {
-        boxA,
-        boxB,
-        boxC,
-        boxD,
-        boxE,
-        boxF,
-        boxG,
-        boxH,
-        futureIncome,
-        paymentTimeline,
-        minimumOfferAmount,
-        monthlyPaymentAmount,
-      };
+      // Summary comes straight from the backend-calculated values so it can
+      // never differ from what is stored, whatever steps were visited.
+      const calculationSummary: CalculationSummary = await fetch433aSummary(
+        caseId!
+      );
 
       dispatch(saveCalculationSummary(calculationSummary));
       setShowCalculationsSummary(true);
@@ -333,12 +245,7 @@ export function SignatureSection({
     const loadMissingData = async () => {
       if (!caseId) return;
 
-      const missingData =
-        !assetsInfo ||
-        !businessAssetsInfo ||
-        !businessIncomeInfo ||
-        !householdIncomeInfo ||
-        !calculationInfo;
+      const missingData = true; // always refresh: backend recalculates on every save
 
       if (missingData) {
         setLoadingAllSections(true);
@@ -346,21 +253,11 @@ export function SignatureSection({
           // Fetch all required sections in parallel and AWAIT them so the
           // data is in Redux before the loader disappears and the user can submit.
           await Promise.all([
-            !assetsInfo
-              ? handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2])
-              : Promise.resolve(),
-            !businessAssetsInfo
-              ? handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4])
-              : Promise.resolve(),
-            !businessIncomeInfo
-              ? handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5])
-              : Promise.resolve(),
-            !householdIncomeInfo
-              ? handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6])
-              : Promise.resolve(),
-            !calculationInfo
-              ? handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7])
-              : Promise.resolve(),
+            handleGetAssetsInfo(caseId, FORM_433A_SECTIONS[2]),
+            handleGetBusinessAssetsInfo(caseId, FORM_433A_SECTIONS[4]),
+            handleGetBusinessIncomeInfo(caseId, FORM_433A_SECTIONS[5]),
+            handleGetHouseholdIncomeInfo(caseId, FORM_433A_SECTIONS[6]),
+            handleGetCalculationInfo(caseId, FORM_433A_SECTIONS[7]),
           ]);
         } finally {
           setLoadingAllSections(false);
@@ -369,14 +266,7 @@ export function SignatureSection({
     };
 
     loadMissingData();
-  }, [
-    caseId,
-    assetsInfo,
-    businessAssetsInfo,
-    businessIncomeInfo,
-    householdIncomeInfo,
-    calculationInfo,
-  ]);
+  }, [caseId]);
 
   useEffect(() => {
     handleGetSignatures();

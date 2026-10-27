@@ -1,4 +1,5 @@
 "use client";
+import { fetch433bSummary } from "@/utils/oicSummary";
 
 import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
 import { FormInput } from "@/components/ui/form-field";
@@ -156,79 +157,8 @@ export function SignatureSection({
     try {
       await handleSaveSignatureInfo(data, caseId);
 
-      // Build calculation summary from 433B redux state using your mapping:
-      // Box A: total business assets
-      // Box B: total business income
-      // Box C: total business expenses
-      // Box D: remaining monthly income = Box B - Box C (do not go below 0)
-      const boxA = Math.round((businessAssetsInfo?.BoxA as number) || 0);
-      const boxB = Math.round((businessIncomeInfo?.BoxB as number) || 0);
-
-      // Compute Box C (total business expenses). The API may not return BoxC
-      // so fall back to summing the individual expense fields if BoxC is missing.
-      let boxC = Math.round((businessExpenseInfo?.BoxC as number) || 0);
-      if (!boxC && businessExpenseInfo) {
-        const materialsPurchased = Number(businessExpenseInfo.materialsPurchased) || 0;
-        const inventoryPurchased = Number(businessExpenseInfo.inventoryPurchased) || 0;
-        const grossWages = Number(businessExpenseInfo.grossWages) || 0;
-        const rent = Number(businessExpenseInfo.rent) || 0;
-        const supplies = Number(businessExpenseInfo.supplies) || 0;
-        const utilities = Number(businessExpenseInfo.utilities) || 0;
-        const vehicleCosts = Number(businessExpenseInfo.vehicleCosts) || 0;
-        const repairsMaintenance = Number(businessExpenseInfo.repairsMaintenance) || 0;
-        const insurance = Number(businessExpenseInfo.insurance) || 0;
-        const currentTaxes = Number(businessExpenseInfo.currentTaxes) || 0;
-        const otherExpenses = Number(businessExpenseInfo.otherExpenses) || 0;
-
-        const totalExpenses =
-          materialsPurchased +
-          inventoryPurchased +
-          grossWages +
-          rent +
-          supplies +
-          utilities +
-          vehicleCosts +
-          repairsMaintenance +
-          insurance +
-          currentTaxes +
-          otherExpenses;
-
-        boxC = Math.round(totalExpenses);
-      }
-
-      const boxD = Math.max(0, boxB - boxC);
-
-      // For compatibility with the summary shape used by the popup, set boxF to the
-      // remaining monthly income (same as Box D for business form) and leave boxE
-      // unused (set to 0) as the business flow doesn't require it here.
-      const boxE = 0;
-      const boxF = boxD;
-
-      const boxG = boxF * 12;
-      const boxH = boxF * 24;
-
-      const paymentTimeline = (calculationInfo?.paymentTimeline as string) || "";
-      let futureIncome = 0;
-      if (paymentTimeline === "5_months_or_less") futureIncome = boxG;
-      else if (paymentTimeline === "6_to_24_months") futureIncome = boxH;
-
-      const minimumOfferAmount = boxA + futureIncome;
-      const monthlyPaymentAmount = paymentTimeline === "5_months_or_less" ? Math.round(minimumOfferAmount / 5) : 0;
-
-      const summary: CalculationSummary = {
-        boxA,
-        boxB,
-        boxC,
-        boxD,
-        boxE,
-        boxF,
-        boxG,
-        boxH,
-        futureIncome,
-        paymentTimeline,
-        minimumOfferAmount,
-        monthlyPaymentAmount,
-      };
+      // Built from backend-stored values so it cannot drift from the saved offer.
+      const summary: CalculationSummary = await fetch433bSummary(caseId!);
 
       setCalculationSummary(summary);
       setShowCalculationsSummary(true);

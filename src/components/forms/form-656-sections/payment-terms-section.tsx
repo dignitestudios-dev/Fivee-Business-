@@ -71,14 +71,10 @@ export function PaymentTermsSection({
     control,
     name: "lumpSum.additionalPayments",
   });
-  // TODO: Implement actual API fetch for minimum offer amount (RCP) from Form 433-A or 433-B
-  // For now, assuming it's fetched and set as initial value. Replace 0 with fetched value.
-  const minOfferAmount = 500; // await api.getMinimumOffer(caseId); // e.g., Reasonable Collection Potential
-
-  useEffect(() => {
-    setValue("lumpSum.totalOfferAmount", minOfferAmount);
-    setValue("periodic.totalOfferAmount", minOfferAmount);
-  }, [minOfferAmount, setValue]);
+  // The backend prefills totalOfferAmount (and the payment option) from the
+  // linked 433-A/433-B minimum offer when Form 656 is created and keeps it in
+  // sync. Users may still edit it (e.g. low-income certification), so the form
+  // only reflects what was saved and never overrides it.
 
   // Reactive calculation for lump sum initial payment
   useEffect(() => {
@@ -152,13 +148,12 @@ export function PaymentTermsSection({
       } else {
         data.lumpSum = undefined;
       }
-      // Ensure offer amount >= minOfferAmount
       const offerAmount =
         paymentOption === "lump-sum"
           ? data.lumpSum.totalOfferAmount
           : data.periodic.totalOfferAmount;
-      if (offerAmount < minOfferAmount) {
-        showError(`Offer amount must be at least $${minOfferAmount}.`, "Payment Terms Error");
+      if (!(offerAmount > 0)) {
+        showError("Offer amount must be greater than $0.", "Payment Terms Error");
         return;
       }
       await handleSavePaymentTerms(data, caseId);
@@ -169,7 +164,8 @@ export function PaymentTermsSection({
     }
   };
   useEffect(() => {
-    if (!paymentTerms) handleGetPaymentTerms(caseId, FORM_656_SECTIONS[3]);
+    // Always refetch: the backend syncs the offer from 433-A/433-B
+    handleGetPaymentTerms(caseId, FORM_656_SECTIONS[3]);
   }, [caseId]);
   useEffect(() => {
     if (paymentTerms) {
@@ -271,7 +267,7 @@ export function PaymentTermsSection({
                 inputMode="decimal"
                 pattern="[0-9.]*"
                 required
-                min={minOfferAmount}
+                min={0}
                 {...register("lumpSum.totalOfferAmount", {
                   valueAsNumber: true,
                   onChange: (e: any) => {
@@ -448,7 +444,7 @@ export function PaymentTermsSection({
                 id="periodic.totalOfferAmount"
                 type="number"
                 required
-                min={minOfferAmount}
+                min={0}
                 {...register("periodic.totalOfferAmount", {
                   valueAsNumber: true,
                 })}

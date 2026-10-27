@@ -165,6 +165,24 @@ export default function Form433AOIC() {
           }
         }
 
+        // Wage earners answer "No" in Section 4; business sections 5 and 6
+        // never get data, so treat them as skipped instead of incomplete.
+        if (sections["selfEmployedInfo"] === "completed") {
+          try {
+            const seResp = await api.get433aSectionInfo(caseId, "selfEmployedInfo");
+            if (seResp?.data?.data?.isSelfEmployed === false) {
+              for (const [idx, key] of [[5, "businessInfo"], [6, "businessIncomeExpenseInfo"]] as const) {
+                if (sections[key] !== "completed") {
+                  sections[key] = "skipped";
+                  if (!newSkipped.includes(idx)) newSkipped.push(idx);
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Failed to check self-employed status:", e);
+          }
+        }
+
         const firstIncompleteIndex = sectionOrder.findIndex(
           (k) => {
             const status = sections && sections[k];
@@ -305,11 +323,11 @@ export default function Form433AOIC() {
     if (currentStep < 10) {
       if (employmentStatus === "self") {
         // Mark current step as completed and remove from skipped if it was skipped
-        const newCompletedSteps = new Set([...completedSteps, 5, 6, 7]);
-        const newSkippedSteps = new Set(skippedSteps);
-        newSkippedSteps.delete(5);
-        newSkippedSteps.delete(6);
-        newSkippedSteps.delete(7);
+        // Not self-employed: Section 4 is done, business sections 5-6 are skipped
+        const newCompletedSteps = new Set([...completedSteps, currentStep]);
+        newCompletedSteps.delete(5);
+        newCompletedSteps.delete(6);
+        const newSkippedSteps = new Set([...skippedSteps, 5, 6]);
         setCompletedSteps(newCompletedSteps);
         setSkippedSteps(newSkippedSteps);
         const nextStep = currentStep + 3;

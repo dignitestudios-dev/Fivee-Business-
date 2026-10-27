@@ -1,4 +1,5 @@
 "use client";
+import { computeBusinessBoxC } from "@/utils/oicMath";
 
 import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
 import { FormInput, FormField } from "@/components/ui/form-field";
@@ -75,6 +76,7 @@ export function BusinessIncomeSection({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
   } = methods;
 
   const onSubmit = async (data: BusinessIncomeFormSchema) => {
@@ -186,8 +188,8 @@ export function BusinessIncomeSection({
   );
 
   const netBusinessIncome = useMemo(
-    () => Math.max(0, totalBusinessIncome - totalBusinessExpenses),
-    [totalBusinessIncome, totalBusinessExpenses]
+    () => computeBusinessBoxC(getValues()),
+    [totalBusinessIncome, totalBusinessExpenses, getValues]
   );
 
   // Update boxC
