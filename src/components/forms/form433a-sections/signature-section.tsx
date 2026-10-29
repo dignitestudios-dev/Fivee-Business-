@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 
 import { FormNavigation } from "./form-navigation";
 import { FormInput } from "@/components/ui/form-field";
@@ -343,7 +344,7 @@ export function SignatureSection({
   return (
     <>
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(handleFormSubmit, reportInvalidForm)} className="space-y-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Section 10: Signatures
@@ -535,7 +536,7 @@ export function SignatureSection({
             totalSteps={totalSteps}
             onPrevious={onPrevious}
             onNext={onNext}
-            onSubmit={handleSubmit(handleFormSubmit)}
+            onSubmit={handleSubmit(handleFormSubmit, reportInvalidForm)}
             paymentStatus={paymentStatus}
             loading={loading}
           />

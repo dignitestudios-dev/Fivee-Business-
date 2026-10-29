@@ -1,3 +1,4 @@
+import { reportInvalidForm } from "@/utils/formErrors";
 import { OIC_RULES } from "@/lib/oicRules";
 import { computeAssetEquity } from "@/utils/oicMath";
 import { FormNavigation } from "./form-navigation";
@@ -406,7 +407,7 @@ export function PersonalAssetsSection({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, reportInvalidForm)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Section 3: Personal Asset Information (Domestic and Foreign)
@@ -2447,7 +2448,7 @@ export function PersonalAssetsSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={handleSubmit(onSubmit, reportInvalidForm)}
           paymentStatus={paymentStatus}
           loading={loading}
         />

@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 import { useForm } from "react-hook-form";
 
 import FInput from "@/components/ui/FInput";
@@ -20,7 +21,7 @@ const ForgotPasswordForm = () => {
   };
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, reportInvalidForm)}
       className="flex flex-col gap-5 items-center mt-5 w-full"
     >
       <FInput

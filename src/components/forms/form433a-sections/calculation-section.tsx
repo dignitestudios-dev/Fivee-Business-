@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 
 import { FormNavigation } from "./form-navigation";
 import { FormField, FormInput } from "@/components/ui/form-field";
@@ -185,7 +186,7 @@ export function CalculationSection({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, reportInvalidForm)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Section 8: Calculate Your Minimum Offer Amount
@@ -437,7 +438,7 @@ export function CalculationSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={handleSubmit(onSubmit, reportInvalidForm)}
           paymentStatus={paymentStatus}
           loading={loading}
         />

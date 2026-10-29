@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 
 import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
 import { FormInput, FormField } from "@/components/ui/form-field";
@@ -139,7 +140,7 @@ export function SelfEmployedSection({
   // Wrap the return content with:
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, reportInvalidForm)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Section 4: Self-Employed Information
@@ -635,7 +636,7 @@ export function SelfEmployedSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={handleSubmit(onSubmit, reportInvalidForm)}
           paymentStatus={paymentStatus}
           loading={loading}
         />

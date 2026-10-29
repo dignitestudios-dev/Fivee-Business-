@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiEyeOff } from "react-icons/fi";
@@ -87,7 +88,7 @@ const SignupForm = () => {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, reportInvalidForm)}
       className="flex flex-col gap-5 items-center mt-5 w-full"
     >
       {signupSuccess ? (

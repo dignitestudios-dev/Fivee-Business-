@@ -407,7 +407,7 @@ export function CalculationsSummaryPopup656({
       cancelText="Back to Review"
       onCancel={onClose}
     >
-      <div className="w-full mt-4 max-h-[60vh] overflow-y-auto pr-1">
+      <div className="w-full mt-4 max-h-[45vh] overflow-y-auto pr-1">
         {/* Dual Form Tab Switcher */}
         {hasBoth && (
           <div className="flex rounded-lg bg-gray-100 p-1 mb-4 sticky top-0 z-10 shadow-xs">

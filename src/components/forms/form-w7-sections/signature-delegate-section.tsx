@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 
 import { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -105,7 +106,7 @@ export function SignatureDelegateSection({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, reportInvalidForm)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Section 4: Signatures
@@ -262,8 +263,8 @@ export function SignatureDelegateSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={disabled ? onNext : handleSubmit(onSubmit)}
-          onSubmit={handleSubmit(onSubmit)}
+          onNext={disabled ? onNext : handleSubmit(onSubmit, reportInvalidForm)}
+          onSubmit={handleSubmit(onSubmit, reportInvalidForm)}
           loading={loading}
         />
       </form>

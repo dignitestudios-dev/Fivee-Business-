@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 import { FormNavigation } from "@/components/forms/form433a-sections/form-navigation";
 import { FormInput } from "@/components/ui/form-field";
 import { Label } from "@/components/ui/label";
@@ -188,7 +189,7 @@ export function PaymentTermsSection({
   }
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, reportInvalidForm)} className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Section 4: Payment Terms
@@ -569,7 +570,7 @@ export function PaymentTermsSection({
           currentStep={currentStep}
           totalSteps={totalSteps}
           onPrevious={onPrevious}
-          onNext={handleSubmit(onSubmit)}
+          onNext={handleSubmit(onSubmit, reportInvalidForm)}
           loading={loading}
         />
       </form>

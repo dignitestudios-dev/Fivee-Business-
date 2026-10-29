@@ -134,7 +134,7 @@ const Modal: React.FC<ModalProps> = ({
         return {
           container: `${baseContainer} overflow-y-auto`,
           modal: `flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0`,
-          modalInner: `${baseModal} p-6 my-8 align-middle ${
+          modalInner: `${baseModal} p-6 my-8 align-middle max-h-[calc(100dvh-4rem)] overflow-y-auto ${
             isAnimating
               ? "opacity-0 scale-95 translate-y-4"
               : "opacity-100 scale-100 translate-y-0"

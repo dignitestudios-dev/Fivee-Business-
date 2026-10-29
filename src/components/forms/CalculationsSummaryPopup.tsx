@@ -51,7 +51,7 @@ export function CalculationsSummaryPopup({
       onCancel={onClose}
     >
       {calculationSummary && (
-        <div className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
+        <div className="space-y-4 mt-4 max-h-[45vh] overflow-y-auto">
           {/* Box A */}
           <Card>
             <CardHeader className="pb-3">

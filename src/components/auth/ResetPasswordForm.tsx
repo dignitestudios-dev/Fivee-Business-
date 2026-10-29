@@ -1,4 +1,5 @@
 "use client";
+import { reportInvalidForm } from "@/utils/formErrors";
 import { useEffect, useState } from "react";
 import FButton from "../../components/ui/FButton";
 import FInput from "../../components/ui/FInput";
@@ -128,7 +129,7 @@ const ResetPasswordForm = ({ onSuccess }: ResetPasswordFormProps) => {
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-6" onSubmit={handleSubmit(onSubmit, reportInvalidForm)}>
       <FInput
         label="Password"
         type={showPassword ? "text" : "password"}
