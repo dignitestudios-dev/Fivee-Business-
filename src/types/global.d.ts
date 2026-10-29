@@ -276,6 +276,49 @@ declare global {
     signaturesInfo: SignaturesFormSchema | null;
     paidPreparer: PaidPreparerFormSchema | null;
     applicationChecklist: ApplicationChecklistFormSchema | null;
+    calculations: Form656CaseCalculations | null;
+  }
+
+  interface Form433ACalculationSummary {
+    boxA: number;
+    boxB: number;
+    boxC: number;
+    boxD: number;
+    boxE: number;
+    boxF: number;
+    boxG: number;
+    boxH: number;
+    paymentTimeline: string | null;
+    futureIncome: number;
+    minimumOfferAmount: number;
+    monthlyPaymentAmount: number;
+  }
+
+  interface Form433BCalculationSummary {
+    boxA: number;
+    boxB: number;
+    boxC: number;
+    boxD: number;
+    boxE?: number;
+    boxF?: number;
+    paymentTimeline: string | null;
+    futureIncome: number;
+    minimumOfferAmount: number;
+    monthlyPaymentAmount: number;
+  }
+
+  interface Form656CaseCalculations {
+    form433A: Form433ACalculationSummary | null;
+    form433B: Form433BCalculationSummary | null;
+  }
+
+  interface Form656CaseDetails {
+    _id: string;
+    title: string;
+    isCompleted: string;
+    form433AId: string | null;
+    form433BOICId: string | null;
+    calculations: Form656CaseCalculations;
   }
 
   // Form W-7 (ITIN application) types

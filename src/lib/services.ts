@@ -1,8 +1,8 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
-// export const BASE_URL = "http://localhost:3001/";
+// export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "http://localhost:3050/";
 // export const BASE_URL = "https://416zwbs6-3050.inc1.devtunnels.ms/";
 
 // Create an Axios instance
@@ -586,6 +586,12 @@ const getW7SupportingDocuments = (
     API.get(`/media/image?page=${page}&limit=${limit}&category=${category}`)
   );
 
+// Form 656 - get case details with calculation summaries
+const getForm656Case = (caseId: string) =>
+  apiHandler<{ data: Form656CaseDetails; message?: string }>(() =>
+    API.get('/form656b/' + caseId)
+  );
+
 // Form 656 - list user's cases
 const getUserForm656Cases = (page: number = 1, limit: number = defaultLimit) =>
   apiHandler(() => API.get(`/form656b/my-cases?page=${page}&limit=${limit}`));
@@ -686,6 +692,7 @@ const api = {
   savePaidPreparer,
   saveApplicationChecklist,
   generate656Pdf,
+  getForm656Case,
   startFormW7,
   getUserFormW7Cases,
   getW7SectionInfo,

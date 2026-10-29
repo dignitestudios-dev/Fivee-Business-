@@ -11,8 +11,11 @@ import {
   applicationChecklistSchema,
   applicationChecklistInitialValues,
 } from "@/lib/validation/form656/application-checklist-section";
-import { useEffect, useMemo } from "react";
-import { useAppSelector } from "@/lib/hooks";
+import { useEffect, useMemo, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { saveCalculations } from "@/lib/features/form656Slice";
+import { CalculationsSummaryPopup656 } from "@/components/forms/CalculationsSummaryPopup656";
+import api from "@/lib/services";
 import FormLoader from "@/components/global/FormLoader";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FORM_656_SECTIONS } from "@/lib/constants";
@@ -35,7 +38,20 @@ export function ApplicationChecklistSection({
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = useMemo(() => searchParams.get("caseId"), [searchParams]);
-  const { applicationChecklist } = useAppSelector((state) => state.form656);
+  const dispatch = useAppDispatch();
+  const { applicationChecklist, calculations } = useAppSelector(
+    (state) => state.form656
+  );
+  const [showCalculationsSummary, setShowCalculationsSummary] = useState(false);
+  const [fetchingCalculations, setFetchingCalculations] = useState(false);
+  const [calculationsData, setCalculationsData] =
+    useState<Form656CaseCalculations | null>(calculations);
+
+  useEffect(() => {
+    if (calculations) {
+      setCalculationsData(calculations);
+    }
+  }, [calculations]);
   const {
     loading,
     loadingFormData,
@@ -58,7 +74,21 @@ export function ApplicationChecklistSection({
 
   const onSubmit = async (data: ApplicationChecklistFormSchema) => {
     try {
+      setFetchingCalculations(true);
       await handleSaveApplicationChecklist(data, caseId);
+
+      if (caseId) {
+        const caseRes = await api.getForm656Case(caseId);
+        const calcs = caseRes?.data?.calculations;
+
+        if (calcs && (calcs.form433A || calcs.form433B)) {
+          setCalculationsData(calcs);
+          dispatch(saveCalculations(calcs));
+          setShowCalculationsSummary(true);
+          return;
+        }
+      }
+
       showSuccess(
         "Form 656 completed successfully, Now you can download it from dashboard.",
         "Success"
@@ -66,8 +96,22 @@ export function ApplicationChecklistSection({
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Error saving application checklist:", error);
-      showError(error.message || "Failed to save application checklist", "Application Checklist Error");
+      showError(
+        error.message || "Failed to save application checklist",
+        "Application Checklist Error"
+      );
+    } finally {
+      setFetchingCalculations(false);
     }
+  };
+
+  const handleConfirmFinalSubmit = () => {
+    setShowCalculationsSummary(false);
+    showSuccess(
+      "Form 656 completed successfully, Now you can download it from dashboard.",
+      "Success"
+    );
+    router.push("/dashboard");
   };
 
   console.log("applicationChecklist: ", applicationChecklist);
@@ -464,7 +508,14 @@ export function ApplicationChecklistSection({
           onPrevious={onPrevious}
           onNext={handleSubmit(onSubmit)}
           onSubmit={handleSubmit(onSubmit)}
-          loading={loading}
+          loading={loading || fetchingCalculations}
+        />
+
+        <CalculationsSummaryPopup656
+          open={showCalculationsSummary}
+          calculations={calculationsData}
+          onClose={() => setShowCalculationsSummary(false)}
+          onConfirm={handleConfirmFinalSubmit}
         />
       </form>
     </FormProvider>

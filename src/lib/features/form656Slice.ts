@@ -12,6 +12,7 @@ const initialState: FormData656State = {
   signaturesInfo: null,
   paidPreparer: null,
   applicationChecklist: null,
+  calculations: null,
 };
 
 const form656Slice = createSlice({
@@ -28,6 +29,7 @@ const form656Slice = createSlice({
         state.paymentTerms = null;
         state.designationEftps = null;
         state.sourceOfFunds = null;
+        state.calculations = null;
       }
     },
     saveIndividualInformation: (
@@ -96,6 +98,12 @@ const form656Slice = createSlice({
     ) => {
       state.applicationChecklist = action.payload;
     },
+    saveCalculations: (
+      state,
+      action: PayloadAction<Form656CaseCalculations | null>
+    ) => {
+      state.calculations = action.payload;
+    },
   },
 });
 
@@ -110,6 +118,7 @@ export const {
   saveSignatures,
   savePaidPreparer,
   saveApplicationChecklist,
+  saveCalculations,
 } = form656Slice.actions;
 
 export default form656Slice.reducer;
