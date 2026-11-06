@@ -1,7 +1,7 @@
 import { isBrowser, storage } from "@/utils/helper";
 import axios from "axios";
 
-export const BASE_URL = "https://api.fiveebusiness.com/";
+export const BASE_URL = "https://api.staging.fiveebusiness.com/";
 // export const BASE_URL = "http://localhost:3050/";
 // export const BASE_URL = "https://416zwbs6-3050.inc1.devtunnels.ms/";
 
